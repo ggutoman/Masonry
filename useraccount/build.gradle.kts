@@ -40,8 +40,14 @@ kotlin {
 
 dependencies {
     implementation(libs.androidx.appcompat)
-    testImplementation(libs.junit)
     implementation(libs.material)
+
+    implementation(project(path = ":appdriver"))
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+
+    testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

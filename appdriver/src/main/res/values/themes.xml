@@ -16,7 +16,7 @@
         <item name="colorOnPrimary">@color/material_black</item>
         <item name="colorSecondary">@color/material_yellow</item>
         <item name="colorOnSecondary">@color/material_black</item>
-        <item name="android:windowBackground">@color/material_white</item>
+        <item name="android:windowBackground">@color/material_background</item>
         <item name="android:statusBarColor">@color/material_yellow</item>
         <item name="android:textColor">@color/material_black</item>
     </style>
