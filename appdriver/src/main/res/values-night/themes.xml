@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--colorPrimary (app bar, material button)-->
+<!--colorOnPrimary (on top of color primary object by property)-->
+<!--colorSecondaru (floating button)-->
+<!--colorOnSecondary (on top of color secondary object by property)-->
+
+<resources>
+
+    <!-- APP THEME -->
+    <style name="MasonryTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/material_yellow</item>
+        <item name="colorOnPrimary">@color/material_black</item>
+        <item name="colorSecondary">@color/material_yellow</item>
+        <item name="colorOnSecondary">@color/material_black</item>
+        <item name="android:windowBackground">@color/material_white</item>
+        <item name="android:statusBarColor">@color/material_yellow</item>
+        <item name="android:textColor">@color/material_black</item>
+    </style>
+
+    <!-- TEXT INPUT -->
+    <style name="TextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_margin">2dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+
+    </style>
+
+    <style name="TextInputStyle.Edittext">
+        <item name="iconStartPadding">10dp</item>
+        <item name="android:drawablePadding">10dp</item>
+    </style>
+
+    <!-- TEXT AREA -->
+    <style name="TextInputTextAreaStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_margin">2dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+    </style>
+
+    <!-- TEXT AUTOFILL-->
+    <style name="AutoCompleteStyleTheme">
+        <item name="android:paddingTop">15dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="paddingStart">10dp</item>
+        <item name="maxLines">1</item>
+    </style>
+
+    <!-- DROPDOWN LAYOUT-->
+    <style name="CustomDropDownTilStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+    </style>
+
+    <!-- DROPDOWN INPUT STYLE-->
+    <style name="DropdownStyleTheme" parent="AutoCompleteStyleTheme">
+        <item name="android:focusable">false</item>
+        <item name="android:clickable">false</item>
+        <item name="android:cursorVisible">false</item>
+        <item name="android:inputType">none</item>
+    </style>
+
+</resources>
