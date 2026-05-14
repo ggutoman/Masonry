@@ -1,4 +1,4 @@
-package com.gag.appdriver
+package org.gag.appdriver
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.gag.appdriver.test", appContext.packageName)
+        assertEquals("org.gag.appdriver.test", appContext.packageName)
     }
 }

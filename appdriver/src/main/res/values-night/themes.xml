@@ -70,4 +70,27 @@
         <item name="android:inputType">none</item>
     </style>
 
+    <!-- TEXT STYLINGS-->
+
+    <style name="Text_Header">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Text_Error" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">@color/material_error_red</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:drawableStart">@drawable/baseline_error_24</item>
+        <item name="android:drawableTint">@color/material_error_red</item>
+    </style>
+
+    <style name="Material_Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:padding">10dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="backgroundTint">@color/material_button</item>
+    </style>
+
 </resources>

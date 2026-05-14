@@ -24,5 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Masonry"
 include(":app")
-include(":appdriver")
 include(":useraccount")
+include(":appdriver")

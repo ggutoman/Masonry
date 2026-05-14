@@ -3,6 +3,9 @@
 
     <application>
         <activity
+            android:name=".Activity_SignUp"
+            android:exported="false" />
+        <activity
             android:name=".Activity_Login"
             android:exported="false" />
     </application>

@@ -4,4 +4,6 @@
     <color name="material_black">#3C3C3C</color>
     <color name="material_background">#E9E8E8</color>
     <color name="material_yellow">#e2c91d</color>
+    <color name="material_error_red">#A40313</color>
+    <color name="material_button">#4978ED</color>
 </resources>
