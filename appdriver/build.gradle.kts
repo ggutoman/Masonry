@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gag.appdriver"
+    namespace = "org.gag.appdriver"
     compileSdk = 36
 
     defaultConfig {
@@ -13,36 +13,33 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    packaging {
-        resources {
-            merges.add("core.properties")
-        }
+    kotlin {
+        jvmToolchain(17)
     }
-}
 
-kotlin {
-    jvmToolchain(17)
 }
 
 dependencies {
     implementation(libs.androidx.appcompat)
-    testImplementation(libs.junit)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.material)
-    androidTestImplementation(libs.androidx.junit)
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.junit)
+
+    // Ktor Client
+    implementation("io.ktor:ktor-client-core:2.3.8")
+    implementation("io.ktor:ktor-client-okhttp:2.3.8") // Android engine
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.8")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Logging (optional)
+    implementation("io.ktor:ktor-client-logging:2.3.8")
 }
