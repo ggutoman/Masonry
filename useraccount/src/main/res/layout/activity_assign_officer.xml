@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_title1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Officer Information"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_status"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_status"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Material_Button_Transparent"
+            android:id="@+id/btn_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Change Status"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_title1"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Officer ID">
+
+            <com.google.android.material.textfield.TextInputEditText
+                style="@style/TextInputStyle.Edittext"
+                android:id="@+id/tie_officerid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomDropDownTilStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Year as Officer">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                style="@style/TextInputStyle.Edittext"
+                android:id="@+id/auto_year"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomDropDownTilStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Position">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                style="@style/DropdownStyleTheme"
+                android:id="@+id/auto_position"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomDropDownTilStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Member">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                style="@style/DropdownStyleTheme"
+                android:id="@+id/auto_member"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/CustomDropDownTilStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Officer Type">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                style="@style/DropdownStyleTheme"
+                android:id="@+id/auto_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:padding="5dp">
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Material_Button"
+                android:id="@+id/btn_create"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Create Member"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancel"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

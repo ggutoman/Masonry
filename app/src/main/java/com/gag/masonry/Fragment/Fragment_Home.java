@@ -1,4 +1,4 @@
-package com.gag.useraccount;
+package com.gag.masonry.Fragment;
 
 import android.os.Bundle;
 
@@ -8,12 +8,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Activity_SignUp extends AppCompatActivity {
+import com.gag.masonry.R;
+
+public class Fragment_Home extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+
+        setContentView(R.layout.activity_fragment_home);
 
     }
 }

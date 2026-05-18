@@ -3,6 +3,12 @@
 
     <application>
         <activity
+            android:name=".Activity_Assign_Officer"
+            android:exported="false" />
+        <activity
+            android:name=".Activity_Create_Member"
+            android:exported="false" />
+        <activity
             android:name=".Activity_SignUp"
             android:exported="false" />
         <activity
