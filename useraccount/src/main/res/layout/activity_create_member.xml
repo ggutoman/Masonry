@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Member Information"/>
+
+            <LinearLayout
+                android:id="@+id/layout_member"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/CustomDropDownTilStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Lodge">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/DropdownStyleTheme"
+                        android:id="@+id/auto_lodge"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/CustomDropDownTilStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Account">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/DropdownStyleTheme"
+                        android:id="@+id/auto_account"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/CustomDropDownTilStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Status">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/DropdownStyleTheme"
+                        android:id="@+id/auto_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/CustomDropDownTilStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Title">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/DropdownStyleTheme"
+                        android:id="@+id/auto_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/CustomDropDownTilStyle"
+                        android:id="@+id/til_sponsor"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Sponsor (Maximum of 3 Entries)"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.8">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/auto_sponosr"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_add_sponsor"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="ADD"
+                        app:layout_constraintTop_toTopOf="@+id/til_sponsor"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_sponsor"
+                        app:layout_constraintStart_toEndOf="@+id/til_sponsor"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/CustomDropDownTilStyle"
+                        android:id="@+id/til_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Address"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.8">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/auto_address"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_add_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="ADD"
+                        app:layout_constraintTop_toTopOf="@+id/til_address"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_address"
+                        app:layout_constraintStart_toEndOf="@+id/til_address"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/CustomDropDownTilStyle"
+                        android:id="@+id/til_contact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Contact Number"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.8">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/auto_contact"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_add_contact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="ADD"
+                        app:layout_constraintTop_toTopOf="@+id/til_contact"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_contact"
+                        app:layout_constraintStart_toEndOf="@+id/til_contact"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/CustomDropDownTilStyle"
+                        android:id="@+id/til_email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Email Address"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.8">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/auto_email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_add_email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="ADD"
+                        app:layout_constraintTop_toTopOf="@+id/til_email"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_email"
+                        app:layout_constraintStart_toEndOf="@+id/til_email"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Personal Information"/>
+
+            <LinearLayout
+                android:id="@+id/layout_personal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/TextInputStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Lastname">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/TextInputStyle.Edittext"
+                        android:id="@+id/tie_lastname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/TextInputStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Firstname">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/TextInputStyle.Edittext"
+                        android:id="@+id/tie_firstname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/TextInputStyle"
+                        android:id="@+id/til_midname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Middlename"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.7">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            style="@style/TextInputStyle.Edittext"
+                            android:id="@+id/tie_middlename"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/TextInputStyle"
+                        android:id="@+id/til_suffix"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Suffix"
+                        app:layout_constraintStart_toEndOf="@+id/til_midname"
+                        app:layout_constraintTop_toTopOf="@+id/til_midname"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_midname"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            style="@style/TextInputStyle.Edittext"
+                            android:id="@+id/tie_suffix"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/CustomDropDownTilStyle"
+                    android:id="@+id/til_civil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Civil Status"
+                    app:layout_constraintStart_toEndOf="@+id/til_midname"
+                    app:layout_constraintTop_toTopOf="@+id/til_midname"
+                    app:layout_constraintBottom_toBottomOf="@+id/til_midname"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/DropdownStyleTheme"
+                        android:id="@+id/auto_civil"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Material_Button"
+                    android:id="@+id/btn_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Member"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

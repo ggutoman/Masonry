@@ -3,7 +3,7 @@
     <color name="material_white">#3C3C3C</color>
     <color name="material_black">#FFFF</color>
     <color name="material_background">#494747</color>
-    <color name="material_yellow">#d8c227</color>
+    <color name="material_yellow">#AFB809</color>
     <color name="material_error_red">#DB4D5A</color>
     <color name="material_button">#1A49B6</color>
 </resources>

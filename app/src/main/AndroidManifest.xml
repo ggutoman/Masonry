@@ -10,6 +10,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
+        <activity
+            android:name=".Fragment.Fragment_Home"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.Activity_Main"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.Activity_Dashboard"
+            android:exported="false" />
     </application>
 
 </manifest>

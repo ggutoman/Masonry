@@ -1,6 +1,6 @@
 package org.gag.appdriver
 
-import org.gag.appdriver.Libraries.DateRepository
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.junit.Test
 
 class DateRepositoryTest {

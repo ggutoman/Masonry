@@ -8,12 +8,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Activity_SignUp extends AppCompatActivity {
+public class Activity_Assign_Officer extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+
+        setContentView(R.layout.activity_assign_officer);
 
     }
 }
