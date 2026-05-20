@@ -30,3 +30,7 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.3.10" }
+kotlin-serialze= { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.8.21" }
+kotlin-kapt= { id = "kotlin-kapt"}
+kotlin-parcelize= { id = "org.jetbrains.kotlin.plugin.parcelize"}
+kotlin-proto= { id = "com.google.protobuf", version = "0.9.4" }
