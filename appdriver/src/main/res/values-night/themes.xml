@@ -16,6 +16,8 @@
         <item name="android:windowBackground">@color/material_background</item>
         <item name="android:statusBarColor">@color/material_yellow</item>
         <item name="android:textColor">@color/material_black</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+        <item name="fontFamily">@font/roboto_regular</item>
     </style>
 
     <!-- TEXT INPUT -->

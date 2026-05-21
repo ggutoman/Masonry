@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialze)
-    alias(libs.plugins.kotlin.kapt)
+    //alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.proto)
 
@@ -29,9 +29,9 @@ android {
     }
 
     // Allow references to generated code
-    kapt {
-        correctErrorTypes = true
-    }
+//    kapt {
+//        correctErrorTypes = true
+//    }
 
     //PROTO PLUGIN
     protobuf {
@@ -93,12 +93,12 @@ dependencies {
     // If this project only uses Java source, use the Java annotationProcessor
     // No additional plugins are necessary
     annotationProcessor("androidx.room:room-compiler:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
-    kapt("android.arch.lifecycle:compiler:1.1.0")
+    //kapt("androidx.room:room-compiler:$room_version")
+    //kapt("android.arch.lifecycle:compiler:1.1.0")
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
-    kapt("android.arch.persistence.room:compiler:1.1.0")
+    //kapt("android.arch.persistence.room:compiler:1.1.0")
 
     // optional - Test helpers
     testImplementation("androidx.room:room-testing:$room_version")
@@ -111,4 +111,6 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.6")
     implementation("com.google.protobuf:protobuf-javalite:4.26.1")
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.18.0")
+
+
 }
