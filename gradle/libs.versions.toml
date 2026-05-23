@@ -6,12 +6,10 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.1"
 material = "1.13.0"
-kotlin = "2.2.10"
 androidxTestRunner = "1.6.1"
 activity = "1.10.0"
 constraintlayout = "2.2.1"
 activityKtx = "1.8.0"
-coreKtxVersion = "1.18.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,7 +27,7 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.3.10" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "1.9.23" }
 kotlin-serialze= { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.8.21" }
 kotlin-kapt= { id = "kotlin-kapt"}
 kotlin-parcelize= { id = "org.jetbrains.kotlin.plugin.parcelize"}

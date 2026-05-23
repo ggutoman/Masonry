@@ -25,11 +25,15 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
+import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo
 import org.json.JSONObject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class KTORepository {
+class KTORepository(instance : Context) {
+
+    val context = instance;
 
     @OptIn(ExperimentalSerializationApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
@@ -70,16 +74,10 @@ class KTORepository {
             headers{
                 append("Accept", "application/json")
                 append("Content-Type", "application/json")
-                append("g-api-id", "gRider")
-                append("g-api-client", "")
-                append("g-api-imei", "356060072281722")
-                append("g-api-model", "")
-                append("g-api-mobile", "")
-                append("g-api-token", "f7qNSw8TRPWHSCga0g8YFF:APA91bG3i_lBPPWv9bbRasNzRH1XX1y0vzp6Ct8S_a-yMPDvSmud8FEVPMr26zZtBPHq2CmaIw9Rx0MZmf3sbuK44q3vQemUBoPPS4Meybw8pnTpcs3p0VbiTuoLHJtdncC6BgirJxt3")
-                append("g-api-user", "GAP0190001")
-                append("g-api-key", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
-//                append("g-api-hash", HashRepository.hashMD5("356060072281722" +
-//                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))))
+                append("g-char-request", "UTF-8")
+                append("product-id", "MSNRY_APP")
+                append("request_date", DateRepository().GetCurrentDate())
+                append("device-id", DeviceInfo(context).GetAndroidID())
             }
 
         }

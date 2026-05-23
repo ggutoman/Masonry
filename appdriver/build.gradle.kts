@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.proto)
-
 }
 
 android {
@@ -40,15 +39,9 @@ android {
         }
 
         generateProtoTasks {
-            // see https://github.com/google/protobuf-gradle-plugin/issues/518
-            // see https://github.com/google/protobuf-gradle-plugin/issues/491
-            // all() here because of android multi-variant
             all().forEach { task ->
-                // this only works on version 3.8+ that has buildins for javalite / kotlin lite
-                // with previous version the java build in is to be removed and a new plugin
-                // need to be declared
                 task.builtins {
-                    id("java") { // id is imported above
+                    id("java") {
                         option("lite")
                     }
                     id("kotlin") {
@@ -58,7 +51,6 @@ android {
             }
         }
     }
-
 }
 
 dependencies {
@@ -71,7 +63,7 @@ dependencies {
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:2.3.8")
-    implementation("io.ktor:ktor-client-okhttp:2.3.8") // Android engine
+    implementation("io.ktor:ktor-client-okhttp:2.3.8")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.8")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
 
@@ -81,34 +73,21 @@ dependencies {
     // Logging (optional)
     implementation("io.ktor:ktor-client-logging:2.3.8")
 
-    //ROOM DEPENDENCY
-    val room_version = "2.7.1"
-
+    // ROOM DEPENDENCY
+    val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
-
-    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
-    // See Add the KSP plugin to your project
-    //ksp("androidx.room:room-compiler:$room_version")
-
-    // If this project only uses Java source, use the Java annotationProcessor
-    // No additional plugins are necessary
-    annotationProcessor("androidx.room:room-compiler:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
-    kapt("android.arch.lifecycle:compiler:1.1.0")
 
-    // optional - Kotlin Extensions and Coroutines support for Room
+    // Fix for "No native library found" error in KAPT on some Windows environments
+    kapt("org.xerial:sqlite-jdbc:3.45.1.0")
+
     implementation("androidx.room:room-ktx:$room_version")
-    kapt("android.arch.persistence.room:compiler:1.1.0")
-
-    // optional - Test helpers
+    implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
 
-    // optional - Paging 3 Integration
-    implementation("androidx.room:room-paging:$room_version")
-
-    //PROTO DEPENDENCIES
+    // PROTO DEPENDENCIES
     implementation("androidx.datastore:datastore:1.1.6")
     implementation("androidx.datastore:datastore-preferences:1.1.6")
     implementation("com.google.protobuf:protobuf-javalite:4.26.1")
-    implementation("com.google.protobuf:protobuf-kotlin-lite:3.18.0")
+    implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.1")
 }

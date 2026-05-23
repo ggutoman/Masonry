@@ -1,9 +1,10 @@
 package org.gag.appdriver.Room.Entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
-@Entity(tableName = "User_Info")
+@Entity(tableName = "User_Info", primaryKeys = ["sUserIDxx"])
 @Serializable
 data class EUserInfo(
     val sUserIDxx : String,

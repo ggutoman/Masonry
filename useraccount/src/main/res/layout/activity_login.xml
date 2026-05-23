@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity_Login">
+    tools:context=".Activity.Activity_Login">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/siv_logo"

@@ -1,5 +1,6 @@
 package org.gag.appdriver.Utilities
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -10,13 +11,14 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 import org.gag.appdriver.R
 import androidx.core.graphics.drawable.toDrawable
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class LoadDialog(instance : Context) {
 
     val context : Context = instance
 
     lateinit var poDialog : AlertDialog
-    lateinit var icon_progress : ShapeableImageView
+    lateinit var icon_progress : CircularProgressIndicator
     lateinit var mtv_message : MaterialTextView
 
     interface OnDialogClick{
@@ -24,17 +26,18 @@ class LoadDialog(instance : Context) {
         fun OnNegative(poDialog : AlertDialog)
     }
 
+    @SuppressLint("InflateParams")
     fun InitDialog(){
 
-        LayoutInflater.from(context).inflate(R.layout.layout_loading, null).let {
+        LayoutInflater.from(context).inflate(R.layout.layout_loading, null).also {
 
             AlertDialog.Builder(context)
                 .setCancelable(false)
-                .setView(it).let {
+                .setView(it).also {
                     poDialog = it.create().also { it.setCancelable(false) }
                 }
 
-            icon_progress = it.findViewById(R.id.icon_status)
+            icon_progress = it.findViewById(R.id.icon_progress)
             mtv_message = it.findViewById(R.id.mtv_message)
 
         }
