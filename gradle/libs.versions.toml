@@ -29,7 +29,7 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.3.10" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.1.0" }
 kotlin-serialze= { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.8.21" }
 kotlin-kapt= { id = "kotlin-kapt"}
 kotlin-parcelize= { id = "org.jetbrains.kotlin.plugin.parcelize"}

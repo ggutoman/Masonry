@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
-import com.gag.useraccount.Activity_Login;
+import com.gag.useraccount.Activity.Activity_Login;
 
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -39,6 +39,11 @@ public class Activity_Main extends AppCompatActivity {
             @Override
             public void isLoading() {
                 poLoad.ShowDialog("Initializing Data. Please wait . .");
+            }
+
+            @Override
+            public void hasLoggedIn() {
+
             }
 
             @Override

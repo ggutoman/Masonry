@@ -4,44 +4,38 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.EUserInfo
 
 @Database(
     entities = [
         EUserInfo::class
     ],
-    version = 6,
+    version = 1,
     exportSchema = false
 )
 abstract class ML_DBF: RoomDatabase() {
 
-    abstract fun GetUserDao(): EUserInfo
+    abstract fun GetUserDao(): DUserInfo
 
     companion object {
 
-        var instance: ML_DBF? = null
+        @Volatile
+        private var instance: ML_DBF? = null
 
-        fun getDatabase(context: Context): ML_DBF? {
-
-            if (instance == null) {
-
-                synchronized(ML_DBF::class) {
-
-                    instance = Room.databaseBuilder(
-                        context,
-                        ML_DBF::class.java,
-                        "Masonry_DB"
-                    )
-                        .fallbackToDestructiveMigration(false)
-                        .allowMainThreadQueries()
-                        .build()
-
-                }
-
+        fun getDatabase(context: Context): ML_DBF {
+            return instance ?: synchronized(this) {
+                val newInstance = Room.databaseBuilder(
+                    context.applicationContext,
+                    ML_DBF::class.java,
+                    "Masonry_DB"
+                )
+                    .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
+                    .build()
+                instance = newInstance
+                newInstance
             }
-
-            return instance
         }
-
     }
 }

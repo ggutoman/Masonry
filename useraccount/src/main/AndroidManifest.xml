@@ -4,16 +4,16 @@
 
     <application android:theme="@style/MasonryTheme">
         <activity
-            android:name=".Activity_Assign_Officer"
+            android:name=".Activity.Activity_Assign_Officer"
             android:exported="false"/>
         <activity
-            android:name=".Activity_Create_Member"
+            android:name=".Activity.Activity_Create_Member"
             android:exported="false"/>
         <activity
-            android:name=".Activity_SignUp"
+            android:name=".Activity.Activity_SignUp"
             android:exported="false"/>
         <activity
-            android:name=".Activity_Login"
+            android:name=".Activity.Activity_Login"
             android:exported="false"/>
     </application>
 

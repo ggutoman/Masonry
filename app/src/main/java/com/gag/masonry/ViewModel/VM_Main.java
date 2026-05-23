@@ -18,6 +18,7 @@ public class VM_Main extends AndroidViewModel {
 
     public interface InitData{
         void isLoading();
+        void hasLoggedIn();
         void isLoginNeeded();
         void isSessionExpired();
     }
@@ -45,8 +46,16 @@ public class VM_Main extends AndroidViewModel {
         //check log transaction, if login needed
         if (!poConfig.hasLoggedIn()){
             foCallback.isLoginNeeded();
-        } else if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
-            foCallback.isSessionExpired();
+        } else {
+
+            poConfig.getokenID();
+            if (poConfig.getokenID().isEmpty()){
+                foCallback.isLoginNeeded();
+            }else if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
+                foCallback.isSessionExpired();
+            }else {
+                foCallback.hasLoggedIn();
+            }
         }
     }
 }
