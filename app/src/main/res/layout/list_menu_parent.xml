@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="10dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/img_icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/rounded_account_circle_24"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/Text_Header"
+        android:id="@+id/mtv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Accounts"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@+id/img_icon"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

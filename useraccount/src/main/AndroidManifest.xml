@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application>
+
+    <application android:theme="@style/MasonryTheme">
         <activity
-            android:name=".Activity_Assign_Officer"
-            android:exported="false" />
+            android:name=".Activity.Activity_Assign_Officer"
+            android:exported="false"/>
         <activity
-            android:name=".Activity_Create_Member"
-            android:exported="false" />
+            android:name=".Activity.Activity_Create_Member"
+            android:exported="false"/>
         <activity
-            android:name=".Activity_SignUp"
-            android:exported="false" />
+            android:name=".Activity.Activity_SignUp"
+            android:exported="false"/>
         <activity
-            android:name=".Activity_Login"
-            android:exported="false" />
+            android:name=".Activity.Activity_Login"
+            android:exported="false"/>
     </application>
 
 </manifest>

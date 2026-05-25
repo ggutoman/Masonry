@@ -16,7 +16,7 @@ class DateRepository {
         return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O)
             SimpleDateFormat(DATE_CONSTANTS.DATE_FORMAT.fsDescript).format(Date())
         else
-            LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_CONSTANTS.DATETIME_FORMAT.fsDescript))
+            LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_CONSTANTS.DATE_FORMAT.fsDescript))
     }
 
     @SuppressLint("SimpleDateFormat")

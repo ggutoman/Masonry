@@ -41,14 +41,26 @@ kotlin {
     jvmToolchain(17)
 }
 
+configurations.implementation {
+    exclude(group = "com.intellij", module = "annotations")
+}
+
 dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.room.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("org.xerial:sqlite-jdbc:3.45.1.0") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+
+
+    implementation(project(":useraccount"))
     implementation(project(":appdriver"))
 }
