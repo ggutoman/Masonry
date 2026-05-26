@@ -48,18 +48,20 @@ class Message_Dialog(instance : Context) {
     fun ShowMessage(fnStatus : Int, fsMessage : String, fsPosText : String, fsNegative : String, foCallback : OnDialogClick){
         if (!poDialog.isShowing){
 
+            InitDialog()
+
             when{
 
                 fnStatus < 2 -> { //Exclude confirmation, no need negative button
                     icon_status.setImageResource(R.drawable.baseline_error_24) //error by default
-                    if (fnStatus < 1) icon_status.setImageResource(R.drawable.baseline_error_24) //change icon to message
+                    if (fnStatus < 1) icon_status.setImageResource(R.drawable.baseline_message) //change icon to message
 
                     btn_positive.visibility = View.VISIBLE
                     btn_negative.visibility = View.GONE
                 }
 
                 fnStatus > 2 -> { //confirmation only
-                    icon_status.setImageResource(R.drawable.baseline_error_24) //change icon to confirmation
+                    icon_status.setImageResource(R.drawable.baseline_confirm) //change icon to confirmation
 
                     btn_positive.visibility = View.VISIBLE
                     btn_negative.visibility = View.VISIBLE
@@ -68,6 +70,7 @@ class Message_Dialog(instance : Context) {
             }
 
             btn_positive.text = fsPosText
+            btn_negative.text = fsNegative
             mtv_message.text = fsMessage
 
             btn_positive.setOnClickListener { view -> foCallback.OnPositive(poDialog) }
@@ -79,6 +82,5 @@ class Message_Dialog(instance : Context) {
             poDialog.show()
             return
         }
-        poDialog.dismiss();
     }
 }

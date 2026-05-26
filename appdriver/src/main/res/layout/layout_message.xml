@@ -14,7 +14,7 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/icon_status"
-            android:layout_width="1dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_error_24"
             android:backgroundTint="@color/material_error_red"
@@ -25,13 +25,12 @@
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
             android:id="@+id/mtv_message"
-            android:layout_width="1dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="No message available at this moment"
+            android:text="No message available at this moment,"
             app:layout_constraintStart_toEndOf="@+id/icon_status"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/icon_status"
-            app:layout_constraintBottom_toBottomOf="@id/icon_status"/>
+            app:layout_constraintTop_toTopOf="@id/icon_status"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_positive"
@@ -40,7 +39,7 @@
             android:text="N/A"
             android:layout_marginVertical="15dp"
             android:layout_marginHorizontal="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/icon_status"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_message"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_negative"/>
 

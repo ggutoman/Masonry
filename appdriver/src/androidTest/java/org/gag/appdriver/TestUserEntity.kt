@@ -19,12 +19,13 @@ class TestUserEntity {
             InstrumentationRegistry
                 .getInstrumentation()
                 .context
-        ) as DUserInfo
+        ).GetUserDao() as DUserInfo
 
         entity = EUserInfo(
             "MLUSR2026050001",
-            "001",
             "Gutoman, Guillier A",
+            "A665A45920422F9D417E4867EFDC4FB8A04A1F3FFF1FA07E998E86F7F7A27AE3",
+            "001",
             "ID20260501001",
             "Gutoman",
             "1998-02-01",

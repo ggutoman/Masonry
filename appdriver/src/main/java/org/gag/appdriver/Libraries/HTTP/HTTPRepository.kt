@@ -128,15 +128,13 @@ class KTORepository(instance : Context) {
         try {
 
             val result = ktorHttp.post(url){
-
                 setBody(params.toString())
-
             }
 
             Log.i("KTORHttpRepository", result.bodyAsText())
 
             val jsonResult = JSONObject(result.bodyAsText())
-            val status = jsonResult.get("status")
+            val status = jsonResult.get("result")
 
             return if (status.equals("success")){
                 OnRequest.onSuccess(result)

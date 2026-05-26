@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/material_error_red"
             android:paddingHorizontal="10dp"
-            android:progress="100"
+           android:indeterminate="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>

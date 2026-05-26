@@ -94,10 +94,11 @@
     </style>
 
     <style name="Text_Link" parent="TextAppearance.MaterialComponents.Subtitle2">
-        <item name="android:gravity">center_horizontal</item>
+        <item name="android:gravity">start</item>
         <item name="android:textSize">12sp</item>
         <item name="android:padding">10dp</item>
         <item name="android:textStyle">italic</item>
+        <item name="android:alpha">0.5</item>
     </style>
 
     <style name="Text_Error" parent="TextAppearance.MaterialComponents.Body1">

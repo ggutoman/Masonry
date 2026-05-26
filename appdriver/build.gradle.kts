@@ -4,9 +4,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialze)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.proto)
+
+    // ✅ Replace kapt with ksp
+    id("com.google.devtools.ksp") version "1.9.22-1.0.16"
 }
 
 android {
@@ -18,6 +20,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -25,11 +28,6 @@ android {
     }
     kotlin {
         jvmToolchain(17)
-    }
-
-    // Allow references to generated code
-    kapt {
-        correctErrorTypes = true
     }
 
     //PROTO PLUGIN
@@ -51,6 +49,10 @@ android {
             }
         }
     }
+}
+
+configurations.implementation {
+    exclude(group = "com.intellij", module = "annotations")
 }
 
 dependencies {
@@ -76,10 +78,9 @@ dependencies {
     // ROOM DEPENDENCY
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
 
-    // Fix for "No native library found" error in KAPT on some Windows environments
-    kapt("org.xerial:sqlite-jdbc:3.45.1.0")
+    // ✅ Use KSP instead of kapt
+    ksp("androidx.room:room-compiler:$room_version")
 
     implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-paging:$room_version")
@@ -90,4 +91,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.6")
     implementation("com.google.protobuf:protobuf-javalite:4.26.1")
     implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.1")
+
 }

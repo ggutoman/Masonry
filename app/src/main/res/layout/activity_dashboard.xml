@@ -9,23 +9,77 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
     tools:context=".Activity.Activity_Dashboard">
-    
-    <com.google.android.material.navigation.NavigationView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header"/>
 
-    <ExpandableListView
-        android:id="@+id/lvExp"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:groupIndicator="@drawable/nav_dropdown_indicator"
-        android:childDivider="@null"
-        android:background="@android:color/transparent"
-        android:divider="@null"
-        android:choiceMode="singleChoice"
-        android:layout_marginTop="@dimen/nav_header_height"/>
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/drawer_content"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="?android:attr/windowBackground"
+        android:fitsSystemWindows="true">
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/layout_header"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:cardElevation="10dp"
+            app:layout_constraintHeight_percent="0.13">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/siv_logo"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/masonry_logo"
+                    app:layout_constraintWidth_percent="0.3"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/Text_Title"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="Masonry Application"
+                    app:layout_constraintStart_toEndOf="@+id/siv_logo"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <ExpandableListView
+            android:id="@+id/list_menus"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:dividerHeight="0dp"
+            android:choiceMode="singleChoice"
+            app:layout_constraintTop_toBottomOf="@+id/layout_header"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>

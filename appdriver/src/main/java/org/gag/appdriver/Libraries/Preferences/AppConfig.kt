@@ -83,4 +83,11 @@ class AppConfig(instance : Context) {
         return sharedPref.getString(TOKEN_ID, "").toString()
     }
 
+    fun ClearAccountSession(){
+        prefEditor.putString(IS_LOGIN, "0")
+        prefEditor.putString(MEMBER_ID, "")
+        prefEditor.putString(TOKEN_ID, "")
+        prefEditor.commit()
+    }
+
 }

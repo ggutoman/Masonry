@@ -1,19 +1,18 @@
 package org.gag.appdriver.App.DataModels
 
 import kotlinx.serialization.Serializable
-import org.gag.appdriver.App.Models.UserInfoResult
 
 @Serializable
-data class DownloadUserInfo(
+data class DownloadLogin(
     private val result: String,
-    private val payload: UserInfoResult
+    private val payload: String
 ) {
 
     fun GetResult(): String{
         return result
     }
 
-    fun GetPayload(): UserInfoResult{
+    fun GetPayload(): String{
         return payload
     }
 }

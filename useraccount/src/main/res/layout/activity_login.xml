@@ -63,7 +63,8 @@
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password">
+            android:hint="Password"
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"
@@ -76,6 +77,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Link"
+            android:id="@+id/mtv_signup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/signup_help"/>
