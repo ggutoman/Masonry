@@ -19,6 +19,7 @@ import org.gag.appdriver.Room.ML_DBF;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
 
@@ -82,5 +83,18 @@ public class VM_Main extends AndroidViewModel {
                 foCallback.hasLoggedIn(GetParentMenu, GetParentItem);
             }
         }
+    }
+
+    public void DownloadUserInfo(String fsID){
+
+        poDashboard.DownloadUserInfo(fsID).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    
+                }
+            }
+        });
     }
 }

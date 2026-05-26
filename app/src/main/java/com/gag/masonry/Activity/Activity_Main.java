@@ -18,6 +18,7 @@ import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,15 +70,17 @@ public class Activity_Main extends AppCompatActivity {
             @Override
             public void hasLoggedIn(List<MENU_PARENT_CONSTANTS> foParentMenu, HashMap<String, List<MENU_ITEM_CONSTANTS>> foParentItem) {
 
-                for (MENU_PARENT_CONSTANTS entries : foParentMenu){
-                    Log.d("TAG", "Parent Menu : " + entries.getFsTitlex());
+                // Ensure data is passed as ArrayList to match expected types in Activity_Dashboard/Adapter_Drawer
+                ArrayList<MENU_PARENT_CONSTANTS> laParentList = new ArrayList<>(foParentMenu);
 
-                    for (MENU_ITEM_CONSTANTS items : foParentItem.get(entries.getFsIDxx())){
-                        Log.d("TAG", "Child Item : " + items.getFsTitlex());
-                    }
+                HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
+                for (Map.Entry<String, List<MENU_ITEM_CONSTANTS>> entry : foParentItem.entrySet()) {
+                    loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
                 }
 
                 Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                loIntent.putExtra("parent_key", laParentList);
+                loIntent.putExtra("child_items", loChildMap);
                 startActivity(loIntent);
             }
 

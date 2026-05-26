@@ -10,8 +10,7 @@
         android:id="@+id/mtv_item"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Update"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

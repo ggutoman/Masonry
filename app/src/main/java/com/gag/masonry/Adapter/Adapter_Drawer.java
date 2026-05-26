@@ -1,6 +1,7 @@
 package com.gag.masonry.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,23 +14,25 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class Adapter_Drawer extends BaseExpandableListAdapter {
 
-    private Context loInstance;
-    private List<MENU_PARENT_CONSTANTS> paParentList;
-    private HashMap<String, List<MENU_ITEM_CONSTANTS>> paChildList;
+    private final Context loInstance;
+    private final ArrayList<MENU_PARENT_CONSTANTS> paParentList;
+    private final HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> paChildList;
 
-    public Adapter_Drawer(Context foinstance, List<MENU_PARENT_CONSTANTS> faParentList, HashMap<String, List<MENU_ITEM_CONSTANTS>> faChildList){
+    public Adapter_Drawer(Context foinstance, ArrayList<MENU_PARENT_CONSTANTS> faParentList, HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> faChildList){
         this.loInstance = foinstance;
         this.paParentList = faParentList;
         this.paChildList = faChildList;
     }
 
     @Override
-    public Object getGroup(int i) {
+    public MENU_PARENT_CONSTANTS getGroup(int i) {
         return paParentList.get(i);
     }
 
@@ -44,13 +47,13 @@ public class Adapter_Drawer extends BaseExpandableListAdapter {
     }
 
     @Override
-    public MENU_ITEM_CONSTANTS getChild(int i, int i1) {
-        return paChildList.get(paParentList.get(i)).get(i1);
+    public MENU_ITEM_CONSTANTS getChild(int groupPosition, int childPosition) {
+        return Objects.requireNonNull(paChildList.get(paParentList.get(groupPosition).getFsIDxx())).get(childPosition);
     }
 
     @Override
-    public int getChildrenCount(int i) {
-        return paChildList.get(paParentList.get(i)).size();
+    public int getChildrenCount(int groupPosition) {
+       return Objects.requireNonNull(paChildList.get(paParentList.get(groupPosition).getFsIDxx())).size();
     }
 
     @Override
@@ -60,7 +63,7 @@ public class Adapter_Drawer extends BaseExpandableListAdapter {
 
     @Override
     public boolean isChildSelectable(int i, int i1) {
-        return false;
+        return true;
     }
 
     @Override
@@ -92,7 +95,6 @@ public class Adapter_Drawer extends BaseExpandableListAdapter {
 
             view = LayoutInflater.from(loInstance).inflate(R.layout.list_menu_item, viewGroup, false);
         }
-
         MaterialTextView mtv_item = view.findViewById(R.id.mtv_item);
         mtv_item.setText(getChild(i, i1).getFsTitlex());
 

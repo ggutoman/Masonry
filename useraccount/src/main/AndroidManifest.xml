@@ -10,7 +10,7 @@
             android:name=".Activity.Activity_Create_Member"
             android:exported="false"/>
         <activity
-            android:name=".Activity.Activity_SignUp"
+            android:name=".Activity.Activity_Account_Info"
             android:exported="false"/>
         <activity
             android:name=".Activity.Activity_Login"

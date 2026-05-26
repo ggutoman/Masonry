@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EUserInfo
 
 @Database(
     entities = [
-        EUserInfo::class
+        EUserInfo::class,
+        EMemberInfo::class
     ],
     version = 1,
     exportSchema = false
@@ -17,6 +20,7 @@ import org.gag.appdriver.Room.Entities.EUserInfo
 abstract class ML_DBF: RoomDatabase() {
 
     abstract fun GetUserDao(): DUserInfo
+    abstract fun GetMemberDao(): DMemberInfo
 
     companion object {
 
