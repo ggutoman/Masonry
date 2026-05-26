@@ -2,18 +2,21 @@ package org.gag.appdriver.App.Accounts
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.example.autodealersapplication.android.DataModels.ApiError
+import android.os.Handler
+import android.os.Looper
+import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.gag.appdriver.App.DataModels.DownloadUserInfo
+import org.gag.appdriver.App.DataModels.DownloadLogin
 import org.gag.appdriver.Constants.API_CONSTANTS
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
+import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
-import org.gag.appdriver.Room.DataObject.DUserInfo
-import org.gag.appdriver.Room.ML_DBF
+import org.gag.appdriver.Libraries.Preferences.AppConfig
+import org.gag.appdriver.Room.Entities.EUserInfo
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
@@ -21,70 +24,174 @@ class UserAccount(instance : Context) {
 
     var message : String = "No message found"
 
+    val session : AppConfig = AppConfig(instance)
     val loInstance : Context = instance
     val httpInstance : KTORepository = KTORepository(instance)
-    val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
+    val encryptObj : HashRepository = HashRepository()
+    val dateObj : DateRepository = DateRepository()
 
     fun GetMessage() : String = message
 
     @SuppressLint("MissingPermission")
-    fun LoginUser(fsID : String, fsPass : String) : CompletableFuture<Boolean>{
-
+    fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
-        CoroutineScope(Dispatchers.IO).launch{
+        CoroutineScope(Dispatchers.IO).launch {
 
-            if (!httpInstance.checkDeviceConnection(loInstance)){
+            if (!httpInstance.checkDeviceConnection(loInstance)) {
                 message = "No internet connection"
-                future.complete(false)
-            }else{
+                Handler(Looper.getMainLooper()).post {
+                    future.complete(false)
+                }
+                return@launch
+            }
 
-                try {
+            try {
+                val loParams = JSONObject().apply {
+                    put("sGLPIDNoX", fsID)
+                }
 
-                    val loParams = JSONObject()
+                val lsEncrPass: String = encryptObj.EncryptHex(fsPass)
+                if (lsEncrPass.isEmpty()) {
+                    message = "Could not generate passkey"
+                    Handler(Looper.getMainLooper()).post {
+                        future.complete(false)
+                    }
+                    return@launch
+                }
+                loParams.put("sPassword", lsEncrPass)
 
-                    loParams.put("sGLPIDNoX", fsID)
-                    loParams.put("sPassword", fsPass)
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_LOGIN_ACCOUNT.fsURL,
+                    loParams
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            session.isLogIn("1")
+                            session.setLogDate(dateObj.GetCurrentDate())
 
-                    httpInstance.makeRequest(API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_LOGIN_ACCOUNT.fsURL, loParams).let {
+                            val resultData =
+                                Json.decodeFromString<DownloadLogin>(result.data.body())
 
-                        when(it){
+                            val sTokenIDxx = resultData.GetPayload();
 
-                            is KTORepository.OnRequest.onSuccess->{
+                            session.setTokenID(sTokenIDxx)
 
-                                val resultData = Json.decodeFromString<DownloadUserInfo>(it.data.body())
-                                val details = resultData.GetData()
-
-                                poDBUser.SaveUserInfo(details)
-
-                                println("User account has been logged in $details")
+                            Handler(Looper.getMainLooper()).post {
                                 future.complete(true)
                             }
+                        }
 
-                            is KTORepository.OnRequest.onError<*> -> {
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetError().message
 
-                                message = it.exception.toString()
+                            Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
                             }
+                        }
 
-                            is KTORepository.OnRequest.onFailed-> {
-
-                                val errorData = Json.decodeFromString<ApiError>(it.data.body())
-                                message = errorData.GetError()
-
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
                             }
+                        }
 
-                            else->{
-                                message = "Invalid transaction. Could not proceed"
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
                             }
                         }
                     }
-                }catch (ex : Exception){
-                    message = ex.message.toString()
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                Handler(Looper.getMainLooper()).post {
                     future.complete(false)
                 }
+            }
+        }
+        return future
+    }
 
+    @SuppressLint("MissingPermission")
+    fun CreateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            if (!httpInstance.checkDeviceConnection(loInstance)) {
+                message = "No internet connection"
+                Handler(Looper.getMainLooper()).post {
+                    future.complete(false)
+                }
+                return@launch
+            }
+
+            try {
+
+                val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
+                if (lsEncrPass.isEmpty()) {
+                    message = "Could not generate passkey"
+                    Handler(Looper.getMainLooper()).post {
+                        future.complete(false)
+                    }
+                    return@launch
+                }
+                poUser.sPassword = lsEncrPass
+
+                val loParams = JSONObject().apply {
+                    put("sUserName", poUser.sUserName)
+                    put("sPassword", poUser.sPassword)
+                    put("sGLPIDNoX", poUser.sGLPIDNoX)
+                    put("sLastName", poUser.sLastName)
+                    put("dBirthDte", poUser.dBirthDte)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ACCOUNT.fsURL,
+                    loParams
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(true)
+                            }
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetError().message
+
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                Handler(Looper.getMainLooper()).post {
+                    future.complete(false)
+                }
             }
         }
         return future
