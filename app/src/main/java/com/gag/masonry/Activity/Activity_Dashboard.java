@@ -66,11 +66,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
     }
 
-    public void InitData(){
-
-
-    }
-
     public void InitAdapter(){
 
         ArrayList<MENU_PARENT_CONSTANTS> parentMenu =
