@@ -1,15 +1,14 @@
+import com.google.protobuf.gradle.id
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialze)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.proto)
 
-    //kotlin serializer
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.21"
-
-    //KOTLIN KAPT METHOD
-    id("kotlin-kapt")
-
-    //PARCELIZE METHOD
-    id("org.jetbrains.kotlin.plugin.parcelize")
+    // ✅ Replace kapt with ksp
+    id("com.google.devtools.ksp") version "1.9.22-1.0.16"
 }
 
 android {
@@ -21,6 +20,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -30,6 +30,29 @@ android {
         jvmToolchain(17)
     }
 
+    //PROTO PLUGIN
+    protobuf {
+        protoc {
+            artifact = "com.google.protobuf:protoc:3.24.1"
+        }
+
+        generateProtoTasks {
+            all().forEach { task ->
+                task.builtins {
+                    id("java") {
+                        option("lite")
+                    }
+                    id("kotlin") {
+                        option("lite")
+                    }
+                }
+            }
+        }
+    }
+}
+
+configurations.implementation {
+    exclude(group = "com.intellij", module = "annotations")
 }
 
 dependencies {
@@ -42,7 +65,7 @@ dependencies {
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:2.3.8")
-    implementation("io.ktor:ktor-client-okhttp:2.3.8") // Android engine
+    implementation("io.ktor:ktor-client-okhttp:2.3.8")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.8")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
 
@@ -52,28 +75,21 @@ dependencies {
     // Logging (optional)
     implementation("io.ktor:ktor-client-logging:2.3.8")
 
-    //ROOM DEPENDENCY
-    val room_version = "2.7.1"
-
+    // ROOM DEPENDENCY
+    val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
 
-    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
-    // See Add the KSP plugin to your project
-    //ksp("androidx.room:room-compiler:$room_version")
+    // ✅ Use KSP instead of kapt
+    ksp("androidx.room:room-compiler:$room_version")
 
-    // If this project only uses Java source, use the Java annotationProcessor
-    // No additional plugins are necessary
-    annotationProcessor("androidx.room:room-compiler:$room_version")
-    //kapt("androidx.room:room-compiler:$room_version")
-    //kapt("android.arch.lifecycle:compiler:1.1.0")
-
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
-    //kapt("android.arch.persistence.room:compiler:1.1.0")
-
-    // optional - Test helpers
+    implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
 
-    // optional - Paging 3 Integration
-    implementation("androidx.room:room-paging:$room_version")
+    // PROTO DEPENDENCIES
+    implementation("androidx.datastore:datastore:1.1.6")
+    implementation("androidx.datastore:datastore-preferences:1.1.6")
+    implementation("com.google.protobuf:protobuf-javalite:4.26.1")
+    implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.1")
+
 }

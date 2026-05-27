@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity_Login">
+    tools:context=".Activity.Activity_Login">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/siv_logo"
@@ -48,14 +48,13 @@
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Member ID">
+            android:hint="Username">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"
-                android:id="@+id/tie_memberid"
+                android:id="@+id/tie_username"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:inputType="number"/>
+                android:layout_height="match_parent" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -63,7 +62,8 @@
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password">
+            android:hint="Password"
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"
@@ -76,6 +76,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Link"
+            android:id="@+id/mtv_signup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/signup_help"/>

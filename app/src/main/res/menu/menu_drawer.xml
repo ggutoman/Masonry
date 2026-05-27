@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_accounts" android:title="Accounts"/>
+
+    <item android:id="@+id/menu_accounts" android:title="Accounts">
+        <menu>
+            <item android:id="@+id/menu_assign" android:title="Assign"/>
+            <item android:id="@+id/menu_update" android:title="Update"/>
+        </menu>
+    </item>
 </menu>

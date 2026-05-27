@@ -16,6 +16,8 @@
         <item name="android:windowBackground">@color/material_background</item>
         <item name="android:statusBarColor">@color/material_yellow</item>
         <item name="android:textColor">@color/material_black</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+        <item name="fontFamily">@font/roboto_regular</item>
     </style>
 
     <!-- TEXT INPUT -->
@@ -105,6 +107,12 @@
         <item name="android:textSize">13sp</item>
         <item name="android:textColor">?attr/colorPrimary</item>
         <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!--ANIMATIONS-->
+    <style name="PopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/anim_pop_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_pop_out</item>
     </style>
 
 </resources>
