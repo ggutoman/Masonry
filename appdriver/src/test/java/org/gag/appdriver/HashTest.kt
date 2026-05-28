@@ -22,4 +22,12 @@ class HashTest {
 
         println(encryptStr)
     }
+
+    @Test
+    fun TestFormat(){
+
+        val name : String = "Gutoman, Guillier A"
+
+        print(name.replace(name.split(",").get(0), "Doe"))
+    }
 }

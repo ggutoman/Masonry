@@ -9,21 +9,6 @@
     android:orientation="vertical"
     tools:context=".Fragment.Fragment_Home">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/layout_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -62,19 +47,22 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     style="@style/Text_Header"
+                    android:id="@+id/mtv_username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gutoman, Guillier A."/>
+                    android:text="User"/>
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_position"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Administrator"/>
+                    android:text="N/A"/>
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_lodge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Dagupan District Lodge"/>
+                    android:text="N/A"/>
 
             </LinearLayout>
 

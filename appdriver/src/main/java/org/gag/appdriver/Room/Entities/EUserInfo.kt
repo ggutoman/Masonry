@@ -9,7 +9,7 @@ data class EUserInfo(
     var sUserIDxx : String,
     var sUserName : String,
     var sPassword : String,
-    var sLodgeIDxx : String,
+    var sLodgeIDx : String,
     var sGLPIDNoX : String,
     var sLastName : String,
     var dBirthDte : String,

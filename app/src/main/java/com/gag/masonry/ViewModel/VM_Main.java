@@ -1,11 +1,10 @@
 package com.gag.masonry.ViewModel;
 
 import android.app.Application;
-import android.text.format.DateUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 
 import org.gag.appdriver.App.Dashboard.Dashboard;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
@@ -13,12 +12,13 @@ import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
-import org.gag.appdriver.Room.DataObject.DUserInfo;
-import org.gag.appdriver.Room.ML_DBF;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EUserInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
@@ -30,9 +30,15 @@ public class VM_Main extends AndroidViewModel {
 
     public interface InitData{
         void isLoading();
-        void hasLoggedIn(List<MENU_PARENT_CONSTANTS> foParentMenu, HashMap<String, List<MENU_ITEM_CONSTANTS>> foParentItem);
         void isLoginNeeded();
-        void isSessionExpired();
+        void isSessionEnded();
+        void hasLoggedIn();
+    }
+
+    public interface OnDownload {
+        void OnLoad();
+        void OnSuccess();
+        void OnError(String fsMEssage);
     }
 
     public VM_Main(@NonNull Application application) {
@@ -42,6 +48,22 @@ public class VM_Main extends AndroidViewModel {
         poDevice = new DeviceInfo(application);
         poDate = new DateRepository();
         poDashboard = new Dashboard(application);
+    }
+
+    public LiveData<EUserInfo> GetUserInfo(){
+        return poDashboard.getPoDBUser().GetUser();
+    }
+
+    public LiveData<EMemberInfo> GetMemberInfo(){
+        return poDashboard.ObserverMemberInfoByUserID();
+    }
+
+    public ELodgeInfo GetLodgeInfo(){
+        return poDashboard.GetLodgeInfo();
+    }
+
+    public AppConfig GetSession(){
+        return poConfig;
     }
 
     public void InitData(InitData foCallback){
@@ -56,45 +78,59 @@ public class VM_Main extends AndroidViewModel {
             poConfig.setDeviceID(poDevice.GetAndroidID());
         }
 
-        //check log transaction, if login needed
-        if (!poConfig.hasLoggedIn()){
+        //check session, if login needed (newly opened or empty token)
+        if (!poConfig.hasLoggedIn() || poConfig.getokenID().isEmpty()){
             foCallback.isLoginNeeded();
         } else {
 
-            poConfig.getokenID();
-            if (poConfig.getokenID().isEmpty()){
-                foCallback.isLoginNeeded();
-            }else if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
-
-                poConfig.ClearAccountSession();
-
-                foCallback.isSessionExpired();
-            }else {
-
-                DUserInfo poUserDb = poDashboard.GetUserInfo().GetUserDao();
-                List<MENU_PARENT_CONSTANTS> GetParentMenu = poDashboard.GetParentMenus(poUserDb.GetUser().getNUserLevl());
-
-                HashMap<String, List<MENU_ITEM_CONSTANTS>> GetParentItem = new HashMap<>();
-                for (MENU_PARENT_CONSTANTS entries : GetParentMenu){
-
-                    GetParentItem.put(entries.getFsIDxx(), poDashboard.GetParentItems(poUserDb.GetUser().getNUserLevl(), entries.getFsIDxx()));
-                }
-
-                foCallback.hasLoggedIn(GetParentMenu, GetParentItem);
+            if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
+                EndSession();
+                foCallback.isSessionEnded();
+                return;
             }
+            foCallback.hasLoggedIn();
         }
     }
 
-    public void DownloadUserInfo(String fsID){
+    public void DownloadUserData(OnDownload foCallback){;
 
-        poDashboard.DownloadUserInfo(fsID).thenAccept(new Consumer<Boolean>() {
+        CompletableFuture<Boolean> poUserInfo = poDashboard.DownloadUserInfo();
+        CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
+
+        CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
             @Override
-            public void accept(Boolean aBoolean) {
+            public void run() {
 
-                if (!aBoolean){
-                    
+                try{
+
+                    foCallback.OnLoad();
+
+                    if (!poUserInfo.get()){
+                        foCallback.OnError("Download User: " + poDashboard.getMessage());
+                        return;
+                    }else if (!poLodgeInfo.get()){
+                        foCallback.OnError("Download Lodge: " + poDashboard.getMessage());
+                        return;
+                    }
+                    foCallback.OnSuccess();
+                }catch (Exception e){
+                    foCallback.OnError(e.getMessage());
                 }
             }
         });
+    }
+
+    public void EndSession(){
+        poDashboard.getPoDBUser().DeleteUser();
+        poDashboard.getPoDBMember().DeleteMember();
+        poConfig.ClearAccountSession();
+    }
+
+    public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
+        return poDashboard.GetParentMenus(fnUserLvl);
+    }
+
+    public List<MENU_ITEM_CONSTANTS> GetMenuItem(int fnUserLvl, String fsParentIDx){
+        return poDashboard.GetParentItems(fnUserLvl, fsParentIDx);
     }
 }

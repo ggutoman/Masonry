@@ -121,7 +121,7 @@ class KTORepository(instance : Context) {
     }
 
     @SuppressLint("NewApi")
-    suspend fun makeRequest(url: String, params: JSONObject): OnRequest<HttpResponse>{
+    suspend fun makeRequest(url: String, params: JSONObject, mapHeaders : Map<String, String> = mapOf()): OnRequest<HttpResponse>{
 
         val ktorHttp: HttpClient = GetInstance()
 
@@ -129,6 +129,11 @@ class KTORepository(instance : Context) {
 
             val result = ktorHttp.post(url){
                 setBody(params.toString())
+                headers{
+                    mapHeaders.forEach { key, value ->
+                        append(key, value)
+                    }
+                }
             }
 
             Log.i("KTORHttpRepository", result.bodyAsText())
