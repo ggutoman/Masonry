@@ -91,6 +91,7 @@ class UserAccount(instance : Context) {
                             session.setTokenID(sTokenIDxx)
 
                             Handler(Looper.getMainLooper()).post {
+
                                 future.complete(true)
                             }
                         }
@@ -98,7 +99,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetError().message
+                            message = errorData.GetPayload().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
@@ -180,7 +181,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetError().message
+                            message = errorData.GetPayload().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
@@ -259,7 +260,7 @@ class UserAccount(instance : Context) {
                             poMemberInfo.GetMemberInfoByUserID(
                                 TextFormatter()
                                     .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
-                                    .get(1)
+                                    .getOrNull(1) ?: ""
                             ).let {
 
                                 if (it == null){
@@ -293,7 +294,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetError().message
+                            message = errorData.GetPayload().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)

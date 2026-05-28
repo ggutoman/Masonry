@@ -46,7 +46,7 @@ class Dashboard(loInstance : Context) {
         return poDBMember.ObserveMemberInfoByUserID(
             TextFormatter()
                 .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
-                .get(1)
+                .getOrNull(1) ?: ""
         )
     }
 
@@ -55,7 +55,7 @@ class Dashboard(loInstance : Context) {
         return poLodgeInfo.GetLodgeInfo(
             TextFormatter()
                 .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
-                .get(0)
+                .getOrNull(0) ?: ""
         )
     }
 
@@ -98,7 +98,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetError().message
+                            message = errorData.GetPayload().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
@@ -168,7 +168,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetError().message
+                            message = errorData.GetPayload().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)

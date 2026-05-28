@@ -3,6 +3,7 @@ package com.gag.masonry.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -30,12 +31,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Activity_Main extends AppCompatActivity {
 
     private VM_Main mviewModel;
     private Message_Dialog poMessage;
     private LoadDialog poLoad;
+
     private final ActivityResultLauncher<Intent> poLogin = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -43,25 +46,6 @@ public class Activity_Main extends AppCompatActivity {
 
                     //this is to ensure that the token return from server is fully initialzed after successful login
                     if (loIntent.getResultCode() == Activity.RESULT_OK) {
-                        Intent data = loIntent.getData();
-
-                        if (!data.hasExtra("result_token") || data.getStringExtra("result_token") == null || data.getStringExtra("result_token").isEmpty()){
-
-                            poMessage.ShowMessage(1, "Invalid access token", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                @Override
-                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                    System.exit(0);
-                                }
-
-                                @Override
-                                public void OnNegative(@NotNull AlertDialog poDialog) {}
-                            });
-                            return;
-                        }
-                        mviewModel.GetSession().isLogIn("1");
-                        mviewModel.GetSession().setLogDate(data.getStringExtra("log_date"));
-                        mviewModel.GetSession().setTokenID(data.getStringExtra("result_token"));
-
                         InitData();
                     }
                 }
@@ -74,7 +58,6 @@ public class Activity_Main extends AppCompatActivity {
 
                     //this is logout receiver from dashboard
                     if (loIntent.getResultCode() == Activity.RESULT_OK) {
-                        mviewModel.EndSession();
                         InitData();
                     }
                 }
@@ -93,13 +76,8 @@ public class Activity_Main extends AppCompatActivity {
         poMessage.InitDialog();
         poLoad.InitDialog();
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
         InitData();
+
     }
 
     private void InitData(){
@@ -138,6 +116,9 @@ public class Activity_Main extends AppCompatActivity {
                                         @Override
                                         public void OnPositive(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
+
+                                            mviewModel.EndSession();
+                                            InitData();
                                         }
 
                                         @Override
@@ -151,8 +132,8 @@ public class Activity_Main extends AppCompatActivity {
                         if (mviewModel.GetLodgeInfo() == null){
                             Toast.makeText(Activity_Main.this, "Lodge information not found", Toast.LENGTH_LONG).show();
 
-//                            mviewModel.EndSession();
-//                            InitData();
+                            mviewModel.EndSession();
+                            InitData();
                             return;
                         }
 

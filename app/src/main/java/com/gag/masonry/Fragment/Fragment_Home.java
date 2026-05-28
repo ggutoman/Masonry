@@ -46,19 +46,7 @@ public class Fragment_Home extends Fragment {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
-                if (eMemberInfo == null){
-
-                    poMessage.ShowMessage(1, "Member information not found", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
-                    return;
-                }
+                if (eMemberInfo == null) return;
 
                 mtv_username.setText(eMemberInfo.getSMemberNm());
                 mtv_position.setText(eMemberInfo.getSPositnCd());

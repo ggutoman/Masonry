@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -153,12 +154,22 @@ public class Activity_Dashboard extends AppCompatActivity {
                         public void OnNegative(@NotNull AlertDialog poDialog) {
                             poDialog.dismiss();
 
+                            Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
+                            if (current != null) {
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .remove(current)
+                                        .commitNow(); // ensures fragment is destroyed immediately
+                            }
+
+                            mviewModel.EndSession();
+
                             Intent loFinish = new Intent();
                             setResult(Activity_Dashboard.RESULT_OK, loFinish);
                             finish();
+
                         }
                     });
-
                     break;
             }
 
@@ -178,9 +189,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Home());
                 break;
         }
-
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        fragmentTransaction.commitNow();
 
     }
 }
