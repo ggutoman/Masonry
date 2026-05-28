@@ -17,4 +17,5 @@ interface DUserInfo {
 
     @Query("DELETE FROM User_Info")
     fun DeleteUser()
+
 }

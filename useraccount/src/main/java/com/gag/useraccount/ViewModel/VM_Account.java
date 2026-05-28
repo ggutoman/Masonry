@@ -1,7 +1,6 @@
 package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -14,8 +13,6 @@ import org.gag.appdriver.Room.Entities.EUserInfo;
 public class VM_Account extends AndroidViewModel {
 
     private final UserAccount poAccount;
-    private final AppConfig poConfig;
-    private final HashRepository poEncrypt;
 
     public interface OnSubmit {
         void onLoad();
@@ -27,20 +24,18 @@ public class VM_Account extends AndroidViewModel {
         super(application);
 
         poAccount = new UserAccount(application);
-        poConfig = new AppConfig(application);
-        poEncrypt = new HashRepository();
     }
 
     public AppConfig GetSession(){
-        return poConfig;
+        return poAccount.GetSession();
     }
 
     public HashRepository GetEncryption(){
-        return poEncrypt;
+        return poAccount.GetEncryption();
     }
 
     public LiveData<EUserInfo> GetUserInfo(){
-        return poAccount.getPoDBUser().GetUser();
+        return poAccount.GetUserInfo();
     }
 
     public void LoginUser(String fsID, String fsPass, OnSubmit foCallback){
@@ -129,7 +124,7 @@ public class VM_Account extends AndroidViewModel {
             return;
         }
 
-        poAccount.UpdateCredentials(poUser)
+        poAccount.UpdateUser(poUser)
                 .thenAccept(aBoolean -> {
 
                     if (aBoolean){
@@ -143,5 +138,6 @@ public class VM_Account extends AndroidViewModel {
                     foCallback.onError(throwable.getMessage());
                     return null;
                 });
+
     }
 }

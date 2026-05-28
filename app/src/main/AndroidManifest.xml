@@ -30,9 +30,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Fragment.Fragment_Home"
-            android:exported="false" />
-        <activity
             android:name=".Activity.Activity_Dashboard"
             android:exported="false" />
     </application>

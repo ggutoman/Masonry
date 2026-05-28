@@ -3,6 +3,7 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
@@ -10,6 +11,7 @@ import android.widget.FrameLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -72,6 +74,7 @@ public class Activity_Dashboard extends AppCompatActivity {
 
         InitAdapter();
         InitListener();
+        InitView("HME"); //default to home
 
     }
 
@@ -95,6 +98,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loChildMap);
 
         list_menus.setAdapter(loAdapter);
+        main_drawer.openDrawer(GravityCompat.START);
 
     }
     public void InitListener(){
@@ -112,7 +116,7 @@ public class Activity_Dashboard extends AppCompatActivity {
 
             String lsParentId = groupMenu.getFsIDxx();
             if (lsParentId.equalsIgnoreCase("HME")){
-                InitView("HME");
+                InitView(lsParentId);
                 return false;
             }
 

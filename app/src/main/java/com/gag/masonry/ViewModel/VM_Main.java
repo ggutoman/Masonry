@@ -12,10 +12,13 @@ import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
@@ -32,7 +35,7 @@ public class VM_Main extends AndroidViewModel {
         void hasLoggedIn();
     }
 
-    public interface OnDownloadUser{
+    public interface OnDownload {
         void OnLoad();
         void OnSuccess();
         void OnError(String fsMEssage);
@@ -52,7 +55,11 @@ public class VM_Main extends AndroidViewModel {
     }
 
     public LiveData<EMemberInfo> GetMemberInfo(){
-        return poDashboard.getPoDBMember().GetMember();
+        return poDashboard.ObserverMemberInfoByUserID();
+    }
+
+    public ELodgeInfo GetLodgeInfo(){
+        return poDashboard.GetLodgeInfo();
     }
 
     public AppConfig GetSession(){
@@ -77,9 +84,7 @@ public class VM_Main extends AndroidViewModel {
         } else {
 
             if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
-
                 EndSession();
-
                 foCallback.isSessionEnded();
                 return;
             }
@@ -87,20 +92,30 @@ public class VM_Main extends AndroidViewModel {
         }
     }
 
-    public void DownloadUserInfo(OnDownloadUser foCallback){
+    public void DownloadUserData(OnDownload foCallback){;
 
-        foCallback.OnLoad();
+        CompletableFuture<Boolean> poUserInfo = poDashboard.DownloadUserInfo();
+        CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
 
-        //download if empty user info
-        poDashboard.DownloadUserInfo().thenAccept(new Consumer<Boolean>() {
+        CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
             @Override
-            public void accept(Boolean aBoolean) {
+            public void run() {
 
-                if (!aBoolean){
-                    foCallback.OnError(poDashboard.getMessage());
-                    return;
+                try{
+
+                    foCallback.OnLoad();
+
+                    if (!poUserInfo.get()){
+                        foCallback.OnError("Download User: " + poDashboard.getMessage());
+                        return;
+                    }else if (!poLodgeInfo.get()){
+                        foCallback.OnError("Download Lodge: " + poDashboard.getMessage());
+                        return;
+                    }
+                    foCallback.OnSuccess();
+                }catch (Exception e){
+                    foCallback.OnError(e.getMessage());
                 }
-                foCallback.OnSuccess();
             }
         });
     }

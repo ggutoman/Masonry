@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.LiveData
 import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,8 @@ import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
+import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
@@ -31,9 +34,16 @@ class UserAccount(instance : Context) {
     val httpInstance : KTORepository = KTORepository(instance)
     val encryptObj : HashRepository = HashRepository()
     val dateObj : DateRepository = DateRepository()
-    val poDBUser : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
+    val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
+    val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
 
     fun GetMessage() : String = message
+
+    fun GetSession() : AppConfig = session
+
+    fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.GetUser()
+
+    fun GetEncryption() : HashRepository = encryptObj
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -88,7 +98,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                            message = errorData.GetError().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
@@ -170,7 +180,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                            message = errorData.GetError().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)
@@ -203,7 +213,8 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun UpdateCredentials(poUser : EUserInfo): CompletableFuture<Boolean> {
+    fun UpdateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
+
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -235,7 +246,7 @@ class UserAccount(instance : Context) {
                 }
 
                 httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_ACCOUNT.fsURL,
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_USER.fsURL,
                     loParams,
                     mapOf(
                         "access-token" to session.getokenID()
@@ -245,8 +256,34 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            poUser.dModified = dateObj.GetCurrentDateTime()
-                            poDBUser.SaveUserInfo(poUser)
+                            poMemberInfo.GetMemberInfoByUserID(
+                                TextFormatter()
+                                    .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
+                                    .get(1)
+                            ).let {
+
+                                if (it == null){
+
+                                    message = "Could not update. Membership information not found"
+                                    Handler(Looper.getMainLooper()).post {
+                                        future.complete(false)
+                                    }
+                                    return@launch
+                                }
+
+                                //update glp id, and lastname from member name
+                                it.sGLPIDNoX = poUser.sGLPIDNoX
+                                it.sMemberNm = TextFormatter()
+                                    .ReplaceText(it.sMemberNm,
+                                        ",",
+                                        0,
+                                        poUser.sLastName
+                                    )
+
+                                //update user info and member info on local data
+                                poMemberInfo.SaveMemberInfo(it)
+                                poUserInfo.SaveUserInfo(poUser)
+                            }
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(true)
@@ -256,7 +293,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                            message = errorData.GetError().message
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(false)

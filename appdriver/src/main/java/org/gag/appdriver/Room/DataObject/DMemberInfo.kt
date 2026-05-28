@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import org.gag.appdriver.Room.Entities.EMemberInfo
-import org.gag.appdriver.Room.Entities.EUserInfo
 
 @Dao
 interface DMemberInfo {
@@ -13,8 +12,13 @@ interface DMemberInfo {
     @Upsert(entity = EMemberInfo::class)
     fun SaveMemberInfo(poMember: EMemberInfo)
 
-    @Query("SELECT * FROM Member_Info")
-    fun GetMember(): LiveData<EMemberInfo>
+    @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= (" +
+            "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
+    fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<EMemberInfo>
+
+    @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= (" +
+            "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
+    fun GetMemberInfoByUserID(fsUserIDx : String): EMemberInfo
 
     @Query("DELETE FROM Member_Info")
     fun DeleteMember()

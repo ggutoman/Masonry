@@ -3,7 +3,6 @@ package com.gag.useraccount.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -81,18 +80,10 @@ public class Activity_Login extends AppCompatActivity {
                     public void onSuccess() {
                         poDialog.DismissDialog();
 
-                        if (mviewModel.GetSession().getokenID() == null || mviewModel.GetSession().getokenID().isEmpty()){
-                            Toast.makeText(Activity_Login.this, "Access token is not initialized", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        //return with result
-                        Intent returnIntent = new Intent();
-                        returnIntent.putExtra("has_login", mviewModel.GetSession().hasLoggedIn());
-                        returnIntent.putExtra("log_date", mviewModel.GetSession().getLogDate());
-                        returnIntent.putExtra("result_token", mviewModel.GetSession().getokenID());
-
-                        setResult(Activity_Login.RESULT_OK, returnIntent);
+                        Intent loIntent = new Intent();
+                        loIntent.putExtra("result_token", mviewModel.GetSession().getokenID());
+                        loIntent.putExtra("log_date", mviewModel.GetSession().getLogDate());
+                        setResult(Activity_Login.RESULT_OK, loIntent);
 
                         finish();
                     }

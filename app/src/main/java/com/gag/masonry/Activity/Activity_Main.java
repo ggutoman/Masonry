@@ -3,7 +3,7 @@ package com.gag.masonry.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -20,7 +20,7 @@ import com.gag.useraccount.Activity.Activity_Login;
 
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
-import org.gag.appdriver.Libraries.Preferences.AppConfig;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -72,7 +72,7 @@ public class Activity_Main extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult loIntent) {
 
-                    //this is to ensure that the token return from server is fully initialzed after successful login
+                    //this is logout receiver from dashboard
                     if (loIntent.getResultCode() == Activity.RESULT_OK) {
                         mviewModel.EndSession();
                         InitData();
@@ -118,7 +118,8 @@ public class Activity_Main extends AppCompatActivity {
 
                         if (eUserInfo == null){
 
-                            mviewModel.DownloadUserInfo(new VM_Main.OnDownloadUser() {
+                            //if user information empty
+                            mviewModel.DownloadUserData(new VM_Main.OnDownload() {
                                 @Override
                                 public void OnLoad() {
                                     poLoad.ShowDialog("Downloading user information");
@@ -144,6 +145,14 @@ public class Activity_Main extends AppCompatActivity {
                                     });
                                 }
                             });
+                            return;
+                        }
+
+                        if (mviewModel.GetLodgeInfo() == null){
+                            Toast.makeText(Activity_Main.this, "Lodge information not found", Toast.LENGTH_LONG).show();
+
+//                            mviewModel.EndSession();
+//                            InitData();
                             return;
                         }
 
