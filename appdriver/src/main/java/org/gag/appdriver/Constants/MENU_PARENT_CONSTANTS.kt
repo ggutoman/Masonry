@@ -12,13 +12,6 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         0
     ),
 
-    MENU_HOME(
-        R.drawable.ic_home,
-        "Home",
-        "HME",
-        1
-    ),
-
     MENU_ACCOUNTS(
         R.drawable.rounded_account_circle_24,
         "Accounts",

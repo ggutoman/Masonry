@@ -1,28 +1,26 @@
 package org.gag.appdriver.Libraries.Preferences
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class AppConfig(instance : Context) {
 
     val sharedPref : SharedPreferences = instance.getSharedPreferences(
         "Masonry_Config",
-        0
+        MODE_PRIVATE
     )
-
-    val prefEditor : SharedPreferences.Editor = sharedPref.edit()
 
     val IS_INITIALIZED : String = "cInitialized"
     val IS_LOGIN : String = "cLoggedIn"
     val LOG_DATE : String = "sLogDate"
     val PRODUCT_ID : String = "sPrdctID"
-    val MEMBER_ID : String = "sMbrID"
     val DEVICE_ID : String = "sDvcID"
     val TOKEN_ID : String = "sTknID"
 
     fun isLogIn(fsVal : String){
-        prefEditor.putString(IS_LOGIN, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(IS_LOGIN, fsVal)}
     }
 
     fun hasLoggedIn() : Boolean{
@@ -30,8 +28,7 @@ class AppConfig(instance : Context) {
     }
 
     fun setLogDate(fsVal : String){
-        prefEditor.putString(LOG_DATE, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(LOG_DATE, fsVal) }
     }
 
     fun getLogDate() : String{
@@ -39,8 +36,7 @@ class AppConfig(instance : Context) {
     }
 
     fun isInitialize(fsVal : String){
-        prefEditor.putString(IS_INITIALIZED, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(IS_INITIALIZED, fsVal) }
     }
 
     fun hasInitialized() : Boolean{
@@ -48,8 +44,7 @@ class AppConfig(instance : Context) {
     }
 
     fun setProductID(fsVal : String){
-        prefEditor.putString(PRODUCT_ID, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(PRODUCT_ID, fsVal) }
     }
 
     fun getProductID() : String{
@@ -57,8 +52,7 @@ class AppConfig(instance : Context) {
     }
 
     fun setDeviceID(fsVal : String){
-        prefEditor.putString(DEVICE_ID, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(DEVICE_ID, fsVal)}
     }
 
     fun getDeviceID() : String{
@@ -66,8 +60,7 @@ class AppConfig(instance : Context) {
     }
 
     fun setTokenID(fsVal : String){
-        prefEditor.putString(TOKEN_ID, fsVal)
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(TOKEN_ID, fsVal) }
     }
 
     fun getokenID() : String{
@@ -75,9 +68,8 @@ class AppConfig(instance : Context) {
     }
 
     fun ClearAccountSession(){
-        prefEditor.putString(IS_LOGIN, "0")
-        prefEditor.putString(TOKEN_ID, "")
-        prefEditor.commit()
+        sharedPref.edit(commit = true) { putString(IS_LOGIN, "0") }
+        sharedPref.edit(commit = true) { putString(TOKEN_ID, "")}
     }
 
 }

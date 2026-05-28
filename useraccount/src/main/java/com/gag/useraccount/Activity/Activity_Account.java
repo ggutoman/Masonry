@@ -50,7 +50,7 @@ public class Activity_Account extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_sign_up);
+        setContentView(R.layout.activity_account);
 
         mviewModel = new ViewModelProvider(Activity_Account.this).get(VM_Account.class);
         poLoading = new LoadDialog(Activity_Account.this);
