@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.LiveData
 import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +17,11 @@ import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
+import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
@@ -29,8 +34,16 @@ class UserAccount(instance : Context) {
     val httpInstance : KTORepository = KTORepository(instance)
     val encryptObj : HashRepository = HashRepository()
     val dateObj : DateRepository = DateRepository()
+    val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
+    val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
 
     fun GetMessage() : String = message
+
+    fun GetSession() : AppConfig = session
+
+    fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.GetUser()
+
+    fun GetEncryption() : HashRepository = encryptObj
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -47,7 +60,7 @@ class UserAccount(instance : Context) {
 
             try {
                 val loParams = JSONObject().apply {
-                    put("sGLPIDNoX", fsID)
+                    put("sUserName", fsID)
                 }
 
                 val lsEncrPass: String = encryptObj.EncryptHex(fsPass)
@@ -62,18 +75,19 @@ class UserAccount(instance : Context) {
 
                 httpInstance.makeRequest(
                     API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_LOGIN_ACCOUNT.fsURL,
-                    loParams
+                    loParams,
+                    mapOf()
                 ).let { result ->
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
-                            session.isLogIn("1")
-                            session.setLogDate(dateObj.GetCurrentDate())
 
                             val resultData =
                                 Json.decodeFromString<DownloadLogin>(result.data.body())
 
                             val sTokenIDxx = resultData.GetPayload();
 
+                            session.isLogIn("1")
+                            session.setLogDate(dateObj.GetCurrentDate())
                             session.setTokenID(sTokenIDxx)
 
                             Handler(Looper.getMainLooper()).post {
@@ -151,11 +165,125 @@ class UserAccount(instance : Context) {
 
                 httpInstance.makeRequest(
                     API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ACCOUNT.fsURL,
-                    loParams
+                    loParams,
+                    mapOf()
                 ).let { result ->
 
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
+
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(true)
+                            }
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetError().message
+
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            Handler(Looper.getMainLooper()).post {
+                                future.complete(false)
+                            }
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                Handler(Looper.getMainLooper()).post {
+                    future.complete(false)
+                }
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun UpdateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            if (!httpInstance.checkDeviceConnection(loInstance)) {
+                message = "No internet connection"
+                Handler(Looper.getMainLooper()).post {
+                    future.complete(false)
+                }
+                return@launch
+            }
+
+            try {
+
+                val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
+                if (lsEncrPass.isEmpty()) {
+                    message = "Could not generate passkey"
+                    Handler(Looper.getMainLooper()).post {
+                        future.complete(false)
+                    }
+                    return@launch
+                }
+                poUser.sPassword = lsEncrPass
+
+                val loParams = JSONObject().apply {
+                    put("sPassword", poUser.sPassword)
+                    put("sGLPIDNoX", poUser.sGLPIDNoX)
+                    put("sLastName", poUser.sLastName)
+                    put("dBirthDte", poUser.dBirthDte)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_USER.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            poMemberInfo.GetMemberInfoByUserID(
+                                TextFormatter()
+                                    .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
+                                    .get(1)
+                            ).let {
+
+                                if (it == null){
+
+                                    message = "Could not update. Membership information not found"
+                                    Handler(Looper.getMainLooper()).post {
+                                        future.complete(false)
+                                    }
+                                    return@launch
+                                }
+
+                                //update glp id, and lastname from member name
+                                it.sGLPIDNoX = poUser.sGLPIDNoX
+                                it.sMemberNm = TextFormatter()
+                                    .ReplaceText(it.sMemberNm,
+                                        ",",
+                                        0,
+                                        poUser.sLastName
+                                    )
+
+                                //update user info and member info on local data
+                                poMemberInfo.SaveMemberInfo(it)
+                                poUserInfo.SaveUserInfo(poUser)
+                            }
 
                             Handler(Looper.getMainLooper()).post {
                                 future.complete(true)

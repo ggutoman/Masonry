@@ -56,15 +56,6 @@ class AppConfig(instance : Context) {
         return sharedPref.getString(PRODUCT_ID, "MSNRY_APP").toString()
     }
 
-    fun setMemberID(fsVal : String){
-        prefEditor.putString(MEMBER_ID, fsVal)
-        prefEditor.commit()
-    }
-
-    fun getMemberID() : String{
-        return sharedPref.getString(MEMBER_ID, "").toString()
-    }
-
     fun setDeviceID(fsVal : String){
         prefEditor.putString(DEVICE_ID, fsVal)
         prefEditor.commit()
@@ -85,7 +76,6 @@ class AppConfig(instance : Context) {
 
     fun ClearAccountSession(){
         prefEditor.putString(IS_LOGIN, "0")
-        prefEditor.putString(MEMBER_ID, "")
         prefEditor.putString(TOKEN_ID, "")
         prefEditor.commit()
     }

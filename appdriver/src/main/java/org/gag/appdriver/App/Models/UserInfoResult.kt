@@ -6,8 +6,8 @@ import org.gag.appdriver.Room.Entities.EUserInfo
 
 @Serializable
 data class UserInfoResult(
-    var userIinfo : EUserInfo,
-    var memberInfo : EMemberInfo
+    var user_info : EUserInfo,
+    var member_info : EMemberInfo
 ){
 
 }
