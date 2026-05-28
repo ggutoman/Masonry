@@ -60,7 +60,7 @@ public class Activity_Login extends AppCompatActivity {
             public void onClick(View view) {
                 startActivity(
                         new Intent(
-            Activity_Login.this, Activity_Account_Info.class
+            Activity_Login.this, Activity_Create_Member.class
                          ));
             }
         });
