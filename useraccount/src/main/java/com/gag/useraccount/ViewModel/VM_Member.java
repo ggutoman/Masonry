@@ -8,8 +8,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Accounts.UserAccount;
+import org.gag.appdriver.App.Dashboard.Dashboard;
 import org.gag.appdriver.Constants.MEMBER_STATUS;
+import org.gag.appdriver.Room.DataObject.DTownInfo;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.ETitle;
+import org.gag.appdriver.Room.Entities.ETownCity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,11 +23,17 @@ import java.util.List;
 public class VM_Member extends AndroidViewModel {
 
     private final MutableLiveData<List<String>> laSponsors;
+    private final MutableLiveData<String> lsTownSearch;
+    private final UserAccount poAccount;
+    private final Dashboard poDashboad;
 
     public VM_Member(@NonNull Application application) {
         super(application);
 
         laSponsors = new MutableLiveData<>();
+        lsTownSearch = new MutableLiveData<>();
+        poAccount = new UserAccount(application);
+        poDashboad = new Dashboard(application);
     }
 
     public void AddSponsor(String fsSponsor){
@@ -36,8 +47,28 @@ public class VM_Member extends AndroidViewModel {
         laSponsors.setValue(currentList);
     }
 
+    public void SearchTownProvince(String fsTown){
+        lsTownSearch.postValue(fsTown);
+    }
+
     public LiveData<List<String>> GetSponsorList(){
         return laSponsors;
+    }
+
+    public LiveData<String> TownSearch(){
+        return lsTownSearch;
+    }
+
+    public LiveData<List<ELodgeInfo>> GetLodgeList() {
+        return poAccount.GetLodges();
+    }
+
+    public LiveData<List<ETitle>> GetTitleList(){
+        return poAccount.GetTitleList();
+    }
+
+    public LiveData<List<DTownInfo.TownProvince>> GetTownList(String fsProvIDx){
+        return poDashboad.ObserveTownInfo(fsProvIDx);
     }
 
     public List<String> GetCivilStatus(){
@@ -61,6 +92,10 @@ public class VM_Member extends AndroidViewModel {
                 MEMBER_STATUS.URL_STATUS_SUSPENDED.getFsDescr()
         );
         return laAccount;
+    }
+
+    public String GenerateGLPID(){
+        return poAccount.GenerateGLPID();
     }
 
 }

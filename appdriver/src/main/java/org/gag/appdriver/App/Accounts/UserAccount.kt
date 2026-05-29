@@ -20,12 +20,17 @@ import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
+import kotlin.random.Random
 
 class UserAccount(instance : Context) {
 
@@ -38,6 +43,8 @@ class UserAccount(instance : Context) {
     val dateObj : DateRepository = DateRepository()
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
+    val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(instance).GetLodge()
+    val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
 
     fun GetMessage() : String = message
 
@@ -45,7 +52,18 @@ class UserAccount(instance : Context) {
 
     fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.GetUser()
 
+    fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
+
     fun GetEncryption() : HashRepository = encryptObj
+
+    fun GenerateGLPID() : String {
+
+        return (1..6)
+            .map { Random.nextInt(0, 10) } // digits 0–9
+            .joinToString("")
+    }
+
+    fun GetTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {

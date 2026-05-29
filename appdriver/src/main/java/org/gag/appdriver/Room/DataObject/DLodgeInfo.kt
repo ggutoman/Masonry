@@ -1,5 +1,6 @@
 package org.gag.appdriver.Room.DataObject
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -13,4 +14,7 @@ interface DLodgeInfo {
 
     @Query("SELECT * FROM Lodge_Info WHERE sLodgeIDx= :fsLodgeIDx")
     fun GetLodgeInfo(fsLodgeIDx : String): ELodgeInfo
+
+    @Query("SELECT * FROM Lodge_Info")
+    fun ObserveLodgeList() : LiveData<List<ELodgeInfo>>
 }
