@@ -7,9 +7,6 @@
             android:name=".Activity.Activity_Assign_Officer"
             android:exported="false"/>
         <activity
-            android:name=".Activity.Activity_Create_Member"
-            android:exported="false"/>
-        <activity
             android:name=".Activity.Activity_Account"
             android:exported="false"/>
         <activity

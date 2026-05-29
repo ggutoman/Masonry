@@ -3,6 +3,7 @@ package org.gag.appdriver.Libraries.Preferences
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.provider.Settings.Global.putString
 import androidx.core.content.edit
 
 class AppConfig(instance : Context) {
@@ -68,8 +69,9 @@ class AppConfig(instance : Context) {
     }
 
     fun ClearAccountSession(){
-        sharedPref.edit(commit = true) { putString(IS_LOGIN, "0") }
-        sharedPref.edit(commit = true) { putString(TOKEN_ID, "")}
+        sharedPref.edit(commit = true) { putString(IS_LOGIN, "0")}
+        sharedPref.edit(commit = true) { putString(LOG_DATE, "1900-00-00 00:00:00") }
+        sharedPref.edit(commit = true) { putString(TOKEN_ID, "") }
     }
 
 }

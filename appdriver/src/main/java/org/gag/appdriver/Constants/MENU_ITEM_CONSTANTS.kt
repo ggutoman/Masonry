@@ -10,19 +10,11 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         0
     ),
 
-    MENU_ITEM_ASSIGN_ROLE(
-    "Assign Role",
+    MENU_ITEM_CREATE_MEMBER(
+    "Create Member",
     "ACC002",
     "ACC",
         1,
         1
-    ),
-
-    MENU_ITEM_LOD_ACCOUNT(
-    "Logout",
-    "ACC003",
-    "ACC",
-    1,
-        0
-    ),
+    )
 }

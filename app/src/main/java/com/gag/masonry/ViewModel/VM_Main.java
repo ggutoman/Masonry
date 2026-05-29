@@ -13,6 +13,7 @@ import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
+import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -36,12 +37,6 @@ public class VM_Main extends AndroidViewModel {
         void hasLoggedIn();
     }
 
-    public interface OnDownload {
-        void OnLoad();
-        void OnSuccess();
-        void OnError(String fsMEssage);
-    }
-
     public VM_Main(@NonNull Application application) {
         super(application);
 
@@ -55,16 +50,12 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.getPoDBUser().GetUser();
     }
 
-    public LiveData<EMemberInfo> GetMemberInfo(){
+    public LiveData<DMemberInfo.MemberDashboardInfo> GetMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
     }
 
     public ELodgeInfo GetLodgeInfo(){
         return poDashboard.GetLodgeInfo();
-    }
-
-    public AppConfig GetSession(){
-        return poConfig;
     }
 
     public void InitData(InitData foCallback){
@@ -85,40 +76,46 @@ public class VM_Main extends AndroidViewModel {
         } else {
 
             if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
-                EndSession();
                 foCallback.isSessionEnded();
                 return;
             }
-            foCallback.hasLoggedIn();
-        }
-    }
 
-    public void DownloadUserData(OnDownload foCallback){;
+            CompletableFuture<Boolean> poUserInfo = poDashboard.DownloadUserInfo();
+            CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
+            CompletableFuture<Boolean> poPosition = poDashboard.DownloadPositionInfo();
+            CompletableFuture<Boolean> poTitle = poDashboard.DownloadTitleInfo();
 
-        CompletableFuture<Boolean> poUserInfo = poDashboard.DownloadUserInfo();
-        CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
+            CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
+                @Override
+                public void run() {
 
-        CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
-            @Override
-            public void run() {
+                    try{
 
-                try{
-
-                    foCallback.OnLoad();
-
-                    if (!poUserInfo.get()){
-                        foCallback.OnError("Download User: " + poDashboard.getMessage());
-                        return;
-                    }else if (!poLodgeInfo.get()){
-                        foCallback.OnError("Download Lodge: " + poDashboard.getMessage());
-                        return;
+                        if (!poUserInfo.get()){
+                            Log.d("Download User:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }else if (!poLodgeInfo.get()){
+                            Log.d("Download Lodge:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }else if (!poPosition.get()){
+                            Log.d("Download Position:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }else if (!poTitle.get()){
+                            Log.d("Download Title:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }
+                        foCallback.hasLoggedIn();
+                    }catch (Exception e){
+                        Log.d("Download Information:", poDashboard.getMessage());
+                        foCallback.isLoginNeeded();
                     }
-                    foCallback.OnSuccess();
-                }catch (Exception e){
-                    foCallback.OnError(e.getMessage());
                 }
-            }
-        });
+            });
+        }
     }
 
     public void EndSession(){

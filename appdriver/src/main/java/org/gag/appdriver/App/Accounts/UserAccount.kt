@@ -9,7 +9,9 @@ import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadLogin
 import org.gag.appdriver.Constants.API_CONSTANTS
@@ -48,111 +50,89 @@ class UserAccount(instance : Context) {
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
+
         CoroutineScope(Dispatchers.IO).launch {
-
-            if (!httpInstance.checkDeviceConnection(loInstance)) {
-                message = "No internet connection"
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
-                return@launch
-            }
-
-            try {
-                val loParams = JSONObject().apply {
-                    put("sUserName", fsID)
-                }
-
-                val lsEncrPass: String = encryptObj.EncryptHex(fsPass)
-                if (lsEncrPass.isEmpty()) {
-                    message = "Could not generate passkey"
-                    Handler(Looper.getMainLooper()).post {
-                        future.complete(false)
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+                    val loParams = JSONObject().apply {
+                        put("sUserName", fsID)
                     }
-                    return@launch
-                }
-                loParams.put("sPassword", lsEncrPass)
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_LOGIN_ACCOUNT.fsURL,
-                    loParams,
-                    mapOf()
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    val lsEncrPass = encryptObj.EncryptHex(fsPass)
+                    if (lsEncrPass.isEmpty()) {
+                        message = "Could not generate passkey"
+                        false
+                    } else {
+                        loParams.put("sPassword", lsEncrPass)
 
-                            val resultData =
-                                Json.decodeFromString<DownloadLogin>(result.data.body())
+                        when (val response = httpInstance.makeRequest(
+                            API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_LOGIN_ACCOUNT.fsURL,
+                            loParams,
+                            mapOf()
+                        )) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                val resultData = Json.decodeFromString<DownloadLogin>(response.data.body())
+                                val sTokenIDxx = resultData.GetPayload()
 
-                            val sTokenIDxx = resultData.GetPayload();
+                                session.isLogIn("1")
+                                session.setLogDate(dateObj.GetCurrentDate())
+                                session.setTokenID(sTokenIDxx)
 
-                            session.isLogIn("1")
-                            session.setLogDate(dateObj.GetCurrentDate())
-                            session.setTokenID(sTokenIDxx)
-
-                            Handler(Looper.getMainLooper()).post {
-
-                                future.complete(true)
+                                true
                             }
-                        }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData = Json.decodeFromString<DownloadError>(response.data.body())
+                                message = errorData.GetPayload().message
+                                false
                             }
-                        }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message = response.exception.toString()
+                                false
                             }
-                        }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
                             }
                         }
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
+                message = ex.message ?: "Unknown error"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
             }
         }
+
         return future
     }
 
     @SuppressLint("MissingPermission")
     fun CreateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
+
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
-            if (!httpInstance.checkDeviceConnection(loInstance)) {
-                message = "No internet connection"
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
-                return@launch
-            }
+            val result =  try {
 
-            try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
 
                 val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
                 if (lsEncrPass.isEmpty()) {
                     message = "Could not generate passkey"
-                    Handler(Looper.getMainLooper()).post {
-                        future.complete(false)
-                    }
-                    return@launch
+                    false
                 }
                 poUser.sPassword = lsEncrPass
 
@@ -172,10 +152,7 @@ class UserAccount(instance : Context) {
 
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
-
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(true)
-                            }
+                            true
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -183,34 +160,33 @@ class UserAccount(instance : Context) {
                                 Json.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
                             message = result.exception.toString()
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
 
                         else -> {
                             message = "Invalid transaction. Could not proceed"
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
                     }
                 }
             } catch (ex: Exception) {
                 message = ex.message.toString()
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
             }
         }
+
         return future
+
     }
 
     @SuppressLint("MissingPermission")
@@ -219,23 +195,17 @@ class UserAccount(instance : Context) {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
-            if (!httpInstance.checkDeviceConnection(loInstance)) {
-                message = "No internet connection"
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
-                return@launch
-            }
+            val result = try {
 
-            try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
 
                 val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
                 if (lsEncrPass.isEmpty()) {
                     message = "Could not generate passkey"
-                    Handler(Looper.getMainLooper()).post {
-                        future.complete(false)
-                    }
-                    return@launch
+                    false
                 }
                 poUser.sPassword = lsEncrPass
 
@@ -266,10 +236,7 @@ class UserAccount(instance : Context) {
                                 if (it == null){
 
                                     message = "Could not update. Membership information not found"
-                                    Handler(Looper.getMainLooper()).post {
-                                        future.complete(false)
-                                    }
-                                    return@launch
+                                    false
                                 }
 
                                 //update glp id, and lastname from member name
@@ -285,42 +252,35 @@ class UserAccount(instance : Context) {
                                 poMemberInfo.SaveMemberInfo(it)
                                 poUserInfo.SaveUserInfo(poUser)
                             }
-
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(true)
-                            }
+                            true
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
                                 Json.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
-
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
                             message = result.exception.toString()
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
 
                         else -> {
                             message = "Invalid transaction. Could not proceed"
-                            Handler(Looper.getMainLooper()).post {
-                                future.complete(false)
-                            }
+                            false
                         }
                     }
                 }
             } catch (ex: Exception) {
                 message = ex.message.toString()
-                Handler(Looper.getMainLooper()).post {
-                    future.complete(false)
-                }
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
             }
         }
         return future

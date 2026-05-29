@@ -90,6 +90,7 @@ public class Activity_Login extends AppCompatActivity {
                         }
 
                         Intent loIntent = new Intent();
+                        loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         setResult(Activity_Login.RESULT_OK, loIntent);
                         finish();
                     }
