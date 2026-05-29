@@ -18,5 +18,13 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         "ACC",
         1,
         0
+    ),
+
+    MENU_ITEM_LOD_ACCOUNT(
+        R.drawable.baseline_logout,
+        "Logout",
+        "LGT",
+        1,
+        0
     )
 }

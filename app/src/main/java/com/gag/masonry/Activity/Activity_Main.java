@@ -58,7 +58,7 @@ public class Activity_Main extends AppCompatActivity {
 
                     //this is logout receiver from dashboard
                     if (loIntent.getResultCode() == Activity.RESULT_OK) {
-                        InitData();
+                        mviewModel.EndSession();
                     }
                 }
             });
@@ -85,7 +85,7 @@ public class Activity_Main extends AppCompatActivity {
         //initialze transaction
         mviewModel.InitData(new VM_Main.InitData() {
             @Override
-            public void isLoading() {}
+            public void isLoading() { poLoad.ShowDialog("Initializing data. Please wait . . ."); }
 
             @Override
             public void hasLoggedIn() {
@@ -94,46 +94,21 @@ public class Activity_Main extends AppCompatActivity {
                     @Override
                     public void onChanged(EUserInfo eUserInfo) {
 
-                        if (eUserInfo == null){
+                        poLoad.DismissDialog();
 
-                            //if user information empty
-                            mviewModel.DownloadUserData(new VM_Main.OnDownload() {
-                                @Override
-                                public void OnLoad() {
-                                    poLoad.ShowDialog("Downloading user information");
-                                }
+                        if (mviewModel.GetUserInfo() == null){
+                            Toast.makeText(Activity_Main.this, "User information not found", Toast.LENGTH_LONG).show();
 
-                                @Override
-                                public void OnSuccess() {
-                                    poLoad.DismissDialog();
-                                }
-
-                                @Override
-                                public void OnError(String fsMEssage) {
-                                    poLoad.DismissDialog();
-
-                                    poMessage.ShowMessage(1, fsMEssage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-
-                                            mviewModel.EndSession();
-                                            InitData();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                    });
-                                }
-                            });
+                            Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
+                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            poLogin.launch(loIntent);
                             return;
-                        }
-
-                        if (mviewModel.GetLodgeInfo() == null){
+                        }else if (mviewModel.GetLodgeInfo() == null){
                             Toast.makeText(Activity_Main.this, "Lodge information not found", Toast.LENGTH_LONG).show();
 
-                            mviewModel.EndSession();
-                            InitData();
+                            Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
+                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            poLogin.launch(loIntent);
                             return;
                         }
 
@@ -154,7 +129,10 @@ public class Activity_Main extends AppCompatActivity {
                             loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
                         }
 
+                        Log.d("Logged In", "Logged again");
+
                         Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                        loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         loIntent.putExtra("parent_key", laParentList);
                         loIntent.putExtra("child_items", loChildMap);
 
@@ -168,6 +146,7 @@ public class Activity_Main extends AppCompatActivity {
                 poLoad.DismissDialog();
 
                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
+                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 poLogin.launch(loIntent);
             }
 
@@ -186,6 +165,7 @@ public class Activity_Main extends AppCompatActivity {
                                 poDialog.dismiss();
 
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
+                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(loIntent);
                             }
 
