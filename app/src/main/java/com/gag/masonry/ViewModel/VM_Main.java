@@ -84,6 +84,8 @@ public class VM_Main extends AndroidViewModel {
             CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
             CompletableFuture<Boolean> poPosition = poDashboard.DownloadPositionInfo();
             CompletableFuture<Boolean> poTitle = poDashboard.DownloadTitleInfo();
+            CompletableFuture<Boolean> poProvince = poDashboard.DownloadProvinceInfo();
+            CompletableFuture<Boolean> poTown = poDashboard.DownloadTownInfo();
 
             CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
                 @Override
@@ -105,6 +107,14 @@ public class VM_Main extends AndroidViewModel {
                             return;
                         }else if (!poTitle.get()){
                             Log.d("Download Title:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }else if (!poProvince.get()){
+                            Log.d("Download Province:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
+                        }else if (!poTown.get()){
+                            Log.d("Download Town:", poDashboard.getMessage());
                             foCallback.isLoginNeeded();
                             return;
                         }

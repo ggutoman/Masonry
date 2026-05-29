@@ -3,12 +3,11 @@ package org.gag.appdriver.Room.Entities
 import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
-@Entity(tableName = "Position_Info", primaryKeys = ["sPositnCd"])
+@Entity(tableName = "Title_Info", primaryKeys = ["sTitleIDx"])
 @Serializable
-data class EPosition(
-    var sPositnCd: String,
-    var sPositnDs: String,
-    var nLineOrdr: String,
+data class ETitle(
+    var sTitleIDx: String,
+    var sTitleDsc: String,
     var cRecdStat: String,
     var sModified: String,
     var dModified: String,

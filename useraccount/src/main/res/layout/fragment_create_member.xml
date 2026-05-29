@@ -33,11 +33,11 @@
                     style="@style/TextInputStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Lodge">
+                    android:hint="GLPID">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/TextInputStyle.Edittext"
-                        android:id="@+id/tie_lodge"
+                        android:id="@+id/tie_glpid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:enabled="false"/>
@@ -48,11 +48,11 @@
                     style="@style/CustomDropDownTilStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Select Account">
+                    android:hint="Lodge">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         style="@style/DropdownStyleTheme"
-                        android:id="@+id/auto_account"
+                        android:id="@+id/auto_lodge"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 

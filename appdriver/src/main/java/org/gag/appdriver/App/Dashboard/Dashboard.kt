@@ -14,7 +14,9 @@ import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
 import org.gag.appdriver.App.DataModels.DownloadPositionInfo
+import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
 import org.gag.appdriver.App.DataModels.DownloadTitleInfo
+import org.gag.appdriver.App.DataModels.DownloadTownInfo
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS
@@ -26,10 +28,13 @@ import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DPositionInfo
+import org.gag.appdriver.Room.DataObject.DProvinceInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
+import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -47,6 +52,8 @@ class Dashboard(loInstance : Context) {
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
     val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
+    val poProvinceInfo : DProvinceInfo = ML_DBF.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
+    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
 
     fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo>{
 
@@ -55,6 +62,10 @@ class Dashboard(loInstance : Context) {
                 .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
                 .getOrNull(1) ?: ""
         )
+    }
+
+    fun ObserveTownInfo(fsProvIDx : String) : LiveData<List<DTownInfo.TownProvince>>{
+        return poTownInfo.ObserveTownList(fsProvIDx)
     }
 
     fun GetLodgeInfo() : ELodgeInfo{
@@ -272,7 +283,7 @@ class Dashboard(loInstance : Context) {
                 }
 
                 httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_POSITION.fsURL,
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_TITLE.fsURL,
                     JSONObject(),
                     mapOf(
                         "access-token" to session.getokenID()
@@ -286,6 +297,134 @@ class Dashboard(loInstance : Context) {
 
                             resultData.GetPayload().forEach { loItem ->
                                 poTitleInfo.SaveTitle(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadProvinceInfo(): CompletableFuture<Boolean>{
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_PROVINCE.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadProvinceInfo>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poProvinceInfo.SaveProvince(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadTownInfo(): CompletableFuture<Boolean>{
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_TOWN.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadTownInfo>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poTownInfo.SaveTownInfo(loItem)
                             }
 
                             true

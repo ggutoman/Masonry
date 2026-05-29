@@ -1,5 +1,6 @@
 package org.gag.appdriver.Room.DataObject
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -13,6 +14,6 @@ interface DTitleInfo {
     @Upsert(ETitle::class)
     fun SaveTitle(title : ETitle)
 
-    @Query("SELECT * FROM Title_Info WHERE sTitleIDx= :fsTitlex")
-    fun GetTitle(fsTitlex : String): ETitle
+    @Query("SELECT * FROM Title_Info")
+    fun ObserveTitleList() : LiveData<List<ETitle>>
 }

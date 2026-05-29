@@ -1,13 +1,18 @@
 package com.gag.useraccount.Fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +28,9 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.gag.appdriver.Room.DataObject.DTownInfo;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.ETitle;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -40,14 +48,14 @@ public class Fragment_Create_Member extends Fragment {
             layout_personal;
 
     private MaterialAutoCompleteTextView
-            auto_account,
             auto_status,
             auto_title,
             auto_sponosr,
             auto_town,
             auto_contact,
             auto_email,
-            auto_civil;
+            auto_civil,
+            auto_lodge;
 
     private TextInputLayout til_sponsor,
             til_address,
@@ -68,9 +76,11 @@ public class Fragment_Create_Member extends Fragment {
             tie_firstname,
             tie_middlename,
             tie_suffix,
-            tie_lodge;
+            tie_glpid;
 
-    private VM_Member mViewmodel;
+    private LodgeAdapter LodgeAdapter;
+    private TitleAdapter TitleAdapter;
+    private TownCityAdapter TownProvAdapter;
 
     @Nullable
     @Override
@@ -99,8 +109,8 @@ public class Fragment_Create_Member extends Fragment {
         layout_member = view.findViewById(R.id.layout_member);
         layout_personal = view.findViewById(R.id.layout_personal);
 
-        tie_lodge = view.findViewById(R.id.tie_lodge);
-        auto_account = view.findViewById(R.id.auto_account);
+        auto_lodge = view.findViewById(R.id.auto_lodge);
+        tie_glpid = view.findViewById(R.id.tie_glpid);
         auto_status = view.findViewById(R.id.auto_status);
         auto_title = view.findViewById(R.id.auto_title);
         auto_sponosr = view.findViewById(R.id.auto_sponosr);
@@ -128,25 +138,13 @@ public class Fragment_Create_Member extends Fragment {
         tie_firstname = view.findViewById(R.id.tie_firstname);
         tie_middlename = view.findViewById(R.id.tie_middlename);
         tie_suffix = view.findViewById(R.id.tie_suffix);
+        tie_glpid = view.findViewById(R.id.tie_glpid);
 
         btn_create.setText("Create Member");
+        tie_glpid.setText(mviewModel.GenerateGLPID());
     }
 
     private void initDataReceiver() {
-
-        auto_status.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mviewModel.GetAccountStatus()
-                ));
-
-        auto_civil.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mviewModel.GetCivilStatus()
-                ));
 
         mviewModel.GetSponsorList().observe(requireActivity(), new Observer<List<String>>() {
             @Override
@@ -169,6 +167,67 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
+        mviewModel.GetLodgeList().observe(requireActivity(), new Observer<List<ELodgeInfo>>() {
+            @Override
+            public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+
+                LodgeAdapter = new LodgeAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        eLodgeInfos);
+
+                auto_lodge.setAdapter(LodgeAdapter);
+            }
+        });
+
+        mviewModel.GetTitleList().observe(requireActivity(), new Observer<List<ETitle>>() {
+            @Override
+            public void onChanged(List<ETitle> eTitles) {
+
+                TitleAdapter = new TitleAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        eTitles
+                );
+
+                auto_title.setAdapter(TitleAdapter);
+            }
+        });
+
+        mviewModel.TownSearch().observe(requireActivity(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+                mviewModel.GetTownList(s).observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
+                    @Override
+                    public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
+
+                        TownProvAdapter = new TownCityAdapter(
+                                requireActivity(),
+                                android.R.layout.simple_spinner_dropdown_item,
+                                townProvinces
+                        );
+
+                        auto_town.setAdapter(TownProvAdapter);
+
+                    }
+                });
+            }
+        });
+
+        auto_status.setAdapter(
+                new ArrayAdapter<>(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        mviewModel.GetAccountStatus()
+                ));
+
+        auto_civil.setAdapter(
+                new ArrayAdapter<>(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        mviewModel.GetCivilStatus()
+                ));
     }
 
     private void initListeners() {
@@ -192,21 +251,64 @@ public class Fragment_Create_Member extends Fragment {
                 auto_sponosr.setText("");
             }
         });
+
+        auto_lodge.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                auto_lodge.setText(((ELodgeInfo) adapterView.getItemAtPosition(i)).getSLodgeNme(), false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        auto_title.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                auto_title.setText(((ETitle) adapterView.getItemAtPosition(i)).getSTitleDsc(), false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        auto_town.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mviewModel.SearchTownProvince(charSequence.toString());
+            }
+        });
+
+        auto_town.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                auto_town.setText(((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsTownProvNme(), false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
     }
 
     private boolean isDataValid() {
 
-        if (TextUtils.isEmpty(tie_lodge.getText().toString())) {
+        if (TextUtils.isEmpty(auto_lodge.getText().toString())) {
 
-            tie_lodge.setError("Lodge is required");
-            tie_lodge.requestFocus();
+            auto_lodge.setError("Lodge is required");
+            auto_lodge.requestFocus();
             return false;
         }
 
-        if (TextUtils.isEmpty(auto_account.getText().toString())) {
+        if (TextUtils.isEmpty(tie_glpid.getText().toString())) {
 
-            auto_account.setError("Account type is required");
-            auto_account.requestFocus();
+            tie_glpid.setError("Account type is required");
+            tie_glpid.requestFocus();
             return false;
         }
 
@@ -246,6 +348,96 @@ public class Fragment_Create_Member extends Fragment {
         }
 
         return true;
+    }
+
+    public static class LodgeAdapter extends ArrayAdapter<ELodgeInfo>{
+
+        private final Context loContext;
+        private final List<ELodgeInfo> lodges;
+
+        public LodgeAdapter(@NonNull Context context, int resource, @NonNull List<ELodgeInfo> objects) {
+            super(context, resource, objects);
+
+            loContext = context;
+            lodges = objects;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = LayoutInflater.from(loContext);
+                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            }
+
+            TextView textView = view.findViewById(android.R.id.text1);
+            textView.setText(lodges.get(position).getSLodgeNme());
+
+            return view;
+
+        }
+    }
+
+    public static class TitleAdapter extends ArrayAdapter<ETitle>{
+
+        private final Context loContext;
+        private final List<ETitle> titles;
+
+        public TitleAdapter(@NonNull Context context, int resource, @NonNull List<ETitle> objects) {
+            super(context, resource, objects);
+
+            loContext = context;
+            titles = objects;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = LayoutInflater.from(loContext);
+                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            }
+
+            TextView textView = view.findViewById(android.R.id.text1);
+            textView.setText(titles.get(position).getSTitleDsc());
+
+            return view;
+
+        }
+    }
+
+    public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince>{
+
+        private final Context loContext;
+        private final List<DTownInfo.TownProvince> towncity;
+
+        public TownCityAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
+            super(context, resource, objects);
+
+            loContext = context;
+            towncity = objects;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = LayoutInflater.from(loContext);
+                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            }
+
+            TextView textView = view.findViewById(android.R.id.text1);
+            textView.setText(towncity.get(position).getPsTownProvNme());
+
+            return view;
+
+        }
     }
 
 }
