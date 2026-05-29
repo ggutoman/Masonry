@@ -5,150 +5,62 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Accounts.UserAccount;
-import org.gag.appdriver.App.Member.Member;
-import org.gag.appdriver.Repository.RLodge;
-import org.gag.appdriver.Repository.RTitle;
-import org.gag.appdriver.Room.Entities.ELodge;
-import org.gag.appdriver.Room.Entities.EMemberAddress;
-import org.gag.appdriver.Room.Entities.EMemberContact;
-import org.gag.appdriver.Room.Entities.EMemberEmail;
+import org.gag.appdriver.Constants.MEMBER_STATUS;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Room.Entities.EMemberMaster;
-import org.gag.appdriver.Room.Entities.ETitle;
-import org.gag.appdriver.Room.Entities.EUserInfo;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class VM_Member extends AndroidViewModel {
 
-    private final Member poMember;
-    private final RTitle poTitle;
-    private final RLodge poLodge;
-    public LiveData<List<ETitle>> GetTitles(){
-        return poTitle.GetTitles();
-    }
-    public LiveData<List<ELodge>> GetLodges(){
-        return poLodge.GetLodges();
-    }
-
-    public interface OnLogin{
-        void onLoad();
-        void onSuccess();
-        void onError(String fsError);
-    }
+    private final MutableLiveData<List<String>> laSponsors;
 
     public VM_Member(@NonNull Application application) {
         super(application);
 
-        poMember = new Member(application);
-        poTitle = new RTitle(application);
-        poLodge = new RLodge(application);
+        laSponsors = new MutableLiveData<>();
     }
 
-    public void CreateMember(
-            EMemberMaster poMemberMaster,
-            List<EMemberAddress> poMemberAddress,
-            List<EMemberContact> poMemberContact,
-            List<EMemberEmail> poMemberEmail,
-            OnLogin foCallback) {
+    public void AddSponsor(String fsSponsor){
+        List<String> currentList = laSponsors.getValue();
 
-        foCallback.onLoad();
-
-        /**
-         * VALIDATIONS
-         */
-        if (poMemberMaster == null) {
-
-            foCallback.onError("Member information is not initialized");
-            return;
+        if (currentList == null) {
+            currentList = new ArrayList<>();
         }
+        currentList.add(fsSponsor);
 
-//        if (poMemberMaster.getSMemberID() == null ||
-//                poMemberMaster.getSMemberID().trim().isEmpty()) {
-//
-//            foCallback.onError("Member ID is not initialized");
-//            return;
-//        }
+        laSponsors.setValue(currentList);
+    }
 
-        if (poMemberMaster.getSLastName() == null ||
-                poMemberMaster.getSLastName().trim().isEmpty()) {
+    public LiveData<List<String>> GetSponsorList(){
+        return laSponsors;
+    }
 
-            foCallback.onError("Lastname is not initialized");
-            return;
-        }
+    public List<String> GetCivilStatus(){
 
-        if (poMemberMaster.getSFrstName() == null ||
-                poMemberMaster.getSFrstName().trim().isEmpty()) {
+        List<String> laCivil = new ArrayList<>();
+        Collections.addAll(laCivil,
+                MEMBER_STATUS.URL_STATUS_SINGLE.getFsDescr(),
+                MEMBER_STATUS.URL_STATUS_MARRIED.getFsDescr(),
+                MEMBER_STATUS.URL_STATUS_WIDOWED.getFsDescr(),
+                MEMBER_STATUS.URL_STATUS_SEPARATED.getFsDescr()
+        );
+        return laCivil;
+    }
 
-            foCallback.onError("Firstname is not initialized");
-            return;
-        }
+    public List<String> GetAccountStatus(){
 
-//        if (poMemberMaster.getDBirthDte() == null ||
-//                poMemberMaster.getDBirthDte().trim().isEmpty()) {
-//
-//            foCallback.onError("Birthdate is not initialized");
-//            return;
-//        }
-
-        /**
-         * ADDRESS VALIDATION
-         */
-        if (poMemberAddress == null || poMemberAddress.isEmpty()) {
-
-            foCallback.onError("Member address is not initialized");
-            return;
-        }
-
-        /**
-         * CONTACT VALIDATION
-         */
-        if (poMemberContact == null || poMemberContact.isEmpty()) {
-
-            foCallback.onError("Member contact is not initialized");
-            return;
-        }
-
-        /**
-         * EMAIL VALIDATION
-         */
-        if (poMemberEmail == null || poMemberEmail.isEmpty()) {
-
-            foCallback.onError("Member email is not initialized");
-            return;
-        }
-
-        /**
-         * CREATE MEMBER
-         */
-        poMember.CreateMember(
-                poMemberMaster,
-                poMemberAddress,
-                poMemberContact,
-                poMemberEmail
-        ).thenAccept(aBoolean -> {
-
-            if (aBoolean) {
-
-                foCallback.onSuccess();
-
-            } else {
-
-                foCallback.onError(poMember.GetMessage());
-            }
-
-        }).exceptionally(throwable -> {
-
-            foCallback.onError(
-                    throwable.getMessage() != null
-                            ? throwable.getMessage()
-                            : "Unable to process request"
-            );
-
-            return null;
-        });
+        List<String> laAccount = new ArrayList<>();
+        Collections.addAll(laAccount,
+                MEMBER_STATUS.URL_STATUS_INACTIVE.getFsDescr(),
+                MEMBER_STATUS.URL_STATUS_ACTIVE.getFsDescr(),
+                MEMBER_STATUS.URL_STATUS_SUSPENDED.getFsDescr()
+        );
+        return laAccount;
     }
 
 }

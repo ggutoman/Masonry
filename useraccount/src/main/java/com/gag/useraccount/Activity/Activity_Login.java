@@ -3,6 +3,7 @@ package com.gag.useraccount.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,7 +27,7 @@ public class Activity_Login extends AppCompatActivity {
 
     private MaterialButton btn_login;
     private MaterialTextView mtv_signup;
-    private TextInputEditText tie_password, tie_memberid;
+    private TextInputEditText tie_password, tie_username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class Activity_Login extends AppCompatActivity {
 
     private void InitWidgets(){
         btn_login = findViewById(R.id.btn_login);
-        tie_memberid = findViewById(R.id.tie_memberid);
+        tie_username = findViewById(R.id.tie_username);
         tie_password = findViewById(R.id.tie_password);
         mtv_signup = findViewById(R.id.mtv_signup);
     }
@@ -60,7 +61,7 @@ public class Activity_Login extends AppCompatActivity {
             public void onClick(View view) {
                 startActivity(
                         new Intent(
-            Activity_Login.this, Activity_Create_Member.class
+            Activity_Login.this, Activity_Account.class
                          ));
             }
         });
@@ -69,7 +70,7 @@ public class Activity_Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                mviewModel.LoginUser(tie_memberid.getText().toString(), tie_password.getText().toString(), new VM_Account.OnLogin() {
+                mviewModel.LoginUser(tie_username.getText().toString(), tie_password.getText().toString(), new VM_Account.OnSubmit() {
 
                     @Override
                     public void onLoad() {
@@ -79,6 +80,18 @@ public class Activity_Login extends AppCompatActivity {
                     @Override
                     public void onSuccess() {
                         poDialog.DismissDialog();
+
+                        if (mviewModel.GetSession().getokenID() == null || mviewModel.GetSession().getokenID().isEmpty()){
+                            Toast.makeText(Activity_Login.this, "Could not get valid token. Please try again.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }else if (mviewModel.GetSession().getLogDate() == null || mviewModel.GetSession().getLogDate().isEmpty()){
+                            Toast.makeText(Activity_Login.this, "Could not initialize log date", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        Intent loIntent = new Intent();
+                        loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        setResult(Activity_Login.RESULT_OK, loIntent);
                         finish();
                     }
 

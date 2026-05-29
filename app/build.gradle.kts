@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.room.runtime)
     implementation(libs.material)
     implementation(libs.androidx.room.runtime)
     testImplementation(libs.junit)

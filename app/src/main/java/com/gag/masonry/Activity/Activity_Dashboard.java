@@ -1,18 +1,31 @@
 package com.gag.masonry.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.gag.masonry.Adapter.Adapter_Drawer;
+import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.R;
+import com.gag.masonry.ViewModel.VM_Main;
+import com.gag.useraccount.Activity.Activity_Account;
+import com.gag.useraccount.Fragments.Fragment_Create_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -30,7 +43,6 @@ public class Activity_Dashboard extends AppCompatActivity {
     private Message_Dialog poMessage;
 
     private DrawerLayout main_drawer;
-    private FrameLayout layout_container;
     private MaterialToolbar toolbar;
     private ExpandableListView list_menus;
 
@@ -41,6 +53,7 @@ public class Activity_Dashboard extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         poMessage = new Message_Dialog(this);
+
         poMessage.InitDialog();
 
         toolbar = findViewById(R.id.toolbar);
@@ -63,6 +76,7 @@ public class Activity_Dashboard extends AppCompatActivity {
 
         InitAdapter();
         InitListener();
+        InitView("HME"); //default to home
 
     }
 
@@ -86,9 +100,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loChildMap);
 
         list_menus.setAdapter(loAdapter);
+        main_drawer.openDrawer(GravityCompat.START);
 
     }
-
     public void InitListener(){
 
         ActionBarDrawerToggle toggleDrawer = new ActionBarDrawerToggle(
@@ -98,11 +112,52 @@ public class Activity_Dashboard extends AppCompatActivity {
         toggleDrawer.syncState();
 
         list_menus.setOnGroupClickListener((parent, v, groupPosition, id) -> {
+
+            MENU_PARENT_CONSTANTS groupMenu = (MENU_PARENT_CONSTANTS) list_menus.getExpandableListAdapter()
+                                                .getGroup(groupPosition);
+
+            String lsParentId = groupMenu.getFsIDxx();
+            if (lsParentId.equalsIgnoreCase("HME")){
+                main_drawer.closeDrawer(GravityCompat.START);
+
+                InitView(lsParentId);
+                return false;
+            }else if (lsParentId.equalsIgnoreCase("LGT")) {
+
+                poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
+                        if (current != null) {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .remove(current)
+                                    .commitNow(); // ensures fragment is destroyed immediately
+                        }
+
+                        Intent loFinish = new Intent();
+                        loFinish.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        setResult(Activity_Dashboard.RESULT_OK, loFinish);
+                        finish();
+
+                    }
+                });
+                return false;
+            }
+
             if (list_menus.isGroupExpanded(groupPosition)) {
                 list_menus.collapseGroup(groupPosition);
             } else {
                 list_menus.expandGroup(groupPosition);
             }
+
             // return true so the default expand/collapse doesn’t also fire
             return true;
         });
@@ -112,19 +167,43 @@ public class Activity_Dashboard extends AppCompatActivity {
             MENU_ITEM_CONSTANTS childItem = (MENU_ITEM_CONSTANTS) list_menus.getExpandableListAdapter()
                     .getChild(groupPosition, childPosition);
 
-            Log.d("TAG", "Clicked child: " + childItem.getFsIDxx() + " : " + childItem.getFsTitlex());
+            main_drawer.closeDrawer(GravityCompat.START);
 
             String itemID = childItem.getFsIDxx();
+            Intent loIntent;
             switch (itemID){
 
                 case "ACC001": //update account
+                    loIntent = new Intent(Activity_Dashboard.this, Activity_Account.class);
+                    loIntent.putExtra("update", true);
+                    startActivity(loIntent);
                     break;
-                case "ACC003": //logout account
+                case "ACC002":
+                    InitView("ACC002");
                     break;
             }
 
-            return true; // consume click
+            return true;
         });
+
+    }
+
+    public void InitView(String fsItemID){
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        switch (fsItemID){
+
+            case "HME":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Home());
+                break;
+            case "ACC002":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Create_Member());
+                break;
+
+        }
+        fragmentTransaction.commit();
 
     }
 }
