@@ -5,6 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
+import org.gag.appdriver.Room.DataObject.DMemberAddress
+import org.gag.appdriver.Room.DataObject.DMemberContact
+import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
@@ -13,6 +16,9 @@ import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.EProvinceInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.EMemberAddress
+import org.gag.appdriver.Room.Entities.EMemberContactInfo
+import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.ETitle
@@ -27,7 +33,10 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EPosition::class,
         ETitle::class,
         ETownCity::class,
-        EProvinceInfo::class
+        EProvinceInfo::class,
+        EMemberAddress::class,
+        EMemberContactInfo::class,
+        EMemberEmailInfo::class
     ],
     version = 1,
     exportSchema = false
@@ -41,6 +50,9 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetTitle() : DTitleInfo
     abstract fun GetTownCity() : DTownInfo
     abstract fun GetProvince() : DProvinceInfo
+    abstract fun GetMemberAddress() : DMemberAddress
+    abstract fun GetMemberContact() : DMemberContact
+    abstract fun GetMemberEmail() : DMemberEmailInfo
 
     companion object {
 

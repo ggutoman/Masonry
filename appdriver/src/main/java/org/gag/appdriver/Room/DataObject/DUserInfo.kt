@@ -13,7 +13,7 @@ interface DUserInfo {
     fun SaveUserInfo(poUser: EUserInfo)
 
     @Query("SELECT * FROM User_Info")
-    fun GetUser(): LiveData<EUserInfo>
+    fun ObserveUserInfo(): LiveData<EUserInfo>
 
     @Query("DELETE FROM User_Info")
     fun DeleteUser()

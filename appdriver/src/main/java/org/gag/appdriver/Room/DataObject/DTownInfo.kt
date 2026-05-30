@@ -12,15 +12,27 @@ interface DTownInfo {
     @Upsert(entity = ETownCity::class)
     fun SaveTownInfo(poTown: ETownCity)
 
-    @Query("SELECT a.sTownIDxx AS psTownIDxx, b.sProvIDxx AS psProvIDxx, (a.sTownName || ',' || b.sDescript) AS psTownProvNme FROM Town_City a, Province b " +
-            "WHERE (a.sProvIDxx = b.sProvIDxx) " +
-            "AND (a.sTownName || ',' || b.sDescript) LIKE :fsTownProv")
-    fun ObserveTownList(fsTownProv : String): LiveData<List<TownProvince>>
+    @Query("SELECT " +
+            "'' AS psAddrsIDx, " +
+            "a.sTownIDxx AS psTownIDxx, " +
+            "b.sProvIDxx AS psProvIDxx, " +
+            "(a.sTownName || ', ' || b.sDescript) AS psTownProvNme, " +
+            "'' AS psAddressx, " +
+            "'0' AS isHomeAddr, " +
+            "'0' AS isActive " +
+            "FROM Town_City a, Province b " +
+            "WHERE a.sProvIDxx = b.sProvIDxx " +
+            "AND (a.sTownName || ',' || b.sDescript) LIKE :fsSearch ")
+    fun SearchTown(fsSearch : String): LiveData<List<TownProvince>>
 
     data class TownProvince(
+        val psAddrsIDx : String,
         val psTownIDxx : String,
         val psProvIDxx : String,
-        val psTownProvNme : String
+        val psTownProvNme : String,
+        val psAddressx : String,
+        val isHomeAddr : String,
+        val isActive : String
     )
 
 }

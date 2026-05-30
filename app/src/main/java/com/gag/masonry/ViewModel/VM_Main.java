@@ -15,13 +15,10 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
 
@@ -47,7 +44,7 @@ public class VM_Main extends AndroidViewModel {
     }
 
     public LiveData<EUserInfo> GetUserInfo(){
-        return poDashboard.getPoDBUser().GetUser();
+        return poDashboard.getPoDBUser().ObserveUserInfo();
     }
 
     public LiveData<DMemberInfo.MemberDashboardInfo> GetMemberInfo(){

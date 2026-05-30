@@ -2,8 +2,6 @@ package org.gag.appdriver.App.Dashboard
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -33,8 +31,6 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
-import org.gag.appdriver.Room.Entities.EMemberInfo
-import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -47,6 +43,7 @@ class Dashboard(loInstance : Context) {
     val loContext : Context = loInstance
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poEncrypt : HashRepository = HashRepository()
+
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
@@ -62,10 +59,6 @@ class Dashboard(loInstance : Context) {
                 .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
                 .getOrNull(1) ?: ""
         )
-    }
-
-    fun ObserveTownInfo(fsProvIDx : String) : LiveData<List<DTownInfo.TownProvince>>{
-        return poTownInfo.ObserveTownList(fsProvIDx)
     }
 
     fun GetLodgeInfo() : ELodgeInfo{

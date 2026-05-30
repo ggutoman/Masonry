@@ -2,14 +2,11 @@ package org.gag.appdriver.App.Accounts
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -21,10 +18,17 @@ import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
+import org.gag.appdriver.Room.DataObject.DMemberAddress
+import org.gag.appdriver.Room.DataObject.DMemberContact
+import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
+import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.EMemberContactInfo
+import org.gag.appdriver.Room.Entities.EMemberEmailInfo
+import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
@@ -41,18 +45,43 @@ class UserAccount(instance : Context) {
     val httpInstance : KTORepository = KTORepository(instance)
     val encryptObj : HashRepository = HashRepository()
     val dateObj : DateRepository = DateRepository()
+
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(instance).GetLodge()
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
+    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
+    val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
+    val poMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
+    val poMemberEmail : DMemberEmailInfo = ML_DBF.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
 
     fun GetMessage() : String = message
 
+    fun GetUserID() : String = TextFormatter()
+        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+        .getOrNull(1) ?: ""
+
+    fun GetCurrentDate() : String = dateObj.GetCurrentDate()
+
     fun GetSession() : AppConfig = session
 
-    fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.GetUser()
+    fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo>  = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
+
+    fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.ObserveUserInfo()
 
     fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
+
+    fun SearchTown(fsSearch : String) : LiveData<List<DTownInfo.TownProvince>>{
+        return poTownInfo.SearchTown("%$fsSearch%")
+    }
+
+    fun GetMemberAddress(fsMemberID : String) : List<DTownInfo.TownProvince>{
+        return poMemberAddress.GetMemberAddress(fsMemberID)
+    }
+
+    fun GetMemberContact(fsMemberID : String) : List<EMemberContactInfo> = poMemberContact.GetMemberContact(fsMemberID)
+
+    fun GetMemberEmail(fsMemberID : String) : List<EMemberEmailInfo> = poMemberEmail.GetMemberEmail(fsMemberID)
 
     fun GetEncryption() : HashRepository = encryptObj
 
