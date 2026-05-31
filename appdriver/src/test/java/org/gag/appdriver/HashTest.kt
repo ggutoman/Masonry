@@ -1,6 +1,7 @@
 package org.gag.appdriver
 
 import org.gag.appdriver.Libraries.Encryption.HashRepository
+import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.junit.Test
 
 class HashTest {
@@ -30,4 +31,5 @@ class HashTest {
 
         print(name.replace(name.split(",").get(0), "Doe"))
     }
+
 }

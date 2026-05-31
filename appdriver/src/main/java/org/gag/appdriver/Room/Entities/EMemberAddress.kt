@@ -8,14 +8,13 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "Member_Address")
 data class EMemberAddress(
     @PrimaryKey
-    val sAddrsIDx: String,
-
-    val sMemberID: String,
-    val sAddressx: String,
-    val sTownIDxx: String,
-    val cIsHomeAd: String,
-    val cRecdStat: String,
-    val sModified: String,
-    val dModified: String,
-    val dTimeStmp: String
+    var sAddrsIDx: String,
+    var sMemberID: String?,
+    var sAddressx: String?,
+    var sTownIDxx: String?,
+    var cIsHomeAd: String?,
+    var cRecdStat: String?,
+    var sModified: String?,
+    var dModified: String?,
+    var dTimeStmp: String?
 )

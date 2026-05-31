@@ -8,14 +8,14 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "Member_Contact")
 data class EMemberContactInfo(
     @PrimaryKey
-    val sContctID: String,     // varchar(10)
+    var sContctID: String,     // varchar(10)
 
-    val sMemberID: String,     // varchar(10)
-    val sContctNo: String,     // varchar(13)
-    val sRemarksx: String,     // varchar(50)
-    val cRecdStat: String,     // char(1)
-    val sModified: String,     // varchar(32)
-    val dModified: String,     // datetime
-    val dTimeStmp: String      // TIMESTAMP
+    var sMemberID: String,     // varchar(10)
+    var sContctNo: String,     // varchar(13)
+    var sRemarksx: String?,     // varchar(50)
+    var cRecdStat: String?,     // char(1)
+    var sModified: String?,     // varchar(32)
+    var dModified: String?,     // datetime
+    var dTimeStmp: String?     // TIMESTAMP
 
 )

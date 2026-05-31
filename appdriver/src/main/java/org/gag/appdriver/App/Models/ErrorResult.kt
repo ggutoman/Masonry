@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ErrorResult(
-    var errno : String,
+    var errno : Int,
     var message : String
 ){
 

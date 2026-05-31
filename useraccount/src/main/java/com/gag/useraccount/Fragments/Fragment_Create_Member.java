@@ -1,17 +1,20 @@
 package com.gag.useraccount.Fragments;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,8 +34,10 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.gag.appdriver.App.Accounts.UserAccount;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
@@ -41,8 +46,8 @@ import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Fragment_Create_Member extends Fragment {
@@ -84,6 +89,7 @@ public class Fragment_Create_Member extends Fragment {
             tie_firstname,
             tie_middlename,
             tie_suffix,
+            tie_birthdate,
             tie_glpid,
             tie_address,
             tie_remarks;
@@ -97,9 +103,19 @@ public class Fragment_Create_Member extends Fragment {
     private MemberContactAdapter MemberContactAdapter;
     private MemberEmailAdapter MemberEmailAdapter;
 
+    private List<String> paramSponsors = new ArrayList<>();
+    private List<DTownInfo.TownProvince> paramTownProvince= new ArrayList<>();
+    private List<EMemberContactInfo> paramContact= new ArrayList<>();
+    private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
+
     private String lsAddr;
     private String lsTwnIDx;
     private String lsProvIDx;
+    private String lsSelectLodge;
+    private String lsSelectTitle;
+
+    private int lnSelectCivil;
+    private int lnSelectStatus;
 
     private boolean isHomeAddr;
     private boolean isActive;
@@ -148,6 +164,7 @@ public class Fragment_Create_Member extends Fragment {
         til_midname = view.findViewById(R.id.til_midname);
         til_suffix = view.findViewById(R.id.til_suffix);
         til_civil = view.findViewById(R.id.til_civil);
+        tie_birthdate = view.findViewById(R.id.tie_birthdate);
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
@@ -257,6 +274,20 @@ public class Fragment_Create_Member extends Fragment {
                             );
                         }
                     }
+
+                    //initialize email with exisitng list
+                    if (mviewModel.GetMemberEmail(eMemberInfo.getSMemberID()).size() > 1){
+
+                        for (EMemberEmailInfo loEmail : mviewModel.GetMemberEmail(eMemberInfo.getSMemberID())){
+
+                            mviewModel.AddMemberEmail(
+                                    loEmail.getSMailIDxx(),
+                                    loEmail.getSMemberID(),
+                                    loEmail.getSEmailAdd(),
+                                    loEmail.getCRecdStat()
+                            );
+                        }
+                    }
                 }
             });
         }
@@ -264,6 +295,8 @@ public class Fragment_Create_Member extends Fragment {
         mviewModel.GetSponsorList().observe(requireActivity(), new Observer<List<String>>() {
             @Override
             public void onChanged(List<String> strings) {
+
+                paramSponsors = strings;
 
                auto_sponosr.setAdapter(new ArrayAdapter<>(
                         requireActivity(),
@@ -283,6 +316,16 @@ public class Fragment_Create_Member extends Fragment {
                         eLodgeInfos);
 
                 auto_lodge.setAdapter(LodgeAdapter);
+
+                //select first item
+                auto_lodge.setSelection(0);
+
+                //enable selection if more than 1 item
+                if (eLodgeInfos.size() > 1){
+                    auto_lodge.setEnabled(false);
+                }else {
+                    auto_lodge.setEnabled(true);
+                }
             }
         });
 
@@ -310,6 +353,8 @@ public class Fragment_Create_Member extends Fragment {
                     mviewModel.HasNewAddress().observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
                         @Override
                         public void onChanged(List<DTownInfo.TownProvince> memberAddresses) {
+
+                            paramTownProvince = memberAddresses;
 
                             MemberAddressAdapter = new MemberAddressAdapter(
                                     requireActivity(),
@@ -343,6 +388,8 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onChanged(List<EMemberContactInfo> eMemberContactInfos) {
 
+                paramContact = eMemberContactInfos;
+
                 MemberContactAdapter = new MemberContactAdapter(
                         requireActivity(),
                         android.R.layout.simple_spinner_dropdown_item,
@@ -355,6 +402,8 @@ public class Fragment_Create_Member extends Fragment {
         mviewModel.HasNewEmail().observe(requireActivity(), new Observer<List<EMemberEmailInfo>>() {
             @Override
             public void onChanged(List<EMemberEmailInfo> eMemberEmailInfos) {
+
+                paramEmail = eMemberEmailInfos;
 
                 MemberEmailAdapter = new MemberEmailAdapter(
                         requireActivity(),
@@ -474,17 +523,52 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
+        tie_birthdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Calendar loCalendar = Calendar.getInstance();
+
+                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        tie_birthdate.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    }
+                }, loCalendar.get(Calendar.YEAR),
+                        loCalendar.get(Calendar.MONTH),
+                        loCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show();
+            }
+        });
+
         auto_lodge.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+                lsSelectLodge = ((ELodgeInfo) adapterView.getItemAtPosition(i)).getSLodgeIDx();
                 auto_lodge.setText(((ELodgeInfo) adapterView.getItemAtPosition(i)).getSLodgeNme(), false);
+            }
+        });
+
+        auto_civil.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                lnSelectCivil = i;
+            }
+        });
+
+        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                lnSelectStatus = i;
             }
         });
 
         auto_title.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                lsSelectTitle = ((ETitle) adapterView.getItemAtPosition(i)).getSTitleIDx();
                 auto_title.setText(((ETitle) adapterView.getItemAtPosition(i)).getSTitleDsc(), false);
             }
         });
@@ -540,6 +624,152 @@ public class Fragment_Create_Member extends Fragment {
 
                 auto_email.setText(((EMemberEmailInfo) adapterView.getItemAtPosition(i)).getSEmailAdd(), false);
                 chkbx_activecontact.setChecked(((EMemberEmailInfo) adapterView.getItemAtPosition(i)).getCRecdStat().equals("1"));
+            }
+        });
+
+        btn_create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String lsFrstNme= tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty() ? "" : tie_firstname.getText().toString();
+                String lsMiddNme= tie_middlename.getText() == null || tie_middlename.getText().toString().isEmpty() ? "" : tie_middlename.getText().toString();
+                String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
+                String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
+
+                String lsMemberFullNm = lsFrstNme + " " + lsMiddNme + ". " + lsLastNme + " " + lsSuffix;
+
+                UserAccount.MemberName loMemberNme = new UserAccount.MemberName(
+                        lsFrstNme,
+                        lsMiddNme,
+                        lsLastNme,
+                        lsSuffix
+                );
+
+                //initialze default values
+                EMemberInfo poMember = new EMemberInfo(
+                        "",
+                        lsSelectLodge,
+                        tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
+                        lsMemberFullNm,
+                        String.valueOf(lnSelectCivil),
+                        tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
+                        String.valueOf(lnSelectStatus),
+                        mviewModel.GetCurrentDate(),
+                        null,
+                        lsSelectTitle,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "",
+                        "",
+                        "",
+                        0.00,
+                        0.00,
+                        null,
+                        String.valueOf(lnSelectStatus)
+                );
+
+                //add sponsors
+                for (int index = 0; index < paramSponsors.size(); index++){
+                    Log.d("Sponsors added ", paramSponsors.get(index));
+
+                    switch (index){
+
+                        case 0:
+                            poMember.setSSponsor1(paramSponsors.get(index));
+                            break;
+                        case 1:
+                            poMember.setSSponsor2(paramSponsors.get(index));
+                            break;
+                        case 2:
+                            poMember.setSSponsor3(paramSponsors.get(index));
+                            break;
+                    }
+                }
+
+                List<EMemberAddress> laAddressParams = new ArrayList<>();
+                for (DTownInfo.TownProvince townProvince : paramTownProvince){
+                    Log.d("Address added ", townProvince.getPsTownProvNme());
+
+                    laAddressParams.add(
+                            new EMemberAddress(
+                                    "",
+                                    "",
+                                    townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
+                                    townProvince.getPsTownIDxx(),
+                                    townProvince.isHomeAddr(),
+                                    townProvince.isActive(),
+                                    mviewModel.GetUserID(),
+                                    mviewModel.GetCurrentDate(),
+                                    mviewModel.GetCurrentDateTime()
+                            )
+                    );
+                }
+
+                List<EMemberContactInfo> laContactParams = new ArrayList<>();
+                for (EMemberContactInfo contactInfo : paramContact){
+                    Log.d("Contacts added ", contactInfo.getSContctNo());
+
+                    laContactParams.add(
+                            new EMemberContactInfo(
+                                    contactInfo.getSContctID(),
+                                    contactInfo.getSMemberID(),
+                                    contactInfo.getSContctNo(),
+                                    contactInfo.getSRemarksx(),
+                                    contactInfo.getCRecdStat(),
+                                    mviewModel.GetUserID(),
+                                    mviewModel.GetCurrentDate(),
+                                    mviewModel.GetCurrentDateTime()
+
+                            )
+                    );
+                }
+
+                List<EMemberEmailInfo> laEmailParams = new ArrayList<>();
+                for (EMemberEmailInfo eMemberEmailInfo : paramEmail){
+                    Log.d("Emails added ", eMemberEmailInfo.getSEmailAdd());
+
+                    laEmailParams.add(
+                            new EMemberEmailInfo(
+                                    eMemberEmailInfo.getSMailIDxx(),
+                                    eMemberEmailInfo.getSMemberID(),
+                                    eMemberEmailInfo.getSEmailAdd(),
+                                    eMemberEmailInfo.getCRecdStat(),
+                                    mviewModel.GetUserID(),
+                                    mviewModel.GetCurrentDate(),
+                                    mviewModel.GetCurrentDateTime()
+                            )
+                    );
+                }
+
+                mviewModel.SubmitParameters(loMemberNme, poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
+                    @Override
+                    public void OnLoad() {
+                        poDialog.ShowDialog("Submitting your information. Please wait . .");
+                    }
+
+                    @Override
+                    public void OnSuccess() {
+                        poDialog.DismissDialog();
+                    }
+
+                    @Override
+                    public void OnFailed(String fsMesssage) {
+                        poDialog.DismissDialog();
+
+                        poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                    }
+                });
+
             }
         });
     }
