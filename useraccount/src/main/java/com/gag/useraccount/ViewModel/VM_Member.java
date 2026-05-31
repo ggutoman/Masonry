@@ -1,6 +1,7 @@
 package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,6 +12,7 @@ import org.gag.appdriver.App.Accounts.UserAccount;
 import org.gag.appdriver.Constants.MEMBER_STATUS;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
@@ -19,6 +21,9 @@ import org.gag.appdriver.Room.Entities.ETitle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class VM_Member extends AndroidViewModel {
 
@@ -29,6 +34,11 @@ public class VM_Member extends AndroidViewModel {
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
     private final UserAccount poAccount;
+    public interface OnSubmit{
+        void OnLoad();
+        void OnSuccess();
+        void OnFailed(String fsMesssage);
+    }
 
     public VM_Member(@NonNull Application application) {
         super(application);
@@ -124,6 +134,18 @@ public class VM_Member extends AndroidViewModel {
         laEmail.setValue(currentList);
     }
 
+    public String GetCurrentDate(){
+        return poAccount.GetCurrentDate();
+    }
+
+    public String GetCurrentDateTime(){
+        return poAccount.GetCurrentDateTime();
+    }
+
+    public String GetUserID(){
+        return poAccount.GetUserID();
+    }
+
     public LiveData<List<String>> GetSponsorList(){
         return laSponsors;
     }
@@ -153,6 +175,10 @@ public class VM_Member extends AndroidViewModel {
 
     public LiveData<List<EMemberEmailInfo>> HasNewEmail(){
         return laEmail;
+    }
+
+    public LiveData<EMemberInfo> GetMemberGLPID(String fsGLPIDxx){
+        return poAccount.GetMemberGLPID(fsGLPIDxx);
     }
 
     public List<DTownInfo.TownProvince> GetMemberAddress(String fsMemberID){
@@ -194,8 +220,57 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GenerateGLPID();
     }
 
-    public LiveData<EMemberInfo> GetMemberGLPID(String fsGLPIDxx){
-        return poAccount.GetMemberGLPID(fsGLPIDxx);
+    public void SubmitParameters(UserAccount.MemberName memberName, EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
+
+        poAccount.CreateMember(memberName, memberInfo)
+                .thenCompose(result -> {
+
+                    if (result instanceof Boolean && !(Boolean) result) {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                        return CompletableFuture.completedFuture(false);
+                    }
+
+                    if (result instanceof String && (((String) result).isEmpty())) {
+                        foCallback.OnFailed("Could not save member address. Member ID not found");
+                        return CompletableFuture.completedFuture(false);
+                    }
+                    String lsMemberID = (String) result;
+
+                    List<CompletableFuture<Boolean>> memberTask = new ArrayList<>();
+
+                    for (EMemberAddress loAddress : laAddress) {
+                        loAddress.setSMemberID(lsMemberID);
+                        memberTask.add(poAccount.CreateMemberAddress(loAddress));
+                    }
+
+                    for (EMemberContactInfo loContact : laContact) {
+                        loContact.setSMemberID(lsMemberID);
+                        memberTask.add(poAccount.CreateMemberContact(loContact));
+                    }
+
+                    for (EMemberEmailInfo loEmail : laEmail) {
+                        loEmail.setSMemberID(lsMemberID);
+                        memberTask.add(poAccount.CreateMemberEmail(loEmail));
+                    }
+
+                    // Combine all tasks into one future that returns Boolean
+                    return CompletableFuture.allOf(memberTask.toArray(new CompletableFuture[0]))
+                            .thenApply(v -> memberTask.stream().allMatch(CompletableFuture::join));
+
+                })
+                .thenAccept(allOk -> {
+                    foCallback.OnLoad();
+                    if (allOk) {
+                        foCallback.OnSuccess();
+                    } else {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                    }
+                })
+                .exceptionally(e -> {
+                    foCallback.OnFailed(e.getMessage());
+                    return null;
+                });
+
     }
 
 }

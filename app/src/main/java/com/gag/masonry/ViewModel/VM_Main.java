@@ -84,7 +84,7 @@ public class VM_Main extends AndroidViewModel {
             CompletableFuture<Boolean> poProvince = poDashboard.DownloadProvinceInfo();
             CompletableFuture<Boolean> poTown = poDashboard.DownloadTownInfo();
 
-            CompletableFuture.allOf(poUserInfo, poLodgeInfo).thenRun(new Runnable() {
+            CompletableFuture.allOf(poUserInfo, poLodgeInfo, poPosition, poTitle, poProvince, poTown).thenRun(new Runnable() {
                 @Override
                 public void run() {
 

@@ -7,13 +7,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EMemberInfo(
     var sMemberID: String,
-    var sLodgeIDx: String,
-    var sGLPIDNoX: String,
-    var sMemberNm: String,
-    var cCvilStat: String,
-    var dBirthDte: String,
-    var cMmbrStat: String,
-    var dMembrshp: String,
+    var sLodgeIDx: String?,
+    var sGLPIDNoX: String?,
+    var sMemberNm: String?,
+    var cCvilStat: String?,
+    var dBirthDte: String?,
+    var cMmbrStat: String?,
+    var dMembrshp: String?,
     var dSuspendx: String?,
     var sTitleIDx: String?,
     var dPetition: String?,
@@ -26,5 +26,5 @@ data class EMemberInfo(
     var nDueBalxx: Double,
     var nPrjBalxx: Double,
     var sPositnCd: String?,
-    var cRecdStat: String
+    var cRecdStat: String?
 )

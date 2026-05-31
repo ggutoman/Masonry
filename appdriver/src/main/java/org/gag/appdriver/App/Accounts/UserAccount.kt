@@ -3,14 +3,14 @@ package org.gag.appdriver.App.Accounts
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
-import org.gag.appdriver.App.DataModels.DownloadError
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.gag.appdriver.App.DataModels.DownloadLogin
+import org.gag.appdriver.App.DataModels.DownloadError
+import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
@@ -26,6 +26,7 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.EMemberAddress
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
@@ -62,6 +63,8 @@ class UserAccount(instance : Context) {
         .getOrNull(1) ?: ""
 
     fun GetCurrentDate() : String = dateObj.GetCurrentDate()
+
+    fun GetCurrentDateTime() : String = dateObj.GetCurrentDateTime()
 
     fun GetSession() : AppConfig = session
 
@@ -121,7 +124,7 @@ class UserAccount(instance : Context) {
                             mapOf()
                         )) {
                             is KTORepository.OnRequest.onSuccess -> {
-                                val resultData = Json.decodeFromString<DownloadLogin>(response.data.body())
+                                val resultData = Json.decodeFromString<DownloadKey>(response.data.body())
                                 val sTokenIDxx = resultData.GetPayload()
 
                                 session.isLogIn("1")
@@ -289,7 +292,7 @@ class UserAccount(instance : Context) {
                                 //update glp id, and lastname from member name
                                 it.sGLPIDNoX = poUser.sGLPIDNoX
                                 it.sMemberNm = TextFormatter()
-                                    .ReplaceText(it.sMemberNm,
+                                    .ReplaceText(it.sMemberNm.toString(),
                                         ",",
                                         0,
                                         poUser.sLastName
@@ -332,5 +335,336 @@ class UserAccount(instance : Context) {
         }
         return future
     }
+
+    @SuppressLint("MissingPermission")
+    fun CreateMember(memberName: MemberName, memberInfo: EMemberInfo) : CompletableFuture<Any>{
+
+        val future = CompletableFuture<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result : Any = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val sLodgeIDx : String = TextFormatter()
+                    .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+                    .getOrNull(0) ?: ""
+
+                val loParams = JSONObject().apply {
+
+                    //this is identifier for new member or update member
+                    if (memberInfo.sMemberID.isNotEmpty()){
+                        put("sMemberID", memberInfo.sMemberID)
+                    }
+
+                    put("sGLPIDNoX", memberInfo.sGLPIDNoX)
+                    put("sLodgeIDx", sLodgeIDx)
+                    put("sLastName", memberName.sLastNme)
+                    put("sFrstName", memberName.sFirstnme)
+                    put("sSuffixNm", memberName.sSuffix)
+                    put("sMiddName", memberName.sMiddNme)
+                    put("cCvilStat", memberInfo.cCvilStat)
+                    put("dBirthDte", memberInfo.dBirthDte)
+                    put("cMmbrStat", memberInfo.cMmbrStat)
+                    put("dMembrshp", memberInfo.dMembrshp)
+                    put("dSuspendx", memberInfo.dSuspendx)
+                    put("sTitleIDx", memberInfo.sTitleIDx)
+                    put("dPetition", memberInfo.dPetition)
+                    put("dInitiatn", memberInfo.dInitiatn)
+                    put("dPassedxx", memberInfo.dPassedxx)
+                    put("dRaisingX", memberInfo.dRaisingX)
+                    put("sSponsor1", memberInfo.sSponsor1)
+                    put("sSponsor2", memberInfo.sSponsor2)
+                    put("sSponsor3", memberInfo.sSponsor3)
+                    put("cRecdStat", memberInfo.cRecdStat)
+                }
+
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_MEMBER.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save member information,with generated member id
+                            val sMemberID = Json.decodeFromString<DownloadKey>(result.data.body());
+                            memberInfo.sMemberID = sMemberID.GetPayload()
+
+                            poMemberInfo.SaveMemberInfo(memberInfo)
+                            sMemberID.GetPayload()
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun CreateMemberAddress(loAddress: EMemberAddress)  : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+
+                    //this is identifier for new member or update member
+                    if (loAddress.sAddrsIDx.isNotEmpty()){
+                        put("sAddrsIDx", loAddress.sAddrsIDx)
+                    }
+
+                    put("sMemberID", loAddress.sMemberID.toString())
+                    put("sAddressx", loAddress.sAddressx.toString())
+                    put("sTownIDxx", loAddress.sTownIDxx.toString())
+                    put("cIsHomeAd", loAddress.cIsHomeAd.toString())
+                    put("cRecdStat", loAddress.cRecdStat.toString())
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ADDRESS.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save member address,with generated address id
+                            val sAddressIDx = Json.decodeFromString<DownloadKey>(result.data.body());
+
+                            loAddress.sAddrsIDx = sAddressIDx.GetPayload()
+                            poMemberAddress.SaveMemberAddress(loAddress)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun CreateMemberContact(laContact: EMemberContactInfo)  : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+                    // identifier for new member or update member
+                    if (laContact.sContctID.isNotEmpty()) {
+                        put("sContctID", laContact.sContctID)
+                    }
+
+                    put("sMemberID", laContact.sMemberID)
+                    put("sContctNo", laContact.sContctNo)
+                    put("sRemarksx", laContact.sRemarksx ?: "")
+                    put("cRecdStat", laContact.cRecdStat ?: "")
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_CONTACT.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save member address,with generated address id
+                            val sContctIDx = Json.decodeFromString<DownloadKey>(result.data.body());
+
+                            laContact.sContctID = sContctIDx.GetPayload()
+                            poMemberContact.SaveMemberContact(laContact)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun CreateMemberEmail( laEmail: EMemberEmailInfo) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+                    // identifier for new or update
+                    if (laEmail.sMailIDxx.isNotEmpty()) {
+                        put("sMailIDxx", laEmail.sMailIDxx)
+                    }
+
+                    put("sMemberID", laEmail.sMemberID)
+                    put("sEmailAdd", laEmail.sEmailAdd)
+                    put("cRecdStat", laEmail.cRecdStat ?: "")
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_EMAIL.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save member address,with generated address id
+                            val sEmail = Json.decodeFromString<DownloadKey>(result.data.body());
+
+                            laEmail.sMailIDxx = sEmail.GetPayload()
+                            poMemberEmail.SaveMemberEmail(laEmail)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message = result.exception.toString()
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message = ex.message.toString()
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    data class MemberName(
+        val sFirstnme : String,
+        val sMiddNme : String,
+        val sLastNme : String,
+        val sSuffix : String
+    )
 
 }
