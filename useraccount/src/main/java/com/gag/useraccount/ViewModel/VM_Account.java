@@ -61,7 +61,7 @@ public class VM_Account extends AndroidViewModel {
 
                 })
                 .exceptionally(throwable -> {
-                    foCallback.onError(throwable.getMessage());
+                    foCallback.onError("Could not make request at this moment:\n\n" + throwable.getMessage());
                     return null;
                 });
     }
@@ -98,7 +98,7 @@ public class VM_Account extends AndroidViewModel {
 
                 })
                 .exceptionally(throwable -> {
-                    foCallback.onError(throwable.getMessage());
+                    foCallback.onError("Could not make request at this moment:\n\n" + throwable.getMessage());
                     return null;
                 });
     }
@@ -135,7 +135,7 @@ public class VM_Account extends AndroidViewModel {
 
                 })
                 .exceptionally(throwable -> {
-                    foCallback.onError(throwable.getMessage());
+                    foCallback.onError("Could not make request at this moment:\n\n" + throwable.getMessage());
                     return null;
                 });
 

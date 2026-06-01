@@ -14,11 +14,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gag.useraccount.Dialog.Dialog_Add_Member_Info;
 import com.gag.useraccount.R;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
@@ -56,10 +58,6 @@ public class Fragment_Create_Member extends Fragment {
     private LoadDialog poDialog;
     private VM_Member mviewModel;
 
-
-    private LinearLayout layout_member,
-            layout_personal;
-
     private MaterialAutoCompleteTextView
             auto_status,
             auto_title,
@@ -70,20 +68,12 @@ public class Fragment_Create_Member extends Fragment {
             auto_civil,
             auto_lodge;
 
-    private TextInputLayout til_sponsor,
-            til_address,
-            til_contact,
-            til_email,
-            til_midname,
-            til_suffix,
-            til_civil;
-
     private ImageButton
             btn_add_address,
             btn_add_contact,
             btn_add_email;
 
-    private MaterialButton btn_add_sponsor, btn_create,btn_cancel;
+    private MaterialButton btn_add_sponsor, btn_create, btn_save_address, btn_save_contact, btn_save_email;
 
     private TextInputEditText tie_lastname,
             tie_firstname,
@@ -96,9 +86,10 @@ public class Fragment_Create_Member extends Fragment {
 
     private CheckBox chkbx_homeaddr, chkbx_active, chkbx_activecontact, chkbx_activeemail;
 
+    private Dialog_Add_Member_Info poDialogAddMember;
+
     private LodgeAdapter LodgeAdapter;
     private TitleAdapter TitleAdapter;
-    private TownCityAdapter TownProvAdapter;
     private MemberAddressAdapter MemberAddressAdapter;
     private MemberContactAdapter MemberContactAdapter;
     private MemberEmailAdapter MemberEmailAdapter;
@@ -108,17 +99,15 @@ public class Fragment_Create_Member extends Fragment {
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
 
-    private String lsAddr;
-    private String lsTwnIDx;
-    private String lsProvIDx;
     private String lsSelectLodge;
     private String lsSelectTitle;
 
+    private DTownInfo.TownProvince loSelectAddress;
+    private EMemberContactInfo loSelectContact;
+    private EMemberEmailInfo loSelectEmail;
+
     private int lnSelectCivil;
     private int lnSelectStatus;
-
-    private boolean isHomeAddr;
-    private boolean isActive;
 
     @Nullable
     @Override
@@ -129,6 +118,7 @@ public class Fragment_Create_Member extends Fragment {
         mviewModel = new ViewModelProvider(this).get(VM_Member.class);
         poMessage = new Message_Dialog(requireActivity());
         poDialog = new LoadDialog(requireActivity());
+        poDialogAddMember = new Dialog_Add_Member_Info(requireActivity(), mviewModel, getViewLifecycleOwner());
 
         poMessage.InitDialog();
         poDialog.InitDialog();
@@ -144,9 +134,6 @@ public class Fragment_Create_Member extends Fragment {
 
     private void initViews(View view) {
 
-        layout_member = view.findViewById(R.id.layout_member);
-        layout_personal = view.findViewById(R.id.layout_personal);
-
         auto_lodge = view.findViewById(R.id.auto_lodge);
         tie_glpid = view.findViewById(R.id.tie_glpid);
         auto_status = view.findViewById(R.id.auto_status);
@@ -157,13 +144,6 @@ public class Fragment_Create_Member extends Fragment {
         auto_email = view.findViewById(R.id.auto_email);
         auto_civil = view.findViewById(R.id.auto_civil);
 
-        til_sponsor = view.findViewById(R.id.til_sponsor);
-        til_address = view.findViewById(R.id.til_town);
-        til_contact = view.findViewById(R.id.til_contact);
-        til_email = view.findViewById(R.id.til_email);
-        til_midname = view.findViewById(R.id.til_midname);
-        til_suffix = view.findViewById(R.id.til_suffix);
-        til_civil = view.findViewById(R.id.til_civil);
         tie_birthdate = view.findViewById(R.id.tie_birthdate);
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
@@ -173,7 +153,9 @@ public class Fragment_Create_Member extends Fragment {
         btn_add_contact = view.findViewById(R.id.btn_add_contact);
         btn_add_email = view.findViewById(R.id.btn_add_email);
         btn_create = view.findViewById(R.id.btn_create);
-        btn_cancel = view.findViewById(R.id.btn_cancel);
+        btn_save_address = view.findViewById(R.id.btn_save_address);
+        btn_save_contact = view.findViewById(R.id.btn_save_contact);
+        btn_save_email = view.findViewById(R.id.btn_save_email);
 
         chkbx_active = view.findViewById(R.id.chkbx_active);
         chkbx_homeaddr = view.findViewById(R.id.chkbx_homeaddr);
@@ -310,6 +292,8 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onChanged(List<ELodgeInfo> eLodgeInfos) {
 
+                if (eLodgeInfos.size() < 1) return;
+
                 LodgeAdapter = new LodgeAdapter(
                         requireActivity(),
                         android.R.layout.simple_spinner_dropdown_item,
@@ -317,14 +301,15 @@ public class Fragment_Create_Member extends Fragment {
 
                 auto_lodge.setAdapter(LodgeAdapter);
 
-                //select first item
-                auto_lodge.setSelection(0);
-
                 //enable selection if more than 1 item
                 if (eLodgeInfos.size() > 1){
-                    auto_lodge.setEnabled(false);
-                }else {
                     auto_lodge.setEnabled(true);
+                }else {
+                    auto_lodge.setEnabled(false);
+
+                    //select first item
+                    auto_lodge.setText(LodgeAdapter.getItem(0).getSLodgeNme(), false);
+                    lsSelectLodge = LodgeAdapter.getItem(0).getSLodgeIDx();
                 }
             }
         });
@@ -343,44 +328,19 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
-        mviewModel.TownSearch().observe(requireActivity(), new Observer<String>() {
+        mviewModel.HasNewAddress().observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
             @Override
-            public void onChanged(String s) {
+            public void onChanged(List<DTownInfo.TownProvince> memberAddresses) {
 
-                //display all town list if empty
-                if (s.length() < 1){
+                //initialize parameter, list for address entry
+                paramTownProvince = memberAddresses;
 
-                    mviewModel.HasNewAddress().observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
-                        @Override
-                        public void onChanged(List<DTownInfo.TownProvince> memberAddresses) {
-
-                            paramTownProvince = memberAddresses;
-
-                            MemberAddressAdapter = new MemberAddressAdapter(
-                                    requireActivity(),
-                                    android.R.layout.simple_spinner_dropdown_item,
-                                    memberAddresses
-                            );
-                            auto_town.setAdapter(MemberAddressAdapter);
-                        }
-                    });
-                    return;
-                }
-
-                //display the properties from selected town
-                mviewModel.SearchTown(s).observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
-                    @Override
-                    public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
-
-                        TownProvAdapter = new TownCityAdapter(
-                                requireActivity(),
-                                android.R.layout.simple_spinner_dropdown_item,
-                                townProvinces
-                        );
-                        auto_town.setAdapter(TownProvAdapter);
-
-                    }
-                });
+                MemberAddressAdapter = new MemberAddressAdapter(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        memberAddresses
+                );
+                auto_town.setAdapter(MemberAddressAdapter);
             }
         });
 
@@ -474,23 +434,24 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if (auto_town.getAdapter() == null){
-                    Toast.makeText(requireActivity(), "Selected town is invalid", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                poDialogAddMember.ShowAddress(new Dialog_Add_Member_Info.OnAddress() {
+                    @Override
+                    public void OnAddress(DTownInfo.TownProvince loProvince) {
 
-                mviewModel.AddMemberAddress(
-                        "",
-                        lsTwnIDx,
-                        lsProvIDx,
-                        auto_town.getText().toString(),
-                        tie_address.getText() == null ? "" : tie_address.getText().toString(),
-                        chkbx_homeaddr.isChecked() ? "1" : "0",
-                        chkbx_active.isChecked() ? "1" : "0"
+                        mviewModel.AddMemberAddress(
+                                "",
+                                loProvince.getPsTownIDxx(),
+                                loProvince.getPsProvIDxx(),
+                                loProvince.getPsTownProvNme(),
+                                loProvince.getPsAddressx(),
+                                loProvince.isHomeAddr(),
+                                loProvince.isActive()
 
-                );
+                        );
 
-                ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
+                        ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
+                    }
+                });
             }
         });
 
@@ -498,14 +459,21 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onClick(View view) {
 
-                mviewModel.AddMemberContact(
-                        "",
-                        "",
-                        auto_contact.getText() == null ? "" : auto_contact.getText().toString(),
-                        tie_remarks.getText() == null ? "" : tie_remarks.getText().toString(),
-                        chkbx_activecontact.isChecked() ? "1" : "0"
-                );
-                ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
+                poDialogAddMember.ShowContact(new Dialog_Add_Member_Info.OnContact() {
+                    @Override
+                    public void OnContact(String lsContactNo, String lsRemarks, String lsActive) {
+
+                        mviewModel.AddMemberContact(
+                                "",
+                                "",
+                                lsContactNo,
+                                lsRemarks,
+                                lsActive
+                        );
+
+                        ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
+                    }
+                });
             }
         });
 
@@ -513,13 +481,20 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onClick(View view) {
 
-                mviewModel.AddMemberEmail(
-                        "",
-                        "",
-                        auto_email.getText() == null ? "" : auto_email.getText().toString(),
-                        chkbx_activecontact.isChecked() ? "1" : "0"
-                );
-                ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
+                poDialogAddMember.ShowEmail(new Dialog_Add_Member_Info.OnEmail() {
+                    @Override
+                    public void OnEmail(String lsEmail, String lsActive) {
+
+                        mviewModel.AddMemberEmail(
+                                "",
+                                "",
+                                lsEmail,
+                                lsActive
+                        );
+
+                        ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
+                    }
+                });
             }
         });
 
@@ -573,43 +548,100 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
-        auto_town.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable editable) {
-                mviewModel.SearchTownProvince(editable.toString());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                auto_town.showDropDown();
-            }
-        });
+        /*MEMBER ADDRESS LISTENER*/
 
         auto_town.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                //get properties to be passed later on
-                lsAddr = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsAddressx();
-                lsTwnIDx = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsTownIDxx();
-                lsProvIDx = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsProvIDxx();
-                isHomeAddr = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).isHomeAddr().equals("1");
-                isActive = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).isActive().equals("1");
+                loSelectAddress = (DTownInfo.TownProvince) adapterView.getItemAtPosition(i);
 
-                auto_town.setText(((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsTownProvNme(), false);
-                tie_address.setText(lsAddr);
-                chkbx_homeaddr.setChecked(isHomeAddr);
-                chkbx_active.setChecked(isActive);
+                auto_town.setText(loSelectAddress.getPsTownProvNme(), false);
+                tie_address.setText(loSelectAddress.getPsAddressx());
+                chkbx_homeaddr.setChecked(loSelectAddress.isHomeAddr().equals("1"));
+                chkbx_active.setChecked((loSelectAddress.isActive().equals("1")));
             }
         });
+
+        auto_town.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (MemberAddressAdapter == null) return;
+                MemberAddressAdapter.getFilter().filter(charSequence);
+            }
+        });
+
+        tie_address.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (loSelectAddress == null) return;
+
+                //show save button, if text changes
+                if (!charSequence.toString().equalsIgnoreCase(loSelectAddress.getPsAddressx())){
+                    //show if gone
+                    if (btn_save_address.getVisibility() == View.GONE) btn_save_address.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_address.getVisibility() == View.VISIBLE) btn_save_address.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        chkbx_homeaddr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+
+                if (loSelectAddress == null) return;
+
+                //show save button, if selection changed
+                if (!loSelectAddress.isHomeAddr().equalsIgnoreCase(b ? "1" : "0")){
+                    //show if gone
+                    if (btn_save_address.getVisibility() == View.GONE) btn_save_address.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_address.getVisibility() == View.VISIBLE) btn_save_address.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        chkbx_active.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+
+                if (loSelectAddress == null) return;
+
+                //show save button, if selection changed
+                if (!loSelectAddress.isActive().equalsIgnoreCase(b ? "1" : "0")){
+                    //show if gone
+                    if (btn_save_address.getVisibility() == View.GONE) btn_save_address.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_address.getVisibility() == View.VISIBLE) btn_save_address.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        /*MEMBER CONTACT LISTENER*/
 
         auto_contact.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                 loSelectContact = (EMemberContactInfo) adapterView.getItemAtPosition(i);
 
                 auto_contact.setText(((EMemberContactInfo) adapterView.getItemAtPosition(i)).getSContctNo(), false);
                 tie_remarks.setText(((EMemberContactInfo) adapterView.getItemAtPosition(i)).getSRemarksx());
@@ -618,12 +650,71 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
+        tie_remarks.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (loSelectContact == null) return;
+
+                //show save button, if text changes
+                if (!charSequence.toString().equalsIgnoreCase(loSelectContact.getSRemarksx())){
+                    //show if gone
+                    if (btn_save_contact.getVisibility() == View.GONE) btn_save_contact.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_contact.getVisibility() == View.VISIBLE) btn_save_contact.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        chkbx_activecontact.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+
+                if (loSelectContact == null) return;
+
+                //show save button, if text changes
+                if (!loSelectContact.getCRecdStat().equalsIgnoreCase(b ? "1" : "0")){
+                    //show if gone
+                    if (btn_save_contact.getVisibility() == View.GONE) btn_save_contact.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_contact.getVisibility() == View.VISIBLE) btn_save_contact.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        /*MEMBER EMAIL LISTENER*/
+
         auto_email.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                auto_email.setText(((EMemberEmailInfo) adapterView.getItemAtPosition(i)).getSEmailAdd(), false);
-                chkbx_activecontact.setChecked(((EMemberEmailInfo) adapterView.getItemAtPosition(i)).getCRecdStat().equals("1"));
+                loSelectEmail = (EMemberEmailInfo) adapterView.getItemAtPosition(i);
+
+                auto_email.setText(loSelectEmail.getSEmailAdd(), false);
+                chkbx_activecontact.setChecked(loSelectEmail.getCRecdStat().equalsIgnoreCase("1"));
+            }
+        });
+
+        chkbx_activeemail.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+
+                //show save button, if selection changed
+                if (!loSelectEmail.getCRecdStat().equalsIgnoreCase(b ? "1" : "0")){
+                    //show if gone
+                    if (btn_save_email.getVisibility() == View.GONE) btn_save_email.setVisibility(View.VISIBLE);
+                }else {
+                    //hide is visible
+                    if (btn_save_email.getVisibility() == View.VISIBLE) btn_save_email.setVisibility(View.GONE);
+                }
             }
         });
 
@@ -688,6 +779,9 @@ public class Fragment_Create_Member extends Fragment {
                     }
                 }
 
+                int hasActive = 0;
+                int hasHomeAddr = 0;
+
                 List<EMemberAddress> laAddressParams = new ArrayList<>();
                 for (DTownInfo.TownProvince townProvince : paramTownProvince){
                     Log.d("Address added ", townProvince.getPsTownProvNme());
@@ -705,7 +799,44 @@ public class Fragment_Create_Member extends Fragment {
                                     mviewModel.GetCurrentDateTime()
                             )
                     );
+
+                    //check if  active
+                    if (townProvince.isActive().equals("1")) hasActive += 1;
+
+                    //check if home address
+                    if (townProvince.isHomeAddr().equals("1")) hasHomeAddr += 1;
                 }
+
+                if (hasHomeAddr < 1){
+
+                    poMessage.ShowMessage(1, "Please select atleast one home address", "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                    return;
+                }
+
+                if (hasActive < 1){
+
+                    poMessage.ShowMessage(1, "Please select atleast one active address", "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                    return;
+                }
+
+                //reset value
+                hasActive = 0;
 
                 List<EMemberContactInfo> laContactParams = new ArrayList<>();
                 for (EMemberContactInfo contactInfo : paramContact){
@@ -724,7 +855,26 @@ public class Fragment_Create_Member extends Fragment {
 
                             )
                     );
+
+                    if (contactInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
                 }
+
+                if (hasActive < 1){
+
+                    poMessage.ShowMessage(1, "Please select atleast one active contact", "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                    return;
+                }
+
+                //reset value
+                hasActive = 0;
 
                 List<EMemberEmailInfo> laEmailParams = new ArrayList<>();
                 for (EMemberEmailInfo eMemberEmailInfo : paramEmail){
@@ -741,6 +891,22 @@ public class Fragment_Create_Member extends Fragment {
                                     mviewModel.GetCurrentDateTime()
                             )
                     );
+
+                    if (eMemberEmailInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
+                }
+
+                if (hasActive < 1){
+
+                    poMessage.ShowMessage(1, "Please select atleast one active email", "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                    return;
                 }
 
                 mviewModel.SubmitParameters(loMemberNme, poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
@@ -903,46 +1069,18 @@ public class Fragment_Create_Member extends Fragment {
         }
     }
 
-    public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince>{
-
-        private final Context loContext;
-        private final List<DTownInfo.TownProvince> towncity;
-
-        public TownCityAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
-            super(context, resource, objects);
-
-            loContext = context;
-            towncity = objects;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-
-            View view = convertView;
-            if (view == null) {
-                LayoutInflater inflater = LayoutInflater.from(loContext);
-                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
-            }
-
-            TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(towncity.get(position).getPsTownProvNme());
-
-            return view;
-
-        }
-    }
-
     public static class MemberAddressAdapter extends ArrayAdapter<DTownInfo.TownProvince>{
 
         private final Context loContext;
         private final List<DTownInfo.TownProvince> laMemberAddress;
+        private List<DTownInfo.TownProvince> laMemberAddressFiltered;
 
         public MemberAddressAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
             super(context, resource, objects);
 
             loContext = context;
             laMemberAddress = objects;
+            laMemberAddressFiltered = objects;
         }
 
         @SuppressLint("SetTextI18n")
@@ -957,10 +1095,53 @@ public class Fragment_Create_Member extends Fragment {
             }
 
             TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(laMemberAddress.get(position).getPsAddressx() + ", " + laMemberAddress.get(position).getPsTownProvNme());
+            textView.setText(laMemberAddressFiltered.get(position).getPsAddressx() + ", " + laMemberAddressFiltered.get(position).getPsTownProvNme());
 
             return view;
 
+        }
+
+        @Override
+        public int getCount() {
+            return laMemberAddressFiltered.size();
+        }
+
+        @Nullable
+        @Override
+        public DTownInfo.TownProvince getItem(int position) {
+            return laMemberAddressFiltered.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+
+                    List<DTownInfo.TownProvince> results = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.addAll(laMemberAddress);
+                    } else {
+                        for (DTownInfo.TownProvince addressInfo : laMemberAddress) {
+                            if (addressInfo.getPsTownProvNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
+                                    addressInfo.getPsAddressx().toLowerCase().contains(constraint.toString().toLowerCase())) {
+
+                                results.add(addressInfo);
+                            }
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = results;
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    laMemberAddressFiltered = (List<DTownInfo.TownProvince>) results.values;
+                    notifyDataSetChanged();
+                }
+            };
         }
     }
 
@@ -968,12 +1149,14 @@ public class Fragment_Create_Member extends Fragment {
 
         private final Context loContext;
         private final List<EMemberContactInfo> laMemberContact;
+        private List<EMemberContactInfo> laMemberContactFiltered;
 
         public MemberContactAdapter(@NonNull Context context, int resource, @NonNull List<EMemberContactInfo> objects) {
             super(context, resource, objects);
 
             loContext = context;
             laMemberContact = objects;
+            laMemberContactFiltered = objects;
         }
 
         @SuppressLint("SetTextI18n")
@@ -988,10 +1171,53 @@ public class Fragment_Create_Member extends Fragment {
             }
 
             TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(laMemberContact.get(position).getSContctNo());
+            textView.setText(laMemberContactFiltered.get(position).getSContctNo());
 
             return view;
 
+        }
+
+        @Override
+        public int getCount() {
+            return laMemberContactFiltered.size();
+        }
+
+        @Nullable
+        @Override
+        public EMemberContactInfo getItem(int position) {
+            return laMemberContactFiltered.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+
+                    List<EMemberContactInfo> results = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.addAll(laMemberContact);
+                    } else {
+                        for (EMemberContactInfo contactInfo : laMemberContact) {
+                            if (contactInfo.getSContctNo().toLowerCase().contains(constraint.toString().toLowerCase()) ||
+                                    contactInfo.getSRemarksx().toLowerCase().contains(constraint.toString().toLowerCase())) {
+
+                                results.add(contactInfo);
+                            }
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = results;
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    laMemberContactFiltered = (List<EMemberContactInfo>) results.values;
+                    notifyDataSetChanged();
+                }
+            };
         }
     }
 
@@ -999,12 +1225,14 @@ public class Fragment_Create_Member extends Fragment {
 
         private final Context loContext;
         private final List<EMemberEmailInfo> laMemberEmail;
+        private List<EMemberEmailInfo> laMemberEmailFiltered;
 
         public MemberEmailAdapter(@NonNull Context context, int resource, @NonNull List<EMemberEmailInfo> objects) {
             super(context, resource, objects);
 
             loContext = context;
             laMemberEmail = objects;
+            laMemberEmailFiltered = objects;
         }
 
         @SuppressLint("SetTextI18n")
@@ -1023,6 +1251,48 @@ public class Fragment_Create_Member extends Fragment {
 
             return view;
 
+        }
+
+        @Override
+        public int getCount() {
+            return laMemberEmailFiltered.size();
+        }
+
+        @Nullable
+        @Override
+        public EMemberEmailInfo getItem(int position) {
+            return laMemberEmailFiltered.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+
+                    List<EMemberEmailInfo> results = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.addAll(laMemberEmail);
+                    } else {
+                        for (EMemberEmailInfo emailInfo : laMemberEmail) {
+                            if (emailInfo.getSEmailAdd().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                                results.add(emailInfo);
+                            }
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = results;
+
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    laMemberEmailFiltered = (List<EMemberEmailInfo>) results.values;
+                    notifyDataSetChanged();
+                }
+            };
         }
     }
 

@@ -110,7 +110,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -121,7 +121,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -176,7 +176,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -187,7 +187,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -240,7 +240,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -251,7 +251,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -304,7 +304,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -315,7 +315,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -368,7 +368,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -379,7 +379,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -432,7 +432,7 @@ class Dashboard(loInstance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -443,7 +443,7 @@ class Dashboard(loInstance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 

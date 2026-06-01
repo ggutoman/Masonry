@@ -141,7 +141,7 @@ class UserAccount(instance : Context) {
                             }
 
                             is KTORepository.OnRequest.onError<*> -> {
-                                message = response.exception.toString()
+                                message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
                                 false
                             }
 
@@ -153,7 +153,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message ?: "Unknown error"
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -214,7 +214,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -225,7 +225,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -313,7 +313,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -324,7 +324,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -410,7 +410,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -421,7 +421,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -487,7 +487,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -498,7 +498,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -562,7 +562,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -573,7 +573,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
@@ -636,7 +636,7 @@ class UserAccount(instance : Context) {
                         }
 
                         is KTORepository.OnRequest.onError<*> -> {
-                            message = result.exception.toString()
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
                             false
                         }
 
@@ -647,7 +647,7 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
-                message = ex.message.toString()
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
 
