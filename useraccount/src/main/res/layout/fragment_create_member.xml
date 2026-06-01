@@ -300,14 +300,23 @@
 
                    </com.google.android.material.textfield.TextInputLayout>
 
+                   <com.google.android.material.button.MaterialButton
+                       style="@style/Material_Button_Transparent"
+                       android:id="@+id/btn_save_address"
+                       android:layout_width="0dp"
+                       android:layout_height="wrap_content"
+                       android:text="Save"
+                       android:visibility="gone"
+                       app:layout_constraintTop_toBottomOf="@+id/til_address"/>
+
                    <com.google.android.material.checkbox.MaterialCheckBox
                        android:id="@+id/chkbx_homeaddr"
                        android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
-                       android:text="Home Address"
-                       android:layout_marginStart="10dp"
+                       android:text="Home"
+                       android:layout_marginHorizontal="10dp"
                        app:layout_constraintTop_toBottomOf="@+id/til_address"
-                       app:layout_constraintStart_toStartOf="parent"/>
+                       app:layout_constraintEnd_toStartOf="@+id/chkbx_active"/>
 
                    <com.google.android.material.checkbox.MaterialCheckBox
                        android:id="@+id/chkbx_active"
@@ -380,6 +389,15 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_save_contact"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Save"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@+id/til_remarks"/>
+
                     <com.google.android.material.checkbox.MaterialCheckBox
                         android:id="@+id/chkbx_activecontact"
                         android:layout_width="wrap_content"
@@ -432,6 +450,15 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Material_Button_Transparent"
+                        android:id="@+id/btn_save_email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Save"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@+id/til_email"/>
+
                     <com.google.android.material.checkbox.MaterialCheckBox
                         android:id="@+id/chkbx_activeemail"
                         android:layout_width="wrap_content"
@@ -457,12 +484,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Create Member"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_cancel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Cancel"/>
 
             </LinearLayout>
 

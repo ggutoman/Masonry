@@ -1,9 +1,17 @@
 package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -50,10 +58,6 @@ public class VM_Member extends AndroidViewModel {
         laEmail = new MutableLiveData<>();
 
         poAccount = new UserAccount(application);
-    }
-
-    public void SearchTownProvince(String fsTown){
-        lsTownSearch.postValue(fsTown);
     }
 
     public boolean AddSponsor(String fsSponsor){
@@ -148,10 +152,6 @@ public class VM_Member extends AndroidViewModel {
 
     public LiveData<List<String>> GetSponsorList(){
         return laSponsors;
-    }
-
-    public LiveData<String> TownSearch(){
-        return lsTownSearch;
     }
 
     public LiveData<List<ELodgeInfo>> GetLodgeList() {
@@ -267,10 +267,86 @@ public class VM_Member extends AndroidViewModel {
                     }
                 })
                 .exceptionally(e -> {
-                    foCallback.OnFailed(e.getMessage());
+                    foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
                     return null;
                 });
 
     }
 
+    public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
+
+        private final Context loContext;
+        private final List<DTownInfo.TownProvince> towncity;
+        private List<DTownInfo.TownProvince> towncityFiltered;
+
+        public TownCityAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
+            super(context, resource, objects);
+
+            loContext = context;
+            towncity = objects;
+            towncityFiltered = objects;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = LayoutInflater.from(loContext);
+                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            }
+
+            TextView textView = view.findViewById(android.R.id.text1);
+            textView.setText(towncityFiltered.get(position).getPsTownProvNme());
+
+            return view;
+
+        }
+
+        @Override
+        public int getCount() {
+            return towncityFiltered.size();
+        }
+
+        @Nullable
+        @Override
+        public DTownInfo.TownProvince getItem(int position) {
+            return towncityFiltered.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+
+                    List<DTownInfo.TownProvince> results = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.addAll(towncity);
+                    } else {
+                        for (DTownInfo.TownProvince town : towncity) {
+                            if (town.getPsTownProvNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
+                                    town.getPsAddressx().toLowerCase().contains(constraint.toString().toLowerCase())) {
+
+                                results.add(town);
+                            }
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = results;
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    towncityFiltered = (List<DTownInfo.TownProvince>) results.values;
+
+                    notifyDataSetChanged();
+                }
+            };
+        }
+    }
 }
