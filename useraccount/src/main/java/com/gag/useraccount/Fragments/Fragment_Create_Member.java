@@ -1073,12 +1073,14 @@ public class Fragment_Create_Member extends Fragment {
 
         private final Context loContext;
         private final List<DTownInfo.TownProvince> laMemberAddress;
+        private List<DTownInfo.TownProvince> laMemberAddressFiltered;
 
         public MemberAddressAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
             super(context, resource, objects);
 
             loContext = context;
             laMemberAddress = objects;
+            laMemberAddressFiltered = objects;
         }
 
         @SuppressLint("SetTextI18n")
@@ -1093,10 +1095,53 @@ public class Fragment_Create_Member extends Fragment {
             }
 
             TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(laMemberAddress.get(position).getPsAddressx() + ", " + laMemberAddress.get(position).getPsTownProvNme());
+            textView.setText(laMemberAddressFiltered.get(position).getPsAddressx() + ", " + laMemberAddressFiltered.get(position).getPsTownProvNme());
 
             return view;
 
+        }
+
+        @Override
+        public int getCount() {
+            return laMemberAddressFiltered.size();
+        }
+
+        @Nullable
+        @Override
+        public DTownInfo.TownProvince getItem(int position) {
+            return laMemberAddressFiltered.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+
+                    List<DTownInfo.TownProvince> results = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.addAll(laMemberAddress);
+                    } else {
+                        for (DTownInfo.TownProvince addressInfo : laMemberAddress) {
+                            if (addressInfo.getPsTownProvNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
+                                    addressInfo.getPsAddressx().toLowerCase().contains(constraint.toString().toLowerCase())) {
+
+                                results.add(addressInfo);
+                            }
+                        }
+                    }
+                    FilterResults filterResults = new FilterResults();
+                    filterResults.values = results;
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    laMemberAddressFiltered = (List<DTownInfo.TownProvince>) results.values;
+                    notifyDataSetChanged();
+                }
+            };
         }
     }
 
@@ -1169,7 +1214,7 @@ public class Fragment_Create_Member extends Fragment {
 
                 @Override
                 protected void publishResults(CharSequence constraint, FilterResults results) {
-                    laMemberContactFiltered = (List<EMemberContactInfo>) results;
+                    laMemberContactFiltered = (List<EMemberContactInfo>) results.values;
                     notifyDataSetChanged();
                 }
             };
@@ -1244,7 +1289,7 @@ public class Fragment_Create_Member extends Fragment {
 
                 @Override
                 protected void publishResults(CharSequence constraint, FilterResults results) {
-                    laMemberEmailFiltered = (List<EMemberEmailInfo>) results;
+                    laMemberEmailFiltered = (List<EMemberEmailInfo>) results.values;
                     notifyDataSetChanged();
                 }
             };
