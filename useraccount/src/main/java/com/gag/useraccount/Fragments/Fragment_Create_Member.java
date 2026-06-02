@@ -20,6 +20,7 @@ import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -106,8 +107,7 @@ public class Fragment_Create_Member extends Fragment {
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
 
-    private int lnSelectCivil;
-    private int lnSelectStatus;
+    private int lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
 
     @Nullable
     @Override
@@ -130,6 +130,51 @@ public class Fragment_Create_Member extends Fragment {
 
         return view;
 
+    }
+
+    private boolean isMemberDataValid(){
+
+        if (tie_glpid.getText() == null || TextUtils.isEmpty(tie_glpid.getText().toString())){
+            Toast.makeText(requireActivity(), "GLPID is missing.", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if (lsSelectLodge == null || lsSelectLodge.isEmpty()){
+            Toast.makeText(requireActivity(), "Please select a lodge", Toast.LENGTH_SHORT).show();
+            auto_lodge.requestFocus();
+            return false;
+        }else if (lnSelectStatus < 0){
+            Toast.makeText(requireActivity(), "Please select account status", Toast.LENGTH_SHORT).show();
+            auto_lodge.requestFocus();
+            return false;
+        }else if (lsSelectTitle == null || lsSelectTitle.isEmpty()){
+            Toast.makeText(requireActivity(), "Please select a title", Toast.LENGTH_SHORT).show();
+            auto_title.requestFocus();
+            return false;
+        }else if (tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please enter lastname", Toast.LENGTH_SHORT).show();
+            tie_lastname.requestFocus();
+            return false;
+        }else if (tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please enter firstname", Toast.LENGTH_SHORT).show();
+            tie_firstname.requestFocus();
+            return false;
+        }else if (lnSelectCivil < 0){
+            Toast.makeText(requireActivity(), "Please select civil status", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramTownProvince.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one address", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramContact.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one contact", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramEmail.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one email", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }
+        return true;
     }
 
     private void initViews(View view) {
@@ -341,6 +386,7 @@ public class Fragment_Create_Member extends Fragment {
                         memberAddresses
                 );
                 auto_town.setAdapter(MemberAddressAdapter);
+                auto_town.postDelayed(() -> auto_town.showDropDown(), 200);
             }
         });
 
@@ -356,6 +402,7 @@ public class Fragment_Create_Member extends Fragment {
                         eMemberContactInfos
                 );
                 auto_contact.setAdapter(MemberContactAdapter);
+                auto_contact.postDelayed(() -> auto_contact.showDropDown(), 200);
             }
         });
 
@@ -371,7 +418,7 @@ public class Fragment_Create_Member extends Fragment {
                         eMemberEmailInfos
                 );
                 auto_email.setAdapter(MemberEmailAdapter);
-
+                auto_email.postDelayed(() -> auto_email.showDropDown(), 200);
             }
         });
 
@@ -427,74 +474,6 @@ public class Fragment_Create_Member extends Fragment {
                 }
                 auto_sponosr.setText("");
 
-            }
-        });
-
-        btn_add_address.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                poDialogAddMember.ShowAddress(new Dialog_Add_Member_Info.OnAddress() {
-                    @Override
-                    public void OnAddress(DTownInfo.TownProvince loProvince) {
-
-                        mviewModel.AddMemberAddress(
-                                "",
-                                loProvince.getPsTownIDxx(),
-                                loProvince.getPsProvIDxx(),
-                                loProvince.getPsTownProvNme(),
-                                loProvince.getPsAddressx(),
-                                loProvince.isHomeAddr(),
-                                loProvince.isActive()
-
-                        );
-
-                        ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
-                    }
-                });
-            }
-        });
-
-        btn_add_contact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                poDialogAddMember.ShowContact(new Dialog_Add_Member_Info.OnContact() {
-                    @Override
-                    public void OnContact(String lsContactNo, String lsRemarks, String lsActive) {
-
-                        mviewModel.AddMemberContact(
-                                "",
-                                "",
-                                lsContactNo,
-                                lsRemarks,
-                                lsActive
-                        );
-
-                        ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
-                    }
-                });
-            }
-        });
-
-        btn_add_email.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                poDialogAddMember.ShowEmail(new Dialog_Add_Member_Info.OnEmail() {
-                    @Override
-                    public void OnEmail(String lsEmail, String lsActive) {
-
-                        mviewModel.AddMemberEmail(
-                                "",
-                                "",
-                                lsEmail,
-                                lsActive
-                        );
-
-                        ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
-                    }
-                });
             }
         });
 
@@ -555,6 +534,7 @@ public class Fragment_Create_Member extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 loSelectAddress = (DTownInfo.TownProvince) adapterView.getItemAtPosition(i);
+                lnSelectAddress = i;
 
                 auto_town.setText(loSelectAddress.getPsTownProvNme(), false);
                 tie_address.setText(loSelectAddress.getPsAddressx());
@@ -601,6 +581,50 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
+        btn_add_address.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poDialogAddMember.ShowAddress(new Dialog_Add_Member_Info.OnAddress() {
+                    @Override
+                    public void OnAddress(DTownInfo.TownProvince loProvince) {
+
+                        mviewModel.AddMemberAddress(
+                                "",
+                                loProvince.getPsTownIDxx(),
+                                loProvince.getPsProvIDxx(),
+                                loProvince.getPsTownProvNme(),
+                                loProvince.getPsAddressx(),
+                                loProvince.isHomeAddr(),
+                                loProvince.isActive()
+
+                        );
+                        ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
+                    }
+                });
+            }
+        });
+
+        btn_save_address.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mviewModel.ReplaceAddress(
+                        lnSelectAddress,
+                        new DTownInfo.TownProvince(
+                                loSelectAddress.getPsAddrsIDx(),
+                                loSelectAddress.getPsTownIDxx(),
+                                loSelectAddress.getPsProvIDxx(),
+                                loSelectAddress.getPsTownProvNme(),
+                                tie_address.getText() == null ? "" : tie_address.getText().toString(),
+                                chkbx_homeaddr.isChecked() ? "1" : "0",
+                                chkbx_active.isChecked() ? "1" : "0"
+                        )
+                );
+                ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
+            }
+        });
+
         chkbx_homeaddr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
@@ -641,12 +665,28 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                 loSelectContact = (EMemberContactInfo) adapterView.getItemAtPosition(i);
+                loSelectContact = (EMemberContactInfo) adapterView.getItemAtPosition(i);
+                lnSelectContact = i;
 
-                auto_contact.setText(((EMemberContactInfo) adapterView.getItemAtPosition(i)).getSContctNo(), false);
-                tie_remarks.setText(((EMemberContactInfo) adapterView.getItemAtPosition(i)).getSRemarksx());
-                chkbx_activecontact.setChecked(((EMemberContactInfo) adapterView.getItemAtPosition(i)).getCRecdStat().equals("1"));
+                auto_contact.setText(loSelectContact.getSContctNo(), false);
+                tie_remarks.setText(loSelectContact.getSRemarksx());
+                chkbx_activecontact.setChecked(loSelectContact.getCRecdStat().equalsIgnoreCase("1"));
 
+            }
+        });
+
+        auto_contact.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) { }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (MemberContactAdapter == null) return;
+                MemberContactAdapter.getFilter().filter(charSequence);
             }
         });
 
@@ -670,6 +710,41 @@ public class Fragment_Create_Member extends Fragment {
                     //hide is visible
                     if (btn_save_contact.getVisibility() == View.VISIBLE) btn_save_contact.setVisibility(View.GONE);
                 }
+            }
+        });
+
+        btn_add_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poDialogAddMember.ShowContact(new Dialog_Add_Member_Info.OnContact() {
+                    @Override
+                    public void OnContact(String lsContactNo, String lsRemarks, String lsActive) {
+
+                        mviewModel.AddMemberContact(
+                                "",
+                                "",
+                                lsContactNo,
+                                lsRemarks,
+                                lsActive
+                        );
+                        ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
+                    }
+                });
+            }
+        });
+
+        btn_save_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mviewModel.ReplaceContact(
+                        lnSelectContact,
+                        tie_remarks.getText() == null ? "" : tie_remarks.getText().toString(),
+                        chkbx_activecontact.isChecked() ? "1" : "0"
+                );
+                view.setVisibility(View.GONE);
+                ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
             }
         });
 
@@ -697,15 +772,51 @@ public class Fragment_Create_Member extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 loSelectEmail = (EMemberEmailInfo) adapterView.getItemAtPosition(i);
+                lnSelectEmail = i;
 
                 auto_email.setText(loSelectEmail.getSEmailAdd(), false);
-                chkbx_activecontact.setChecked(loSelectEmail.getCRecdStat().equalsIgnoreCase("1"));
+                chkbx_activeemail.setChecked(loSelectEmail.getCRecdStat().equalsIgnoreCase("1"));
+            }
+        });
+
+        btn_add_email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poDialogAddMember.ShowEmail(new Dialog_Add_Member_Info.OnEmail() {
+                    @Override
+                    public void OnEmail(String lsEmail, String lsActive) {
+
+                        mviewModel.AddMemberEmail(
+                                "",
+                                "",
+                                lsEmail,
+                                lsActive
+                        );
+                        ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
+                    }
+                });
+            }
+        });
+
+        btn_save_email.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mviewModel.ReplaceEmail(
+                        lnSelectEmail,
+                        chkbx_activeemail.isChecked() ? "1" : "0"
+                );
+                view.setVisibility(View.GONE);
+                ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
             }
         });
 
         chkbx_activeemail.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean b) {
+
+                if (loSelectEmail == null) return;
 
                 //show save button, if selection changed
                 if (!loSelectEmail.getCRecdStat().equalsIgnoreCase(b ? "1" : "0")){
@@ -722,217 +833,234 @@ public class Fragment_Create_Member extends Fragment {
             @Override
             public void onClick(View view) {
 
-                String lsFrstNme= tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty() ? "" : tie_firstname.getText().toString();
-                String lsMiddNme= tie_middlename.getText() == null || tie_middlename.getText().toString().isEmpty() ? "" : tie_middlename.getText().toString();
-                String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
-                String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
+                //validate member data information
+                if (!isMemberDataValid()) return;
 
-                String lsMemberFullNm = lsFrstNme + " " + lsMiddNme + ". " + lsLastNme + " " + lsSuffix;
-
-                UserAccount.MemberName loMemberNme = new UserAccount.MemberName(
-                        lsFrstNme,
-                        lsMiddNme,
-                        lsLastNme,
-                        lsSuffix
-                );
-
-                //initialze default values
-                EMemberInfo poMember = new EMemberInfo(
-                        "",
-                        lsSelectLodge,
-                        tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
-                        lsMemberFullNm,
-                        String.valueOf(lnSelectCivil),
-                        tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
-                        String.valueOf(lnSelectStatus),
-                        mviewModel.GetCurrentDate(),
-                        null,
-                        lsSelectTitle,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "",
-                        "",
-                        "",
-                        0.00,
-                        0.00,
-                        null,
-                        String.valueOf(lnSelectStatus)
-                );
-
-                //add sponsors
-                for (int index = 0; index < paramSponsors.size(); index++){
-                    Log.d("Sponsors added ", paramSponsors.get(index));
-
-                    switch (index){
-
-                        case 0:
-                            poMember.setSSponsor1(paramSponsors.get(index));
-                            break;
-                        case 1:
-                            poMember.setSSponsor2(paramSponsors.get(index));
-                            break;
-                        case 2:
-                            poMember.setSSponsor3(paramSponsors.get(index));
-                            break;
-                    }
-                }
-
-                int hasActive = 0;
-                int hasHomeAddr = 0;
-
-                List<EMemberAddress> laAddressParams = new ArrayList<>();
-                for (DTownInfo.TownProvince townProvince : paramTownProvince){
-                    Log.d("Address added ", townProvince.getPsTownProvNme());
-
-                    laAddressParams.add(
-                            new EMemberAddress(
-                                    "",
-                                    "",
-                                    townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
-                                    townProvince.getPsTownIDxx(),
-                                    townProvince.isHomeAddr(),
-                                    townProvince.isActive(),
-                                    mviewModel.GetUserID(),
-                                    mviewModel.GetCurrentDate(),
-                                    mviewModel.GetCurrentDateTime()
-                            )
-                    );
-
-                    //check if  active
-                    if (townProvince.isActive().equals("1")) hasActive += 1;
-
-                    //check if home address
-                    if (townProvince.isHomeAddr().equals("1")) hasHomeAddr += 1;
-                }
-
-                if (hasHomeAddr < 1){
-
-                    poMessage.ShowMessage(1, "Please select atleast one home address", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
-                    return;
-                }
-
-                if (hasActive < 1){
-
-                    poMessage.ShowMessage(1, "Please select atleast one active address", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
-                    return;
-                }
-
-                //reset value
-                hasActive = 0;
-
-                List<EMemberContactInfo> laContactParams = new ArrayList<>();
-                for (EMemberContactInfo contactInfo : paramContact){
-                    Log.d("Contacts added ", contactInfo.getSContctNo());
-
-                    laContactParams.add(
-                            new EMemberContactInfo(
-                                    contactInfo.getSContctID(),
-                                    contactInfo.getSMemberID(),
-                                    contactInfo.getSContctNo(),
-                                    contactInfo.getSRemarksx(),
-                                    contactInfo.getCRecdStat(),
-                                    mviewModel.GetUserID(),
-                                    mviewModel.GetCurrentDate(),
-                                    mviewModel.GetCurrentDateTime()
-
-                            )
-                    );
-
-                    if (contactInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
-                }
-
-                if (hasActive < 1){
-
-                    poMessage.ShowMessage(1, "Please select atleast one active contact", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
-                    return;
-                }
-
-                //reset value
-                hasActive = 0;
-
-                List<EMemberEmailInfo> laEmailParams = new ArrayList<>();
-                for (EMemberEmailInfo eMemberEmailInfo : paramEmail){
-                    Log.d("Emails added ", eMemberEmailInfo.getSEmailAdd());
-
-                    laEmailParams.add(
-                            new EMemberEmailInfo(
-                                    eMemberEmailInfo.getSMailIDxx(),
-                                    eMemberEmailInfo.getSMemberID(),
-                                    eMemberEmailInfo.getSEmailAdd(),
-                                    eMemberEmailInfo.getCRecdStat(),
-                                    mviewModel.GetUserID(),
-                                    mviewModel.GetCurrentDate(),
-                                    mviewModel.GetCurrentDateTime()
-                            )
-                    );
-
-                    if (eMemberEmailInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
-                }
-
-                if (hasActive < 1){
-
-                    poMessage.ShowMessage(1, "Please select atleast one active email", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
-                    return;
-                }
-
-                mviewModel.SubmitParameters(loMemberNme, poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
+                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
-                    public void OnLoad() {
-                        poDialog.ShowDialog("Submitting your information. Please wait . .");
+                    public void OnPositive(@NotNull AlertDialog poConfirmDialog) {
+                        poConfirmDialog.dismiss();
                     }
 
                     @Override
-                    public void OnSuccess() {
-                        poDialog.DismissDialog();
-                    }
+                    public void OnNegative(@NotNull AlertDialog poConfirmDialog) {
 
-                    @Override
-                    public void OnFailed(String fsMesssage) {
-                        poDialog.DismissDialog();
+                        poConfirmDialog.dismiss();
 
-                        poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                        String lsFrstNme= tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty() ? "" : tie_firstname.getText().toString();
+                        String lsMiddNme= tie_middlename.getText() == null || tie_middlename.getText().toString().isEmpty() ? "" : tie_middlename.getText().toString();
+                        String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
+                        String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
+
+                        String lsMemberFullNm = lsFrstNme + " " + lsMiddNme + ". " + lsLastNme + " " + lsSuffix;
+
+                        UserAccount.MemberName loMemberNme = new UserAccount.MemberName(
+                                lsFrstNme,
+                                lsMiddNme,
+                                lsLastNme,
+                                lsSuffix
+                        );
+
+                        //initialze default values
+                        EMemberInfo poMember = new EMemberInfo(
+                                "",
+                                lsSelectLodge,
+                                tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
+                                lsMemberFullNm,
+                                String.valueOf(lnSelectCivil),
+                                tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
+                                String.valueOf(lnSelectStatus),
+                                mviewModel.GetCurrentDate(),
+                                null,
+                                lsSelectTitle,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "",
+                                "",
+                                "",
+                                0.00,
+                                0.00,
+                                null,
+                                String.valueOf(lnSelectStatus)
+                        );
+
+                        //add sponsors
+                        for (int index = 0; index < paramSponsors.size(); index++){
+                            Log.d("Sponsors added ", paramSponsors.get(index));
+
+                            switch (index){
+
+                                case 0:
+                                    poMember.setSSponsor1(paramSponsors.get(index));
+                                    break;
+                                case 1:
+                                    poMember.setSSponsor2(paramSponsors.get(index));
+                                    break;
+                                case 2:
+                                    poMember.setSSponsor3(paramSponsors.get(index));
+                                    break;
+                            }
+                        }
+
+                        int hasActive = 0;
+                        int hasHomeAddr = 0;
+
+                        List<EMemberAddress> laAddressParams = new ArrayList<>();
+                        for (DTownInfo.TownProvince townProvince : paramTownProvince){
+                            Log.d("Address added ", townProvince.getPsTownProvNme());
+
+                            laAddressParams.add(
+                                    new EMemberAddress(
+                                            "",
+                                            "",
+                                            townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
+                                            townProvince.getPsTownIDxx(),
+                                            townProvince.isHomeAddr(),
+                                            townProvince.isActive(),
+                                            mviewModel.GetUserID(),
+                                            mviewModel.GetCurrentDate(),
+                                            mviewModel.GetCurrentDateTime()
+                                    )
+                            );
+
+                            //check if  active
+                            if (townProvince.isActive().equals("1")) hasActive += 1;
+
+                            //check if home address
+                            if (townProvince.isHomeAddr().equals("1")) hasHomeAddr += 1;
+                        }
+
+                        if (hasHomeAddr < 1){
+
+                            poMessage.ShowMessage(1, "Please select atleast one home address", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        if (hasActive < 1){
+
+                            poMessage.ShowMessage(1, "Please select atleast one active address", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        //reset value
+                        hasActive = 0;
+
+                        List<EMemberContactInfo> laContactParams = new ArrayList<>();
+                        for (EMemberContactInfo contactInfo : paramContact){
+                            Log.d("Contacts added ", contactInfo.getSContctNo());
+
+                            laContactParams.add(
+                                    new EMemberContactInfo(
+                                            contactInfo.getSContctID(),
+                                            contactInfo.getSMemberID(),
+                                            contactInfo.getSContctNo(),
+                                            contactInfo.getSRemarksx(),
+                                            contactInfo.getCRecdStat(),
+                                            mviewModel.GetUserID(),
+                                            mviewModel.GetCurrentDate(),
+                                            mviewModel.GetCurrentDateTime()
+
+                                    )
+                            );
+
+                            if (contactInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
+                        }
+
+                        if (hasActive < 1){
+
+                            poMessage.ShowMessage(1, "Please select atleast one active contact", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        //reset value
+                        hasActive = 0;
+
+                        List<EMemberEmailInfo> laEmailParams = new ArrayList<>();
+                        for (EMemberEmailInfo eMemberEmailInfo : paramEmail){
+                            Log.d("Emails added ", eMemberEmailInfo.getSEmailAdd());
+
+                            laEmailParams.add(
+                                    new EMemberEmailInfo(
+                                            eMemberEmailInfo.getSMailIDxx(),
+                                            eMemberEmailInfo.getSMemberID(),
+                                            eMemberEmailInfo.getSEmailAdd(),
+                                            eMemberEmailInfo.getCRecdStat(),
+                                            mviewModel.GetUserID(),
+                                            mviewModel.GetCurrentDate(),
+                                            mviewModel.GetCurrentDateTime()
+                                    )
+                            );
+
+                            if (eMemberEmailInfo.getCRecdStat().equalsIgnoreCase("1")) hasActive += 1;
+                        }
+
+                        if (hasActive < 1){
+
+                            poMessage.ShowMessage(1, "Please select atleast one active email", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        mviewModel.SubmitParameters(loMemberNme, poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
                             @Override
-                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
+                            public void OnLoad() {
+                                poDialog.ShowDialog("Submitting your information. Please wait . .");
                             }
 
                             @Override
-                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            public void OnSuccess() {
+                                poDialog.DismissDialog();
+                            }
+
+                            @Override
+                            public void OnFailed(String fsMesssage) {
+                                poDialog.DismissDialog();
+
+                                poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
                         });
+
                     }
                 });
 
@@ -953,60 +1081,6 @@ public class Fragment_Create_Member extends Fragment {
                 ((CheckBox) view).setChecked(false);
             }
         }
-    }
-
-    private boolean isDataValid() {
-
-        if (TextUtils.isEmpty(auto_lodge.getText().toString())) {
-
-            auto_lodge.setError("Lodge is required");
-            auto_lodge.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(tie_glpid.getText().toString())) {
-
-            tie_glpid.setError("Account type is required");
-            tie_glpid.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(auto_status.getText().toString())) {
-
-            auto_status.setError("Status is required");
-            auto_status.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(auto_title.getText().toString())) {
-
-            auto_title.setError("Title is required");
-            auto_title.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(tie_lastname.getText().toString())) {
-
-            tie_lastname.setError("Lastname is required");
-            tie_lastname.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(tie_firstname.getText().toString())) {
-
-            tie_firstname.setError("Firstname is required");
-            tie_firstname.requestFocus();
-            return false;
-        }
-
-        if (TextUtils.isEmpty(auto_civil.getText().toString())) {
-
-            auto_civil.setError("Civil status is required");
-            auto_civil.requestFocus();
-            return false;
-        }
-
-        return true;
     }
 
     public static class LodgeAdapter extends ArrayAdapter<ELodgeInfo>{

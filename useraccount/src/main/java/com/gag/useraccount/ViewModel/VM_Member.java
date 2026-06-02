@@ -95,6 +95,16 @@ public class VM_Member extends AndroidViewModel {
         laAddress.setValue(currentList);
     }
 
+    public void ReplaceAddress(int index, DTownInfo.TownProvince loAddress){
+
+        List<DTownInfo.TownProvince> currentList = laAddress.getValue();
+
+        if (currentList == null) return;
+
+        currentList.set(index, loAddress);
+        laAddress.setValue(currentList);
+    }
+
     public void AddMemberContact(String fsContactID, String fsMemberID, String fsContactNo, String fsRemarks, String fsStatus){
 
         EMemberContactInfo loContact = new EMemberContactInfo(
@@ -117,6 +127,20 @@ public class VM_Member extends AndroidViewModel {
         laContact.setValue(currentList);
     }
 
+    public void ReplaceContact(int index, String fsRemarks, String fsStatus){
+
+        List<EMemberContactInfo> currentList = laContact.getValue();
+
+        if (currentList == null) return;
+
+        EMemberContactInfo loContact = laContact.getValue().get(index);
+        loContact.setSRemarksx(fsRemarks);
+        loContact.setCRecdStat(fsStatus);
+
+        currentList.set(index, loContact);
+        laContact.setValue(currentList);
+    }
+
     public void AddMemberEmail(String fsEmailID, String fsMemberID, String fsEmailAdd, String fsStatus){
 
         EMemberEmailInfo loContact = new EMemberEmailInfo(
@@ -135,6 +159,19 @@ public class VM_Member extends AndroidViewModel {
             currentList = new ArrayList<>();
         }
         currentList.add(loContact);
+        laEmail.setValue(currentList);
+    }
+
+    public void ReplaceEmail(int index, String fsStatus){
+
+        List<EMemberEmailInfo> currentList = laEmail.getValue();
+
+        if (currentList == null) return;
+
+        EMemberEmailInfo loEmail = laEmail.getValue().get(index);
+        loEmail.setCRecdStat(fsStatus);
+
+        currentList.set(index, loEmail);
         laEmail.setValue(currentList);
     }
 

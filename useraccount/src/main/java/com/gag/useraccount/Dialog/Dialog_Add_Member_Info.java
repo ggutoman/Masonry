@@ -139,7 +139,8 @@ public class Dialog_Add_Member_Info{
                                 townProvinces
                         );
                         auto_town.setAdapter(TownProvAdapter);
-                        auto_town.showDropDown();
+
+                        TownProvAdapter.getFilter().filter(charSequence.toString());
                     }
                 });;
             }
@@ -226,17 +227,12 @@ public class Dialog_Add_Member_Info{
         ClearFields(new ArrayList<>(List.of(tie_email, chkemail_active)), false);
 
         layoutAddress.setVisibility(View.GONE);
-        layoutContact.setVisibility(View.VISIBLE);
-        layoutEmail.setVisibility(View.GONE);
+        layoutContact.setVisibility(View.GONE);
+        layoutEmail.setVisibility(View.VISIBLE);
 
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (tie_contact.getText() == null || tie_contact.getText().toString().isEmpty()){
-                    Toast.makeText(loInstance, "Please enter contact no", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
                 if (tie_email.getText() == null || tie_email.getText().toString().isEmpty()){
                     Toast.makeText(loInstance, "Please enter email address", Toast.LENGTH_SHORT).show();

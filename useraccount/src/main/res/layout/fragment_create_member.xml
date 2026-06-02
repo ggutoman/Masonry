@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:id="@+id/scv_form"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btn_create">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,7 +39,7 @@
                     style="@style/TextInputStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="GLPID">
+                    android:hint="GLPID (Required)">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/TextInputStyle.Edittext"
@@ -48,7 +54,7 @@
                     style="@style/CustomDropDownTilStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Lodge">
+                    android:hint="Lodge  (Required)">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         style="@style/DropdownStyleTheme"
@@ -62,7 +68,7 @@
                     style="@style/CustomDropDownTilStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Select Status">
+                    android:hint="Select Status  (Required)">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         style="@style/DropdownStyleTheme"
@@ -76,7 +82,7 @@
                     style="@style/CustomDropDownTilStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Select Title">
+                    android:hint="Select Title  (Required)">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         style="@style/DropdownStyleTheme"
@@ -138,7 +144,7 @@
                     style="@style/TextInputStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Lastname">
+                    android:hint="Lastname  (Required)">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/TextInputStyle.Edittext"
@@ -152,7 +158,7 @@
                     style="@style/TextInputStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Firstname">
+                    android:hint="Firstname  (Required)">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/TextInputStyle.Edittext"
@@ -209,7 +215,7 @@
                     android:id="@+id/til_civil"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Civil Status"
+                    android:hint="Civil Status  (Required)"
                     app:layout_constraintStart_toEndOf="@+id/til_midname"
                     app:layout_constraintTop_toTopOf="@+id/til_midname"
                     app:layout_constraintBottom_toBottomOf="@+id/til_midname"
@@ -270,7 +276,7 @@
                        android:id="@+id/til_town"
                        android:layout_width="0dp"
                        android:layout_height="wrap_content"
-                       android:hint="Select Towm/City"
+                       android:hint="Select Address"
                        app:layout_constraintStart_toStartOf="parent"
                        app:layout_constraintEnd_toEndOf="parent"
                        app:layout_constraintTop_toBottomOf="@+id/mtv_address">
@@ -358,7 +364,7 @@
                         android:id="@+id/til_contact"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="Contact Number"
+                        android:hint="Select Contact"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/mtv_contact">
@@ -438,7 +444,7 @@
                         android:id="@+id/til_email"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="Email Address"
+                        android:hint="Select Email"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/mtv_email">
@@ -472,23 +478,19 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="5dp">
-
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Material_Button"
-                    android:id="@+id/btn_create"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Create Member"/>
-
-            </LinearLayout>
-
         </LinearLayout>
 
     </ScrollView>
 
-</LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        style="@style/Material_Button"
+        android:id="@+id/btn_create"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Create Member"
+        android:layout_margin="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
