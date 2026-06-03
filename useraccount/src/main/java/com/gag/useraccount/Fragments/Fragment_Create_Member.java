@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -74,7 +75,7 @@ public class Fragment_Create_Member extends Fragment {
             btn_add_contact,
             btn_add_email;
 
-    private MaterialButton btn_add_sponsor, btn_create, btn_save_address, btn_save_contact, btn_save_email;
+    private MaterialButton btn_add_sponsor, btn_save_sponsor, btn_create, btn_save_address, btn_save_contact, btn_save_email;
 
     private TextInputEditText tie_lastname,
             tie_firstname,
@@ -100,6 +101,7 @@ public class Fragment_Create_Member extends Fragment {
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
 
+    private String lsSelectSponsor;
     private String lsSelectLodge;
     private String lsSelectTitle;
 
@@ -107,7 +109,7 @@ public class Fragment_Create_Member extends Fragment {
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
 
-    private int lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
+    private int lnSelectSponsor = -1, lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
 
     @Nullable
     @Override
@@ -184,6 +186,7 @@ public class Fragment_Create_Member extends Fragment {
         auto_status = view.findViewById(R.id.auto_status);
         auto_title = view.findViewById(R.id.auto_title);
         auto_sponosr = view.findViewById(R.id.auto_sponosr);
+        btn_save_sponsor = view.findViewById(R.id.btn_save_sponsor);
         auto_town = view.findViewById(R.id.auto_town);
         auto_contact = view.findViewById(R.id.auto_contact);
         auto_email = view.findViewById(R.id.auto_email);
@@ -224,7 +227,7 @@ public class Fragment_Create_Member extends Fragment {
 
             if (getArguments().getString("fsGLPIDxx") == null || getArguments().getString("fsGLPIDxx").isEmpty()){
 
-                poMessage.ShowMessage(1, "Could not find member information", "Okay", "", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(1, "Could not verify member ID", "Okay", "", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
@@ -241,83 +244,92 @@ public class Fragment_Create_Member extends Fragment {
                 });
                 return;
             }
+            btn_create.setText("Update Member");
+            tie_glpid.setText(getArguments().getString("fsGLPIDxx"));
+        }
 
-            mviewModel.GetMemberGLPID(getArguments().getString("fsGLPIDxx")).observe(requireActivity(), new Observer<EMemberInfo>() {
-                @Override
-                public void onChanged(EMemberInfo eMemberInfo) {
+        if (tie_glpid.getText() == null || tie_glpid.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "GLP ID is not initialized properly.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                    if (eMemberInfo == null){
+        //get member information via glpid
+        mviewModel.GetMemberGLPID(tie_glpid.getText().toString()).observe(requireActivity(), new Observer<EMemberInfo>() {
+            @Override
+            public void onChanged(EMemberInfo eMemberInfo) {
 
-                        poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
-                            @Override
-                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
+                //if member information is not found via argument's passed GLPID (update member only), validate and return
+                if (eMemberInfo == null && getArguments() != null){
 
-                                requireActivity()
-                                        .getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .remove(Fragment_Create_Member.this)
-                                        .commit();
-                            }
+                    poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
 
-                            @Override
-                            public void OnNegative(@NotNull AlertDialog poDialog) {}
-                        });
-                        return;
-
-                    }
-
-                    btn_create.setText("Update Member");
-                    tie_glpid.setText(eMemberInfo.getSGLPIDNoX());
-
-                    //initialize address, and email with exisitng list
-                    if (mviewModel.GetMemberAddress(eMemberInfo.getSMemberID()).size() > 1){
-
-                        for (DTownInfo.TownProvince loTown : mviewModel.GetMemberAddress(eMemberInfo.getSMemberID())){
-
-                            mviewModel.AddMemberAddress(
-                                    loTown.getPsAddrsIDx(),
-                                    loTown.getPsTownIDxx(),
-                                    loTown.getPsProvIDxx(),
-                                    loTown.getPsTownProvNme(),
-                                    loTown.getPsAddressx(),
-                                    loTown.isHomeAddr(),
-                                    loTown.isActive()
-                            );
+                            requireActivity()
+                                    .getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .remove(Fragment_Create_Member.this)
+                                    .commit();
                         }
-                    }
 
-                    //initialize contact with exisitng list
-                    if (mviewModel.GetMemberContact(eMemberInfo.getSMemberID()).size() > 1){
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                    return;
 
-                        for (EMemberContactInfo loContact : mviewModel.GetMemberContact(eMemberInfo.getSMemberID())){
+                }
 
-                            mviewModel.AddMemberContact(
-                                    loContact.getSContctID(),
-                                    loContact.getSMemberID(),
-                                    loContact.getSContctNo(),
-                                    loContact.getSRemarksx(),
-                                    loContact.getCRecdStat()
-                            );
-                        }
-                    }
+                //initialize member information
+                //tie_lastname.setText(eMemberInfo.get);
 
-                    //initialize email with exisitng list
-                    if (mviewModel.GetMemberEmail(eMemberInfo.getSMemberID()).size() > 1){
+                //initialize address, and email with exisitng list
+                if (mviewModel.GetMemberAddress(eMemberInfo.getSMemberID()).size() > 1){
 
-                        for (EMemberEmailInfo loEmail : mviewModel.GetMemberEmail(eMemberInfo.getSMemberID())){
+                    for (DTownInfo.TownProvince loTown : mviewModel.GetMemberAddress(eMemberInfo.getSMemberID())){
 
-                            mviewModel.AddMemberEmail(
-                                    loEmail.getSMailIDxx(),
-                                    loEmail.getSMemberID(),
-                                    loEmail.getSEmailAdd(),
-                                    loEmail.getCRecdStat()
-                            );
-                        }
+                        mviewModel.AddMemberAddress(
+                                loTown.getPsAddrsIDx(),
+                                loTown.getPsTownIDxx(),
+                                loTown.getPsProvIDxx(),
+                                loTown.getPsTownProvNme(),
+                                loTown.getPsAddressx(),
+                                loTown.isHomeAddr(),
+                                loTown.isActive()
+                        );
                     }
                 }
-            });
-        }
+
+                //initialize contact with exisitng list
+                if (mviewModel.GetMemberContact(eMemberInfo.getSMemberID()).size() > 1){
+
+                    for (EMemberContactInfo loContact : mviewModel.GetMemberContact(eMemberInfo.getSMemberID())){
+
+                        mviewModel.AddMemberContact(
+                                loContact.getSContctID(),
+                                loContact.getSMemberID(),
+                                loContact.getSContctNo(),
+                                loContact.getSRemarksx(),
+                                loContact.getCRecdStat()
+                        );
+                    }
+                }
+
+                //initialize email with exisitng list
+                if (mviewModel.GetMemberEmail(eMemberInfo.getSMemberID()).size() > 1){
+
+                    for (EMemberEmailInfo loEmail : mviewModel.GetMemberEmail(eMemberInfo.getSMemberID())){
+
+                        mviewModel.AddMemberEmail(
+                                loEmail.getSMailIDxx(),
+                                loEmail.getSMemberID(),
+                                loEmail.getSEmailAdd(),
+                                loEmail.getCRecdStat()
+                        );
+                    }
+                }
+            }
+        });
 
         mviewModel.GetSponsorList().observe(requireActivity(), new Observer<List<String>>() {
             @Override
@@ -330,6 +342,7 @@ public class Fragment_Create_Member extends Fragment {
                         android.R.layout.simple_spinner_dropdown_item,
                         strings
                 ));
+                auto_sponosr.postDelayed(() -> auto_sponosr.showDropDown(), 200);
             }
         });
 
@@ -439,44 +452,6 @@ public class Fragment_Create_Member extends Fragment {
 
     private void initListeners() {
 
-        btn_add_sponsor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (auto_sponosr.getText() == null || auto_sponosr.getText().toString().isEmpty()) {
-
-                    poMessage.ShowMessage(1, "Please enter a sponsor name", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                        }
-                    });
-                    return;
-                }
-
-                if (!mviewModel.AddSponsor(auto_sponosr.getText().toString())){
-
-                    poMessage.ShowMessage(1, "Sponsor has reached maximum limit of entries", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                        }
-                    });
-                    return;
-                }
-                auto_sponosr.setText("");
-
-            }
-        });
-
         tie_birthdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -524,6 +499,95 @@ public class Fragment_Create_Member extends Fragment {
 
                 lsSelectTitle = ((ETitle) adapterView.getItemAtPosition(i)).getSTitleIDx();
                 auto_title.setText(((ETitle) adapterView.getItemAtPosition(i)).getSTitleDsc(), false);
+            }
+        });
+
+        /*MEMBER SPONSOR LISTENER*/
+        auto_sponosr.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                lnSelectSponsor = i;
+                lsSelectSponsor = adapterView.getItemAtPosition(i).toString();
+
+
+                auto_sponosr.setText(adapterView.getItemAtPosition(lnSelectSponsor).toString());
+                btn_save_sponsor.setVisibility(View.VISIBLE);
+            }
+        });
+
+        auto_sponosr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (lnSelectSponsor < 0) {
+                    if (btn_save_sponsor.getVisibility() == View.VISIBLE) btn_save_sponsor.setVisibility(View.GONE);
+                }else {
+                    if (btn_save_sponsor.getVisibility() == View.GONE) btn_save_sponsor.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        btn_add_sponsor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poDialogAddMember.ShowSponsor(true, auto_sponosr.getText() == null ? "" : auto_sponosr.getText().toString(), new Dialog_Add_Member_Info.OnSponsor() {
+                    @Override
+                    public void OnSubmit(String fsSponsor) {
+
+                        if (!mviewModel.AddSponsor(fsSponsor)){
+
+                            poMessage.ShowMessage(1, "Sponsor has reached maximum limit of entries", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {
+                                }
+                            });
+                            return;
+                        }
+
+                        //reset selection
+                        lnSelectSponsor = -1;
+                        ClearFields(new ArrayList<>(List.of(auto_sponosr, btn_save_sponsor)), false);
+                    }
+                });
+            }
+        });
+
+        btn_save_sponsor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (lnSelectSponsor < 0){
+                    Toast.makeText(requireActivity(), "Please select a sponsor", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                poDialogAddMember.ShowSponsor(false, lsSelectSponsor, new Dialog_Add_Member_Info.OnSponsor() {
+                    @Override
+                    public void OnSubmit(String fsSponsor) {
+
+                        mviewModel.ReplaceSponsor(
+                                lnSelectSponsor,
+                                fsSponsor
+                        );
+
+                        //reset selection
+                        lnSelectSponsor = -1;
+                        ClearFields(new ArrayList<>(List.of(auto_sponosr, btn_save_sponsor)), false);
+                    }
+                });
             }
         });
 
@@ -599,9 +663,14 @@ public class Fragment_Create_Member extends Fragment {
                                 loProvince.isActive()
 
                         );
-                        ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
                     }
                 });
+
+                //reset selection
+                loSelectAddress = null;
+                lnSelectAddress = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
             }
         });
 
@@ -621,7 +690,12 @@ public class Fragment_Create_Member extends Fragment {
                                 chkbx_active.isChecked() ? "1" : "0"
                         )
                 );
-                ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active)), false);
+
+                //reset selection
+                loSelectAddress = null;
+                lnSelectAddress = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkbx_homeaddr, chkbx_active, btn_save_address)), false);
             }
         });
 
@@ -728,9 +802,13 @@ public class Fragment_Create_Member extends Fragment {
                                 lsRemarks,
                                 lsActive
                         );
-                        ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
                     }
                 });
+
+                loSelectContact = null;
+                lnSelectContact = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
             }
         });
 
@@ -743,8 +821,11 @@ public class Fragment_Create_Member extends Fragment {
                         tie_remarks.getText() == null ? "" : tie_remarks.getText().toString(),
                         chkbx_activecontact.isChecked() ? "1" : "0"
                 );
-                view.setVisibility(View.GONE);
-                ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact)), false);
+
+                loSelectContact = null;
+                lnSelectContact = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_contact, tie_remarks, chkbx_activecontact, btn_save_contact)), false);
             }
         });
 
@@ -779,6 +860,21 @@ public class Fragment_Create_Member extends Fragment {
             }
         });
 
+        auto_email.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) { }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (MemberEmailAdapter == null) return;
+                MemberEmailAdapter.getFilter().filter(charSequence);
+            }
+        });
+
         btn_add_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -793,9 +889,13 @@ public class Fragment_Create_Member extends Fragment {
                                 lsEmail,
                                 lsActive
                         );
-                        ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
                     }
                 });
+
+                loSelectEmail = null;
+                lnSelectEmail = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
             }
         });
 
@@ -807,8 +907,11 @@ public class Fragment_Create_Member extends Fragment {
                         lnSelectEmail,
                         chkbx_activeemail.isChecked() ? "1" : "0"
                 );
-                view.setVisibility(View.GONE);
-                ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail)), false);
+
+                loSelectEmail = null;
+                lnSelectEmail = -1;
+
+                ClearFields(new ArrayList<>(List.of(auto_email, chkbx_activeemail, btn_save_email)), false);
             }
         });
 
@@ -1043,6 +1146,33 @@ public class Fragment_Create_Member extends Fragment {
                             @Override
                             public void OnSuccess() {
                                 poDialog.DismissDialog();
+
+                                poMessage.ShowMessage(0, "Member created successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+
+
+                                        //reset only text from selection
+                                        ClearFields(new ArrayList<>(List.of(auto_lodge, auto_title, auto_status, auto_civil)), false);
+
+                                        //clear all fields and adapters
+                                        ClearFields(new ArrayList<>(List.of(tie_glpid, auto_sponosr, btn_save_sponsor, tie_lastname,
+                                                        tie_firstname, tie_middlename, tie_suffix, tie_birthdate, tie_address,
+                                                        auto_town, chkbx_homeaddr, chkbx_homeaddr, auto_contact, tie_remarks, chkbx_activecontact,
+                                                        auto_email, chkbx_activeemail, btn_save_address, btn_save_contact, btn_save_email
+                                                    )
+                                                ),
+                                                true);
+
+                                        initDataReceiver();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+
+
                             }
 
                             @Override
@@ -1053,6 +1183,9 @@ public class Fragment_Create_Member extends Fragment {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
+
+                                        //retrieve saved entries upon error, if exists
+                                        initDataReceiver();
                                     }
 
                                     @Override
@@ -1079,6 +1212,8 @@ public class Fragment_Create_Member extends Fragment {
                 if (clearAdapter) ((MaterialAutoCompleteTextView) view).setAdapter(null);
             }else if (view instanceof CheckBox){
                 ((CheckBox) view).setChecked(false);
+            }else if (view instanceof MaterialButton){
+                ((MaterialButton) view).setVisibility(View.GONE);
             }
         }
     }

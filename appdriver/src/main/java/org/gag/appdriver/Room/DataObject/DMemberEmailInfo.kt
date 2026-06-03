@@ -11,7 +11,7 @@ interface DMemberEmailInfo {
     @Upsert(entity = EMemberEmailInfo::class)
     fun SaveMemberEmail(poContact: EMemberEmailInfo)
 
-    @Query("SELECT * FROM Email_Info WHERE sMemberID = :fsMemberID")
+    @Query("SELECT * FROM Member_Email WHERE sMemberID = :fsMemberID")
     fun GetMemberEmail(fsMemberID : String): List<EMemberEmailInfo>
 
 }

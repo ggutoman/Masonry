@@ -28,15 +28,16 @@ import org.gag.appdriver.Room.Entities.ETitle;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class VM_Member extends AndroidViewModel {
 
     private final MutableLiveData<List<String>> laSponsors;
-    private final MutableLiveData<String> lsTownSearch;
     private final MutableLiveData<List<DTownInfo.TownProvince>> laAddress;
     private final MutableLiveData<List<EMemberContactInfo>> laContact;
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
@@ -52,7 +53,6 @@ public class VM_Member extends AndroidViewModel {
         super(application);
 
         laSponsors = new MutableLiveData<>();
-        lsTownSearch = new MutableLiveData<>();
         laAddress = new MutableLiveData<>();
         laContact = new MutableLiveData<>();
         laEmail = new MutableLiveData<>();
@@ -72,6 +72,16 @@ public class VM_Member extends AndroidViewModel {
         currentList.add(fsSponsor);
         laSponsors.setValue(currentList);
         return true;
+    }
+
+    public void ReplaceSponsor(int index, String fsSponsor){
+
+        List<String> currentList = laSponsors.getValue();
+
+        if (currentList == null) return;
+
+        currentList.set(index, fsSponsor);
+        laSponsors.setValue(currentList);
     }
 
     public void AddMemberAddress(String fsAddressIDx, String fsTownIDx, String fsProvIDx, String fsProvNme, String fsAddressx, String isHomeAddrssx, String isActive){
@@ -143,7 +153,7 @@ public class VM_Member extends AndroidViewModel {
 
     public void AddMemberEmail(String fsEmailID, String fsMemberID, String fsEmailAdd, String fsStatus){
 
-        EMemberEmailInfo loContact = new EMemberEmailInfo(
+        EMemberEmailInfo loEmail = new EMemberEmailInfo(
                 fsEmailID,
                 fsMemberID,
                 fsEmailAdd,
@@ -158,7 +168,7 @@ public class VM_Member extends AndroidViewModel {
         if (currentList == null) {
             currentList = new ArrayList<>();
         }
-        currentList.add(loContact);
+        currentList.add(loEmail);
         laEmail.setValue(currentList);
     }
 
@@ -257,59 +267,6 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GenerateGLPID();
     }
 
-    public void SubmitParameters(UserAccount.MemberName memberName, EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
-
-        poAccount.CreateMember(memberName, memberInfo)
-                .thenCompose(result -> {
-
-                    if (result instanceof Boolean && !(Boolean) result) {
-                        foCallback.OnFailed(poAccount.GetMessage());
-                        return CompletableFuture.completedFuture(false);
-                    }
-
-                    if (result instanceof String && (((String) result).isEmpty())) {
-                        foCallback.OnFailed("Could not save member address. Member ID not found");
-                        return CompletableFuture.completedFuture(false);
-                    }
-                    String lsMemberID = (String) result;
-
-                    List<CompletableFuture<Boolean>> memberTask = new ArrayList<>();
-
-                    for (EMemberAddress loAddress : laAddress) {
-                        loAddress.setSMemberID(lsMemberID);
-                        memberTask.add(poAccount.CreateMemberAddress(loAddress));
-                    }
-
-                    for (EMemberContactInfo loContact : laContact) {
-                        loContact.setSMemberID(lsMemberID);
-                        memberTask.add(poAccount.CreateMemberContact(loContact));
-                    }
-
-                    for (EMemberEmailInfo loEmail : laEmail) {
-                        loEmail.setSMemberID(lsMemberID);
-                        memberTask.add(poAccount.CreateMemberEmail(loEmail));
-                    }
-
-                    // Combine all tasks into one future that returns Boolean
-                    return CompletableFuture.allOf(memberTask.toArray(new CompletableFuture[0]))
-                            .thenApply(v -> memberTask.stream().allMatch(CompletableFuture::join));
-
-                })
-                .thenAccept(allOk -> {
-                    foCallback.OnLoad();
-                    if (allOk) {
-                        foCallback.OnSuccess();
-                    } else {
-                        foCallback.OnFailed(poAccount.GetMessage());
-                    }
-                })
-                .exceptionally(e -> {
-                    foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
-                    return null;
-                });
-
-    }
-
     public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
 
         private final Context loContext;
@@ -385,5 +342,80 @@ public class VM_Member extends AndroidViewModel {
                 }
             };
         }
+    }
+
+    public void SubmitParameters(UserAccount.MemberName memberName, EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+
+        //run first background to get the result
+        poAccount.CreateMember(memberName, memberInfo)
+                .thenCompose(result -> {
+
+                    //if return is booleen
+                    if (result instanceof Boolean && !(Boolean) result) {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                        return CompletableFuture.completedFuture(false);
+                    }
+
+                    //if return is empty string
+                    if (result instanceof String && (((String) result).isEmpty())) {
+                        foCallback.OnFailed("Could not save member address. Member ID not found");
+                        return CompletableFuture.completedFuture(false);
+                    }
+                    String lsMemberID = (String) result;
+
+                    //initialize result holder, return true as default
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+
+                    // Save addresses one by one
+                    for (EMemberAddress loAddress : new HashSet<>(laAddress)) {
+                        loAddress.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.CreateMemberAddress(loAddress);
+                        });
+                    }
+
+                    // Save contacts one by one
+                    for (EMemberContactInfo loContact : new HashSet<>(laContact)) {
+                        loContact.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.CreateMemberContact(loContact);
+                        });
+                    }
+
+                    // Save emails one by one, with the generated member id from result
+                    for (EMemberEmailInfo loEmail : new HashSet<>(laEmail)) {
+                        loEmail.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.CreateMemberEmail(loEmail);
+                        });
+                    }
+
+                    return chain;
+
+                })
+                .thenAccept(allOk -> {
+                    foCallback.OnLoad();
+                    if (allOk) {
+                        foCallback.OnSuccess();
+                    } else {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                    }
+                })
+                .exceptionally(e -> {
+                    foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
+                    return null;
+                });
+
     }
 }

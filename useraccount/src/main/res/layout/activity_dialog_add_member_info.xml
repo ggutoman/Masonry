@@ -24,6 +24,30 @@
             android:text="Member Infomation"
             android:padding="10dp"/>
 
+        <!--Sponsor Information-->
+        <LinearLayout
+            android:id="@+id/layout_sponsor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/TextInputStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Sponsor Name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/TextInputStyle.Edittext"
+                    android:id="@+id/tie_sponsor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
         <!--Address Information-->
         <LinearLayout
             android:id="@+id/layout_address"
@@ -89,7 +113,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="visible">
 
 
             <com.google.android.material.textfield.TextInputLayout
@@ -102,7 +126,8 @@
                     style="@style/TextInputStyle.Edittext"
                     android:id="@+id/tie_contact"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:maxLength="11"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

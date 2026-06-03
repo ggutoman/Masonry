@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Entity(tableName = "Email_Info")
+@Entity(tableName = "Member_Email")
 data class EMemberEmailInfo(
     @PrimaryKey
     var sMailIDxx: String,
