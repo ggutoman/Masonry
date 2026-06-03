@@ -29,8 +29,8 @@ import java.util.List;
 
 public class Dialog_Add_Member_Info{
 
-    public enum SectionType {
-        ADDRESS, CONTACT, EMAIL
+    public interface OnSponsor{
+        void OnSubmit(String fsSponsor);
     }
 
     public interface OnAddress{
@@ -49,9 +49,9 @@ public class Dialog_Add_Member_Info{
     private final View view;
     private final AlertDialog poDialog;
 
-    private LinearLayout layoutAddress, layoutContact, layoutEmail;
+    private LinearLayout layout_sponsor, layoutAddress, layoutContact, layoutEmail;
     private MaterialAutoCompleteTextView auto_town;
-    private TextInputEditText tie_address, tie_contact, tie_remarks, tie_email;
+    private TextInputEditText tie_sponsor, tie_address, tie_contact, tie_remarks, tie_email;
     private CheckBox chkHome, chkActive, chkcontact_active, chkemail_active;
     private MaterialButton btn_add, btn_cancel;
 
@@ -87,6 +87,9 @@ public class Dialog_Add_Member_Info{
 
     private void InitViews(){
 
+        layout_sponsor = view.findViewById(R.id.layout_sponsor);
+        tie_sponsor = view.findViewById(R.id.tie_sponsor);
+
         layoutAddress = view.findViewById(R.id.layout_address);
         auto_town = view.findViewById(R.id.auto_town);
         tie_address = view.findViewById(R.id.tie_address);
@@ -107,10 +110,47 @@ public class Dialog_Add_Member_Info{
         btn_cancel = view.findViewById(R.id.btn_cancel);
     }
 
+    public void ShowSponsor(boolean isNew, String fsSponsor, OnSponsor foSponsor){
+
+        ClearFields(new ArrayList<>(List.of(tie_sponsor)), false);
+
+        layout_sponsor.setVisibility(View.VISIBLE);
+        layoutAddress.setVisibility(View.GONE);
+        layoutContact.setVisibility(View.GONE);
+        layoutEmail.setVisibility(View.GONE);
+
+        tie_sponsor.setText(fsSponsor);
+
+        if (!isNew){
+            btn_add.setText("UPDATE");
+        }else {
+            btn_add.setText("ADD");
+        }
+
+        btn_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (tie_sponsor.getText() == null || tie_sponsor.getText().toString().isEmpty()){
+                    Toast.makeText(loInstance, "Please enter sponsor name", Toast.LENGTH_SHORT).show();
+                    tie_sponsor.requestFocus();
+                    return;
+                }
+
+                foSponsor.OnSubmit(tie_sponsor.getText().toString());
+                poDialog.dismiss();
+            }
+        });
+
+        btn_cancel.setOnClickListener(view1 -> poDialog.dismiss());
+        poDialog.show();
+    }
+
     public void ShowAddress(OnAddress foCallback){
 
         ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkHome, chkActive)), true);
 
+        layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.VISIBLE);
         layoutContact.setVisibility(View.GONE);
         layoutEmail.setVisibility(View.GONE);
@@ -196,6 +236,7 @@ public class Dialog_Add_Member_Info{
 
         ClearFields(new ArrayList<>(List.of(tie_contact, tie_remarks, chkcontact_active)), false);
 
+        layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.GONE);
         layoutContact.setVisibility(View.VISIBLE);
         layoutEmail.setVisibility(View.GONE);
@@ -206,6 +247,9 @@ public class Dialog_Add_Member_Info{
 
                 if (tie_contact.getText() == null || tie_contact.getText().toString().isEmpty()){
                     Toast.makeText(loInstance, "Please enter contact no", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (!tie_contact.getText().toString().matches("^(09\\d{9}|\\+639\\d{9})$\n")) {
+                    Toast.makeText(loInstance, "Please enter valid contact no", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -226,6 +270,7 @@ public class Dialog_Add_Member_Info{
 
         ClearFields(new ArrayList<>(List.of(tie_email, chkemail_active)), false);
 
+        layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.GONE);
         layoutContact.setVisibility(View.GONE);
         layoutEmail.setVisibility(View.VISIBLE);

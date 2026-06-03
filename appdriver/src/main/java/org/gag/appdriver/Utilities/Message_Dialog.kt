@@ -60,7 +60,7 @@ class Message_Dialog(instance : Context) {
                     btn_negative.visibility = View.GONE
                 }
 
-                fnStatus > 2 -> { //confirmation only
+                fnStatus >= 2 -> { //confirmation only
                     icon_status.setImageResource(R.drawable.baseline_confirm) //change icon to confirmation
 
                     btn_positive.visibility = View.VISIBLE
