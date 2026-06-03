@@ -344,12 +344,12 @@ public class VM_Member extends AndroidViewModel {
         }
     }
 
-    public void SubmitParameters(UserAccount.MemberName memberName, EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
+    public void SubmitParameters(EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
 
         foCallback.OnLoad();
 
         //run first background to get the result
-        poAccount.CreateMember(memberName, memberInfo)
+        poAccount.CreateMember(memberInfo)
                 .thenCompose(result -> {
 
                     //if return is booleen
