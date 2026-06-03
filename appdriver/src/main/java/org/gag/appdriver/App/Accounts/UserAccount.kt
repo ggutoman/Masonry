@@ -291,12 +291,8 @@ class UserAccount(instance : Context) {
 
                                 //update glp id, and lastname from member name
                                 it.sGLPIDNoX = poUser.sGLPIDNoX
-                                it.sMemberNm = TextFormatter()
-                                    .ReplaceText(it.sMemberNm.toString(),
-                                        ",",
-                                        0,
-                                        poUser.sLastName
-                                    )
+                                it.sLastName = poUser.sLastName
+                                it.dBirthDte = poUser.dBirthDte
 
                                 //update user info and member info on local data
                                 poMemberInfo.SaveMemberInfo(it)
@@ -337,7 +333,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateMember(memberName: MemberName, memberInfo: EMemberInfo) : CompletableFuture<Any>{
+    fun CreateMember(memberInfo: EMemberInfo) : CompletableFuture<Any>{
 
         val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -362,10 +358,10 @@ class UserAccount(instance : Context) {
 
                     put("sGLPIDNoX", memberInfo.sGLPIDNoX)
                     put("sLodgeIDx", sLodgeIDx)
-                    put("sLastName", memberName.sLastNme)
-                    put("sFrstName", memberName.sFirstnme)
-                    put("sSuffixNm", memberName.sSuffix)
-                    put("sMiddName", memberName.sMiddNme)
+                    put("sLastName", memberInfo.sLastName)
+                    put("sFrstName", memberInfo.sFrstName)
+                    put("sSuffixNm", memberInfo.sSuffixNm)
+                    put("sMiddName", memberInfo.sMiddName)
                     put("cCvilStat", memberInfo.cCvilStat)
                     put("dBirthDte", memberInfo.dBirthDte)
                     put("cMmbrStat", memberInfo.cMmbrStat)
@@ -659,12 +655,5 @@ class UserAccount(instance : Context) {
         return future
 
     }
-
-    data class MemberName(
-        val sFirstnme : String,
-        val sMiddNme : String,
-        val sLastNme : String,
-        val sSuffix : String
-    )
 
 }

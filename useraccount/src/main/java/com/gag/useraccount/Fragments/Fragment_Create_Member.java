@@ -105,6 +105,7 @@ public class Fragment_Create_Member extends Fragment {
     private String lsSelectLodge;
     private String lsSelectTitle;
 
+    private EMemberInfo loMemberInfo;
     private DTownInfo.TownProvince loSelectAddress;
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
@@ -253,13 +254,15 @@ public class Fragment_Create_Member extends Fragment {
             return;
         }
 
-        //get member information via glpid
+        //get member information via glpid, this is to restore the new entry if error occured or to update the member
         mviewModel.GetMemberGLPID(tie_glpid.getText().toString()).observe(requireActivity(), new Observer<EMemberInfo>() {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
+                if (eMemberInfo == null) return;
+
                 //if member information is not found via argument's passed GLPID (update member only), validate and return
-                if (eMemberInfo == null && getArguments() != null){
+                if (getArguments() != null){
 
                     poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
                         @Override
@@ -277,14 +280,24 @@ public class Fragment_Create_Member extends Fragment {
                         public void OnNegative(@NotNull AlertDialog poDialog) {}
                     });
                     return;
-
                 }
 
-                //initialize member information
-                //tie_lastname.setText(eMemberInfo.get);
+                loMemberInfo = eMemberInfo;
+
+                //initialize member name and birthdate
+                tie_lastname.setText(loMemberInfo.getSLastName());
+                tie_firstname.setText(loMemberInfo.getSFrstName());
+                tie_middlename.setText(loMemberInfo.getSMiddName());
+                tie_suffix.setText(loMemberInfo.getSSuffixNm());
+                tie_birthdate.setText(loMemberInfo.getDBirthDte());
+
+                //initialze sponsors, if not empty
+                if (!(loMemberInfo.getSSponsor1() == null ? "" : loMemberInfo.getSSponsor1()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor1());
+                if (!(loMemberInfo.getSSponsor2() == null ? "" : loMemberInfo.getSSponsor2()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor2());
+                if (!(loMemberInfo.getSSponsor3() == null ? "" : loMemberInfo.getSSponsor3()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor3());
 
                 //initialize address, and email with exisitng list
-                if (mviewModel.GetMemberAddress(eMemberInfo.getSMemberID()).size() > 1){
+                if (mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).size() > 1){
 
                     for (DTownInfo.TownProvince loTown : mviewModel.GetMemberAddress(eMemberInfo.getSMemberID())){
 
@@ -301,7 +314,7 @@ public class Fragment_Create_Member extends Fragment {
                 }
 
                 //initialize contact with exisitng list
-                if (mviewModel.GetMemberContact(eMemberInfo.getSMemberID()).size() > 1){
+                if (mviewModel.GetMemberContact(loMemberInfo.getSMemberID()).size() > 1){
 
                     for (EMemberContactInfo loContact : mviewModel.GetMemberContact(eMemberInfo.getSMemberID())){
 
@@ -316,7 +329,7 @@ public class Fragment_Create_Member extends Fragment {
                 }
 
                 //initialize email with exisitng list
-                if (mviewModel.GetMemberEmail(eMemberInfo.getSMemberID()).size() > 1){
+                if (mviewModel.GetMemberEmail(loMemberInfo.getSMemberID()).size() > 1){
 
                     for (EMemberEmailInfo loEmail : mviewModel.GetMemberEmail(eMemberInfo.getSMemberID())){
 
@@ -369,6 +382,18 @@ public class Fragment_Create_Member extends Fragment {
                     auto_lodge.setText(LodgeAdapter.getItem(0).getSLodgeNme(), false);
                     lsSelectLodge = LodgeAdapter.getItem(0).getSLodgeIDx();
                 }
+
+                if (loMemberInfo == null) return;
+
+                //display the lodge information if member information is set
+                for (int index = 0; index <  LodgeAdapter.lodges.size(); index++){
+
+                    if (loMemberInfo.getSLodgeIDx().equalsIgnoreCase( LodgeAdapter.lodges.get(index).getSLodgeIDx())){
+
+                        auto_lodge.setText( LodgeAdapter.lodges.get(index).getSLodgeNme(), false);
+                        lsSelectLodge = LodgeAdapter.lodges.get(index).getSLodgeIDx();
+                    }
+                }
             }
         });
 
@@ -381,8 +406,19 @@ public class Fragment_Create_Member extends Fragment {
                         android.R.layout.simple_spinner_dropdown_item,
                         eTitles
                 );
-
                 auto_title.setAdapter(TitleAdapter);
+
+                if (loMemberInfo == null) return;
+
+                //display the title information if member information is set
+                for (int index = 0; index < TitleAdapter.titles.size(); index++){
+
+                    if (loMemberInfo.getSTitleIDx().equalsIgnoreCase(TitleAdapter.titles.get(index).getSTitleIDx())){
+
+                        auto_title.setText(TitleAdapter.titles.get(index).getSTitleDsc(), false);
+                        lsSelectTitle = TitleAdapter.titles.get(index).getSTitleIDx();
+                    }
+                }
             }
         });
 
@@ -448,6 +484,10 @@ public class Fragment_Create_Member extends Fragment {
                         android.R.layout.simple_spinner_dropdown_item,
                         mviewModel.GetCivilStatus()
                 ));
+
+        if (loMemberInfo == null) return;
+        auto_status.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat())), false);
+        auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat())), false);
     }
 
     private void initListeners() {
@@ -955,21 +995,15 @@ public class Fragment_Create_Member extends Fragment {
                         String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
                         String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
 
-                        String lsMemberFullNm = lsFrstNme + " " + lsMiddNme + ". " + lsLastNme + " " + lsSuffix;
-
-                        UserAccount.MemberName loMemberNme = new UserAccount.MemberName(
-                                lsFrstNme,
-                                lsMiddNme,
-                                lsLastNme,
-                                lsSuffix
-                        );
-
                         //initialze default values
                         EMemberInfo poMember = new EMemberInfo(
                                 "",
                                 lsSelectLodge,
                                 tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
-                                lsMemberFullNm,
+                                lsLastNme,
+                                lsFrstNme,
+                                lsMiddNme,
+                                lsSuffix,
                                 String.valueOf(lnSelectCivil),
                                 tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
                                 String.valueOf(lnSelectStatus),
@@ -1137,7 +1171,7 @@ public class Fragment_Create_Member extends Fragment {
                             return;
                         }
 
-                        mviewModel.SubmitParameters(loMemberNme, poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
+                        mviewModel.SubmitParameters(poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
                             @Override
                             public void OnLoad() {
                                 poDialog.ShowDialog("Submitting your information. Please wait . .");

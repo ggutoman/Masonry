@@ -248,7 +248,7 @@ public class Dialog_Add_Member_Info{
                 if (tie_contact.getText() == null || tie_contact.getText().toString().isEmpty()){
                     Toast.makeText(loInstance, "Please enter contact no", Toast.LENGTH_SHORT).show();
                     return;
-                } else if (!tie_contact.getText().toString().matches("^(09\\d{9}|\\+639\\d{9})$\n")) {
+                } else if (!tie_contact.getText().toString().matches("^(09\\d{9}|\\+639\\d{9})$")) {
                     Toast.makeText(loInstance, "Please enter valid contact no", Toast.LENGTH_SHORT).show();
                     return;
                 }
