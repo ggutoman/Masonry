@@ -12,11 +12,14 @@ interface DMemberInfo {
     @Upsert(entity = EMemberInfo::class)
     fun SaveMemberInfo(poMember: EMemberInfo)
 
-    @Query("SELECT (a.sFrstName || ' ' || ifnull(substr(a.sMiddName, 1, 1), '') || ' ' || a.sLastName || ' ' || ifnull(substr(a.sSuffixNm, 1, 1), '')) sMemberNm, b.sLodgeNme, c.sPositnCd " +
+    @Query("SELECT a.sMemberID sMemberID, (a.sFrstName || ' ' || ifnull(substr(a.sMiddName, 1, 1), '') || ' ' || a.sLastName || ' ' || ifnull(substr(a.sSuffixNm, 1, 1), '')) sMemberNm, b.sLodgeNme, c.sPositnCd " +
                     "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
                     "WHERE sGLPIDNoX= (" +
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
     fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<MemberDashboardInfo>
+
+    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx")
+    fun ObserveMemberList(fsMemberIDx : String): LiveData<List<EMemberInfo>>
 
     @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= (" +
             "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
@@ -29,6 +32,7 @@ interface DMemberInfo {
     fun DeleteMember()
 
     data class MemberDashboardInfo(
+        val sMemberID: String,
         val sMemberNm: String,
         val sLodgeNme: String
     )

@@ -333,7 +333,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateMember(memberInfo: EMemberInfo) : CompletableFuture<Any>{
+    fun SaveMember(memberInfo: EMemberInfo) : CompletableFuture<Any>{
 
         val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -390,12 +390,15 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            //save member information,with generated member id
-                            val sMemberID = Json.decodeFromString<DownloadKey>(result.data.body());
-                            memberInfo.sMemberID = sMemberID.GetPayload()
+                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body())
+
+                            //initialize new member id, if not initialized
+                            if (memberInfo.sMemberID.isNullOrEmpty()){
+                                memberInfo.sMemberID = loResult.GetPayload()
+                            }
 
                             poMemberInfo.SaveMemberInfo(memberInfo)
-                            sMemberID.GetPayload()
+                            loResult.GetPayload()
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -430,7 +433,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateMemberAddress(loAddress: EMemberAddress)  : CompletableFuture<Boolean>{
+    fun SaveMemberAddress(loAddress: EMemberAddress)  : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -467,10 +470,11 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            //save member address,with generated address id
-                            val sAddressIDx = Json.decodeFromString<DownloadKey>(result.data.body());
-
-                            loAddress.sAddrsIDx = sAddressIDx.GetPayload()
+                            //initialize new address id, if not initialized
+                            if (loAddress.sAddrsIDx.isNullOrEmpty()){
+                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body())
+                                loAddress.sAddrsIDx = loResult.GetPayload()
+                            }
                             poMemberAddress.SaveMemberAddress(loAddress)
                             true
                         }
@@ -507,7 +511,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateMemberContact(laContact: EMemberContactInfo)  : CompletableFuture<Boolean>{
+    fun SaveMemberContact(laContact: EMemberContactInfo)  : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -542,10 +546,11 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            //save member address,with generated address id
-                            val sContctIDx = Json.decodeFromString<DownloadKey>(result.data.body());
-
-                            laContact.sContctID = sContctIDx.GetPayload()
+                            //initialize new contact id if not initialized
+                            if (laContact.sContctID.isNullOrEmpty()){
+                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                                laContact.sContctID = loResult.GetPayload()
+                            }
                             poMemberContact.SaveMemberContact(laContact)
                             true
                         }
@@ -582,7 +587,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateMemberEmail( laEmail: EMemberEmailInfo) : CompletableFuture<Boolean>{
+    fun SaveMemberEmail(laEmail: EMemberEmailInfo) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -616,10 +621,11 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            //save member address,with generated address id
-                            val sEmail = Json.decodeFromString<DownloadKey>(result.data.body());
-
-                            laEmail.sMailIDxx = sEmail.GetPayload()
+                            //initialize new email id if not initialized
+                            if (laEmail.sMailIDxx.isNullOrEmpty()){
+                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                                laEmail.sMailIDxx = loResult.GetPayload()
+                            }
                             poMemberEmail.SaveMemberEmail(laEmail)
                             true
                         }

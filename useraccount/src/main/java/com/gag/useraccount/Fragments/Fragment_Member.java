@@ -18,7 +18,6 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Filter;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -36,9 +34,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
-import org.gag.appdriver.App.Accounts.UserAccount;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
@@ -54,7 +50,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Fragment_Create_Member extends Fragment {
+public class Fragment_Member extends Fragment {
 
     private Message_Dialog poMessage;
     private LoadDialog poDialog;
@@ -116,7 +112,7 @@ public class Fragment_Create_Member extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.fragment_create_member, container, false);
+        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.fragment_member, container, false);
 
         mviewModel = new ViewModelProvider(this).get(VM_Member.class);
         poMessage = new Message_Dialog(requireActivity());
@@ -236,7 +232,7 @@ public class Fragment_Create_Member extends Fragment {
                         requireActivity()
                                 .getSupportFragmentManager()
                                 .beginTransaction()
-                                .remove(Fragment_Create_Member.this)
+                                .remove(Fragment_Member.this)
                                 .commit();
                     }
 
@@ -272,7 +268,7 @@ public class Fragment_Create_Member extends Fragment {
                             requireActivity()
                                     .getSupportFragmentManager()
                                     .beginTransaction()
-                                    .remove(Fragment_Create_Member.this)
+                                    .remove(Fragment_Member.this)
                                     .commit();
                         }
 
@@ -486,8 +482,8 @@ public class Fragment_Create_Member extends Fragment {
                 ));
 
         if (loMemberInfo == null) return;
-        auto_status.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat())), false);
-        auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat())), false);
+        auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
+        auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat() == null ? "0" : loMemberInfo.getCCvilStat())), false);
     }
 
     private void initListeners() {
@@ -995,50 +991,57 @@ public class Fragment_Create_Member extends Fragment {
                         String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
                         String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
 
-                        //initialze default values
-                        EMemberInfo poMember = new EMemberInfo(
-                                "",
-                                lsSelectLodge,
-                                tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
-                                lsLastNme,
-                                lsFrstNme,
-                                lsMiddNme,
-                                lsSuffix,
-                                String.valueOf(lnSelectCivil),
-                                tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
-                                String.valueOf(lnSelectStatus),
-                                mviewModel.GetCurrentDate(),
-                                null,
-                                lsSelectTitle,
-                                null,
-                                null,
-                                null,
-                                null,
-                                "",
-                                "",
-                                "",
-                                0.00,
-                                0.00,
-                                null,
-                                String.valueOf(lnSelectStatus)
-                        );
+                        //if member info is not existing, create a new one
+                        if (loMemberInfo == null || loMemberInfo.getSMemberID().isEmpty()){
 
-                        //add sponsors
-                        for (int index = 0; index < paramSponsors.size(); index++){
-                            Log.d("Sponsors added ", paramSponsors.get(index));
+                            loMemberInfo = new EMemberInfo(
+                                    "",
+                                    lsSelectLodge,
+                                    tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
+                                    lsLastNme,
+                                    lsFrstNme,
+                                    lsMiddNme,
+                                    lsSuffix,
+                                    String.valueOf(lnSelectCivil),
+                                    tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
+                                    String.valueOf(lnSelectStatus),
+                                    mviewModel.GetCurrentDate(),
+                                    lnSelectStatus > 1 ? mviewModel.GetCurrentDateTime() : null,
+                                    lsSelectTitle,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    "",
+                                    "",
+                                    "",
+                                    0.00,
+                                    0.00,
+                                    null,
+                                    lnSelectStatus != 1 ? "0" : "1"
+                            );
+                        }else {
 
-                            switch (index){
+                            //if member status has changed
+                            if (lnSelectStatus != Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())){
 
-                                case 0:
-                                    poMember.setSSponsor1(paramSponsors.get(index));
-                                    break;
-                                case 1:
-                                    poMember.setSSponsor2(paramSponsors.get(index));
-                                    break;
-                                case 2:
-                                    poMember.setSSponsor3(paramSponsors.get(index));
-                                    break;
+                                if (lnSelectStatus > 1){ //update suspend date, if status is suspended
+                                    loMemberInfo.setDSuspendx(mviewModel.GetCurrentDate());
+                                }else { //remove suspend date
+                                    loMemberInfo.setDSuspendx(null);
+                                }
                             }
+
+                            loMemberInfo.setSLodgeIDx(lsSelectLodge);
+                            loMemberInfo.setSLastName(lsLastNme);
+                            loMemberInfo.setSFrstName(lsFrstNme);
+                            loMemberInfo.setSMiddName(lsMiddNme);
+                            loMemberInfo.setSSuffixNm(lsSuffix);
+                            loMemberInfo.setCCvilStat(String.valueOf(lnSelectCivil));
+                            loMemberInfo.setDBirthDte(tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString());
+                            loMemberInfo.setCMmbrStat(String.valueOf(lnSelectStatus));
+                            loMemberInfo.setSTitleIDx(lsSelectTitle);
+                            loMemberInfo.setCRecdStat(String.valueOf(lnSelectStatus));
                         }
 
                         int hasActive = 0;
@@ -1067,6 +1070,24 @@ public class Fragment_Create_Member extends Fragment {
 
                             //check if home address
                             if (townProvince.isHomeAddr().equals("1")) hasHomeAddr += 1;
+                        }
+
+                        //add or update sponsors
+                        for (int index = 0; index < paramSponsors.size(); index++){
+                            Log.d("Sponsors added ", paramSponsors.get(index));
+
+                            switch (index){
+
+                                case 0:
+                                    loMemberInfo.setSSponsor1(paramSponsors.get(index));
+                                    break;
+                                case 1:
+                                    loMemberInfo.setSSponsor2(paramSponsors.get(index));
+                                    break;
+                                case 2:
+                                    loMemberInfo.setSSponsor3(paramSponsors.get(index));
+                                    break;
+                            }
                         }
 
                         if (hasHomeAddr < 1){
@@ -1171,7 +1192,7 @@ public class Fragment_Create_Member extends Fragment {
                             return;
                         }
 
-                        mviewModel.SubmitParameters(poMember, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
+                        mviewModel.SubmitParameters(loMemberInfo, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
                             @Override
                             public void OnLoad() {
                                 poDialog.ShowDialog("Submitting your information. Please wait . .");
@@ -1199,14 +1220,25 @@ public class Fragment_Create_Member extends Fragment {
                                                 ),
                                                 true);
 
+                                        //reset parameters or data
+                                        loMemberInfo = null;
+                                        paramTownProvince = null;
+                                        paramSponsors = null;
+                                        paramContact = null;
+                                        paramEmail = null;
+
+                                        mviewModel.ClearSponsor();
+                                        mviewModel.ClearAddress();
+                                        mviewModel.ClearContacts();
+                                        mviewModel.ClearEmails();
+
+                                        //initialize transaction again
                                         initDataReceiver();
                                     }
 
                                     @Override
                                     public void OnNegative(@NotNull AlertDialog poDialog) {}
                                 });
-
-
                             }
 
                             @Override
@@ -1247,7 +1279,7 @@ public class Fragment_Create_Member extends Fragment {
             }else if (view instanceof CheckBox){
                 ((CheckBox) view).setChecked(false);
             }else if (view instanceof MaterialButton){
-                ((MaterialButton) view).setVisibility(View.GONE);
+                view.setVisibility(View.GONE);
             }
         }
     }

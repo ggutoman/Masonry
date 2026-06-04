@@ -150,6 +150,8 @@ public class Dialog_Add_Member_Info{
 
         ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkHome, chkActive)), true);
 
+        btn_add.setText("ADD");
+
         layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.VISIBLE);
         layoutContact.setVisibility(View.GONE);
@@ -236,6 +238,8 @@ public class Dialog_Add_Member_Info{
 
         ClearFields(new ArrayList<>(List.of(tie_contact, tie_remarks, chkcontact_active)), false);
 
+        btn_add.setText("ADD");
+
         layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.GONE);
         layoutContact.setVisibility(View.VISIBLE);
@@ -269,6 +273,8 @@ public class Dialog_Add_Member_Info{
     public void ShowEmail(OnEmail foCallback){
 
         ClearFields(new ArrayList<>(List.of(tie_email, chkemail_active)), false);
+
+        btn_add.setText("ADD");
 
         layout_sponsor.setVisibility(View.GONE);
         layoutAddress.setVisibility(View.GONE);

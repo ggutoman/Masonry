@@ -2,7 +2,6 @@ package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public class VM_Member extends AndroidViewModel {
 
@@ -84,6 +80,10 @@ public class VM_Member extends AndroidViewModel {
         laSponsors.setValue(currentList);
     }
 
+    public void ClearSponsor(){
+        laSponsors.setValue(new ArrayList<>());
+    }
+
     public void AddMemberAddress(String fsAddressIDx, String fsTownIDx, String fsProvIDx, String fsProvNme, String fsAddressx, String isHomeAddrssx, String isActive){
 
         DTownInfo.TownProvince loAddress = new DTownInfo.TownProvince(
@@ -113,6 +113,10 @@ public class VM_Member extends AndroidViewModel {
 
         currentList.set(index, loAddress);
         laAddress.setValue(currentList);
+    }
+
+    public void ClearAddress(){
+        laAddress.setValue(new ArrayList<>());
     }
 
     public void AddMemberContact(String fsContactID, String fsMemberID, String fsContactNo, String fsRemarks, String fsStatus){
@@ -151,6 +155,10 @@ public class VM_Member extends AndroidViewModel {
         laContact.setValue(currentList);
     }
 
+    public void ClearContacts(){
+        laContact.setValue(new ArrayList<>());
+    }
+
     public void AddMemberEmail(String fsEmailID, String fsMemberID, String fsEmailAdd, String fsStatus){
 
         EMemberEmailInfo loEmail = new EMemberEmailInfo(
@@ -183,6 +191,10 @@ public class VM_Member extends AndroidViewModel {
 
         currentList.set(index, loEmail);
         laEmail.setValue(currentList);
+    }
+
+    public void ClearEmails(){
+        laEmail.setValue(new ArrayList<>());
     }
 
     public String GetCurrentDate(){
@@ -349,7 +361,7 @@ public class VM_Member extends AndroidViewModel {
         foCallback.OnLoad();
 
         //run first background to get the result
-        poAccount.CreateMember(memberInfo)
+        poAccount.SaveMember(memberInfo)
                 .thenCompose(result -> {
 
                     //if return is booleen
@@ -375,7 +387,7 @@ public class VM_Member extends AndroidViewModel {
                         //bind the result after each thread runs
                         chain = chain.thenCompose(ok -> {
                             if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.CreateMemberAddress(loAddress);
+                            return poAccount.SaveMemberAddress(loAddress);
                         });
                     }
 
@@ -386,7 +398,7 @@ public class VM_Member extends AndroidViewModel {
                         //bind the result after each thread runs
                         chain = chain.thenCompose(ok -> {
                             if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.CreateMemberContact(loContact);
+                            return poAccount.SaveMemberContact(loContact);
                         });
                     }
 
@@ -397,7 +409,7 @@ public class VM_Member extends AndroidViewModel {
                         //bind the result after each thread runs
                         chain = chain.thenCompose(ok -> {
                             if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.CreateMemberEmail(loEmail);
+                            return poAccount.SaveMemberEmail(loEmail);
                         });
                     }
 

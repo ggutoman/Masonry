@@ -2,13 +2,7 @@ package com.gag.masonry.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -18,16 +12,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.R;
-import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Account;
-import com.gag.useraccount.Fragments.Fragment_Create_Member;
+import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.navigation.NavigationView;
 
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
@@ -199,7 +190,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Home());
                 break;
             case "ACC002":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Create_Member());
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
                 break;
 
         }
