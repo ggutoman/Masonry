@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
+import org.gag.appdriver.App.DataModels.DownloadMemberList
 import org.gag.appdriver.App.DataModels.DownloadPositionInfo
 import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
 import org.gag.appdriver.App.DataModels.DownloadTitleInfo
@@ -31,6 +32,7 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -60,6 +62,8 @@ class Dashboard(loInstance : Context) {
                 .getOrNull(1) ?: ""
         )
     }
+
+    fun ObserveMemberList(fsMemberIDx : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberList(fsMemberIDx)
 
     fun GetLodgeInfo() : ELodgeInfo{
 
@@ -418,6 +422,70 @@ class Dashboard(loInstance : Context) {
 
                             resultData.GetPayload().forEach { loItem ->
                                 poTownInfo.SaveTownInfo(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadMemberList(): CompletableFuture<Boolean>{
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadMemberList>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poDBMember.SaveMemberInfo(loItem)
                             }
 
                             true

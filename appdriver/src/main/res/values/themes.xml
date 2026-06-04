@@ -39,6 +39,14 @@
         <item name="android:drawablePadding">10dp</item>
     </style>
 
+    <style name="TextInputStyleRounded" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_margin">2dp</item>
+        <item name="boxCornerRadiusBottomEnd">20dp</item>
+        <item name="boxCornerRadiusBottomStart">20dp</item>
+        <item name="boxCornerRadiusTopStart">20dp</item>
+        <item name="boxCornerRadiusTopEnd">20dp</item>
+    </style>
+
     <!-- TEXT AREA -->
     <style name="TextInputTextAreaStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:layout_margin">2dp</item>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_marginBottom="15dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/btn_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:src="@drawable/person_2_baseline_member"
+            android:paddingRight="10dp"
+            android:alpha="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/mtv_name"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_datemember"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_icon"
+            app:layout_constraintWidth_percent="0.6"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_datemember"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1900-00-00"
+            android:textSize="15sp"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_name"
+            app:layout_constraintStart_toEndOf="@+id/btn_icon"
+            app:layout_constraintWidth_percent="0.7"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_glipd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:gravity="end"
+            app:layout_constraintTop_toTopOf="@+id/mtv_name"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
+            app:layout_constraintStart_toEndOf="@+id/mtv_name"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:textSize="15sp"
+            android:gravity="end"
+            app:layout_constraintTop_toTopOf="@+id/mtv_datemember"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_datemember"
+            app:layout_constraintStart_toEndOf="@+id/mtv_datemember"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

@@ -15,10 +15,12 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
 
@@ -32,6 +34,11 @@ public class VM_Main extends AndroidViewModel {
         void isLoginNeeded();
         void isSessionEnded();
         void hasLoggedIn();
+    }
+
+    public interface OnDownloadData{
+        void OnDownload();
+        void OnFinished(String fsMessage);
     }
 
     public VM_Main(@NonNull Application application) {
@@ -49,6 +56,18 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<DMemberInfo.MemberDashboardInfo> GetMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
+    }
+
+    public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx) {
+        return poDashboard.ObserveMemberList(fsMemberIDx);
+    }
+
+    public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
+        return poDashboard.GetParentMenus(fnUserLvl);
+    }
+
+    public List<MENU_ITEM_CONSTANTS> GetMenuItem(int fnUserLvl, String fsParentIDx){
+        return poDashboard.GetParentItems(fnUserLvl, fsParentIDx);
     }
 
     public ELodgeInfo GetLodgeInfo(){
@@ -84,6 +103,7 @@ public class VM_Main extends AndroidViewModel {
             CompletableFuture<Boolean> poProvince = poDashboard.DownloadProvinceInfo();
             CompletableFuture<Boolean> poTown = poDashboard.DownloadTownInfo();
 
+            //execute list of background tasks at once. no sequential execution
             CompletableFuture.allOf(poUserInfo, poLodgeInfo, poPosition, poTitle, poProvince, poTown).thenRun(new Runnable() {
                 @Override
                 public void run() {
@@ -124,18 +144,25 @@ public class VM_Main extends AndroidViewModel {
             });
         }
     }
+    public void DownloadMembers(OnDownloadData foCallback){
+
+        poDashboard.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                foCallback.OnDownload();
+                if (!aBoolean){
+                    foCallback.OnFinished(poDashboard.getMessage());
+                    return;
+                }
+                foCallback.OnFinished("Successfully downloaded member list");
+            }
+        });
+    }
 
     public void EndSession(){
         poDashboard.getPoDBUser().DeleteUser();
         poDashboard.getPoDBMember().DeleteMember();
         poConfig.ClearAccountSession();
-    }
-
-    public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
-        return poDashboard.GetParentMenus(fnUserLvl);
-    }
-
-    public List<MENU_ITEM_CONSTANTS> GetMenuItem(int fnUserLvl, String fsParentIDx){
-        return poDashboard.GetParentItems(fnUserLvl, fsParentIDx);
     }
 }
