@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:elevation="10dp"
+    app:cardUseCompatPadding="true">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:orientation="vertical"
+       android:padding="10dp"
+       android:gravity="">
+
+       <View
+           android:layout_width="match_parent"
+           android:layout_height="0.6dp"
+           android:layout_marginTop="10dp"
+           android:background="@android:color/darker_gray"/>
+
+       <com.google.android.material.textview.MaterialTextView
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:padding="10dp"
+           android:layout_marginTop="10dp"
+           android:text="Lodge Name"/>
+
+       <com.google.android.material.textfield.TextInputLayout
+           style="@style/CustomDropDownTilStyle"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:hint="Select Lodge">
+
+           <com.google.android.material.textfield.MaterialAutoCompleteTextView
+               style="@style/DropdownStyleTheme"
+               android:id="@+id/auto_lodge"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"/>
+
+       </com.google.android.material.textfield.TextInputLayout>
+
+       <com.google.android.material.textview.MaterialTextView
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:padding="10dp"
+           android:text="Lodge Year"/>
+
+       <com.google.android.material.textfield.TextInputLayout
+           style="@style/TextInputStyle"
+           android:id="@+id/til_birthdate"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:hint="Select Year">
+
+           <com.google.android.material.textfield.TextInputEditText
+               style="@style/TextInputStyle.Edittext"
+               android:id="@+id/tie_year"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:drawableEnd="@drawable/baseline_edit_calendar_24"
+               android:focusable="false"
+               android:clickable="true"/>
+
+       </com.google.android.material.textfield.TextInputLayout>
+
+       <com.google.android.material.textview.MaterialTextView
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:padding="10dp"
+           android:text="Valid Until"
+           android:layout_marginTop="10dp"/>
+
+       <com.google.android.material.textfield.TextInputLayout
+           style="@style/TextInputStyle"
+           android:id="@+id/til_valid_until"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:hint="Select Date of Validity">
+
+           <com.google.android.material.textfield.TextInputEditText
+               style="@style/TextInputStyle.Edittext"
+               android:id="@+id/tie_valid_until"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:drawableEnd="@drawable/baseline_edit_calendar_24"
+               android:focusable="false"
+               android:clickable="true"/>
+
+       </com.google.android.material.textfield.TextInputLayout>
+
+       <com.google.android.material.button.MaterialButton
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="Create Lodge"
+           android:layout_marginTop="10dp"/>
+
+   </LinearLayout>
+
+    <include
+        layout="@layout/layout_developer"/>
+
+</com.google.android.material.card.MaterialCardView>

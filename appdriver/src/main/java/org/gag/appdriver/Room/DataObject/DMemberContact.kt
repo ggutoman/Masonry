@@ -1,5 +1,6 @@
 package org.gag.appdriver.Room.DataObject
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -12,5 +13,5 @@ interface DMemberContact {
     fun SaveMemberContact(poContact: EMemberContactInfo)
 
     @Query("SELECT * FROM Member_Contact WHERE sMemberID = :fsMemberID")
-    fun GetMemberContact(fsMemberID : String): List<EMemberContactInfo>
+    fun GetMemberContact(fsMemberID : String): LiveData<List<EMemberContactInfo>>
 }

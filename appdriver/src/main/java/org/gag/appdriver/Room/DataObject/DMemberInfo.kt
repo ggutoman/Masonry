@@ -18,8 +18,8 @@ interface DMemberInfo {
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
     fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<MemberDashboardInfo>
 
-    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx")
-    fun ObserveMemberList(fsMemberIDx : String): LiveData<List<EMemberInfo>>
+    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx AND dMembrshp BETWEEN :fsDateFrom AND :fsDateTo ")
+    fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String): LiveData<List<EMemberInfo>>
 
     @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= (" +
             "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")

@@ -88,14 +88,88 @@
 
             </com.google.android.material.tabs.TabLayout>
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/vpage_tab_data"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:orientation="vertical"
+                android:padding="15dp"
                 app:layout_constraintTop_toBottomOf="@+id/tab_layout"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_search"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        app:layout_constraintWidth_percent="0.85">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tie_search"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:hint="Search Member"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/btn_filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:src="@drawable/baseine_filter"
+                        android:background="@android:color/transparent"
+                        app:layout_constraintTop_toTopOf="@+id/til_search"
+                        app:layout_constraintBottom_toBottomOf="@+id/til_search"
+                        app:layout_constraintStart_toEndOf="@+id/til_search"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_no_record"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/icon_no_record"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:src="@drawable/baseline_warning"
+                        android:scaleType="fitCenter"
+                        android:alpha="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintWidth_percent="0.2"
+                        app:layout_constraintHeight_percent="0.1"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Title"
+                        android:id="@+id/mtv_no_record"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15sp"
+                        android:text="No members found"
+                        android:alpha="0.5"
+                        app:layout_constraintTop_toBottomOf="@+id/icon_no_record"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcv_members"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="15sp"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

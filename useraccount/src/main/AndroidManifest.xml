@@ -3,12 +3,6 @@
 
     <application android:theme="@style/MasonryTheme">
         <activity
-            android:name=".Dialog.Dialog_Add_Member_Info"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.Activity_Assign_Officer"
-            android:exported="false" />
-        <activity
             android:name=".Activity.Activity_Account"
             android:exported="false" />
         <activity

@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -250,35 +251,129 @@ public class Fragment_Member extends Fragment {
             return;
         }
 
+        auto_status.setAdapter(
+                new ArrayAdapter<>(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        mviewModel.GetAccountStatus()
+                ));
+
+        auto_civil.setAdapter(
+                new ArrayAdapter<>(
+                        requireActivity(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        mviewModel.GetCivilStatus()
+                ));
+
         //get member information via glpid, this is to restore the new entry if error occured or to update the member
-        mviewModel.GetMemberGLPID(tie_glpid.getText().toString()).observe(requireActivity(), new Observer<EMemberInfo>() {
+        mviewModel.GetMemberGLPID(tie_glpid.getText().toString()).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
-                if (eMemberInfo == null) return;
+                //do not proceed if member information is not found
+                if (eMemberInfo == null){
 
-                //if member information is not found via argument's passed GLPID (update member only), validate and return
-                if (getArguments() != null){
+                    //if member information is not found via argument's passed GLPID (update member only), validate and return
+                    if (getArguments() != null){
 
-                    poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
+                        poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
 
-                            requireActivity()
-                                    .getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .remove(Fragment_Member.this)
-                                    .commit();
-                        }
+                                requireActivity()
+                                        .getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .remove(Fragment_Member.this)
+                                        .commit();
+                            }
 
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-                    });
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                        return;
+                    }
                     return;
                 }
 
+                if (getArguments() != null){
+
+                    mviewModel.DownloadMemberInfo(eMemberInfo.getSMemberID(), new VM_Member.OnDownload() {
+                        @Override
+                        public void Loading() {
+                            Toast.makeText(requireActivity(), "Downloading member information...", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void Finished(String fsMessage) {
+                            Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+
                 loMemberInfo = eMemberInfo;
+
+                //initialize address, and email with exisitng list
+                mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<DTownInfo.TownProvince>>() {
+                    @Override
+                    public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
+
+                        if (townProvinces == null) return;
+
+                        mviewModel.ClearAddress();
+                        for (DTownInfo.TownProvince loTown : townProvinces){
+
+                            mviewModel.AddMemberAddress(
+                                    loTown.getPsAddrsIDx(),
+                                    loTown.getPsTownIDxx(),
+                                    loTown.getPsProvIDxx(),
+                                    loTown.getPsTownProvNme(),
+                                    loTown.getPsAddressx(),
+                                    loTown.isHomeAddr(),
+                                    loTown.isActive()
+                            );
+                        }
+                    }
+                });
+
+                //initialize contact with exisitng list
+                mviewModel.GetMemberContact(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<EMemberContactInfo>>() {
+                    @Override
+                    public void onChanged(List<EMemberContactInfo> eMemberContactInfos) {
+
+                        if (eMemberContactInfos == null) return;
+
+                        mviewModel.ClearContacts();
+                        for (EMemberContactInfo loContact : eMemberContactInfos){
+
+                            mviewModel.AddMemberContact(
+                                    loContact.getSContctID(),
+                                    loContact.getSMemberID(),
+                                    loContact.getSContctNo(),
+                                    loContact.getSRemarksx(),
+                                    loContact.getCRecdStat()
+                            );
+                        }
+                    }
+                });
+
+                //initialize email with exisitng list
+                mviewModel.GetMemberEmail(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<EMemberEmailInfo>>() {
+                    @Override
+                    public void onChanged(List<EMemberEmailInfo> eMemberEmailInfos) {
+
+                        mviewModel.ClearEmails();
+                        for (EMemberEmailInfo loEmail : eMemberEmailInfos){
+
+                            mviewModel.AddMemberEmail(
+                                    loEmail.getSMailIDxx(),
+                                    loEmail.getSMemberID(),
+                                    loEmail.getSEmailAdd(),
+                                    loEmail.getCRecdStat()
+                            );
+                        }
+                    }
+                });
 
                 //initialize member name and birthdate
                 tie_lastname.setText(loMemberInfo.getSLastName());
@@ -292,61 +387,21 @@ public class Fragment_Member extends Fragment {
                 if (!(loMemberInfo.getSSponsor2() == null ? "" : loMemberInfo.getSSponsor2()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor2());
                 if (!(loMemberInfo.getSSponsor3() == null ? "" : loMemberInfo.getSSponsor3()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor3());
 
-                //initialize address, and email with exisitng list
-                if (mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).size() > 1){
+                auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
+                lnSelectStatus = Integer.parseInt(loMemberInfo.getCMmbrStat());
 
-                    for (DTownInfo.TownProvince loTown : mviewModel.GetMemberAddress(eMemberInfo.getSMemberID())){
-
-                        mviewModel.AddMemberAddress(
-                                loTown.getPsAddrsIDx(),
-                                loTown.getPsTownIDxx(),
-                                loTown.getPsProvIDxx(),
-                                loTown.getPsTownProvNme(),
-                                loTown.getPsAddressx(),
-                                loTown.isHomeAddr(),
-                                loTown.isActive()
-                        );
-                    }
-                }
-
-                //initialize contact with exisitng list
-                if (mviewModel.GetMemberContact(loMemberInfo.getSMemberID()).size() > 1){
-
-                    for (EMemberContactInfo loContact : mviewModel.GetMemberContact(eMemberInfo.getSMemberID())){
-
-                        mviewModel.AddMemberContact(
-                                loContact.getSContctID(),
-                                loContact.getSMemberID(),
-                                loContact.getSContctNo(),
-                                loContact.getSRemarksx(),
-                                loContact.getCRecdStat()
-                        );
-                    }
-                }
-
-                //initialize email with exisitng list
-                if (mviewModel.GetMemberEmail(loMemberInfo.getSMemberID()).size() > 1){
-
-                    for (EMemberEmailInfo loEmail : mviewModel.GetMemberEmail(eMemberInfo.getSMemberID())){
-
-                        mviewModel.AddMemberEmail(
-                                loEmail.getSMailIDxx(),
-                                loEmail.getSMemberID(),
-                                loEmail.getSEmailAdd(),
-                                loEmail.getCRecdStat()
-                        );
-                    }
-                }
+                auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat() == null ? "0" : loMemberInfo.getCCvilStat())), false);
+                lnSelectCivil = Integer.parseInt(loMemberInfo.getCCvilStat());
             }
         });
 
-        mviewModel.GetSponsorList().observe(requireActivity(), new Observer<List<String>>() {
+        mviewModel.GetSponsorList().observe(getViewLifecycleOwner(), new Observer<List<String>>() {
             @Override
             public void onChanged(List<String> strings) {
 
                 paramSponsors = strings;
 
-               auto_sponosr.setAdapter(new ArrayAdapter<>(
+                auto_sponosr.setAdapter(new ArrayAdapter<>(
                         requireActivity(),
                         android.R.layout.simple_spinner_dropdown_item,
                         strings
@@ -355,7 +410,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.GetLodgeList().observe(requireActivity(), new Observer<List<ELodgeInfo>>() {
+        mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
             @Override
             public void onChanged(List<ELodgeInfo> eLodgeInfos) {
 
@@ -393,7 +448,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.GetTitleList().observe(requireActivity(), new Observer<List<ETitle>>() {
+        mviewModel.GetTitleList().observe(getViewLifecycleOwner(), new Observer<List<ETitle>>() {
             @Override
             public void onChanged(List<ETitle> eTitles) {
 
@@ -418,7 +473,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.HasNewAddress().observe(requireActivity(), new Observer<List<DTownInfo.TownProvince>>() {
+        mviewModel.HasNewAddress().observe(getViewLifecycleOwner(), new Observer<List<DTownInfo.TownProvince>>() {
             @Override
             public void onChanged(List<DTownInfo.TownProvince> memberAddresses) {
 
@@ -435,7 +490,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.HasNewContact().observe(requireActivity(), new Observer<List<EMemberContactInfo>>() {
+        mviewModel.HasNewContact().observe(getViewLifecycleOwner(), new Observer<List<EMemberContactInfo>>() {
             @Override
             public void onChanged(List<EMemberContactInfo> eMemberContactInfos) {
 
@@ -451,7 +506,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.HasNewEmail().observe(requireActivity(), new Observer<List<EMemberEmailInfo>>() {
+        mviewModel.HasNewEmail().observe(getViewLifecycleOwner(), new Observer<List<EMemberEmailInfo>>() {
             @Override
             public void onChanged(List<EMemberEmailInfo> eMemberEmailInfos) {
 
@@ -466,24 +521,6 @@ public class Fragment_Member extends Fragment {
                 auto_email.postDelayed(() -> auto_email.showDropDown(), 200);
             }
         });
-
-        auto_status.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mviewModel.GetAccountStatus()
-                ));
-
-        auto_civil.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mviewModel.GetCivilStatus()
-                ));
-
-        if (loMemberInfo == null) return;
-        auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
-        auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat() == null ? "0" : loMemberInfo.getCCvilStat())), false);
     }
 
     private void initListeners() {
@@ -1053,8 +1090,8 @@ public class Fragment_Member extends Fragment {
 
                             laAddressParams.add(
                                     new EMemberAddress(
-                                            "",
-                                            "",
+                                            townProvince.getPsAddrsIDx(),
+                                            loMemberInfo == null ? "" : loMemberInfo.getSMemberID(),
                                             townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
                                             townProvince.getPsTownIDxx(),
                                             townProvince.isHomeAddr(),
@@ -1202,7 +1239,7 @@ public class Fragment_Member extends Fragment {
                             public void OnSuccess() {
                                 poDialog.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Member created successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                poMessage.ShowMessage(0, "Member information has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
@@ -1232,8 +1269,9 @@ public class Fragment_Member extends Fragment {
                                         mviewModel.ClearContacts();
                                         mviewModel.ClearEmails();
 
-                                        //initialize transaction again
-                                        initDataReceiver();
+                                        requireActivity()
+                                                .getSupportFragmentManager()
+                                                .popBackStack("create_member", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

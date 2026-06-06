@@ -58,8 +58,8 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.ObserverMemberInfoByUserID();
     }
 
-    public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx) {
-        return poDashboard.ObserveMemberList(fsMemberIDx);
+    public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx, String fsDfrom, String fsDto) {
+        return poDashboard.ObserveMemberList(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
@@ -72,6 +72,18 @@ public class VM_Main extends AndroidViewModel {
 
     public ELodgeInfo GetLodgeInfo(){
         return poDashboard.GetLodgeInfo();
+    }
+
+    public String GetCurrentDate(){
+        return poDate.GetCurrentDate();
+    }
+
+    public String GetFirstQuarter(){
+        return poDate.GetCountedDate(4, 0, false);
+    }
+
+    public String GetFormattedDate(Long flDate){
+        return poDate.FormatLongDate(flDate);
     }
 
     public void InitData(InitData foCallback){
@@ -144,19 +156,22 @@ public class VM_Main extends AndroidViewModel {
             });
         }
     }
-    public void DownloadMembers(OnDownloadData foCallback){
+    public void DownloadMembers(String fdFrom, String fDto, OnDownloadData foCallback){
 
-        poDashboard.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
+        foCallback.OnDownload();
+        poDashboard.DownloadMemberList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
-                foCallback.OnDownload();
                 if (!aBoolean){
                     foCallback.OnFinished(poDashboard.getMessage());
-                    return;
+                }else {
+                    foCallback.OnFinished("Successfully downloaded member list");
                 }
-                foCallback.OnFinished("Successfully downloaded member list");
             }
+        }).exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
         });
     }
 

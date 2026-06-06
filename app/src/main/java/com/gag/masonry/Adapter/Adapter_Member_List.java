@@ -9,6 +9,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,18 +20,33 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_List.Adapter_Member_List_Holder> {
 
     private final Context loInstance;
     private final List<EMemberInfo> laMembers;
-    private final List<EMemberInfo> laMembersFiltered;
+    private final Adapter_Member_List_Filter loFilter;
+    private final OnSelect poCallback;
 
-    public Adapter_Member_List(Context foContext, List<EMemberInfo> faMembers){
+    private List<EMemberInfo> laMembersFiltered;
+
+    public Adapter_Member_List_Filter GetFilter(){
+        return loFilter;
+    }
+
+    public interface OnSelect{
+        void Selected(EMemberInfo foMember);
+    }
+
+    public Adapter_Member_List(Context foContext, List<EMemberInfo> faMembers, OnSelect foCallback){
         this.loInstance = foContext;
         this.laMembers = faMembers;
         this.laMembersFiltered = laMembers;
+        this.loFilter = new Adapter_Member_List_Filter(this);
+        this.poCallback = foCallback;
     }
 
     @NonNull
@@ -64,6 +80,7 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
         switch (loMember.getCMmbrStat()){
             case "0":
                 holder.mtv_status.setText("Inactive");
+                holder.mtv_status.setTextColor(Color.GRAY);
                 break;
             case "1":
                 holder.mtv_status.setText("Active");
@@ -77,6 +94,14 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
                 holder.mtv_status.setText("N/A");
                 break;
         }
+
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poCallback.Selected(loMember);
+            }
+        });
     }
 
     @Override
@@ -84,13 +109,80 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
         return laMembersFiltered.size();
     }
 
+    public class Adapter_Member_List_Filter extends Filter{
+
+        private final Adapter_Member_List loAdapter;
+        private List<String> laStatus = new ArrayList<>(List.of("0", "1", "2"));
+
+        public void InitStatus(List<String> faStatus){
+            laStatus = faStatus;
+        }
+
+        public Adapter_Member_List_Filter(Adapter_Member_List foAdapter){
+            loAdapter = foAdapter;
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+
+            if (charSequence.length() < 1){
+                laMembersFiltered = laMembers;
+            }else {
+
+                List<EMemberInfo> filterSearch = new ArrayList<>();
+
+                //first filter, via search text
+                for (EMemberInfo loMember : laMembers){
+
+                    String lsMiddlNme = loMember.getSMiddName() == null ? "" : loMember.getSMiddName();
+                    String lsSuffix = loMember.getSSuffixNm() == null ? "" : loMember.getSSuffixNm();
+
+                    String lsMemberNm = loMember.getSFrstName() + " " +
+                                            lsMiddlNme + " " +
+                                            loMember.getSLastName() + " " +
+                                            lsSuffix;
+
+                    if (lsMemberNm.toLowerCase().contains(charSequence.toString().toLowerCase()) || loMember.getSGLPIDNoX().toLowerCase().contains(charSequence.toString().toLowerCase())){
+                        filterSearch.add(loMember);
+                    }
+                }
+
+                laMembersFiltered = filterSearch;
+            }
+
+            laMembersFiltered = laMembersFiltered.stream()
+                    .filter(loMember -> laStatus.contains(loMember.getCMmbrStat()))
+                    .collect(Collectors.toList());
+
+            FilterResults loResults = new FilterResults();
+            loResults.values = laMembersFiltered;
+            loResults.count = laMembersFiltered.size();
+
+            return loResults;
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+
+            laMembersFiltered = (List<EMemberInfo>) filterResults.values;
+            loAdapter.notifyDataSetChanged();
+        }
+    }
+
     public static class Adapter_Member_List_Holder extends RecyclerView.ViewHolder{
 
-        private MaterialTextView mtv_name, mtv_glipd, mtv_status, mtv_datemember;
+        private final View view;
+        private final MaterialTextView mtv_name;
+        private final MaterialTextView mtv_glipd;
+        private final MaterialTextView mtv_status;
+        private final MaterialTextView mtv_datemember;
 
         public Adapter_Member_List_Holder(@NonNull View itemView) {
             super(itemView);
 
+            view = itemView;
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_glipd = itemView.findViewById(R.id.mtv_glipd);
             mtv_status = itemView.findViewById(R.id.mtv_status);

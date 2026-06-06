@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
+import org.gag.appdriver.App.DataModels.DownloadMemberAddresses
 import org.gag.appdriver.App.DataModels.DownloadMemberList
 import org.gag.appdriver.App.DataModels.DownloadPositionInfo
 import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
@@ -25,6 +26,7 @@ import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
+import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
@@ -48,6 +50,7 @@ class Dashboard(loInstance : Context) {
 
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
+    val poDBMemberAddr : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
     val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
@@ -63,7 +66,7 @@ class Dashboard(loInstance : Context) {
         )
     }
 
-    fun ObserveMemberList(fsMemberIDx : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberList(fsMemberIDx)
+    fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberList(fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun GetLodgeInfo() : ELodgeInfo{
 
@@ -460,7 +463,8 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberList(): CompletableFuture<Boolean>{
+    fun DownloadMemberList(fdFromxx : String, fsDto : String): CompletableFuture<Boolean>{
+
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -471,9 +475,14 @@ class Dashboard(loInstance : Context) {
                     false
                 }
 
+                val params : JSONObject = JSONObject().also {
+                    it.put("dFromxx", fdFromxx)
+                    it.put("dToxx", fsDto)
+                }
+
                 httpInstance.makeRequest(
                     API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
-                    JSONObject(),
+                    params,
                     mapOf(
                         "access-token" to session.getokenID()
                     )

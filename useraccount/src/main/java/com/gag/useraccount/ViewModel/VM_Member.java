@@ -2,6 +2,7 @@ package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class VM_Member extends AndroidViewModel {
 
@@ -39,10 +41,17 @@ public class VM_Member extends AndroidViewModel {
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
     private final UserAccount poAccount;
+
+
     public interface OnSubmit{
         void OnLoad();
         void OnSuccess();
         void OnFailed(String fsMesssage);
+    }
+
+    public interface OnDownload{
+        void Loading();
+        void Finished(String fsMessage);
     }
 
     public VM_Member(@NonNull Application application) {
@@ -240,15 +249,15 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetMemberGLPID(fsGLPIDxx);
     }
 
-    public List<DTownInfo.TownProvince> GetMemberAddress(String fsMemberID){
+    public LiveData<List<DTownInfo.TownProvince>> GetMemberAddress(String fsMemberID){
         return poAccount.GetMemberAddress(fsMemberID);
     }
 
-    public List<EMemberContactInfo> GetMemberContact(String fsMemberID){
+    public LiveData<List<EMemberContactInfo>> GetMemberContact(String fsMemberID){
         return poAccount.GetMemberContact(fsMemberID);
     }
 
-    public List<EMemberEmailInfo> GetMemberEmail(String fsMemberID){
+    public LiveData<List<EMemberEmailInfo>> GetMemberEmail(String fsMemberID){
         return poAccount.GetMemberEmail(fsMemberID);
     }
 
@@ -277,6 +286,107 @@ public class VM_Member extends AndroidViewModel {
 
     public String GenerateGLPID(){
         return poAccount.GenerateGLPID();
+    }
+
+    public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
+
+        CompletableFuture<Boolean> poDownloadAddress = poAccount.DownloadMemberAddress(fsMemberIDxx);
+        CompletableFuture<Boolean> poDownloadContact = poAccount.DownloadMemberContact(fsMemberIDxx);
+        CompletableFuture<Boolean> poDownloadEmail = poAccount.DownloadMemberEmail(fsMemberIDxx);
+
+        foCallback.Loading();
+        CompletableFuture.allOf(poDownloadAddress, poDownloadContact, poDownloadEmail).thenRun(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    if (!poDownloadAddress.get() || !poDownloadContact.get() || !poDownloadEmail.get()){
+                        foCallback.Finished("Failed to download member information:\n\n" + poAccount.GetMessage());
+                        return;
+                    }
+                    foCallback.Finished("Sucessfully downloaded member information");
+
+                }catch (Exception e){
+                    foCallback.Finished("Failed to download member information:\n\n" + e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void SubmitParameters(EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+
+        //run first background to get the result
+        poAccount.SaveMember(memberInfo)
+                .thenCompose(result -> {
+
+                    //if return is booleen
+                    if (result instanceof Boolean && !(Boolean) result) {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                        return CompletableFuture.completedFuture(false);
+                    }
+
+                    //if return is empty string
+                    if (result instanceof String && (((String) result).isEmpty())) {
+                        foCallback.OnFailed("Could not save member address. Member ID not found");
+                        return CompletableFuture.completedFuture(false);
+                    }
+                    String lsMemberID = (String) result;
+
+                    //initialize result holder, return true as default
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+
+                    // Save addresses one by one
+                    for (EMemberAddress loAddress : new HashSet<>(laAddress)) {
+                        loAddress.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.SaveMemberAddress(loAddress);
+                        });
+                    }
+
+                    // Save contacts one by one
+                    for (EMemberContactInfo loContact : new HashSet<>(laContact)) {
+                        loContact.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.SaveMemberContact(loContact);
+                        });
+                    }
+
+                    // Save emails one by one, with the generated member id from result
+                    for (EMemberEmailInfo loEmail : new HashSet<>(laEmail)) {
+                        loEmail.setSMemberID(lsMemberID);
+
+                        //bind the result after each thread runs
+                        chain = chain.thenCompose(ok -> {
+                            if (!ok) return CompletableFuture.completedFuture(false);
+                            return poAccount.SaveMemberEmail(loEmail);
+                        });
+                    }
+
+                    return chain;
+
+                })
+                .thenAccept(allOk -> {
+                    foCallback.OnLoad();
+                    if (allOk) {
+                        foCallback.OnSuccess();
+                    } else {
+                        foCallback.OnFailed(poAccount.GetMessage());
+                    }
+                })
+                .exceptionally(e -> {
+                    foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
+                    return null;
+                });
+
     }
 
     public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
@@ -354,80 +464,5 @@ public class VM_Member extends AndroidViewModel {
                 }
             };
         }
-    }
-
-    public void SubmitParameters(EMemberInfo memberInfo, List<EMemberAddress> laAddress, List<EMemberContactInfo> laContact, List<EMemberEmailInfo> laEmail, OnSubmit foCallback){
-
-        foCallback.OnLoad();
-
-        //run first background to get the result
-        poAccount.SaveMember(memberInfo)
-                .thenCompose(result -> {
-
-                    //if return is booleen
-                    if (result instanceof Boolean && !(Boolean) result) {
-                        foCallback.OnFailed(poAccount.GetMessage());
-                        return CompletableFuture.completedFuture(false);
-                    }
-
-                    //if return is empty string
-                    if (result instanceof String && (((String) result).isEmpty())) {
-                        foCallback.OnFailed("Could not save member address. Member ID not found");
-                        return CompletableFuture.completedFuture(false);
-                    }
-                    String lsMemberID = (String) result;
-
-                    //initialize result holder, return true as default
-                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
-
-                    // Save addresses one by one
-                    for (EMemberAddress loAddress : new HashSet<>(laAddress)) {
-                        loAddress.setSMemberID(lsMemberID);
-
-                        //bind the result after each thread runs
-                        chain = chain.thenCompose(ok -> {
-                            if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.SaveMemberAddress(loAddress);
-                        });
-                    }
-
-                    // Save contacts one by one
-                    for (EMemberContactInfo loContact : new HashSet<>(laContact)) {
-                        loContact.setSMemberID(lsMemberID);
-
-                        //bind the result after each thread runs
-                        chain = chain.thenCompose(ok -> {
-                            if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.SaveMemberContact(loContact);
-                        });
-                    }
-
-                    // Save emails one by one, with the generated member id from result
-                    for (EMemberEmailInfo loEmail : new HashSet<>(laEmail)) {
-                        loEmail.setSMemberID(lsMemberID);
-
-                        //bind the result after each thread runs
-                        chain = chain.thenCompose(ok -> {
-                            if (!ok) return CompletableFuture.completedFuture(false);
-                            return poAccount.SaveMemberEmail(loEmail);
-                        });
-                    }
-
-                    return chain;
-
-                })
-                .thenAccept(allOk -> {
-                    foCallback.OnLoad();
-                    if (allOk) {
-                        foCallback.OnSuccess();
-                    } else {
-                        foCallback.OnFailed(poAccount.GetMessage());
-                    }
-                })
-                .exceptionally(e -> {
-                    foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
-                    return null;
-                });
-
     }
 }

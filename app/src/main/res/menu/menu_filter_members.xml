@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_by_date"
+        android:orderInCategory="100"
+        android:title="Membership Date"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_item_filter"
+                android:title="Filter"/>
+
+            <item
+                android:id="@+id/action_item_download"
+                android:title="Download"/>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_by_status"
+        android:orderInCategory="100"
+        android:title="Membership Status"
+        app:showAsAction="never" >
+
+        <menu>
+            <item
+                android:id="@+id/action_item_all"
+                android:title="All"/>
+
+            <item
+                android:id="@+id/action_item_inactive"
+                android:title="Inactive"/>
+
+            <item
+                android:id="@+id/action_item_active"
+                android:title="Active"/>
+
+            <item
+                android:id="@+id/action_item_suspended"
+                android:title="Suspended"/>
+        </menu>
+
+    </item>
+
+</menu>

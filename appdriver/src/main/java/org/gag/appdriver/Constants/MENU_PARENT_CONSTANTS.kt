@@ -12,18 +12,18 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         0
     ),
 
-    MENU_ACCOUNTS(
-        R.drawable.rounded_account_circle_24,
-        "Accounts",
-        "ACC",
+    MENU_MEMBER(
+        R.drawable.person_2_baseline_member,
+        "Members",
+        "MEM",
         1,
         0
     ),
 
-    MENU_ITEM_LOD_ACCOUNT(
-        R.drawable.baseline_logout,
-        "Logout",
-        "LGT",
+    MENU_ACCOUNTS(
+        R.drawable.rounded_account_circle_24,
+        "Accounts",
+        "ACC",
         1,
         0
     )
