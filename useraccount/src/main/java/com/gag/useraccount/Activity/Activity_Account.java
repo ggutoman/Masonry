@@ -205,10 +205,12 @@ public class Activity_Account extends AppCompatActivity {
                     return;
                 }
 
-                poMessage.ShowMessage(2, "Are you sure your information is complete?", "Yes", "No", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Are you sure your information is complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                    public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss();}
 
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
 
                         if (!IsUpdate){
@@ -322,12 +324,6 @@ public class Activity_Account extends AppCompatActivity {
 
                             }
                         });
-
-                    }
-
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
                     }
                 });
             }

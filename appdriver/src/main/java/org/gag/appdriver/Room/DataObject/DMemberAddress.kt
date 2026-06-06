@@ -1,5 +1,6 @@
 package org.gag.appdriver.Room.DataObject
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -23,5 +24,5 @@ interface DMemberAddress {
             "WHERE a.sProvIDxx = b.sProvIDxx " +
             "AND a.sTownIDxx = c.sTownIDxx " +
             "AND c.sMemberID = :fsMemberID")
-    fun GetMemberAddress(fsMemberID : String): List<TownProvince>
+    fun GetMemberAddress(fsMemberID : String): LiveData<List<TownProvince>>
 }

@@ -129,8 +129,6 @@ public class Activity_Main extends AppCompatActivity {
                             loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
                         }
 
-                        Log.d("Logged In", "Logged again");
-
                         Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
                         loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         loIntent.putExtra("parent_key", laParentList);

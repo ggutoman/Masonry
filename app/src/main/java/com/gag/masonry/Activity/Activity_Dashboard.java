@@ -17,6 +17,8 @@ import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.R;
 import com.gag.useraccount.Activity.Activity_Account;
+import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
+import com.gag.useraccount.Fragments.Fragment_Lodge;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -115,31 +117,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 return false;
             }else if (lsParentId.equalsIgnoreCase("LGT")) {
 
-                poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                    @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-                    }
 
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-
-                        Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
-                        if (current != null) {
-                            getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .remove(current)
-                                    .commitNow(); // ensures fragment is destroyed immediately
-                        }
-
-                        Intent loFinish = new Intent();
-                        loFinish.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        setResult(Activity_Dashboard.RESULT_OK, loFinish);
-                        finish();
-
-                    }
-                });
                 return false;
             }
 
@@ -169,8 +147,42 @@ public class Activity_Dashboard extends AppCompatActivity {
                     loIntent.putExtra("update", true);
                     startActivity(loIntent);
                     break;
-                case "ACC002":
-                    InitView("ACC002");
+                case "ACC002": //logout account
+
+                    poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+
+                            Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
+                            if (current != null) {
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .remove(current)
+                                        .commitNow(); // ensures fragment is destroyed immediately
+                            }
+
+                            Intent loFinish = new Intent();
+                            loFinish.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            setResult(Activity_Dashboard.RESULT_OK, loFinish);
+                            finish();
+
+                        }
+                    });
+                    break;
+                case "MEM001":
+                    InitView("MEM001");
+                    break;
+                case "MEM002":
+                    InitView("MEM002");
+                    break;
+                case "MEM003":
+                    InitView("MEM003");
                     break;
             }
 
@@ -188,9 +200,19 @@ public class Activity_Dashboard extends AppCompatActivity {
 
             case "HME":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Home());
+                fragmentTransaction.addToBackStack("home");
                 break;
-            case "ACC002":
+            case "MEM001":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge());
+                fragmentTransaction.addToBackStack("lodge_entry");
+                break;
+            case "MEM002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
+                fragmentTransaction.addToBackStack("create_member");
+                break;
+            case "MEM003":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
+                fragmentTransaction.addToBackStack("assign_officer");
                 break;
 
         }
