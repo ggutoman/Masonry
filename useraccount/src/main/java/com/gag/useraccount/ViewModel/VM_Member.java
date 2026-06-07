@@ -1,29 +1,25 @@
 package com.gag.useraccount.ViewModel;
 
 import android.app.Application;
-import android.content.Context;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Filter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Accounts.UserAccount;
-import org.gag.appdriver.Constants.MEMBER_STATUS;
+import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
+import org.gag.appdriver.Libraries.DateUtil.DateRepository;
+import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
+import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EOfficer;
+import org.gag.appdriver.Room.Entities.EPosition;
 import org.gag.appdriver.Room.Entities.ETitle;
 
 import java.util.ArrayList;
@@ -41,6 +37,7 @@ public class VM_Member extends AndroidViewModel {
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
     private final UserAccount poAccount;
+    private final DateRepository poDate;
 
 
     public interface OnSubmit{
@@ -63,6 +60,7 @@ public class VM_Member extends AndroidViewModel {
         laEmail = new MutableLiveData<>();
 
         poAccount = new UserAccount(application);
+        poDate = new DateRepository();
     }
 
     public boolean AddSponsor(String fsSponsor){
@@ -206,6 +204,10 @@ public class VM_Member extends AndroidViewModel {
         laEmail.setValue(new ArrayList<>());
     }
 
+    public LiveData<List<EMemberInfo>> ObserverMemberList(){
+        return poAccount.GetMemberList();
+    }
+
     public String GetCurrentDate(){
         return poAccount.GetCurrentDate();
     }
@@ -233,6 +235,7 @@ public class VM_Member extends AndroidViewModel {
     public LiveData<List<DTownInfo.TownProvince>> SearchTown(String fsSearch){
         return poAccount.SearchTown(fsSearch);
     }
+
     public LiveData<List<DTownInfo.TownProvince>> HasNewAddress(){
         return laAddress;
     }
@@ -261,14 +264,22 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetMemberEmail(fsMemberID);
     }
 
+    public LiveData<List<DLodgeCalendar.LodgeCalendarList>> GetLodgeCalendar(){
+        return poAccount.GetLodgeCalendarList();
+    }
+
+    public LiveData<List<EPosition>> ObserverPositionList(){
+        return poAccount.ObserverPositionList();
+    }
+
     public List<String> GetCivilStatus(){
 
         List<String> laCivil = new ArrayList<>();
         Collections.addAll(laCivil,
-                MEMBER_STATUS.URL_STATUS_SINGLE.getFsDescr(),
-                MEMBER_STATUS.URL_STATUS_MARRIED.getFsDescr(),
-                MEMBER_STATUS.URL_STATUS_WIDOWED.getFsDescr(),
-                MEMBER_STATUS.URL_STATUS_SEPARATED.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_SINGLE.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_MARRIED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_WIDOWED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_SEPARATED.getFsDescr()
         );
         return laCivil;
     }
@@ -277,15 +288,44 @@ public class VM_Member extends AndroidViewModel {
 
         List<String> laAccount = new ArrayList<>();
         Collections.addAll(laAccount,
-                MEMBER_STATUS.URL_STATUS_INACTIVE.getFsDescr(),
-                MEMBER_STATUS.URL_STATUS_ACTIVE.getFsDescr(),
-                MEMBER_STATUS.URL_STATUS_SUSPENDED.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_INACTIVE.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_ACTIVE.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_SUSPENDED.getFsDescr()
         );
         return laAccount;
     }
 
+    public List<String> GetOfficerTypes(){
+
+        List<String> laType = new ArrayList<>();
+        Collections.addAll(laType,
+                MEMBER_CONSTANTS.STATUS_ELECTED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_APPOINTED.getFsDescr()
+        );
+        return laType;
+    }
+
+    public List<String> GetOfficerStatus(){
+
+        List<String> laType = new ArrayList<>();
+        Collections.addAll(laType,
+                MEMBER_CONSTANTS.STATUS_OFFICER_SUSPENDED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_OFFICER_ACTIVE.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_OFFICER_REASSIGN.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_OFFICER_REMOVED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_OFFICER_RESIGNED.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_OFFICER_DECEASE.getFsDescr()
+
+        );
+        return laType;
+    }
+
     public String GenerateGLPID(){
         return poAccount.GenerateGLPID();
+    }
+
+    public boolean IsDateCompared(String fsDate1, String fsDate2){
+        return poDate.IsDateCompared(fsDate1, fsDate2);
     }
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
@@ -389,80 +429,37 @@ public class VM_Member extends AndroidViewModel {
 
     }
 
-    public static class TownCityAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
+    public void CreateLodgeCalendar(ELodgeCalendar foLodgeCalendar, VM_Account.OnSubmit foCallback){
 
-        private final Context loContext;
-        private final List<DTownInfo.TownProvince> towncity;
-        private List<DTownInfo.TownProvince> towncityFiltered;
+        foCallback.onLoad();
 
-        public TownCityAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
-            super(context, resource, objects);
+        poAccount.CreateLodgeCalendar(foLodgeCalendar).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
 
-            loContext = context;
-            towncity = objects;
-            towncityFiltered = objects;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-
-            View view = convertView;
-            if (view == null) {
-                LayoutInflater inflater = LayoutInflater.from(loContext);
-                view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+                if (!aBoolean){
+                    foCallback.onError(poAccount.GetMessage());
+                    return;
+                }
+                foCallback.onSuccess();
             }
+        });
+    }
 
-            TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(towncityFiltered.get(position).getPsTownProvNme());
+    public void AssignOfficer(EOfficer foOfficer, String fsRemarksx, VM_Account.OnSubmit foCallback){
 
-            return view;
+        foCallback.onLoad();
 
-        }
+        poAccount.SaveOfficer(foOfficer, fsRemarksx).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
 
-        @Override
-        public int getCount() {
-            return towncityFiltered.size();
-        }
-
-        @Nullable
-        @Override
-        public DTownInfo.TownProvince getItem(int position) {
-            return towncityFiltered.get(position);
-        }
-
-        @NonNull
-        @Override
-        public Filter getFilter() {
-
-            return new Filter() {
-                @Override
-                protected FilterResults performFiltering(CharSequence constraint) {
-
-                    List<DTownInfo.TownProvince> results = new ArrayList<>();
-                    if (constraint == null || constraint.length() == 0) {
-                        results.addAll(towncity);
-                    } else {
-                        for (DTownInfo.TownProvince town : towncity) {
-                            if (town.getPsTownProvNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
-                                    town.getPsAddressx().toLowerCase().contains(constraint.toString().toLowerCase())) {
-
-                                results.add(town);
-                            }
-                        }
-                    }
-                    FilterResults filterResults = new FilterResults();
-                    filterResults.values = results;
-                    return filterResults;
+                if (!aBoolean){
+                    foCallback.onError(poAccount.GetMessage());
+                    return;
                 }
-
-                @Override
-                protected void publishResults(CharSequence constraint, FilterResults results) {
-                    towncityFiltered = (List<DTownInfo.TownProvince>) results.values;
-
-                    notifyDataSetChanged();
-                }
-            };
-        }
+                foCallback.onSuccess();
+            }
+        });
     }
 }

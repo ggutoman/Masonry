@@ -14,6 +14,7 @@ import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
+import org.gag.appdriver.Room.DataObject.DOfficer;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -60,6 +61,10 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx, String fsDfrom, String fsDto) {
         return poDashboard.ObserveMemberList(fsMemberIDx, fsDfrom, fsDto);
+    }
+
+    public LiveData<List<DOfficer.OfficerList>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
+        return poDashboard.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
@@ -114,6 +119,7 @@ public class VM_Main extends AndroidViewModel {
             CompletableFuture<Boolean> poTitle = poDashboard.DownloadTitleInfo();
             CompletableFuture<Boolean> poProvince = poDashboard.DownloadProvinceInfo();
             CompletableFuture<Boolean> poTown = poDashboard.DownloadTownInfo();
+            CompletableFuture<Boolean> poLodgeCalendar = poDashboard.DownloadLodgeCalendar();
 
             //execute list of background tasks at once. no sequential execution
             CompletableFuture.allOf(poUserInfo, poLodgeInfo, poPosition, poTitle, poProvince, poTown).thenRun(new Runnable() {
@@ -146,6 +152,10 @@ public class VM_Main extends AndroidViewModel {
                             Log.d("Download Town:", poDashboard.getMessage());
                             foCallback.isLoginNeeded();
                             return;
+                        } else if (!poLodgeCalendar.get()) {
+                            Log.d("Download Lodge Calendars:", poDashboard.getMessage());
+                            foCallback.isLoginNeeded();
+                            return;
                         }
                         foCallback.hasLoggedIn();
                     }catch (Exception e){
@@ -156,6 +166,7 @@ public class VM_Main extends AndroidViewModel {
             });
         }
     }
+
     public void DownloadMembers(String fdFrom, String fDto, OnDownloadData foCallback){
 
         foCallback.OnDownload();
@@ -167,6 +178,25 @@ public class VM_Main extends AndroidViewModel {
                     foCallback.OnFinished(poDashboard.getMessage());
                 }else {
                     foCallback.OnFinished("Successfully downloaded member list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void DownloadOfficers(String fdFrom, String fDto, OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+        poDashboard.DownloadOfficerList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFinished(poDashboard.getMessage());
+                }else {
+                    foCallback.OnFinished("Successfully downloaded officer list");
                 }
             }
         }).exceptionally(throwable -> {

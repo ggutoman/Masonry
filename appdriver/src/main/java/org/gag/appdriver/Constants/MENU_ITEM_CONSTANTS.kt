@@ -21,7 +21,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_CREATE_LODGE(
-        "Create Lodge",
+        "Create Lodge Calendar",
         "MEM001",
         "MEM",
         1,
@@ -29,7 +29,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_CREATE_MEMBER(
-    "Create Member",
+    "Add Member",
     "MEM002",
     "MEM",
         1,

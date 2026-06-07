@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_by_date"
         android:orderInCategory="100"
-        android:title="Membership Date"
+        android:title="By Date"
         app:showAsAction="never">
 
         <menu>
@@ -25,7 +25,7 @@
     <item
         android:id="@+id/action_by_status"
         android:orderInCategory="100"
-        android:title="Membership Status"
+        android:title="By Status"
         app:showAsAction="never" >
 
         <menu>
@@ -34,16 +34,32 @@
                 android:title="All"/>
 
             <item
-                android:id="@+id/action_item_inactive"
-                android:title="Inactive"/>
-
-            <item
                 android:id="@+id/action_item_active"
                 android:title="Active"/>
 
             <item
                 android:id="@+id/action_item_suspended"
                 android:title="Suspended"/>
+
+            <item
+                android:id="@+id/action_item_inactive"
+                android:title="Inactive"/>
+
+            <item
+                android:id="@+id/action_item_reassign"
+                android:title="Re-assigned"/>
+
+            <item
+                android:id="@+id/action_item_remove"
+                android:title="Removed"/>
+
+            <item
+                android:id="@+id/action_item_resign"
+                android:title="Resigned"/>
+
+            <item
+                android:id="@+id/action_item_decease"
+                android:title="Deceased"/>
         </menu>
 
     </item>

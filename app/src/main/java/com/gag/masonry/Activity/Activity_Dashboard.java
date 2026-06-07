@@ -204,7 +204,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 break;
             case "MEM001":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge());
-                fragmentTransaction.addToBackStack("lodge_entry");
+                fragmentTransaction.addToBackStack("lodge_calendar_entry");
                 break;
             case "MEM002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="15dp"
+    android:ellipsize="marquee">
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/Text_Header"
+        android:id="@+id/mtv_descr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="N/A"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_validity_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Valid Until"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_validity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1900-00-00"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_validity_label"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

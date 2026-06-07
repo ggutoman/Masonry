@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.masonry.Adapter.Adapter_Member_List;
+import com.gag.masonry.Adapter.Adapter_Officer_List;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Member;
@@ -33,6 +34,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
+import org.gag.appdriver.Room.DataObject.DOfficer;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -46,12 +48,13 @@ public class Fragment_Home extends Fragment {
 
     private MaterialTextView mtv_username, mtv_position, mtv_lodge;
     private TabLayout tab_layout;
-    private Adapter_Member_List loAdapter;
+    private Adapter_Member_List loMemberAdaoter;
+    private Adapter_Officer_List loOfficerAdapter;
 
     private ConstraintLayout layout_no_record;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
-    private RecyclerView rcv_members;
+    private RecyclerView rcv_home;
 
     private String lsDfrom, lsDto, lsMemberId;
 
@@ -91,6 +94,8 @@ public class Fragment_Home extends Fragment {
 
                 if (tab_layout.getSelectedTabPosition() == 0){
                     InitMemberList();
+                }else {
+                    InitOfficerList();
                 }
             }
         });
@@ -106,7 +111,7 @@ public class Fragment_Home extends Fragment {
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter= view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
-        rcv_members = view.findViewById(R.id.rcv_members);
+        rcv_home = view.findViewById(R.id.rcv_home);
     }
 
     private void InitListeners(){
@@ -121,10 +126,10 @@ public class Fragment_Home extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                if (loAdapter == null) return;
+                if (loMemberAdaoter == null) return;
 
-                loAdapter.GetFilter().filter(charSequence);
-                loAdapter.notifyDataSetChanged();
+                loMemberAdaoter.GetFilter().filter(charSequence);
+                loMemberAdaoter.notifyDataSetChanged();
             }
         });
 
@@ -135,7 +140,30 @@ public class Fragment_Home extends Fragment {
 
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
-                loMenu.getMenuInflater().inflate(R.menu.menu_filter_members, loMenu.getMenu());
+                loMenu.getMenuInflater().inflate(R.menu.menu_filter_home, loMenu.getMenu());
+
+                if (tab_layout.getSelectedTabPosition() == 0){ //members tab
+
+                    loMenu.getMenu().findItem (R.id.action_item_inactive).setVisible(true);
+
+                    //disable other menus
+                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(false);
+                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(false);
+                    loMenu.getMenu().findItem(R.id.action_item_remove).setVisible(false);
+                    loMenu.getMenu().findItem(R.id.action_item_resign).setVisible(false);
+                    loMenu.getMenu().findItem(R.id.action_item_decease).setVisible(false);
+                }else {
+
+                    loMenu.getMenu().findItem (R.id.action_item_inactive).setVisible(false);
+
+                    //disable other menus
+                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(true);
+                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(true);
+                    loMenu.getMenu().findItem(R.id.action_item_remove).setVisible(true);
+                    loMenu.getMenu().findItem(R.id.action_item_resign).setVisible(true);
+                    loMenu.getMenu().findItem(R.id.action_item_decease).setVisible(true);
+                }
+
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -201,42 +229,42 @@ public class Fragment_Home extends Fragment {
 
                         }else if (menuItem.getItemId() == R.id.action_item_all){
 
-                            if (loAdapter == null) return false;
+                            if (loMemberAdaoter == null) return false;
 
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-                            loAdapter.GetFilter().InitStatus(List.of("0", "1", "2"));
+                            loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loMemberAdaoter.GetFilter().InitStatus(List.of("0", "1", "2"));
 
-                            loAdapter.notifyDataSetChanged();
+                            loMemberAdaoter.notifyDataSetChanged();
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_inactive){
 
-                            if (loAdapter == null) return false;
+                            if (loMemberAdaoter == null) return false;
 
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-                            loAdapter.GetFilter().InitStatus(List.of("0"));
+                            loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loMemberAdaoter.GetFilter().InitStatus(List.of("0"));
 
-                            loAdapter.notifyDataSetChanged();
+                            loMemberAdaoter.notifyDataSetChanged();
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_active){
 
-                            if (loAdapter == null) return false;
+                            if (loMemberAdaoter == null) return false;
 
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-                            loAdapter.GetFilter().InitStatus(List.of("1"));
+                            loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loMemberAdaoter.GetFilter().InitStatus(List.of("1"));
 
-                            loAdapter.notifyDataSetChanged();
+                            loMemberAdaoter.notifyDataSetChanged();
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_suspended){
 
-                            if (loAdapter == null) return false;
+                            if (loMemberAdaoter == null) return false;
 
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-                            loAdapter.GetFilter().InitStatus(List.of("2"));
+                            loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loMemberAdaoter.GetFilter().InitStatus(List.of("2"));
 
-                            loAdapter.notifyDataSetChanged();
+                            loMemberAdaoter.notifyDataSetChanged();
 
                             return true;
                         }
@@ -252,7 +280,9 @@ public class Fragment_Home extends Fragment {
             public void onTabSelected(TabLayout.Tab tab) {
 
                 if (tab.getPosition() == 0){
-                    InitMemberList(); //initialize list
+                    InitMemberList();
+                }else {
+                    InitOfficerList();
                 }
             }
 
@@ -272,13 +302,13 @@ public class Fragment_Home extends Fragment {
 
                 if (eMemberInfos == null || eMemberInfos.size() < 1){
                     layout_no_record.setVisibility(View.VISIBLE);
-                    rcv_members.setVisibility(View.GONE);
+                    rcv_home.setVisibility(View.GONE);
                     return;
                 }
                 layout_no_record.setVisibility(View.GONE);
-                rcv_members.setVisibility(View.VISIBLE);
+                rcv_home.setVisibility(View.VISIBLE);
 
-                loAdapter = new Adapter_Member_List(requireActivity(), eMemberInfos, new Adapter_Member_List.OnSelect() {
+                loMemberAdaoter = new Adapter_Member_List(requireActivity(), eMemberInfos, new Adapter_Member_List.OnSelect() {
                     @Override
                     public void Selected(EMemberInfo foMember) {
 
@@ -298,8 +328,38 @@ public class Fragment_Home extends Fragment {
                     }
                 });
 
-                rcv_members.setAdapter(loAdapter);
-                rcv_members.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+                rcv_home.setAdapter(loMemberAdaoter);
+                rcv_home.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+
+            }
+        });
+    }
+
+    private void InitOfficerList(){
+
+        mviewModel.ObserveOfficerList(lsMemberId, lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<DOfficer.OfficerList>>() {
+            @Override
+            public void onChanged(List<DOfficer.OfficerList> officerLists) {
+
+                Toast.makeText(requireActivity(), lsDfrom + " and " + lsDto, Toast.LENGTH_SHORT).show();
+
+                if (officerLists == null || officerLists.size() < 1){
+                    layout_no_record.setVisibility(View.VISIBLE);
+                    rcv_home.setVisibility(View.GONE);
+                    return;
+                }
+                layout_no_record.setVisibility(View.GONE);
+                rcv_home.setVisibility(View.VISIBLE);
+
+                loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerLists, new Adapter_Officer_List.OnSelect() {
+                    @Override
+                    public void Selected(DOfficer.OfficerList poItem) {
+
+                    }
+                });
+
+                rcv_home.setAdapter(loOfficerAdapter);
+                rcv_home.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
 
             }
         });
@@ -315,6 +375,21 @@ public class Fragment_Home extends Fragment {
             public void OnFinished(String fsMessage) {
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
                 InitMemberList();
+            }
+        });
+
+    }
+
+    private void DownloadOfficersList(){
+
+        mviewModel.DownloadOfficers(lsDfrom, lsDto, new VM_Main.OnDownloadData() {
+            @Override
+            public void OnDownload() { Toast.makeText(requireActivity(), "Downloading officers . . .", Toast.LENGTH_SHORT).show(); }
+
+            @Override
+            public void OnFinished(String fsMessage) {
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                InitOfficerList();
             }
         });
 

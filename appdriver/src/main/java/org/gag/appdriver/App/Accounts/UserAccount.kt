@@ -20,20 +20,27 @@ import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DOfficer
+import org.gag.appdriver.Room.DataObject.DOfficerHistory
+import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo.TownProvince
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberAddress
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EOfficer
+import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
@@ -59,6 +66,12 @@ class UserAccount(instance : Context) {
     val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
     val poMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
     val poMemberEmail : DMemberEmailInfo = ML_DBF.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
+    val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
+    val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
+    val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+
+
 
     fun GetMessage() : String = message
 
@@ -78,7 +91,7 @@ class UserAccount(instance : Context) {
 
     fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
 
-    fun SearchTown(fsSearch : String) : LiveData<List<DTownInfo.TownProvince>>{
+    fun SearchTown(fsSearch : String) : LiveData<List<TownProvince>>{
         return poTownInfo.SearchTown("%$fsSearch%")
     }
 
@@ -100,6 +113,12 @@ class UserAccount(instance : Context) {
     }
 
     fun GetTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
+
+    fun GetLodgeCalendarList(): LiveData<List<DLodgeCalendar.LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList()
+
+    fun GetMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
+
+    fun ObserverPositionList() : LiveData<List<EPosition>> = poPosition.ObserverPositionList()
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -242,7 +261,6 @@ class UserAccount(instance : Context) {
         return future
 
     }
-
     @SuppressLint("MissingPermission")
     fun UpdateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
 
@@ -838,6 +856,153 @@ class UserAccount(instance : Context) {
                                 laEmail.sMailIDxx = loResult.GetPayload()
                             }
                             poMemberEmail.SaveMemberEmail(laEmail)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun CreateLodgeCalendar(loLodgeCalendar : ELodgeCalendar) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+                    put("sLodgeIDx", loLodgeCalendar.sLodgeIDx)
+                    put("nYearxxxx", loLodgeCalendar.nYearxxxx)
+                    put("dThruDate", loLodgeCalendar.dThruDate)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_LODGE_CALENDAR.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //initialize new year id from result
+                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+
+                            loLodgeCalendar.sYearIDxx = loResult.GetPayload()
+                            poLodgeCalendar.SaveLodgeCalendar(loLodgeCalendar)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun SaveOfficer(fOfficer : EOfficer, fsRemarks : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+                    put("sYearIDxx", fOfficer.sYearIDxx)
+                    put("sMemberID", fOfficer.sMemberID)
+                    put("sPositnCd", fOfficer.sPositnCd)
+                    put("cNewStatx", fOfficer.cStatusxx)
+                    put("cAppointx", fOfficer.cAppointx)
+                    put("cAppointx", fsRemarks)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_OFFICER.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //initialize new year id from result
+                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+
+                            fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
+                            poOfficer.SaveOfficer(fOfficer)
+
+                            //save changes
+                            poOfficer.SaveOfficer(fOfficer)
+
                             true
                         }
 
