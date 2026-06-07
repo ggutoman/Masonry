@@ -29,19 +29,24 @@ class DateRepository {
     }
 
     @SuppressLint("SimpleDateFormat")
-    fun FormatToDate(fsParam : String) : String{
-        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O)
+    fun IsDateCompared(fsDate1: String, fsDate2: String): Boolean {
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
 
-            SimpleDateFormat(DATE_CONSTANTS.DATE_FORMAT.fsDescript)
-                .format(fsParam)
-        else
-            LocalDate.parse(fsParam)
-                .format(
-                    DateTimeFormatter.ofPattern(
-                        DATE_CONSTANTS.DATE_FORMAT.fsDescript
-                )
-            )
+            val sdf = SimpleDateFormat(DATE_CONSTANTS.DATE_FORMAT.fsDescript)
+            val date1 = sdf.parse(fsDate1)
+            val date2 = sdf.parse(fsDate2)
+
+            date1 != null && date2 != null && date1.before(date2)
+        } else {
+
+            val formatter = DateTimeFormatter.ofPattern(DATE_CONSTANTS.DATE_FORMAT.fsDescript)
+            val date1 = LocalDate.parse(fsDate1, formatter)
+            val date2 = LocalDate.parse(fsDate2, formatter)
+
+            date1.isBefore(date2)
+        }
     }
+
 
     @SuppressLint("SimpleDateFormat")
     fun GetCountedDate(fnCount : Int, fnDateIndex : Int, fbIsAdd : Boolean) : String{

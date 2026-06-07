@@ -10,9 +10,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
+import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
-import org.gag.appdriver.App.DataModels.DownloadMemberAddresses
 import org.gag.appdriver.App.DataModels.DownloadMemberList
+import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.DataModels.DownloadPositionInfo
 import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
 import org.gag.appdriver.App.DataModels.DownloadTitleInfo
@@ -25,9 +26,11 @@ import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
@@ -35,6 +38,7 @@ import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -50,12 +54,13 @@ class Dashboard(loInstance : Context) {
 
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
-    val poDBMemberAddr : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
     val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
     val poProvinceInfo : DProvinceInfo = ML_DBF.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
+    val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
 
     fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo>{
 
@@ -66,7 +71,9 @@ class Dashboard(loInstance : Context) {
         )
     }
 
-    fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberList(fsMemberIDx, fsDateFrom, fsDateTo)
+    fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberListByFilter(fsMemberIDx, fsDateFrom, fsDateTo)
+
+    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<DOfficer.OfficerList>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun GetLodgeInfo() : ELodgeInfo{
 
@@ -463,6 +470,70 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
+    fun DownloadLodgeCalendar(): CompletableFuture<Boolean>{
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_LODGE_CALENDAR.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadLodgeCalendar>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poLodgeCalendar.SaveLodgeCalendar(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
     fun DownloadMemberList(fdFromxx : String, fsDto : String): CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
@@ -530,6 +601,76 @@ class Dashboard(loInstance : Context) {
             }
         }
         return future
+    }
+
+    fun DownloadOfficerList(fdFromxx : String, fsDto : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val params : JSONObject = JSONObject().also {
+                    it.put("dFromxx", fdFromxx)
+                    it.put("dToxx", fsDto)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICERS.fsURL,
+                    params,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadOfficerList>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poOfficers.SaveOfficer(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
     }
 
     fun GetParentMenus(fnUserLvl : Int) : List<MENU_PARENT_CONSTANTS>{

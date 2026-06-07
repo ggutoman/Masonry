@@ -22,6 +22,13 @@
             android:orientation="vertical"
             android:padding="20dp">
 
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Membership Information"/>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.6dp"
@@ -32,7 +39,7 @@
                 style="@style/Text_Header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Member Information"
+                android:text="Member Details"
                 android:paddingVertical="20dp"
                 android:paddingHorizontal="10dp"
                 android:layout_margin="5dp"
@@ -149,7 +156,7 @@
                 style="@style/Text_Header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Personal Information"
+                android:text="Personal Details"
                 android:paddingVertical="20dp"
                 android:paddingHorizontal="10dp"
                 android:layout_margin="5dp"

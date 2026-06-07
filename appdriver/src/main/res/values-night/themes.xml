@@ -50,6 +50,11 @@
         <item name="boxCornerRadiusBottomStart">10dp</item>
         <item name="boxCornerRadiusTopStart">10dp</item>
         <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="android:inputType">textMultiLine</item>
+        <item name="android:overScrollMode">always</item>
+        <item name="android:scrollHorizontally">false</item>
+        <item name="android:lines">3</item>
+        <item name="android:ellipsize">none</item>
     </style>
 
     <!-- TEXT AUTOFILL-->

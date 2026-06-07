@@ -1,5 +1,6 @@
 package org.gag.appdriver.Room.DataObject
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
@@ -14,4 +15,7 @@ interface DPositionInfo {
 
     @Query("SELECT * FROM Position_Info WHERE sPositnCd= :fspositionCd")
     fun GetLodgeInfo(fspositionCd : String): EPosition
+
+    @Query("SELECT * FROM Position_Info")
+    fun ObserverPositionList() : LiveData<List<EPosition>>
 }

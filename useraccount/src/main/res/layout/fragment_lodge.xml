@@ -15,6 +15,13 @@
        android:padding="10dp"
        android:gravity="">
 
+       <com.google.android.material.textview.MaterialTextView
+           style="@style/Text_Title"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:padding="10dp"
+           android:text="Lodge Calendar Information"/>
+
        <View
            android:layout_width="match_parent"
            android:layout_height="0.6dp"
@@ -31,8 +38,7 @@
        <com.google.android.material.textfield.TextInputLayout
            style="@style/CustomDropDownTilStyle"
            android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:hint="Select Lodge">
+           android:layout_height="wrap_content">
 
            <com.google.android.material.textfield.MaterialAutoCompleteTextView
                style="@style/DropdownStyleTheme"
@@ -52,8 +58,7 @@
            style="@style/TextInputStyle"
            android:id="@+id/til_birthdate"
            android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:hint="Select Year">
+           android:layout_height="wrap_content">
 
            <com.google.android.material.textfield.TextInputEditText
                style="@style/TextInputStyle.Edittext"
@@ -77,8 +82,7 @@
            style="@style/TextInputStyle"
            android:id="@+id/til_valid_until"
            android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:hint="Select Date of Validity">
+           android:layout_height="wrap_content">
 
            <com.google.android.material.textfield.TextInputEditText
                style="@style/TextInputStyle.Edittext"
@@ -92,6 +96,7 @@
        </com.google.android.material.textfield.TextInputLayout>
 
        <com.google.android.material.button.MaterialButton
+           android:id="@+id/btn_save"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:text="Create Lodge"

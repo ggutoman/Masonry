@@ -22,6 +22,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.gag.appdriver.App.Adapters.TownCityAdapter;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class Dialog_Add_Member_Info{
 
     private final VM_Member loViewModel;
     private final LifecycleOwner loOwner;
-    private VM_Member.TownCityAdapter TownProvAdapter;
+    private TownCityAdapter TownProvAdapter;
 
     private String lsTwnIDx, lsProvIDx;
 
@@ -175,7 +176,7 @@ public class Dialog_Add_Member_Info{
                     @Override
                     public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
 
-                        TownProvAdapter = new VM_Member.TownCityAdapter(
+                        TownProvAdapter = new TownCityAdapter(
                                 loInstance,
                                 android.R.layout.simple_spinner_dropdown_item,
                                 townProvinces

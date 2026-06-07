@@ -13,7 +13,7 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
     ),
 
     MENU_MEMBER(
-        R.drawable.person_2_baseline_member,
+        R.drawable.baseline_member,
         "Members",
         "MEM",
         1,
@@ -22,7 +22,7 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
 
     MENU_ACCOUNTS(
         R.drawable.rounded_account_circle_24,
-        "Accounts",
+        "Account Settings",
         "ACC",
         1,
         0
