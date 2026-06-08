@@ -13,6 +13,9 @@ interface DOfficerHistory {
     @Upsert(EOfficerHistory::class)
     fun SaveOfficerHistory(eOfficerHistory: EOfficerHistory)
 
+    @Query("DELETE FROM Officer_History")
+    fun DeleteOfficerHistory()
+
     @Query("SELECT * FROM Officer_History WHERE sMemberID= :fsMemberIDx")
     fun GetOfficerHistory(fsMemberIDx : String) : LiveData<List<EOfficerHistory>>
 }

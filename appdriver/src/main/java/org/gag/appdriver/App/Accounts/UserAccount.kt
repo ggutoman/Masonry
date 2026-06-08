@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Accounts
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -71,8 +72,6 @@ class UserAccount(instance : Context) {
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
 
-
-
     fun GetMessage() : String = message
 
     fun GetUserID() : String = TextFormatter()
@@ -112,13 +111,15 @@ class UserAccount(instance : Context) {
             .joinToString("")
     }
 
-    fun GetTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
+    fun ObserveTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
 
-    fun GetLodgeCalendarList(): LiveData<List<DLodgeCalendar.LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList()
+    fun ObserveLodgeCalendarList(): LiveData<List<DLodgeCalendar.LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList()
 
-    fun GetMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
+    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
 
     fun ObserverPositionList() : LiveData<List<EPosition>> = poPosition.ObserverPositionList()
+
+    fun ObserveOfficeInfo(fsMemberIDx : String, fsYearIDx : String) : LiveData<EOfficer> = poOfficer.ObserveOfficeInfo(fsMemberIDx, fsYearIDx)
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -980,7 +981,7 @@ class UserAccount(instance : Context) {
                     put("sPositnCd", fOfficer.sPositnCd)
                     put("cNewStatx", fOfficer.cStatusxx)
                     put("cAppointx", fOfficer.cAppointx)
-                    put("cAppointx", fsRemarks)
+                    put("sRemarksx", fsRemarks)
                 }
 
                 httpInstance.makeRequest(
@@ -999,10 +1000,6 @@ class UserAccount(instance : Context) {
 
                             fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
                             poOfficer.SaveOfficer(fOfficer)
-
-                            //save changes
-                            poOfficer.SaveOfficer(fOfficer)
-
                             true
                         }
 

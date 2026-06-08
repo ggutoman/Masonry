@@ -17,7 +17,7 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         "Members",
         "MEM",
         1,
-        0
+        1
     ),
 
     MENU_ACCOUNTS(

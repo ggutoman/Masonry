@@ -12,6 +12,9 @@ interface DMemberEmailInfo {
     @Upsert(entity = EMemberEmailInfo::class)
     fun SaveMemberEmail(poContact: EMemberEmailInfo)
 
+    @Query("DELETE FROM Member_Email")
+    fun DeleteMemberEmail()
+
     @Query("SELECT * FROM Member_Email WHERE sMemberID = :fsMemberID")
     fun GetMemberEmail(fsMemberID : String): LiveData<List<EMemberEmailInfo>>
 

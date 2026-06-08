@@ -25,6 +25,8 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
 import org.gag.appdriver.App.Adapters.MemberAdapter;
@@ -49,11 +51,16 @@ public class Fragment_Assign_Officer extends Fragment {
     private MemberAdapter loMemberAdapter;
     private PositionAdapter loPositionAdapter;
 
+    private EOfficer loOfficer;
     private DLodgeCalendar.LodgeCalendarList loSelectCalendar;
     private EMemberInfo loSelectMember;
     private EPosition loSelectPosition;
+
+    private String lsSelectMember, lsSelectCalendar;
     private int lnSelectLevel = -1, lnSelectStatus = -1;
 
+    private MaterialTextView mtv_remarks;
+    private TextInputLayout til_remarks;
     private TextInputEditText tie_remarks;
     private MaterialAutoCompleteTextView  tie_yearid, auto_member, auto_position, auto_type, auto_status;
     private MaterialButton btn_create;
@@ -85,66 +92,191 @@ public class Fragment_Assign_Officer extends Fragment {
         auto_position = view.findViewById(R.id.auto_position);
         auto_type = view.findViewById(R.id.auto_type);
         auto_status = view.findViewById(R.id.auto_status);
+
+        mtv_remarks = view.findViewById(R.id.mtv_remarks);
+        til_remarks = view.findViewById(R.id.til_remarks);
         tie_remarks = view.findViewById(R.id.tie_remarks);
+
         btn_create = view.findViewById(R.id.btn_create);
     }
 
     private void InitDataReceiver(){
 
-        mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<DLodgeCalendar.LodgeCalendarList>>() {
+        if (getArguments() == null){
+            btn_create.setText("Assign Officer");
+            lsSelectMember = "";
+            lsSelectCalendar = "";
+        }else {
+
+            if ((getArguments().getString("fsMemberID") == null || getArguments().getString("fsMemberID").isEmpty()) ||
+                    getArguments().getString("fsYearID") == null || getArguments().getString("fsYearID").isEmpty()){
+
+                poMessage.ShowMessage(1, "Could not verify officer data", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        requireActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .remove(Fragment_Assign_Officer.this)
+                                .commit();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+                return;
+            }
+            btn_create.setText("Update Officer");
+
+            lsSelectMember = getArguments().getString("fsMemberID");
+            lsSelectCalendar = getArguments().getString("fsYearID");
+        }
+
+        mViewmodel.ObserveOfficerInfo(lsSelectMember, lsSelectCalendar).observe(getViewLifecycleOwner(), new Observer<EOfficer>() {
             @Override
-            public void onChanged(List<DLodgeCalendar.LodgeCalendarList> lodgeCalendarLists) {
+            public void onChanged(EOfficer eOfficer) {
 
-                if (lodgeCalendarLists == null) return;
+                //do not proceed if member information is not found
+                if (eOfficer == null){
 
-                loLodgeCalAdapter = new LodgeCalendarAdapter(
-                        requireActivity(),
-                        org.gag.appdriver.R.layout.adapter_list_lodge_calendar,
-                        lodgeCalendarLists
-                );
+                    //if member information is not found via argument's passed GLPID (update member only), validate and return
+                    if (getArguments() != null){
 
-                tie_yearid.setAdapter(loLodgeCalAdapter);
+                        poMessage.ShowMessage(1, "Could not load officer information", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                requireActivity()
+                                        .getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .remove(Fragment_Assign_Officer.this)
+                                        .commit();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                        return;
+                    }
+
+                    //hide remarks field
+                    mtv_remarks.setVisibility(View.GONE);
+                    til_remarks.setVisibility(View.GONE);
+                    tie_remarks.setVisibility(View.GONE);
+                }else {
+
+                    loOfficer = eOfficer;
+
+                    //display remarks field
+                    mtv_remarks.setVisibility(View.VISIBLE);
+                    til_remarks.setVisibility(View.VISIBLE);
+                    tie_remarks.setVisibility(View.VISIBLE);
+                }
+
+                mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<DLodgeCalendar.LodgeCalendarList>>() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onChanged(List<DLodgeCalendar.LodgeCalendarList> lodgeCalendarLists) {
+
+                        if (lodgeCalendarLists == null) return;
+
+                        loLodgeCalAdapter = new LodgeCalendarAdapter(
+                                requireActivity(),
+                                org.gag.appdriver.R.layout.adapter_list_lodge_calendar,
+                                lodgeCalendarLists
+                        );
+
+                        tie_yearid.setAdapter(loLodgeCalAdapter);
+
+                        if (loOfficer == null) return;
+
+                        lodgeCalendarLists.stream()
+                                .filter(loCalendar -> loCalendar.getSYearIDxx()
+                                        .equalsIgnoreCase(loOfficer.getSYearIDxx()))
+                                .findFirst()
+                                .ifPresent(loCalendar ->{
+
+                                    tie_yearid.setText(loCalendar.getSLodgeNme() + " (" + loCalendar.getNYearxxxx() + ")", false);
+                                    loSelectCalendar = loCalendar;
+
+                                });
+
+                    }
+                });
+
+                mViewmodel.ObserverMemberList().observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onChanged(List<EMemberInfo> eMemberInfos) {
+
+                        if (eMemberInfos == null) return;
+
+                        loMemberAdapter = new MemberAdapter(requireActivity(),
+                                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                                eMemberInfos);
+
+                        auto_member.setAdapter(loMemberAdapter);
+
+                        if (loOfficer == null) return;
+                        eMemberInfos.stream()
+                                .filter(loMember -> loMember.getSMemberID()
+                                        .equalsIgnoreCase(loOfficer.getSMemberID()))
+                                .findFirst()
+                                .ifPresent(loMember ->{
+
+                                    auto_member.setText(loMember.getSFrstName() + " " + loMember.getSLastName(), false);
+                                    loSelectMember = loMember;
+                                });
+                    }
+                });
+
+                mViewmodel.ObserverPositionList().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
+                    @Override
+                    public void onChanged(List<EPosition> ePositions) {
+
+                        if (ePositions == null) return;
+
+                        loPositionAdapter = new PositionAdapter(requireActivity(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, ePositions);
+                        auto_position.setAdapter(loPositionAdapter);
+
+                        if (loOfficer == null) return;
+                        ePositions.stream()
+                                .filter(loPosition -> loPosition.getSPositnCd()
+                                        .equalsIgnoreCase(loOfficer.getSPositnCd()))
+                                .findFirst()
+                                .ifPresent(loPosition -> {
+
+                                    auto_position.setText(loPosition.getSPositnDs(), false);
+                                    loSelectPosition = loPosition;
+                                });
+                    }
+                });
+
+                auto_type.setAdapter(
+                        new ArrayAdapter<>(
+                                requireActivity(),
+                                android.R.layout.simple_spinner_dropdown_item,
+                                mViewmodel.GetOfficerTypes()
+                        ));
+
+                auto_status.setAdapter(
+                        new ArrayAdapter<>(
+                                requireActivity(),
+                                android.R.layout.simple_spinner_dropdown_item,
+                                mViewmodel.GetOfficerStatus()
+                        ));
+
+                if (loOfficer == null) return;
+                lnSelectLevel = loOfficer.getCAppointx() == null ? 0 : Integer.parseInt(loOfficer.getCAppointx());
+                auto_type.setText(mViewmodel.GetOfficerTypes().get(loOfficer.getCAppointx() == null ? 0 : Integer.parseInt(loOfficer.getCAppointx())), false);
+
+                lnSelectStatus = loOfficer.getCStatusxx() == null ? 0 : Integer.parseInt(loOfficer.getCStatusxx());
+                auto_status.setText(mViewmodel.GetOfficerStatus().get(loOfficer.getCStatusxx() == null ? 0 : Integer.parseInt(loOfficer.getCStatusxx())), false);
             }
         });
-
-        mViewmodel.ObserverMemberList().observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
-            @Override
-            public void onChanged(List<EMemberInfo> eMemberInfos) {
-
-                if (eMemberInfos == null) return;
-
-                loMemberAdapter = new MemberAdapter(requireActivity(),
-                        androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                        eMemberInfos);
-
-                auto_member.setAdapter(loMemberAdapter);
-            }
-        });
-
-        mViewmodel.ObserverPositionList().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
-            @Override
-            public void onChanged(List<EPosition> ePositions) {
-
-                if (ePositions == null) return;
-
-                loPositionAdapter = new PositionAdapter(requireActivity(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, ePositions);
-                auto_position.setAdapter(loPositionAdapter);
-            }
-        });
-
-        auto_type.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mViewmodel.GetOfficerTypes()
-                ));
-
-        auto_status.setAdapter(
-                new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        mViewmodel.GetOfficerStatus()
-                ));
     }
 
     private void InitListener(){
@@ -156,6 +288,8 @@ public class Fragment_Assign_Officer extends Fragment {
 
                 loSelectCalendar= (DLodgeCalendar.LodgeCalendarList) adapterView.getItemAtPosition(i);
                 tie_yearid.setText(loSelectCalendar.getSLodgeNme() + " (" + loSelectCalendar.getNYearxxxx() + ")");
+
+                lsSelectCalendar = loSelectCalendar.getSYearIDxx();
             }
         });
 
@@ -178,6 +312,8 @@ public class Fragment_Assign_Officer extends Fragment {
                         lsSuffix;
 
                 auto_member.setText(lsMemberNm);
+
+                lsSelectMember = loSelectMember.getSMemberID();
             }
         });
 

@@ -13,6 +13,7 @@ import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
 import org.gag.appdriver.App.DataModels.DownloadMemberList
+import org.gag.appdriver.App.DataModels.DownloadOfficerHistory
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.DataModels.DownloadPositionInfo
 import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
@@ -29,8 +30,11 @@ import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
+import org.gag.appdriver.Room.DataObject.DMemberContact
+import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DOfficer
+import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
@@ -54,6 +58,9 @@ class Dashboard(loInstance : Context) {
 
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
+    val poDBMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
+    val poDBMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
+    val poDBMemberEmail : DMemberEmailInfo = ML_DBF.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
     val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
@@ -61,6 +68,7 @@ class Dashboard(loInstance : Context) {
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
+    val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
 
     fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo>{
 
@@ -82,6 +90,17 @@ class Dashboard(loInstance : Context) {
                 .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
                 .getOrNull(0) ?: ""
         )
+    }
+
+    fun ClearMemberData(){
+
+        poDBMember.DeleteMember()
+        poDBMemberAddress.DeletMemberAddress()
+        poDBMemberContact.DeleteMemberContact()
+        poDBMemberEmail.DeleteMemberEmail()
+
+        poOfficers.DeleteOfficers()
+        poOfficerHistory.DeleteOfficerHistory()
     }
 
     @SuppressLint("MissingPermission")
@@ -603,6 +622,7 @@ class Dashboard(loInstance : Context) {
         return future
     }
 
+    @SuppressLint("MissingPermission")
     fun DownloadOfficerList(fdFromxx : String, fsDto : String) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
@@ -635,6 +655,78 @@ class Dashboard(loInstance : Context) {
 
                             resultData.GetPayload().forEach { loItem ->
                                 poOfficers.SaveOfficer(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadOfficerHistory(fsMemberIDx : String, fdFromxx : String, fsDto : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val params : JSONObject = JSONObject().also {
+                    it.put("fsMemberIDx", fsMemberIDx)
+                    it.put("dFromxx", fdFromxx)
+                    it.put("dToxx", fsDto)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICER_HISTORY.fsURL,
+                    params,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.decodeFromString<DownloadOfficerHistory>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poOfficerHistory.SaveOfficerHistory(loItem)
                             }
 
                             true

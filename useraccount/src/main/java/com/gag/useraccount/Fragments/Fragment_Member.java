@@ -315,7 +315,6 @@ public class Fragment_Member extends Fragment {
                         }
                     });
                 }
-
                 loMemberInfo = eMemberInfo;
 
                 //initialize address, and email with exisitng list

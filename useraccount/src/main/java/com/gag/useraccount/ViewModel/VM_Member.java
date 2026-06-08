@@ -204,10 +204,6 @@ public class VM_Member extends AndroidViewModel {
         laEmail.setValue(new ArrayList<>());
     }
 
-    public LiveData<List<EMemberInfo>> ObserverMemberList(){
-        return poAccount.GetMemberList();
-    }
-
     public String GetCurrentDate(){
         return poAccount.GetCurrentDate();
     }
@@ -220,6 +216,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetUserID();
     }
 
+    public LiveData<List<EMemberInfo>> ObserverMemberList(){
+        return poAccount.ObserveMemberList();
+    }
+
     public LiveData<List<String>> GetSponsorList(){
         return laSponsors;
     }
@@ -229,7 +229,7 @@ public class VM_Member extends AndroidViewModel {
     }
 
     public LiveData<List<ETitle>> GetTitleList(){
-        return poAccount.GetTitleList();
+        return poAccount.ObserveTitleList();
     }
 
     public LiveData<List<DTownInfo.TownProvince>> SearchTown(String fsSearch){
@@ -265,11 +265,15 @@ public class VM_Member extends AndroidViewModel {
     }
 
     public LiveData<List<DLodgeCalendar.LodgeCalendarList>> GetLodgeCalendar(){
-        return poAccount.GetLodgeCalendarList();
+        return poAccount.ObserveLodgeCalendarList();
     }
 
     public LiveData<List<EPosition>> ObserverPositionList(){
         return poAccount.ObserverPositionList();
+    }
+
+    public LiveData<EOfficer> ObserveOfficerInfo(String fsMemberIDxx, String fsYearIDxx){
+        return poAccount.ObserveOfficeInfo(fsMemberIDxx, fsYearIDxx);
     }
 
     public List<String> GetCivilStatus(){
