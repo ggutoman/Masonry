@@ -53,13 +53,6 @@
                     android:text="User"/>
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/mtv_position"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"
-                    android:visibility="gone"/>
-
-                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/mtv_lodge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

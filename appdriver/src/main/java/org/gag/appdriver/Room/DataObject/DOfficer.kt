@@ -12,6 +12,9 @@ interface DOfficer {
     @Upsert(EOfficer::class)
     fun SaveOfficer(eOfficer: EOfficer)
 
+    @Query("DELETE FROM Officer_Info")
+    fun DeleteOfficers()
+
     @Query("SELECT " +
             "a.sMemberID, a.sYearIDxx, a.cAppointx, a.cStatusxx, a.sPositnCd," +
             "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
@@ -25,6 +28,9 @@ interface DOfficer {
             "AND (b.dFromDate >= :fsDateFrom " +
             "AND b.dThruDate <= :fsDateTo)")
     fun ObserveOfficerList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerList>>
+
+    @Query("SELECT * FROM Officer_Info WHERE sMemberID= :fsMemberIDx AND sYearIDxx= :fsYearIDx")
+    fun ObserveOfficeInfo(fsMemberIDx : String, fsYearIDx : String) : LiveData<EOfficer>
 
     data class OfficerList(
         val sMemberID : String,

@@ -21,6 +21,7 @@ import com.gag.useraccount.Activity.Activity_Login;
 
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
+import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -96,45 +97,61 @@ public class Activity_Main extends AppCompatActivity {
 
                         poLoad.DismissDialog();
 
-                        if (mviewModel.GetUserInfo() == null){
-                            Toast.makeText(Activity_Main.this, "User information not found", Toast.LENGTH_LONG).show();
-
+                        if (mviewModel.GetUserInfo() == null || mviewModel.GetLodgeInfo() == null){
                             Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                             loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             poLogin.launch(loIntent);
-                            return;
-                        }else if (mviewModel.GetLodgeInfo() == null){
-                            Toast.makeText(Activity_Main.this, "Lodge information not found", Toast.LENGTH_LONG).show();
 
-                            Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
-                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            poLogin.launch(loIntent);
                             return;
                         }
 
-                        //initialze drawer menus
-                        List<MENU_PARENT_CONSTANTS> faParentMenu = mviewModel.GetParentMenu(eUserInfo.getNUserLevl());
+                        //verify member information, it would be the basis of displaying menus
+                        mviewModel.GetMemberInfo().observe(Activity_Main.this, new Observer<DMemberInfo.MemberDashboardInfo>() {
+                            @Override
+                            public void onChanged(DMemberInfo.MemberDashboardInfo memberDashboardInfo) {
 
-                        HashMap<String, List<MENU_ITEM_CONSTANTS>> faParentItems = new HashMap<>();
-                        for (MENU_PARENT_CONSTANTS entries : faParentMenu){
+                                if (memberDashboardInfo == null) return;
 
-                            faParentItems.put(entries.getFsIDxx(), mviewModel.GetMenuItem(eUserInfo.getNUserLevl(), entries.getFsIDxx()));
-                        }
+                                /**DOUBLE CHECK CREDENTIALS. ALTHOUGH IT IS ALREADY VALIDATED ON SERVER SIDE**/
 
-                        // Ensure data is passed as ArrayList to match expected types in Activity_Dashboard/Adapter_Drawer
-                        ArrayList<MENU_PARENT_CONSTANTS> laParentList = new ArrayList<>(faParentMenu);
+                                //initialize user level based on matching credentials, if mismatch then hide menus
+                                int fnUserLevel = -1;
+                                if (!eUserInfo.getSGLPIDNoX().equalsIgnoreCase(memberDashboardInfo.getSGLPIDNoX()) ||
+                                        !eUserInfo.getSLastName().equalsIgnoreCase(memberDashboardInfo.getSLastName()) ||
+                                        !eUserInfo.getDBirthDte().equalsIgnoreCase(memberDashboardInfo.getDBirthDte()) ){
 
-                        HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
-                        for (Map.Entry<String, List<MENU_ITEM_CONSTANTS>> entry : faParentItems.entrySet()) {
-                            loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-                        }
+                                    //shows only update account and logout
+                                    fnUserLevel = 0;
 
-                        Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-                        loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        loIntent.putExtra("parent_key", laParentList);
-                        loIntent.putExtra("child_items", loChildMap);
+                                }else {
+                                    fnUserLevel = eUserInfo.getNUserLevl();
+                                }
 
-                        poLogout.launch(loIntent);
+                                //initialze drawer menus
+                                List<MENU_PARENT_CONSTANTS> faParentMenu = mviewModel.GetParentMenu(fnUserLevel);
+
+                                HashMap<String, List<MENU_ITEM_CONSTANTS>> faParentItems = new HashMap<>();
+                                for (MENU_PARENT_CONSTANTS entries : faParentMenu){
+
+                                    faParentItems.put(entries.getFsIDxx(), mviewModel.GetMenuItem(fnUserLevel, entries.getFsIDxx()));
+                                }
+
+                                // Ensure data is passed as ArrayList to match expected types in Activity_Dashboard/Adapter_Drawer
+                                ArrayList<MENU_PARENT_CONSTANTS> laParentList = new ArrayList<>(faParentMenu);
+
+                                HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
+                                for (Map.Entry<String, List<MENU_ITEM_CONSTANTS>> entry : faParentItems.entrySet()) {
+                                    loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                                }
+
+                                Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                loIntent.putExtra("parent_key", laParentList);
+                                loIntent.putExtra("child_items", loChildMap);
+
+                                poLogout.launch(loIntent);
+                            }
+                        });
                     }
                 });
             }

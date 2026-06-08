@@ -19,6 +19,7 @@ import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -113,55 +114,39 @@ public class VM_Main extends AndroidViewModel {
                 return;
             }
 
-            CompletableFuture<Boolean> poUserInfo = poDashboard.DownloadUserInfo();
-            CompletableFuture<Boolean> poLodgeInfo = poDashboard.DownloadLodgeInfo();
-            CompletableFuture<Boolean> poPosition = poDashboard.DownloadPositionInfo();
-            CompletableFuture<Boolean> poTitle = poDashboard.DownloadTitleInfo();
-            CompletableFuture<Boolean> poProvince = poDashboard.DownloadProvinceInfo();
-            CompletableFuture<Boolean> poTown = poDashboard.DownloadTownInfo();
-            CompletableFuture<Boolean> poLodgeCalendar = poDashboard.DownloadLodgeCalendar();
+            //store all threads into hash set, to execute one by one and avoid memory leakage
+            HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                    List.of(
+                            poDashboard.DownloadUserInfo(),
+                            poDashboard.DownloadLodgeInfo(),
+                            poDashboard.DownloadPositionInfo(),
+                            poDashboard.DownloadTitleInfo(),
+                            poDashboard.DownloadProvinceInfo(),
+                            poDashboard.DownloadTownInfo(),
+                            poDashboard.DownloadLodgeCalendar(),
+                            poDashboard.DownloadMemberList(GetFirstQuarter(), GetCurrentDate()),
+                            poDashboard.DownloadOfficerList(GetFirstQuarter(), GetCurrentDate())
+                    )
+            );
 
-            //execute list of background tasks at once. no sequential execution
-            CompletableFuture.allOf(poUserInfo, poLodgeInfo, poPosition, poTitle, poProvince, poTown).thenRun(new Runnable() {
+            //initialize task result holder
+            CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+            for (CompletableFuture<Boolean> task : laTasks){
+
+                poResult = poResult.thenCompose(aBoolean -> {
+                    if (!aBoolean) return CompletableFuture.completedFuture(false);
+                    return task;
+                });
+            }
+
+            //get the result
+            poResult.thenAccept(new Consumer<Boolean>() {
                 @Override
-                public void run() {
-
-                    try{
-
-                        if (!poUserInfo.get()){
-                            Log.d("Download User:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }else if (!poLodgeInfo.get()){
-                            Log.d("Download Lodge:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }else if (!poPosition.get()){
-                            Log.d("Download Position:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }else if (!poTitle.get()){
-                            Log.d("Download Title:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }else if (!poProvince.get()){
-                            Log.d("Download Province:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }else if (!poTown.get()){
-                            Log.d("Download Town:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        } else if (!poLodgeCalendar.get()) {
-                            Log.d("Download Lodge Calendars:", poDashboard.getMessage());
-                            foCallback.isLoginNeeded();
-                            return;
-                        }
-                        foCallback.hasLoggedIn();
-                    }catch (Exception e){
-                        Log.d("Download Information:", poDashboard.getMessage());
-                        foCallback.isLoginNeeded();
+                public void accept(Boolean aBoolean) {
+                    if (!aBoolean){
+                        Log.d("Download Data: ", poDashboard.getMessage());
                     }
+                    foCallback.hasLoggedIn();
                 }
             });
         }
@@ -206,8 +191,8 @@ public class VM_Main extends AndroidViewModel {
     }
 
     public void EndSession(){
-        poDashboard.getPoDBUser().DeleteUser();
-        poDashboard.getPoDBMember().DeleteMember();
+        poDashboard.ClearMemberData();
         poConfig.ClearAccountSession();
+        poDashboard.getPoDBUser().DeleteUser();
     }
 }

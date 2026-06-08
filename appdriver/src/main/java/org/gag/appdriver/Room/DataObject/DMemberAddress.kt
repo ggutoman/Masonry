@@ -13,6 +13,9 @@ interface DMemberAddress {
     @Upsert(entity = EMemberAddress::class)
     fun SaveMemberAddress(poMemberAddress: EMemberAddress)
 
+    @Query("DELETE FROM Member_Address")
+    fun DeletMemberAddress()
+
     @Query("SELECT c.sAddrsIDx AS psAddrsIDx, " +
             "a.sTownIDxx AS psTownIDxx, " +
             "b.sProvIDxx AS psProvIDxx, " +

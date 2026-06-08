@@ -15,7 +15,6 @@ import com.gag.masonry.R;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.Room.DataObject.DOfficer;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
 
 import java.util.ArrayList;
 import java.util.List;

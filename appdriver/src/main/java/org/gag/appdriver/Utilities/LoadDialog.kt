@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import androidx.appcompat.app.AlertDialog
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 import org.gag.appdriver.R
 import androidx.core.graphics.drawable.toDrawable

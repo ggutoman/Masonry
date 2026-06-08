@@ -158,7 +158,6 @@
                 android:visibility="gone"/>
 
             <com.google.android.material.button.MaterialButton
-                style="@style/Material_Button"
                 android:id="@+id/btn_create_acct"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

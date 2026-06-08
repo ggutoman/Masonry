@@ -12,16 +12,16 @@ interface DMemberInfo {
     @Upsert(entity = EMemberInfo::class)
     fun SaveMemberInfo(poMember: EMemberInfo)
 
-    @Query("SELECT a.sMemberID sMemberID, (a.sFrstName || ' ' || ifnull(substr(a.sMiddName, 1, 1), '') || ' ' || a.sLastName || ' ' || ifnull(substr(a.sSuffixNm, 1, 1), '')) sMemberNm, b.sLodgeNme, c.sPositnCd " +
+    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, b.sLodgeNme " +
                     "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
                     "WHERE sGLPIDNoX= (" +
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
     fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<MemberDashboardInfo>
 
-    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx AND dMembrshp BETWEEN :fsDateFrom AND :fsDateTo ")
+    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx AND dMembrshp BETWEEN :fsDateFrom AND :fsDateTo ORDER BY dMembrshp DESC, sGLPIDNoX ASC")
     fun ObserveMemberListByFilter(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String): LiveData<List<EMemberInfo>>
 
-    @Query("SELECT * FROM Member_Info")
+    @Query("SELECT * FROM Member_Info  ORDER BY dMembrshp DESC")
     fun ObserveMemeberList(): LiveData<List<EMemberInfo>>
 
     @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= (" +
@@ -35,8 +35,13 @@ interface DMemberInfo {
     fun DeleteMember()
 
     data class MemberDashboardInfo(
-        val sMemberID: String,
-        val sMemberNm: String,
-        val sLodgeNme: String
+        val sGLPIDNoX : String?,
+        val sLastName : String?,
+        val sFrstName : String?,
+        val sMiddName : String?,
+        val sSuffixNm : String?,
+        val dBirthDte : String?,
+        val sMemberID : String?,
+        val sLodgeNme: String?,
     )
 }
