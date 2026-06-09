@@ -43,6 +43,8 @@ public class Fragment_Lodge extends Fragment {
     private Message_Dialog poMessage;
     private Calendar loCalendar;
 
+    private int lnYearPicked = 1;
+
     private MaterialAutoCompleteTextView auto_lodge;
     private TextInputEditText tie_year, tie_valid_until;
     private MaterialButton btn_save;
@@ -107,6 +109,7 @@ public class Fragment_Lodge extends Fragment {
                         .setView(yearPicker)
                         .setPositiveButton("OK", (dialog, which) -> {
                             tie_year.setText(String.valueOf(yearPicker.getValue()));
+                            lnYearPicked = yearPicker.getValue();
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
@@ -118,16 +121,28 @@ public class Fragment_Lodge extends Fragment {
             @Override
             public void onClick(View view) {
 
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                DatePickerDialog loValidPicker = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
                         String formatted = String.format("%04d-%02d-%02d", i, i1 + 1, i2);
                         tie_valid_until.setText(formatted);
                     }
-                }, loCalendar.get(Calendar.YEAR),
+                }, lnYearPicked,
                         loCalendar.get(Calendar.MONTH),
                         loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                );
+
+                // Restrict to chosen year
+                Calendar minDate = Calendar.getInstance();
+                minDate.set(lnYearPicked, Calendar.JANUARY, 1);
+
+                Calendar maxDate = Calendar.getInstance();
+                maxDate.set(lnYearPicked, Calendar.DECEMBER, 31);
+
+                loValidPicker.getDatePicker().setMinDate(minDate.getTimeInMillis());
+                loValidPicker.getDatePicker().setMaxDate(maxDate.getTimeInMillis());
+
+                loValidPicker.show();
             }
         });
 

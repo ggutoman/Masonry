@@ -16,6 +16,7 @@ interface DOfficer {
     fun DeleteOfficers()
 
     @Query("SELECT " +
+            "b.nYearxxxx, " +
             "a.sMemberID, a.sYearIDxx, a.cAppointx, a.cStatusxx, a.sPositnCd," +
             "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
             "d.sPositnDs sPositionNme " +
@@ -33,6 +34,8 @@ interface DOfficer {
     fun ObserveOfficeInfo(fsMemberIDx : String, fsYearIDx : String) : LiveData<EOfficer>
 
     data class OfficerList(
+
+        val nYearxxxx : String,
         val sMemberID : String,
         val sYearIDxx : String,
         val cAppointx : String,

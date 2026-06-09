@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.masonry.R;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.Room.DataObject.DOfficer;
@@ -62,28 +63,26 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
 
         holder.mtv_name.setText(loOfficer.getSMemberNme());
         holder.mtv_position.setText(loOfficer.getSPositionNme());
+        holder.mtv_term.setText(loOfficer.getNYearxxxx());
 
         switch (loOfficer.getCStatusxx()){
             case "0":
-                holder.mtv_status.setText("Suspended");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
                 break;
             case "1":
-                holder.mtv_status.setText("Active/Incumbent");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
                 break;
             case "2":
-                holder.mtv_status.setText("Reassigned");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_reassign);
                 break;
             case "3":
-                holder.mtv_status.setText("Removed");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_remove);
                 break;
             case "4":
-                holder.mtv_status.setText("Resigned");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_exit);
                 break;
             case "5":
-                holder.mtv_status.setText("Deceased");
-                break;
-            default:
-                holder.mtv_status.setText("N/A");
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
                 break;
         }
 
@@ -160,17 +159,19 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
     public static class Adapter_Member_List_Holder extends RecyclerView.ViewHolder{
 
         private final View view;
+        private ShapeableImageView btn_icone;
         private final MaterialTextView mtv_name;
         private final MaterialTextView mtv_position;
-        private final MaterialTextView mtv_status;
+        private final MaterialTextView mtv_term;
 
         public Adapter_Member_List_Holder(@NonNull View itemView) {
             super(itemView);
 
             view = itemView;
+            btn_icone = itemView.findViewById(R.id.btn_icon);
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_position = itemView.findViewById(R.id.mtv_position);
-            mtv_status = itemView.findViewById(R.id.mtv_status);
+            mtv_term = itemView.findViewById(R.id.mtv_term);
         }
     }
 }

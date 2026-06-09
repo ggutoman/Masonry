@@ -12,11 +12,19 @@ interface DMemberInfo {
     @Upsert(entity = EMemberInfo::class)
     fun SaveMemberInfo(poMember: EMemberInfo)
 
-    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, b.sLodgeNme " +
+    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, d.sYearIDxx, b.sLodgeNme " +
                     "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
+                    "LEFT JOIN Officer_Info d ON (a.sMemberID = d.sMemberID) " +
                     "WHERE sGLPIDNoX= (" +
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
     fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<MemberDashboardInfo>
+
+    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, d.sYearIDxx, b.sLodgeNme " +
+            "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
+            "LEFT JOIN Officer_Info d ON (a.sMemberID = d.sMemberID) " +
+            "WHERE sGLPIDNoX= (" +
+            "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
+    fun GetMemberParameters(fsUserIDx : String): MemberDashboardInfo
 
     @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberIDx AND dMembrshp BETWEEN :fsDateFrom AND :fsDateTo ORDER BY dMembrshp DESC, sGLPIDNoX ASC")
     fun ObserveMemberListByFilter(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String): LiveData<List<EMemberInfo>>
@@ -42,6 +50,7 @@ interface DMemberInfo {
         val sSuffixNm : String?,
         val dBirthDte : String?,
         val sMemberID : String?,
+        val sYearIDxx: String?,
         val sLodgeNme: String?,
     )
 }

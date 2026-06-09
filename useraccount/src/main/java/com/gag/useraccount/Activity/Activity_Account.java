@@ -2,6 +2,7 @@ package com.gag.useraccount.Activity;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -73,7 +74,6 @@ public class Activity_Account extends AppCompatActivity {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
                                 poDialog.dismiss();
-
                                 finish();
                             }
 

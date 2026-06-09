@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.masonry.R;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter;
@@ -79,19 +80,16 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
 
         switch (loMember.getCMmbrStat()){
             case "0":
-                holder.mtv_status.setText("Inactive");
-                holder.mtv_status.setTextColor(Color.GRAY);
+                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
                 break;
             case "1":
-                holder.mtv_status.setText("Active");
-                holder.mtv_status.setTextColor(Color.GREEN);
+                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
                 break;
             case "2":
-                holder.mtv_status.setText("Suspended");
-                holder.mtv_status.setTextColor(Color.RED);
+                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
                 break;
             default:
-                holder.mtv_status.setText("N/A");
+
                 break;
         }
 
@@ -174,18 +172,18 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
     public static class Adapter_Member_List_Holder extends RecyclerView.ViewHolder{
 
         private final View view;
+        private ShapeableImageView siv_status;
         private final MaterialTextView mtv_name;
         private final MaterialTextView mtv_glipd;
-        private final MaterialTextView mtv_status;
         private final MaterialTextView mtv_datemember;
 
         public Adapter_Member_List_Holder(@NonNull View itemView) {
             super(itemView);
 
             view = itemView;
+            siv_status = itemView.findViewById(R.id.siv_status);
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_glipd = itemView.findViewById(R.id.mtv_glipd);
-            mtv_status = itemView.findViewById(R.id.mtv_status);
             mtv_datemember = itemView.findViewById(R.id.mtv_datemember);
         }
     }

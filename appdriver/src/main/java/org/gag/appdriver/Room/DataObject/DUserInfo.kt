@@ -15,6 +15,9 @@ interface DUserInfo {
     @Query("SELECT * FROM User_Info")
     fun ObserveUserInfo(): LiveData<EUserInfo>
 
+    @Query("SELECT * FROM User_Info")
+    fun GetUserInfo(): EUserInfo
+
     @Query("DELETE FROM User_Info")
     fun DeleteUser()
 

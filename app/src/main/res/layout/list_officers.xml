@@ -14,12 +14,12 @@
             android:id="@+id/btn_icon"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:src="@drawable/person_2_baseline_member"
+            android:src="@drawable/baseline_inactive"
             android:paddingRight="10dp"
-            android:alpha="0.5"
+            android:alpha="0.75"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/mtv_name"
-            app:layout_constraintBottom_toBottomOf="@+id/mtv_position"/>
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_name"/>
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
@@ -29,24 +29,24 @@
             android:text="N/A"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_icon"
-            app:layout_constraintWidth_percent="0.6"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/mtv_position"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="N/A"
-            android:textSize="15sp"
+            android:textSize="13sp"
             app:layout_constraintTop_toBottomOf="@+id/mtv_name"
             app:layout_constraintStart_toEndOf="@+id/btn_icon"
             app:layout_constraintWidth_percent="0.5"/>
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/mtv_status"
+            android:id="@+id/mtv_term"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="N/A"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:gravity="end"
             app:layout_constraintTop_toTopOf="@+id/mtv_position"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_position"

@@ -53,11 +53,12 @@ public class Fragment_Home extends Fragment {
     private Adapter_Member_List loMemberAdaoter;
     private Adapter_Officer_List loOfficerAdapter;
 
-    private ConstraintLayout layout_no_record;
+    private ConstraintLayout layout_no_record, layout_records;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
     private RecyclerView rcv_home;
+    private View layout_footer;
 
     private String lsDfrom, lsDto, lsMemberId;
 
@@ -84,7 +85,7 @@ public class Fragment_Home extends Fragment {
 
     private void InitData(){
 
-        mviewModel.GetMemberInfo().observe(getViewLifecycleOwner(), new Observer<DMemberInfo.MemberDashboardInfo>() {
+        mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<DMemberInfo.MemberDashboardInfo>() {
             @Override
             public void onChanged(DMemberInfo.MemberDashboardInfo eMemberInfo) {
 
@@ -107,6 +108,13 @@ public class Fragment_Home extends Fragment {
                 mtv_username.setText(fullName);
                 mtv_lodge.setText(eMemberInfo.getSLodgeNme());
 
+                //do not display list of officers and members for unatuthorized users
+                if (getArguments() == null || getArguments().getInt("user_level") < 1){
+                    layout_no_record.setVisibility(View.GONE);
+                    layout_records.setVisibility(View.GONE);
+                    layout_footer.setVisibility(View.VISIBLE);
+                    return;
+                }
                 InitList();
             }
         });
@@ -118,11 +126,14 @@ public class Fragment_Home extends Fragment {
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
 
         tab_layout = view.findViewById(R.id.tab_layout);
+        layout_records = view.findViewById(R.id.layout_records);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter= view.findViewById(R.id.btn_filter);
         til_search = view.findViewById(R.id.til_search);
         tie_search = view.findViewById(R.id.tie_search);
         rcv_home = view.findViewById(R.id.rcv_home);
+
+        layout_footer = view.findViewById(R.id.layout_footer);
     }
 
     private void InitListeners(){
@@ -370,7 +381,7 @@ public class Fragment_Home extends Fragment {
                                     .getSupportFragmentManager()
                                     .beginTransaction()
                                     .replace(R.id.layout_container, loDetail)
-                                    .addToBackStack("create_member")
+                                    .addToBackStack("assign_officer")
                                     .commit();
                         }
                     });

@@ -21,8 +21,8 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
     ),
 
     MENU_ACCOUNTS(
-        R.drawable.rounded_account_circle_24,
-        "Account Settings",
+        R.drawable.baseline_settings,
+        "Settings",
         "ACC",
         1,
         0
