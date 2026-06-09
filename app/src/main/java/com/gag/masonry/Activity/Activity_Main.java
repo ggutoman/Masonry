@@ -3,8 +3,6 @@ package com.gag.masonry.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -22,7 +20,6 @@ import com.gag.useraccount.Activity.Activity_Login;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -32,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Activity_Main extends AppCompatActivity {
 
@@ -91,13 +87,13 @@ public class Activity_Main extends AppCompatActivity {
             @Override
             public void hasLoggedIn() {
 
-                mviewModel.GetUserInfo().observe(Activity_Main.this, new Observer<EUserInfo>() {
+                mviewModel.ObserveUserInfo().observe(Activity_Main.this, new Observer<EUserInfo>() {
                     @Override
                     public void onChanged(EUserInfo eUserInfo) {
 
                         poLoad.DismissDialog();
 
-                        if (mviewModel.GetUserInfo() == null || mviewModel.GetLodgeInfo() == null){
+                        if (mviewModel.ObserveUserInfo() == null || mviewModel.GetLodgeInfo() == null){
                             Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                             loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             poLogin.launch(loIntent);
@@ -106,7 +102,7 @@ public class Activity_Main extends AppCompatActivity {
                         }
 
                         //verify member information, it would be the basis of displaying menus
-                        mviewModel.GetMemberInfo().observe(Activity_Main.this, new Observer<DMemberInfo.MemberDashboardInfo>() {
+                        mviewModel.ObserveMemberInfo().observe(Activity_Main.this, new Observer<DMemberInfo.MemberDashboardInfo>() {
                             @Override
                             public void onChanged(DMemberInfo.MemberDashboardInfo memberDashboardInfo) {
 
@@ -115,7 +111,7 @@ public class Activity_Main extends AppCompatActivity {
                                 /**DOUBLE CHECK CREDENTIALS. ALTHOUGH IT IS ALREADY VALIDATED ON SERVER SIDE**/
 
                                 //initialize user level based on matching credentials, if mismatch then hide menus
-                                int fnUserLevel = -1;
+                                int fnUserLevel;
                                 if (!eUserInfo.getSGLPIDNoX().equalsIgnoreCase(memberDashboardInfo.getSGLPIDNoX()) ||
                                         !eUserInfo.getSLastName().equalsIgnoreCase(memberDashboardInfo.getSLastName()) ||
                                         !eUserInfo.getDBirthDte().equalsIgnoreCase(memberDashboardInfo.getDBirthDte()) ){
@@ -145,9 +141,9 @@ public class Activity_Main extends AppCompatActivity {
                                 }
 
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                loIntent.putExtra("parent_key", laParentList);
-                                loIntent.putExtra("child_items", loChildMap);
+                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //clear existing activities
+                                loIntent.putExtra("parent_key", laParentList); //parent menus
+                                loIntent.putExtra("child_items", loChildMap); //parent items
 
                                 poLogout.launch(loIntent);
                             }
@@ -178,6 +174,9 @@ public class Activity_Main extends AppCompatActivity {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
                                 poDialog.dismiss();
+
+                                //clear session before login
+                                mviewModel.EndSession();
 
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                                 loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

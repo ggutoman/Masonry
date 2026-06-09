@@ -4,17 +4,42 @@ import org.gag.appdriver.R
 
 enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val fsParentIDx : String, val fnActive : Int, val fnLevel : Int){
 
-    MENU_ITEM_UPDATE_ACCOUNT(
-        "Update Account",
+
+    MENU_ITEM_DOWNLOAD_PARAMETERS(
+        "Download Data",
         "ACC001",
+        "ACC",
+        1,
+        1
+    ),
+
+    MENU_ITEM_UPDATE_ACCOUNT(
+        "Account Update",
+        "ACC002",
         "ACC",
         1,
         0
     ),
 
+    MENU_ITEM_UPDATE_MEMBERSHIP(
+        "Membership Update",
+        "ACC003",
+        "ACC",
+        1,
+        1
+    ),
+
+    MENU_ITEM_UPDATE_OFFICERSHIP(
+        "Officership Update",
+        "ACC004",
+        "ACC",
+        1,
+        1
+    ),
+
     MENU_ITEM_LOD_ACCOUNT(
         "Logout",
-        "ACC002",
+        "ACC005",
         "ACC",
         1,
         0

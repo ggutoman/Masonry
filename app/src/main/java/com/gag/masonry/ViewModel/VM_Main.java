@@ -52,11 +52,19 @@ public class VM_Main extends AndroidViewModel {
         poDashboard = new Dashboard(application);
     }
 
-    public LiveData<EUserInfo> GetUserInfo(){
+    public EUserInfo GetUserInfo(){
+        return poDashboard.getPoDBUser().GetUserInfo();
+    }
+
+    public LiveData<EUserInfo> ObserveUserInfo(){
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
 
-    public LiveData<DMemberInfo.MemberDashboardInfo> GetMemberInfo(){
+    public DMemberInfo.MemberDashboardInfo GetMemberInfo(String fsUserIDxx){
+        return poDashboard.getPoDBMember().GetMemberParameters(fsUserIDxx);
+    }
+
+    public LiveData<DMemberInfo.MemberDashboardInfo> ObserveMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
     }
 
@@ -150,6 +158,45 @@ public class VM_Main extends AndroidViewModel {
                 }
             });
         }
+    }
+
+    public void DownloadParameters(OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+
+        //store all threads into hash set, to execute one by one and avoid memory leakage
+        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                List.of(
+                        poDashboard.DownloadUserInfo(),
+                        poDashboard.DownloadLodgeInfo(),
+                        poDashboard.DownloadPositionInfo(),
+                        poDashboard.DownloadTitleInfo(),
+                        poDashboard.DownloadProvinceInfo(),
+                        poDashboard.DownloadTownInfo(),
+                        poDashboard.DownloadLodgeCalendar()
+                )
+        );
+
+        //initialize task result holder
+        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+        for (CompletableFuture<Boolean> task : laTasks){
+
+            poResult = poResult.thenCompose(aBoolean -> {
+                if (!aBoolean) return CompletableFuture.completedFuture(false);
+                return task;
+            });
+        }
+
+        //get the result
+        poResult.thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+                if (!aBoolean){
+                    foCallback.OnFinished(poDashboard.getMessage());
+                }
+                foCallback.OnFinished("Successfully downloaded data");
+            }
+        });
     }
 
     public void DownloadMembers(String fdFrom, String fDto, OnDownloadData foCallback){
