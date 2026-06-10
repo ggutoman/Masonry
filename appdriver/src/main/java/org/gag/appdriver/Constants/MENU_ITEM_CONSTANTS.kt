@@ -14,7 +14,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_UPDATE_ACCOUNT(
-        "Account Update",
+        "Account Details",
         "ACC002",
         "ACC",
         1,
@@ -22,7 +22,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_UPDATE_MEMBERSHIP(
-        "Membership Update",
+        "Membership Information",
         "ACC003",
         "ACC",
         1,
@@ -30,7 +30,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_UPDATE_OFFICERSHIP(
-        "Officership Update",
+        "Membership Role",
         "ACC004",
         "ACC",
         1,
