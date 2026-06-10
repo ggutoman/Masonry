@@ -15,11 +15,10 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:src="@drawable/baseline_inactive"
-            android:paddingRight="10dp"
+            android:scaleType="fitCenter"
             android:alpha="0.75"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mtv_name"
-            app:layout_constraintBottom_toBottomOf="@+id/mtv_name"/>
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
+            app:layout_constraintHeight_percent="0.45"/>
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"

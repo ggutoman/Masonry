@@ -163,8 +163,7 @@
                 android:layout_height="wrap_content"
                 android:text="Create Account"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="20dp"
-                android:backgroundTint="@color/material_button"/>
+                android:layout_marginTop="20dp"/>
 
             <include
                 android:layout_width="match_parent"

@@ -17,7 +17,6 @@
             android:src="@drawable/baseline_inactive"
             android:scaleType="fitCenter"
             android:alpha="0.75"
-            app:layout_constraintTop_toTopOf="@+id/mtv_name"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
             app:layout_constraintHeight_percent="0.45"/>
 
