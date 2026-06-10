@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import org.gag.appdriver.App.Accounts.UserAccount;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar;

@@ -37,6 +37,14 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         1
     ),
 
+    MENU_ITEM_TURNOVER_FUNDS(
+        "Turnover Funds",
+        "DISB001",
+        "DISB",
+        1,
+        1
+    ),
+
     MENU_ITEM_LOD_ACCOUNT(
         "Logout",
         "ACC005",

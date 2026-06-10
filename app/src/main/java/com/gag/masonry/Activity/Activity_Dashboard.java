@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gag.accounting.Disbursement.Fragments.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.R;
@@ -224,6 +225,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                         }
                     });
                     break;
+                case "DISB001":
+                    InitView("DISB001");
+                    break;
                 case "MEM001":
                     InitView("MEM001");
                     break;
@@ -295,6 +299,12 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                 fragmentTransaction.replace(R.id.layout_container, loFragOff);
                 fragmentTransaction.addToBackStack("assign_officer");
+                break;
+            case "DISB001":
+                Fragment_Turnover_Funds loTurnOver = new Fragment_Turnover_Funds();
+
+                fragmentTransaction.replace(R.id.layout_container, loTurnOver);
+                fragmentTransaction.addToBackStack("turnover_funds");
                 break;
 
         }

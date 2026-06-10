@@ -1,8 +1,7 @@
-package org.gag.appdriver.App.Accounts
+package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +31,6 @@ import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
-import org.gag.appdriver.Room.DataObject.DTownInfo.TownProvince
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
@@ -70,7 +68,6 @@ class UserAccount(instance : Context) {
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
-    val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
 
     fun GetMessage() : String = message
 
@@ -84,17 +81,17 @@ class UserAccount(instance : Context) {
 
     fun GetSession() : AppConfig = session
 
-    fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo>  = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
+    fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo> = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
 
     fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.ObserveUserInfo()
 
     fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
 
-    fun SearchTown(fsSearch : String) : LiveData<List<TownProvince>>{
+    fun SearchTown(fsSearch : String) : LiveData<List<DTownInfo.TownProvince>> {
         return poTownInfo.SearchTown("%$fsSearch%")
     }
 
-    fun GetMemberAddress(fsMemberID : String) : LiveData<List<TownProvince>>{
+    fun GetMemberAddress(fsMemberID : String) : LiveData<List<DTownInfo.TownProvince>> {
         return poMemberAddress.GetMemberAddress(fsMemberID)
     }
 
@@ -107,7 +104,7 @@ class UserAccount(instance : Context) {
     fun GenerateGLPID() : String {
 
         return (1..6)
-            .map { Random.nextInt(0, 10) } // digits 0–9
+            .map { Random.Default.nextInt(0, 10) } // digits 0–9
             .joinToString("")
     }
 
@@ -148,7 +145,7 @@ class UserAccount(instance : Context) {
                             mapOf()
                         )) {
                             is KTORepository.OnRequest.onSuccess -> {
-                                val resultData = Json.decodeFromString<DownloadKey>(response.data.body())
+                                val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
                                 val sTokenIDxx = resultData.GetPayload()
 
                                 session.isLogIn("1")
@@ -159,7 +156,7 @@ class UserAccount(instance : Context) {
                             }
 
                             is KTORepository.OnRequest.onFailed -> {
-                                val errorData = Json.decodeFromString<DownloadError>(response.data.body())
+                                val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
                                 message = errorData.GetPayload().message
                                 false
                             }
@@ -231,7 +228,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -326,7 +323,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -356,7 +353,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberAddress(fsMemberIDxx : String): CompletableFuture<Boolean>{
+    fun DownloadMemberAddress(fsMemberIDxx : String): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -383,7 +380,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadMemberAddresses>(result.data.body())
+                                Json.Default.decodeFromString<DownloadMemberAddresses>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poMemberAddress.SaveMemberAddress(loItem)
@@ -394,7 +391,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -425,7 +422,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberContact(fsMemberIDxx : String): CompletableFuture<Boolean>{
+    fun DownloadMemberContact(fsMemberIDxx : String): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -452,7 +449,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadMemberContact>(result.data.body())
+                                Json.Default.decodeFromString<DownloadMemberContact>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poMemberContact.SaveMemberContact(loItem)
@@ -463,7 +460,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -494,7 +491,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberEmail(fsMemberIDxx : String): CompletableFuture<Boolean>{
+    fun DownloadMemberEmail(fsMemberIDxx : String): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -521,7 +518,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadMemberEmail>(result.data.body())
+                                Json.Default.decodeFromString<DownloadMemberEmail>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poMemberEmail.SaveMemberEmail(loItem)
@@ -532,7 +529,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -563,7 +560,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveMember(memberInfo: EMemberInfo) : CompletableFuture<Any>{
+    fun SaveMember(memberInfo: EMemberInfo) : CompletableFuture<Any> {
 
         val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -620,7 +617,7 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body())
+                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body())
 
                             //initialize new member id, if not initialized
                             if (memberInfo.sMemberID.isNullOrEmpty()){
@@ -633,7 +630,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -663,7 +660,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveMemberAddress(loAddress: EMemberAddress)  : CompletableFuture<Boolean>{
+    fun SaveMemberAddress(loAddress: EMemberAddress)  : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -702,7 +699,7 @@ class UserAccount(instance : Context) {
 
                             //initialize new address id, if not initialized
                             if (loAddress.sAddrsIDx.isNullOrEmpty()){
-                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body())
+                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body())
                                 loAddress.sAddrsIDx = loResult.GetPayload()
                             }
                             poMemberAddress.SaveMemberAddress(loAddress)
@@ -711,7 +708,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -741,7 +738,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveMemberContact(laContact: EMemberContactInfo)  : CompletableFuture<Boolean>{
+    fun SaveMemberContact(laContact: EMemberContactInfo)  : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -778,7 +775,7 @@ class UserAccount(instance : Context) {
 
                             //initialize new contact id if not initialized
                             if (laContact.sContctID.isNullOrEmpty()){
-                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
                                 laContact.sContctID = loResult.GetPayload()
                             }
                             poMemberContact.SaveMemberContact(laContact)
@@ -787,7 +784,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -817,7 +814,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveMemberEmail(laEmail: EMemberEmailInfo) : CompletableFuture<Boolean>{
+    fun SaveMemberEmail(laEmail: EMemberEmailInfo) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -853,7 +850,7 @@ class UserAccount(instance : Context) {
 
                             //initialize new email id if not initialized
                             if (laEmail.sMailIDxx.isNullOrEmpty()){
-                                val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
                                 laEmail.sMailIDxx = loResult.GetPayload()
                             }
                             poMemberEmail.SaveMemberEmail(laEmail)
@@ -862,7 +859,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -893,7 +890,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun CreateLodgeCalendar(loLodgeCalendar : ELodgeCalendar) : CompletableFuture<Boolean>{
+    fun CreateLodgeCalendar(loLodgeCalendar : ELodgeCalendar) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -923,7 +920,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             //initialize new year id from result
-                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
 
                             loLodgeCalendar.sYearIDxx = loResult.GetPayload()
                             poLodgeCalendar.SaveLodgeCalendar(loLodgeCalendar)
@@ -932,7 +929,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }
@@ -963,7 +960,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveOfficer(fOfficer : EOfficer, fsRemarks : String) : CompletableFuture<Boolean>{
+    fun SaveOfficer(fOfficer : EOfficer, fsRemarks : String) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -996,7 +993,7 @@ class UserAccount(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             //initialize new year id from result
-                            val loResult = Json.decodeFromString<DownloadKey>(result.data.body());
+                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
 
                             fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
                             poOfficer.SaveOfficer(fOfficer)
@@ -1005,7 +1002,7 @@ class UserAccount(instance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
                             false
                         }

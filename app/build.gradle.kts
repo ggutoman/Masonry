@@ -64,5 +64,6 @@ dependencies {
 
 
     implementation(project(":useraccount"))
+    implementation(project(":accounting"))
     implementation(project(":appdriver"))
 }

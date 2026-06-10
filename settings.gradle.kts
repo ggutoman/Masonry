@@ -26,3 +26,4 @@ rootProject.name = "Masonry"
 include(":app")
 include(":useraccount")
 include(":appdriver")
+include(":accounting")
