@@ -1,4 +1,4 @@
-package org.gag.appdriver.App.Dashboard
+package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -42,7 +42,6 @@ import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
-import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -56,21 +55,21 @@ class Dashboard(loInstance : Context) {
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poEncrypt : HashRepository = HashRepository()
 
-    val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
-    val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
-    val poDBMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
-    val poDBMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
-    val poDBMemberEmail : DMemberEmailInfo = ML_DBF.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
-    val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
-    val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
-    val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
-    val poProvinceInfo : DProvinceInfo = ML_DBF.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
-    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
-    val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
-    val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
-    val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+    val poDBUser : DUserInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetUserDao() as DUserInfo
+    val poDBMember : DMemberInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
+    val poDBMemberAddress : DMemberAddress = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
+    val poDBMemberContact : DMemberContact = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
+    val poDBMemberEmail : DMemberEmailInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
+    val poLodgeInfo : DLodgeInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
+    val poPositionInfo : DPositionInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetPosition() as DPositionInfo
+    val poTitleInfo : DTitleInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetTitle() as DTitleInfo
+    val poProvinceInfo : DProvinceInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
+    val poTownInfo : DTownInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetTownCity() as DTownInfo
+    val poLodgeCalendar : DLodgeCalendar = ML_DBF.Companion.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poOfficers : DOfficer = ML_DBF.Companion.getDatabase(loInstance)?.GetOfficer() as DOfficer
+    val poOfficerHistory : DOfficerHistory = ML_DBF.Companion.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
 
-    fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo>{
+    fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo> {
 
         return poDBMember.ObserveMemberInfoByUserID(
             TextFormatter()
@@ -83,7 +82,7 @@ class Dashboard(loInstance : Context) {
 
     fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<DOfficer.OfficerList>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
 
-    fun GetLodgeInfo() : ELodgeInfo{
+    fun GetLodgeInfo() : ELodgeInfo {
 
         return poLodgeInfo.GetLodgeInfo(
             TextFormatter()
@@ -126,7 +125,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadUserInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadUserInfo>(result.data.body())
 
                             poDBUser.SaveUserInfo(resultData.GetPayload().user_info)
                             poDBMember.SaveMemberInfo(resultData.GetPayload().member_info)
@@ -136,7 +135,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -169,7 +168,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadLodgeInfo(): CompletableFuture<Boolean>{
+    fun DownloadLodgeInfo(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -191,7 +190,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadLodgeInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadLodgeInfo>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poLodgeInfo.SaveLodge(loItem)
@@ -202,7 +201,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -233,7 +232,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadPositionInfo(): CompletableFuture<Boolean>{
+    fun DownloadPositionInfo(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -255,7 +254,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadPositionInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadPositionInfo>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poPositionInfo.SavePosition(loItem)
@@ -266,7 +265,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -297,7 +296,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadTitleInfo(): CompletableFuture<Boolean>{
+    fun DownloadTitleInfo(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -319,7 +318,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadTitleInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadTitleInfo>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poTitleInfo.SaveTitle(loItem)
@@ -330,7 +329,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -361,7 +360,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadProvinceInfo(): CompletableFuture<Boolean>{
+    fun DownloadProvinceInfo(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -383,7 +382,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadProvinceInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadProvinceInfo>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poProvinceInfo.SaveProvince(loItem)
@@ -394,7 +393,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -425,7 +424,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadTownInfo(): CompletableFuture<Boolean>{
+    fun DownloadTownInfo(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -447,7 +446,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadTownInfo>(result.data.body())
+                                Json.Default.decodeFromString<DownloadTownInfo>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poTownInfo.SaveTownInfo(loItem)
@@ -458,7 +457,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -489,7 +488,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadLodgeCalendar(): CompletableFuture<Boolean>{
+    fun DownloadLodgeCalendar(): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -511,7 +510,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadLodgeCalendar>(result.data.body())
+                                Json.Default.decodeFromString<DownloadLodgeCalendar>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poLodgeCalendar.SaveLodgeCalendar(loItem)
@@ -522,7 +521,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -553,7 +552,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberList(fdFromxx : String, fsDto : String): CompletableFuture<Boolean>{
+    fun DownloadMemberList(fdFromxx : String, fsDto : String): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -581,7 +580,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadMemberList>(result.data.body())
+                                Json.Default.decodeFromString<DownloadMemberList>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poDBMember.SaveMemberInfo(loItem)
@@ -592,7 +591,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -623,7 +622,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadOfficerList(fdFromxx : String, fsDto : String) : CompletableFuture<Boolean>{
+    fun DownloadOfficerList(fdFromxx : String, fsDto : String) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -651,7 +650,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadOfficerList>(result.data.body())
+                                Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poOfficers.SaveOfficer(loItem)
@@ -662,7 +661,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false
@@ -694,7 +693,7 @@ class Dashboard(loInstance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadOfficerHistory(fsMemberIDx : String, fdFromxx : String, fsDto : String) : CompletableFuture<Boolean>{
+    fun DownloadOfficerHistory(fsMemberIDx : String, fdFromxx : String, fsDto : String) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -723,7 +722,7 @@ class Dashboard(loInstance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
 
                             val resultData =
-                                Json.decodeFromString<DownloadOfficerHistory>(result.data.body())
+                                Json.Default.decodeFromString<DownloadOfficerHistory>(result.data.body())
 
                             resultData.GetPayload().forEach { loItem ->
                                 poOfficerHistory.SaveOfficerHistory(loItem)
@@ -734,7 +733,7 @@ class Dashboard(loInstance : Context) {
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
-                                Json.decodeFromString<DownloadError>(result.data.body())
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
                             message = errorData.GetPayload().message
 
                             false

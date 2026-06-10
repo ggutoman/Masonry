@@ -5,13 +5,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import org.gag.appdriver.App.Accounts.UserAccount;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.Libraries.Encryption.HashRepository;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
-import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.EUserInfo;
-
-import java.util.function.Consumer;
 
 public class VM_Account extends AndroidViewModel {
 

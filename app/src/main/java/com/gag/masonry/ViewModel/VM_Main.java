@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import org.gag.appdriver.App.Dashboard.Dashboard;
+import org.gag.appdriver.App.Core.Dashboard;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;

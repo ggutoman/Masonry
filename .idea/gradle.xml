@@ -9,6 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/accounting" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/appdriver" />
             <option value="$PROJECT_DIR$/useraccount" />
