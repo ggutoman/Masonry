@@ -23,6 +23,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Adapters.TownCityAdapter;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class Dialog_Add_Member_Info{
     }
 
     public interface OnAddress{
-        void OnAddress(DTownInfo.TownProvince loProvince);
+        void OnAddress(TownProvince loProvince);
     }
 
     public interface OnContact{
@@ -172,9 +173,9 @@ public class Dialog_Add_Member_Info{
                 if (charSequence.length() < 1) return;
 
                 //display the properties from selected town
-                loViewModel.SearchTown(charSequence.toString()).observe(loOwner, new Observer<List<DTownInfo.TownProvince>>() {
+                loViewModel.SearchTown(charSequence.toString()).observe(loOwner, new Observer<List<TownProvince>>() {
                     @Override
-                    public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
+                    public void onChanged(List<TownProvince> townProvinces) {
 
                         TownProvAdapter = new TownCityAdapter(
                                 loInstance,
@@ -194,10 +195,10 @@ public class Dialog_Add_Member_Info{
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 //get properties to be passed later on
-                lsTwnIDx = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsTownIDxx();
-                lsProvIDx = ((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsProvIDxx();
+                lsTwnIDx = ((TownProvince) adapterView.getItemAtPosition(i)).getPsTownIDxx();
+                lsProvIDx = ((TownProvince) adapterView.getItemAtPosition(i)).getPsProvIDxx();
 
-                auto_town.setText(((DTownInfo.TownProvince) adapterView.getItemAtPosition(i)).getPsTownProvNme(), false);
+                auto_town.setText(((TownProvince) adapterView.getItemAtPosition(i)).getPsTownProvNme(), false);
             }
         });
 
@@ -318,9 +319,9 @@ public class Dialog_Add_Member_Info{
         }
     }
 
-    private DTownInfo.TownProvince InitAddress(String fsTownID, String fsProvID, String fsTownProvNme, String fsAddress, String isHome, String isActive){
+    private TownProvince InitAddress(String fsTownID, String fsProvID, String fsTownProvNme, String fsAddress, String isHome, String isActive){
 
-        return new DTownInfo.TownProvince(
+        return new TownProvince(
                 "",
                 fsTownID,
                 fsProvID,

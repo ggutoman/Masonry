@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 class DateRepository {
 
@@ -137,5 +138,20 @@ class DateRepository {
     fun FormatLongDate(fsParam : Long) : String{
         return SimpleDateFormat(DATE_CONSTANTS.DATE_FORMAT.fsDescript)
             .format(fsParam)
+    }
+
+    fun FormatDate(input: String, fsFormat: String): String {
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val date = LocalDate.parse(input)
+            val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
+            date.format(formatter)
+        } else {
+            // Use java.text.SimpleDateFormat for older Android versions
+            val parser = SimpleDateFormat(fsFormat, Locale.getDefault())
+            val date = parser.parse(input)
+            val formatter = SimpleDateFormat(fsFormat, Locale.getDefault())
+            formatter.format(date!!)
+        }
     }
 }

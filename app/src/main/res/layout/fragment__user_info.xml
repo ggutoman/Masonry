@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="10dp"
+    tools:context=".Fragment.Fragment_UserInfo">
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="15dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_user"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/siv_account"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/person_2_baseline_member"
+                android:alpha="0.5"
+                android:padding="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/mtv_name"
+                app:layout_constraintBottom_toBottomOf="@+id/layout_user_info"
+                app:layout_constraintHeight_percent="0.1"
+                app:layout_constraintWidth_percent="0.2"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="N/A"
+                android:textSize="18sp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/siv_account"
+                app:layout_constraintEnd_toStartOf="@+id/siv_status"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/siv_status"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/baseline_inactive"
+                android:padding="8dp"
+                app:layout_constraintTop_toTopOf="@+id/mtv_name"
+                app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.1"
+                />
+
+            <LinearLayout
+                android:id="@+id/layout_user_info"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="10dp"
+                app:layout_constraintStart_toEndOf="@+id/siv_account"
+                app:layout_constraintTop_toBottomOf="@+id/mtv_name"
+                app:layout_constraintBottom_toBottomOf="@+id/siv_account"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_user_level"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="N/A"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_glpid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="N/A"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@android:color/darker_gray"
+                app:layout_constraintHeight_percent="0.001"
+                app:layout_constraintTop_toBottomOf="@+id/layout_user_info"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Material_Button_Transparent"
+                android:id="@+id/btn_edit_account"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Edit Account"
+                app:layout_constraintTop_toBottomOf="@+id/layout_user_info"
+                app:layout_constraintEnd_toEndOf="@+id/layout_user_info"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_label_member"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Member Information"
+                android:textSize="16sp"
+                android:alpha="0.7"
+                android:padding="10dp"
+                app:layout_constraintTop_toBottomOf="@+id/btn_edit_account"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_member"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardElevation="5dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintTop_toBottomOf="@+id/mtv_label_member"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="5dp">
+
+                    <!-- Lodge Name -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_lodge"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Lodge Name:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_lodge"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_lodge"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_lodge"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Member Title -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Member Title:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_lodge"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_title"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_title"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Status -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_status"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Status:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_status"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_status"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_status"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Date Membership -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_membership"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Date Membership:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_status"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_membership"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_membership"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_membership"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Sponsors -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_sponsors"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sponsors:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_membership"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_sponsors"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_membership"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_sponsors"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_label_personal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Personal Information"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:alpha="0.7"
+                android:padding="10dp"
+                app:layout_constraintTop_toBottomOf="@+id/card_member"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_personal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardElevation="5dp"
+                app:cardUseCompatPadding="true"
+                app:layout_constraintTop_toBottomOf="@+id/mtv_label_personal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="5dp">
+
+                    <!-- Firstname -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_firstname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Firstname:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_firstname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_firstname"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_firstname"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Lastname -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_lastname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Lastname:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_firstname"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_lastname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_lastname"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_lastname"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Middlename -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_middlename"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Middlename:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_lastname"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_middlename"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_middlename"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_middlename"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Suffix -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_suffix"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Suffix:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_middlename"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_suffix"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_suffix"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_suffix"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Birthdate -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_birthdate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Birthdate:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_suffix"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_birthdate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_birthdate"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_birthdate"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Civil Status -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_civilstatus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Civil Status:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_birthdate"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_civilstatus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_civilstatus"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_civilstatus"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_label_others"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Other Informations"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:alpha="0.7"
+                android:padding="10dp"
+                app:layout_constraintTop_toBottomOf="@+id/card_personal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_others"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:cardElevation="5dp"
+                app:layout_constraintTop_toBottomOf="@+id/mtv_label_others"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.25">
+
+                <ExpandableListView
+                    android:id="@+id/rcv_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:nestedScrollingEnabled="true"
+                    android:scrollbars="vertical" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Material_Button_Transparent"
+                android:id="@+id/btn_edit_member"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Edit Member"
+                app:layout_constraintTop_toBottomOf="@+id/card_others"
+                app:layout_constraintEnd_toEndOf="@+id/card_others"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</com.google.android.material.card.MaterialCardView>

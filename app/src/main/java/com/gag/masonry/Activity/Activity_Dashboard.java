@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.gag.accounting.Disbursement.Fragments.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
+import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Account;
@@ -31,6 +32,7 @@ import com.gag.useraccount.Fragments.Fragment_Lodge;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
+import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
@@ -144,7 +146,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             main_drawer.closeDrawer(GravityCompat.START);
 
             String itemID = childItem.getFsIDxx();
-            Intent loIntent;
             switch (itemID){
 
                 case "ACC001": //download data initialized upon login
@@ -186,16 +187,11 @@ public class Activity_Dashboard extends AppCompatActivity {
                         }
                     });
                     break;
-                case "ACC002": //update account
-                    loIntent = new Intent(Activity_Dashboard.this, Activity_Account.class);
-                    loIntent.putExtra("update", true);
-                    startActivity(loIntent);
+                case "ACC002": //update view account
+                    InitView("ACC002");
                     break;
-                case "ACC003": //update membership
+                case "ACC003": //update officership
                     InitView("ACC003");
-                    break;
-                case "ACC004": //update officership
-                    InitView("ACC004");
                     break;
                 case "ACC005": //logout account
 
@@ -251,7 +247,7 @@ public class Activity_Dashboard extends AppCompatActivity {
 
         //get changes from user account, to get the accurate details passed for updating account
         EUserInfo loUser = mViewmodel.GetUserInfo();
-        DMemberInfo.MemberDashboardInfo poMember = mViewmodel.GetMemberInfo(loUser.getSUserIDxx());
+        MemberDashboardInfo poMember = mViewmodel.GetMemberInfo(loUser.getSUserIDxx());
 
         //paramter object for arguments
         Bundle loArgs;
@@ -279,17 +275,13 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
                 fragmentTransaction.addToBackStack("assign_officer");
                 break;
-            case "ACC003":
-                Fragment_Member loFragMem = new Fragment_Member();
+            case "ACC002":
+                Fragment_UserInfo loFragUser = new Fragment_UserInfo();
 
-                loArgs = new Bundle();
-                loArgs.putString("fsGLPIDxx", poMember.getSGLPIDNoX());
-                loFragMem.setArguments(loArgs);
-
-                fragmentTransaction.replace(R.id.layout_container, loFragMem);
-                fragmentTransaction.addToBackStack("create_member");
+                fragmentTransaction.replace(R.id.layout_container, loFragUser);
+                fragmentTransaction.addToBackStack("view_account");
                 break;
-            case "ACC004":
+            case "ACC003":
                 Fragment_Assign_Officer loFragOff = new Fragment_Assign_Officer();
 
                 loArgs = new Bundle();

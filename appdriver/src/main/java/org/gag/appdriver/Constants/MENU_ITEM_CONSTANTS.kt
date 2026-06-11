@@ -10,31 +10,23 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ACC001",
         "ACC",
         1,
-        1
+        2
     ),
 
-    MENU_ITEM_UPDATE_ACCOUNT(
-        "Account Details",
+    MENU_ITEM_ACCOUNT_DETAILS(
+        "Account Info",
         "ACC002",
         "ACC",
         1,
-        0
-    ),
-
-    MENU_ITEM_UPDATE_MEMBERSHIP(
-        "Membership Information",
-        "ACC003",
-        "ACC",
-        1,
-        1
+        2
     ),
 
     MENU_ITEM_UPDATE_OFFICERSHIP(
         "Membership Role",
-        "ACC004",
+        "ACC003",
         "ACC",
         1,
-        1
+        2
     ),
 
     MENU_ITEM_TURNOVER_FUNDS(
@@ -50,7 +42,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ACC005",
         "ACC",
         1,
-        0
+        1
     ),
 
     MENU_ITEM_CREATE_LODGE(
@@ -58,7 +50,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "MEM001",
         "MEM",
         1,
-        1
+        2
     ),
 
     MENU_ITEM_CREATE_MEMBER(
@@ -66,7 +58,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     "MEM002",
     "MEM",
         1,
-        1
+        2
     ),
 
     MENU_ITEM_ASSIGN_OFFICER(
@@ -74,6 +66,6 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     "MEM003",
     "MEM",
     1,
-    1
+    2
     )
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
@@ -32,7 +33,7 @@ import java.util.function.Consumer;
 public class VM_Member extends AndroidViewModel {
 
     private final MutableLiveData<List<String>> laSponsors;
-    private final MutableLiveData<List<DTownInfo.TownProvince>> laAddress;
+    private final MutableLiveData<List<TownProvince>> laAddress;
     private final MutableLiveData<List<EMemberContactInfo>> laContact;
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
@@ -93,7 +94,7 @@ public class VM_Member extends AndroidViewModel {
 
     public void AddMemberAddress(String fsAddressIDx, String fsTownIDx, String fsProvIDx, String fsProvNme, String fsAddressx, String isHomeAddrssx, String isActive){
 
-        DTownInfo.TownProvince loAddress = new DTownInfo.TownProvince(
+        TownProvince loAddress = new TownProvince(
                 fsAddressIDx,
                 fsTownIDx,
                 fsProvIDx,
@@ -103,7 +104,7 @@ public class VM_Member extends AndroidViewModel {
                 isActive
         );
 
-        List<DTownInfo.TownProvince> currentList = laAddress.getValue();
+        List<TownProvince> currentList = laAddress.getValue();
 
         if (currentList == null) {
             currentList = new ArrayList<>();
@@ -112,9 +113,9 @@ public class VM_Member extends AndroidViewModel {
         laAddress.setValue(currentList);
     }
 
-    public void ReplaceAddress(int index, DTownInfo.TownProvince loAddress){
+    public void ReplaceAddress(int index, TownProvince loAddress){
 
-        List<DTownInfo.TownProvince> currentList = laAddress.getValue();
+        List<TownProvince> currentList = laAddress.getValue();
 
         if (currentList == null) return;
 
@@ -232,11 +233,11 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveTitleList();
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> SearchTown(String fsSearch){
+    public LiveData<List<TownProvince>> SearchTown(String fsSearch){
         return poAccount.SearchTown(fsSearch);
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> HasNewAddress(){
+    public LiveData<List<TownProvince>> HasNewAddress(){
         return laAddress;
     }
 
@@ -252,7 +253,7 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetMemberGLPID(fsGLPIDxx);
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> GetMemberAddress(String fsMemberID){
+    public LiveData<List<TownProvince>> GetMemberAddress(String fsMemberID){
         return poAccount.GetMemberAddress(fsMemberID);
     }
 

@@ -35,6 +35,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.DataObject.DOfficer;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
@@ -85,9 +86,9 @@ public class Fragment_Home extends Fragment {
 
     private void InitData(){
 
-        mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<DMemberInfo.MemberDashboardInfo>() {
+        mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<MemberDashboardInfo>() {
             @Override
-            public void onChanged(DMemberInfo.MemberDashboardInfo eMemberInfo) {
+            public void onChanged(MemberDashboardInfo eMemberInfo) {
 
                 if (eMemberInfo == null) return;
 
@@ -109,7 +110,7 @@ public class Fragment_Home extends Fragment {
                 mtv_lodge.setText(eMemberInfo.getSLodgeNme());
 
                 //do not display list of officers and members for unatuthorized users
-                if (getArguments() == null || getArguments().getInt("user_level") < 1){
+                if (getArguments() == null || getArguments().getInt("user_level") <= 1){
                     layout_no_record.setVisibility(View.GONE);
                     layout_records.setVisibility(View.GONE);
                     layout_footer.setVisibility(View.VISIBLE);
