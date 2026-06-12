@@ -8,7 +8,6 @@ data class MemberDashboardInfo(
     val sSuffixNm : String?,
     val dBirthDte : String?,
     val sMemberID : String?,
-    val sYearIDxx: String?,
     val sLodgeNme: String?,
     val sTitleDsc : String?,
     val cMmbrStat : String?,

@@ -13,6 +13,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import org.gag.appdriver.App.Core.Dashboard;
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
+import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
@@ -25,6 +26,7 @@ import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
@@ -108,6 +110,10 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<HashMap<String, ArrayList<String>>> ObserveMemberInfoList(){
         return laMemberInfoOthers;
+    }
+
+    public LiveData<OfficerInfo> ObserveCurrentRole(String fsMemberID){
+        return poAccount.ObserveCurrentRole(fsMemberID);
     }
 
     public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
@@ -200,26 +206,37 @@ public class VM_Main extends AndroidViewModel {
 
     public void DownloadMemberInfo(String fsMemberIDxx, VM_Member.OnDownload foCallback){
 
-        CompletableFuture<Boolean> poDownloadAddress = poAccount.DownloadMemberAddress(fsMemberIDxx);
-        CompletableFuture<Boolean> poDownloadContact = poAccount.DownloadMemberContact(fsMemberIDxx);
-        CompletableFuture<Boolean> poDownloadEmail = poAccount.DownloadMemberEmail(fsMemberIDxx);
-
         foCallback.Loading();
-        CompletableFuture.allOf(poDownloadAddress, poDownloadContact, poDownloadEmail).thenRun(new Runnable() {
+
+        //store all threads into hash set, to execute one by one and avoid memory leakage
+        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                List.of(
+                        poAccount.DownloadMemberAddress(fsMemberIDxx),
+                        poAccount.DownloadMemberContact(fsMemberIDxx),
+                        poAccount.DownloadMemberEmail(fsMemberIDxx),
+                        poAccount.DownloadOfficerInfo(fsMemberIDxx)
+                )
+        );
+
+        //initialize task result holder
+        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+        for (CompletableFuture<Boolean> task : laTasks){
+
+            poResult = poResult.thenCompose(aBoolean -> {
+                if (!aBoolean) return CompletableFuture.completedFuture(false);
+                return task;
+            });
+        }
+
+        //get the result
+        poResult.thenAccept(new Consumer<Boolean>() {
             @Override
-            public void run() {
-
-                try {
-
-                    if (!poDownloadAddress.get() || !poDownloadContact.get() || !poDownloadEmail.get()){
-                        foCallback.Finished("Failed to download member information:\n\n" + poAccount.GetMessage());
-                        return;
-                    }
-                    foCallback.Finished("Sucessfully downloaded member information");
-
-                }catch (Exception e){
-                    foCallback.Finished("Failed to download member information:\n\n" + e.getMessage());
+            public void accept(Boolean aBoolean) {
+                if (!aBoolean){
+                    foCallback.Finished("Failed to download member information:\n\n" + poAccount.getMessage());
+                    return;
                 }
+                foCallback.Finished("Successfully downloaded member information");
             }
         });
     }

@@ -46,6 +46,7 @@ import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -722,7 +723,7 @@ class Dashboard(loInstance : Context) {
                 }
 
                 val params : JSONObject = JSONObject().also {
-                    it.put("fsMemberIDx", fsMemberIDx)
+                    it.put("sMemberID", fsMemberIDx)
                     it.put("dFromxx", fdFromxx)
                     it.put("dToxx", fsDto)
                 }

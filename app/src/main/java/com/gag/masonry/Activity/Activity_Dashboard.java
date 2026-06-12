@@ -190,10 +190,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "ACC002": //update view account
                     InitView("ACC002");
                     break;
-                case "ACC003": //update officership
-                    InitView("ACC003");
-                    break;
-                case "ACC005": //logout account
+                case "ACC003": //logout account
 
                     poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                         @Override
@@ -280,17 +277,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                 fragmentTransaction.replace(R.id.layout_container, loFragUser);
                 fragmentTransaction.addToBackStack("view_account");
-                break;
-            case "ACC003":
-                Fragment_Assign_Officer loFragOff = new Fragment_Assign_Officer();
-
-                loArgs = new Bundle();
-                loArgs.putString("fsMemberID",poMember.getSMemberID());
-                loArgs.putString("fsYearID", poMember.getSYearIDxx());
-                loFragOff.setArguments(loArgs);
-
-                fragmentTransaction.replace(R.id.layout_container, loFragOff);
-                fragmentTransaction.addToBackStack("assign_officer");
                 break;
             case "DISB001":
                 Fragment_Turnover_Funds loTurnOver = new Fragment_Turnover_Funds();

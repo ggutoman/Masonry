@@ -1093,11 +1093,18 @@ public class Fragment_Member extends Fragment {
                         for (TownProvince townProvince : paramTownProvince){
                             Log.d("Address added ", townProvince.getPsTownProvNme());
 
+                            String lsAddress;
+                            if (townProvince.getPsAddrsIDx() == null || townProvince.getPsAddrsIDx().isEmpty()){
+                                lsAddress = townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme();
+                            }else {
+                                lsAddress = townProvince.getPsAddressx();
+                            }
+
                             laAddressParams.add(
                                     new EMemberAddress(
                                             townProvince.getPsAddrsIDx(),
                                             loMemberInfo == null ? "" : loMemberInfo.getSMemberID(),
-                                            townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
+                                            lsAddress,
                                             townProvince.getPsTownIDxx(),
                                             townProvince.isHomeAddr(),
                                             townProvince.isActive(),

@@ -1,7 +1,5 @@
 package org.gag.appdriver.Constants
 
-import org.gag.appdriver.R
-
 enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val fsParentIDx : String, val fnActive : Int, val fnLevel : Int){
 
 
@@ -21,26 +19,18 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         2
     ),
 
-    MENU_ITEM_UPDATE_OFFICERSHIP(
-        "Membership Role",
+    MENU_ITEM_LOD_ACCOUNT(
+        "Logout",
         "ACC003",
         "ACC",
         1,
-        2
+        1
     ),
 
     MENU_ITEM_TURNOVER_FUNDS(
         "Turnover Funds",
         "DISB001",
         "DISB",
-        1,
-        1
-    ),
-
-    MENU_ITEM_LOD_ACCOUNT(
-        "Logout",
-        "ACC005",
-        "ACC",
         1,
         1
     ),

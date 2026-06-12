@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.Room.Entities.EOfficer
 
 @Dao
@@ -35,6 +36,35 @@ interface DOfficer {
 
     @Query("SELECT * FROM Officer_Info WHERE sMemberID= :fsMemberIDx AND sYearIDxx= :fsYearIDx")
     fun ObserveOfficeInfo(fsMemberIDx : String, fsYearIDx : String) : LiveData<EOfficer>
+
+    @Query("""
+            SELECT 
+                a.sYearIDxx,
+                b.nYearxxxx,
+                c.sPositnDs,
+                a.cAppointx,
+                a.cStatusxx
+            FROM 
+                Officer_Info a
+            JOIN
+                Lodge_Calendar b
+            ON
+                a.sYearIDxx = b.sYearIDxx
+            JOIN
+                Position_Info c
+            ON
+                a.sPositnCd = c.sPositnCd
+            WHERE 
+                sMemberID = :fsMemberIDx 
+            AND 
+                a.cStatusxx = '1' 
+            AND
+                b.dThruDate >= CURRENT_DATE
+            ORDER BY
+                b.dThruDate
+            DESC LIMIT 1
+    """)
+    fun ObserveCurrentRole(fsMemberIDx: String): LiveData<OfficerInfo>
 
     data class OfficerList(
 

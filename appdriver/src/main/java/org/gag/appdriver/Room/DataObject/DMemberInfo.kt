@@ -13,10 +13,9 @@ interface DMemberInfo {
     @Upsert(entity = EMemberInfo::class)
     fun SaveMemberInfo(poMember: EMemberInfo)
 
-    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, d.sYearIDxx, b.sLodgeNme, e.sTitleDsc, a.cMmbrStat, a.dMembrshp," +
+    @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, b.sLodgeNme, e.sTitleDsc, a.cMmbrStat, a.dMembrshp," +
                     "a.sSponsor1, a.sSponsor2, a.sSponsor3, a.cCvilStat " +
                     "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
-                    "LEFT JOIN Officer_Info d ON (a.sMemberID = d.sMemberID) " +
                     "LEFT JOIN Title_Info e ON (a.sTitleIDx = e.sTitleIDx) " +
                     "WHERE sGLPIDNoX= (" +
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")

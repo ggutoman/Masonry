@@ -26,10 +26,12 @@ import com.gag.useraccount.Activity.Activity_Account;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
+import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
@@ -38,6 +40,7 @@ import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
+import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
@@ -56,6 +59,11 @@ public class Fragment_UserInfo extends Fragment {
 
     // Member Information card
     private MaterialTextView mtv_lodge, mtv_title, mtv_status, mtv_membership, mtv_sponsors;
+
+    //Officer Information
+    private MaterialCardView card_officer;
+    private MaterialTextView mtv_term, mtv_position, mtv_type, mtv_off_status, mtv_label_officer;
+    private MaterialButton btn_view_officer;
 
     // Personal Information card
     private MaterialTextView mtv_firstname, mtv_lastname, mtv_middlename, mtv_suffix, mtv_birthdate, mtv_civilstatus;
@@ -94,6 +102,15 @@ public class Fragment_UserInfo extends Fragment {
         mtv_status = view.findViewById(R.id.mtv_status);
         mtv_membership = view.findViewById(R.id.mtv_membership);
         mtv_sponsors = view.findViewById(R.id.mtv_sponsors);
+
+        //Officer Information
+        mtv_label_officer = view.findViewById(R.id.mtv_label_officer);
+        card_officer = view.findViewById(R.id.card_officer);
+        mtv_term = view.findViewById(R.id.mtv_term);
+        mtv_position = view.findViewById(R.id.mtv_position);
+        mtv_type = view.findViewById(R.id.mtv_type);
+        mtv_off_status = view.findViewById(R.id.mtv_off_status);
+        btn_view_officer = view.findViewById(R.id.btn_view_officer);
 
         // Personal Information card
         mtv_firstname = view.findViewById(R.id.mtv_firstname);
@@ -161,8 +178,8 @@ public class Fragment_UserInfo extends Fragment {
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
                 String lsSponsors = (memberDashboardInfo.getSSponsor1() == null ? "" : memberDashboardInfo.getSSponsor1()) +
-                                        (memberDashboardInfo.getSSponsor2() == null ? "" : "\n\n" + memberDashboardInfo.getSSponsor2()) +
-                                        (memberDashboardInfo.getSSponsor3() == null ? "" : "\n\n" + memberDashboardInfo.getSSponsor3());
+                                        (memberDashboardInfo.getSSponsor2() == null ? "" : "\n" + memberDashboardInfo.getSSponsor2()) +
+                                        (memberDashboardInfo.getSSponsor3() == null ? "" : "\n" + memberDashboardInfo.getSSponsor3());
 
                 mtv_lodge.setText(memberDashboardInfo.getSLodgeNme());
                 mtv_title.setText(memberDashboardInfo.getSTitleDsc());
@@ -283,6 +300,42 @@ public class Fragment_UserInfo extends Fragment {
                                 }
 
                                 rcv_list.setAdapter(new Adapter_MemberInfoList(requireActivity(), new ArrayList<>(parentList), loChildMap));
+                            }
+                        });
+
+                        mViewModel.ObserveCurrentRole(memberDashboardInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<OfficerInfo>() {
+                            @Override
+                            public void onChanged(OfficerInfo eOfficer) {
+
+                                if (eOfficer == null){
+                                    mtv_label_officer.setVisibility(View.GONE);
+                                    card_officer.setVisibility(View.GONE);
+                                    btn_view_officer.setVisibility(View.GONE);
+                                    return;
+                                }
+                                mtv_label_officer.setVisibility(View.VISIBLE);
+                                card_officer.setVisibility(View.VISIBLE);
+                                btn_view_officer.setVisibility(View.VISIBLE);
+
+                                List<MEMBER_CONSTANTS> laType = List.of(
+                                        MEMBER_CONSTANTS.STATUS_ELECTED,
+                                        MEMBER_CONSTANTS.STATUS_APPOINTED
+                                );
+
+                                List<MEMBER_CONSTANTS> laOfficerStatus = List.of(
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_SUSPENDED,
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_ACTIVE,
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_REASSIGN,
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_REMOVED,
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_RESIGNED,
+                                        MEMBER_CONSTANTS.STATUS_OFFICER_DECEASE
+                                );
+
+
+                                mtv_term.setText(String.valueOf(eOfficer.getNYearxxxx()));
+                                mtv_position.setText(eOfficer.getSPositnDs());
+                                mtv_type.setText(laType.get(Integer.parseInt(eOfficer.getCAppointx())).getFsDescr());
+                                mtv_off_status.setText(laOfficerStatus.get(Integer.parseInt(eOfficer.getCStatusxx())).getFsDescr());
                             }
                         });
                     }
