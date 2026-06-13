@@ -52,6 +52,7 @@ public class Fragment_UserInfo extends Fragment {
 
     private VM_Main mViewModel;
     private HashMap<String, ArrayList<String>> laMemberInfoOthers;
+    private String lsMemberID;
 
     //User Information
     private ShapeableImageView siv_status;
@@ -164,6 +165,9 @@ public class Fragment_UserInfo extends Fragment {
                         mtv_user_level.setText("Owner Account");
                         break;
                 }
+
+                //hide edit of membership if user level
+                if (eUserInfo.getNUserLevl() < 2) btn_edit_member.setVisibility(View.GONE);
             }
         });
 
@@ -333,7 +337,7 @@ public class Fragment_UserInfo extends Fragment {
 
 
                                 mtv_term.setText(String.valueOf(eOfficer.getNYearxxxx()));
-                                mtv_position.setText(eOfficer.getSPositnDs());
+                                mtv_position.setText(eOfficer.getSPositionNme());
                                 mtv_type.setText(laType.get(Integer.parseInt(eOfficer.getCAppointx())).getFsDescr());
                                 mtv_off_status.setText(laOfficerStatus.get(Integer.parseInt(eOfficer.getCStatusxx())).getFsDescr());
                             }
@@ -374,6 +378,25 @@ public class Fragment_UserInfo extends Fragment {
                 fragmentTransaction.addToBackStack("create_member");
                 fragmentTransaction.commit();
 
+            }
+        });
+
+        btn_view_officer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Fragment_Officer_history loFragHistory = new Fragment_Officer_history();
+
+                Bundle loArgs = new Bundle();
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                loArgs.putString("fsGLPIDxx", mtv_glpid.getText().toString());
+                loFragHistory.setArguments(loArgs);
+
+                fragmentTransaction.replace(R.id.layout_container, loFragHistory);
+                fragmentTransaction.addToBackStack("view_officer_history");
+                fragmentTransaction.commit();
             }
         });
 

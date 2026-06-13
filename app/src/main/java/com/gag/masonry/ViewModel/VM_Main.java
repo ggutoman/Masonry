@@ -13,6 +13,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import org.gag.appdriver.App.Core.Dashboard;
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
+import org.gag.appdriver.App.Models.OfficerHistory;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
@@ -20,13 +21,11 @@ import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
-import org.gag.appdriver.Room.DataObject.DMemberInfo;
-import org.gag.appdriver.Room.DataObject.DOfficer;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Room.Entities.EOfficer;
+import org.gag.appdriver.Room.Entities.EOfficerHistory;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
@@ -104,8 +103,12 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.GetMemberEmail(fsMemberID);
     }
 
-    public LiveData<List<DOfficer.OfficerList>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
+    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
         return poDashboard.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
+    }
+
+    public LiveData<List<OfficerHistory>> ObserveOfficerHistory(String fsMemberIDx, String fsDfrom, String fsDto) {
+        return poDashboard.ObserveOfficerHistory(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public LiveData<HashMap<String, ArrayList<String>>> ObserveMemberInfoList(){
@@ -310,6 +313,25 @@ public class VM_Main extends AndroidViewModel {
                     foCallback.OnFinished(poDashboard.getMessage());
                 }else {
                     foCallback.OnFinished("Successfully downloaded officer list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void DownloadOfficerHistory(String fsMemberID, String fdFrom, String fDto, OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+        poDashboard.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFinished(poDashboard.getMessage());
+                }else {
+                    foCallback.OnFinished("Successfully downloaded officer history");
                 }
             }
         }).exceptionally(throwable -> {

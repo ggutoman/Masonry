@@ -30,7 +30,6 @@ import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DOfficer
-import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo

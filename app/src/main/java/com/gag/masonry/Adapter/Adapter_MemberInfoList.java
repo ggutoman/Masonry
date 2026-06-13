@@ -1,7 +1,6 @@
 package com.gag.masonry.Adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +9,7 @@ import android.widget.BaseExpandableListAdapter;
 import com.gag.masonry.R;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
+import org.gag.appdriver.R.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +78,7 @@ public class Adapter_MemberInfoList extends BaseExpandableListAdapter {
         ShapeableImageView img_icon = view.findViewById(R.id.img_icon);
         MaterialTextView mtv_title = view.findViewById(R.id.mtv_title);
 
-        img_icon.setVisibility(View.INVISIBLE);
+        img_icon.setVisibility(View.GONE);
         mtv_title.setText(paParentList.get(i));
 
         return view;

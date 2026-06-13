@@ -21,6 +21,8 @@ import org.gag.appdriver.App.DataModels.DownloadTitleInfo
 import org.gag.appdriver.App.DataModels.DownloadTownInfo
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
 import org.gag.appdriver.App.Models.MemberDashboardInfo
+import org.gag.appdriver.App.Models.OfficerHistory
+import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS
@@ -46,7 +48,7 @@ import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
-import org.gag.appdriver.Room.Entities.EOfficer
+import org.gag.appdriver.Room.Entities.EOfficerHistory
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -85,7 +87,9 @@ class Dashboard(loInstance : Context) {
 
     fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberListByFilter(fsMemberIDx, fsDateFrom, fsDateTo)
 
-    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<DOfficer.OfficerList>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
+    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
+
+    fun ObserveOfficerHistory(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerHistory>> = poOfficerHistory.ObserveOfficerHistory( fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun GetMemberAddress(fsMemberID : String) : LiveData<List<TownProvince>> {
         return poDBMemberAddress.GetMemberAddress(fsMemberID)
@@ -723,7 +727,7 @@ class Dashboard(loInstance : Context) {
                 }
 
                 val params : JSONObject = JSONObject().also {
-                    it.put("sMemberID", fsMemberIDx)
+                    it.put("sGLPIDNoX", fsMemberIDx)
                     it.put("dFromxx", fdFromxx)
                     it.put("dToxx", fsDto)
                 }

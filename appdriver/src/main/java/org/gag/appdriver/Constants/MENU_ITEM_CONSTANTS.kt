@@ -16,7 +16,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ACC002",
         "ACC",
         1,
-        2
+        1
     ),
 
     MENU_ITEM_LOD_ACCOUNT(
