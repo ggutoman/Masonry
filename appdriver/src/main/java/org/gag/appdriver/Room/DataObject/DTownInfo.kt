@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Room.Entities.ETownCity
 
 @Dao
@@ -24,15 +25,5 @@ interface DTownInfo {
             "WHERE a.sProvIDxx = b.sProvIDxx " +
             "AND (a.sTownName || ',' || b.sDescript) LIKE :fsSearch ")
     fun SearchTown(fsSearch : String): LiveData<List<TownProvince>>
-
-    data class TownProvince(
-        val psAddrsIDx : String,
-        val psTownIDxx : String,
-        val psProvIDxx : String,
-        val psTownProvNme : String,
-        val psAddressx : String,
-        val isHomeAddr : String,
-        val isActive : String
-    )
 
 }

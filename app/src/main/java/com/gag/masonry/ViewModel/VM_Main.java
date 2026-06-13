@@ -6,19 +6,30 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.gag.useraccount.ViewModel.VM_Member;
 
 import org.gag.appdriver.App.Core.Dashboard;
+import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.MemberDashboardInfo;
+import org.gag.appdriver.App.Models.OfficerHistory;
+import org.gag.appdriver.App.Models.OfficerInfo;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
-import org.gag.appdriver.Room.DataObject.DMemberInfo;
-import org.gag.appdriver.Room.DataObject.DOfficer;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
+import org.gag.appdriver.Room.Entities.EMemberContactInfo;
+import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EOfficerHistory;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +41,9 @@ public class VM_Main extends AndroidViewModel {
     private final DeviceInfo poDevice;
     private final DateRepository poDate;
     private final Dashboard poDashboard;
+    private final UserAccount poAccount;
+
+    private final MutableLiveData<HashMap<String, ArrayList<String>>> laMemberInfoOthers = new MutableLiveData<>();
 
     public interface InitData{
         void isLoading();
@@ -50,6 +64,11 @@ public class VM_Main extends AndroidViewModel {
         poDevice = new DeviceInfo(application);
         poDate = new DateRepository();
         poDashboard = new Dashboard(application);
+        poAccount = new UserAccount(application);
+    }
+
+    public void AddInfoList(HashMap<String, ArrayList<String>> faMemberInfoOthers){
+        laMemberInfoOthers.setValue(faMemberInfoOthers);
     }
 
     public EUserInfo GetUserInfo(){
@@ -60,11 +79,11 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
 
-    public DMemberInfo.MemberDashboardInfo GetMemberInfo(String fsUserIDxx){
+    public MemberDashboardInfo GetMemberInfo(String fsUserIDxx){
         return poDashboard.getPoDBMember().GetMemberParameters(fsUserIDxx);
     }
 
-    public LiveData<DMemberInfo.MemberDashboardInfo> ObserveMemberInfo(){
+    public LiveData<MemberDashboardInfo> ObserveMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
     }
 
@@ -72,8 +91,32 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.ObserveMemberList(fsMemberIDx, fsDfrom, fsDto);
     }
 
-    public LiveData<List<DOfficer.OfficerList>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
+    public LiveData<List<TownProvince>> ObserveMemberAddress(String fsMemberID){
+        return poDashboard.GetMemberAddress(fsMemberID);
+    }
+
+    public LiveData<List<EMemberContactInfo>> ObserveMemberContact(String fsMemberID){
+        return poDashboard.GetMemberContact(fsMemberID);
+    }
+
+    public LiveData<List<EMemberEmailInfo>> ObserveMemberEmail(String fsMemberID){
+        return poDashboard.GetMemberEmail(fsMemberID);
+    }
+
+    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
         return poDashboard.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
+    }
+
+    public LiveData<List<OfficerHistory>> ObserveOfficerHistory(String fsMemberIDx, String fsDfrom, String fsDto) {
+        return poDashboard.ObserveOfficerHistory(fsMemberIDx, fsDfrom, fsDto);
+    }
+
+    public LiveData<HashMap<String, ArrayList<String>>> ObserveMemberInfoList(){
+        return laMemberInfoOthers;
+    }
+
+    public LiveData<OfficerInfo> ObserveCurrentRole(String fsMemberID){
+        return poAccount.ObserveCurrentRole(fsMemberID);
     }
 
     public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
@@ -98,6 +141,10 @@ public class VM_Main extends AndroidViewModel {
 
     public String GetFormattedDate(Long flDate){
         return poDate.FormatLongDate(flDate);
+    }
+
+    public String GetFormattedDate(String fsDate, String fsFormat){
+        return poDate.FormatDate(fsDate, fsFormat);
     }
 
     public void InitData(InitData foCallback){
@@ -158,6 +205,43 @@ public class VM_Main extends AndroidViewModel {
                 }
             });
         }
+    }
+
+    public void DownloadMemberInfo(String fsMemberIDxx, VM_Member.OnDownload foCallback){
+
+        foCallback.Loading();
+
+        //store all threads into hash set, to execute one by one and avoid memory leakage
+        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                List.of(
+                        poAccount.DownloadMemberAddress(fsMemberIDxx),
+                        poAccount.DownloadMemberContact(fsMemberIDxx),
+                        poAccount.DownloadMemberEmail(fsMemberIDxx),
+                        poAccount.DownloadOfficerInfo(fsMemberIDxx)
+                )
+        );
+
+        //initialize task result holder
+        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+        for (CompletableFuture<Boolean> task : laTasks){
+
+            poResult = poResult.thenCompose(aBoolean -> {
+                if (!aBoolean) return CompletableFuture.completedFuture(false);
+                return task;
+            });
+        }
+
+        //get the result
+        poResult.thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+                if (!aBoolean){
+                    foCallback.Finished("Failed to download member information:\n\n" + poAccount.getMessage());
+                    return;
+                }
+                foCallback.Finished("Successfully downloaded member information");
+            }
+        });
     }
 
     public void DownloadParameters(OnDownloadData foCallback){
@@ -229,6 +313,25 @@ public class VM_Main extends AndroidViewModel {
                     foCallback.OnFinished(poDashboard.getMessage());
                 }else {
                     foCallback.OnFinished("Successfully downloaded officer list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void DownloadOfficerHistory(String fsMemberID, String fdFrom, String fDto, OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+        poDashboard.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFinished(poDashboard.getMessage());
+                }else {
+                    foCallback.OnFinished("Successfully downloaded officer history");
                 }
             }
         }).exceptionally(throwable -> {

@@ -12,18 +12,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemberAddressAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
+public class MemberAddressAdapter extends ArrayAdapter<TownProvince> {
 
     private final Context loContext;
-    private final List<DTownInfo.TownProvince> laMemberAddress;
-    private List<DTownInfo.TownProvince> laMemberAddressFiltered;
+    private final List<TownProvince> laMemberAddress;
+    private List<TownProvince> laMemberAddressFiltered;
 
-    public MemberAddressAdapter(@NonNull Context context, int resource, @NonNull List<DTownInfo.TownProvince> objects) {
+    public MemberAddressAdapter(@NonNull Context context, int resource, @NonNull List<TownProvince> objects) {
         super(context, resource, objects);
 
         loContext = context;
@@ -56,7 +57,7 @@ public class MemberAddressAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
 
     @Nullable
     @Override
-    public DTownInfo.TownProvince getItem(int position) {
+    public TownProvince getItem(int position) {
         return laMemberAddressFiltered.get(position);
     }
 
@@ -67,11 +68,11 @@ public class MemberAddressAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
 
-                List<DTownInfo.TownProvince> results = new ArrayList<>();
+                List<TownProvince> results = new ArrayList<>();
                 if (constraint == null || constraint.length() == 0) {
                     results.addAll(laMemberAddress);
                 } else {
-                    for (DTownInfo.TownProvince addressInfo : laMemberAddress) {
+                    for (TownProvince addressInfo : laMemberAddress) {
                         if (addressInfo.getPsTownProvNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
                                 addressInfo.getPsAddressx().toLowerCase().contains(constraint.toString().toLowerCase())) {
 
@@ -86,7 +87,7 @@ public class MemberAddressAdapter extends ArrayAdapter<DTownInfo.TownProvince> {
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                laMemberAddressFiltered = (List<DTownInfo.TownProvince>) results.values;
+                laMemberAddressFiltered = (List<TownProvince>) results.values;
                 notifyDataSetChanged();
             }
         };

@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
-import org.gag.appdriver.Room.DataObject.DTownInfo.TownProvince
+import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Room.Entities.EMemberAddress
 
 @Dao

@@ -17,6 +17,7 @@ import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Login;
 
+import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
@@ -102,9 +103,9 @@ public class Activity_Main extends AppCompatActivity {
                         }
 
                         //verify member information, it would be the basis of displaying menus
-                        mviewModel.ObserveMemberInfo().observe(Activity_Main.this, new Observer<DMemberInfo.MemberDashboardInfo>() {
+                        mviewModel.ObserveMemberInfo().observe(Activity_Main.this, new Observer<MemberDashboardInfo>() {
                             @Override
-                            public void onChanged(DMemberInfo.MemberDashboardInfo memberDashboardInfo) {
+                            public void onChanged(MemberDashboardInfo memberDashboardInfo) {
 
                                 if (memberDashboardInfo == null) return;
 

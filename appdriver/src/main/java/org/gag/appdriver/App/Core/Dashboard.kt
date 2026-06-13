@@ -20,6 +20,10 @@ import org.gag.appdriver.App.DataModels.DownloadProvinceInfo
 import org.gag.appdriver.App.DataModels.DownloadTitleInfo
 import org.gag.appdriver.App.DataModels.DownloadTownInfo
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
+import org.gag.appdriver.App.Models.MemberDashboardInfo
+import org.gag.appdriver.App.Models.OfficerHistory
+import org.gag.appdriver.App.Models.OfficerInfo
+import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS
@@ -41,7 +45,10 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.ELodgeInfo
+import org.gag.appdriver.Room.Entities.EMemberContactInfo
+import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EOfficerHistory
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -55,21 +62,21 @@ class Dashboard(loInstance : Context) {
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poEncrypt : HashRepository = HashRepository()
 
-    val poDBUser : DUserInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetUserDao() as DUserInfo
-    val poDBMember : DMemberInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
-    val poDBMemberAddress : DMemberAddress = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
-    val poDBMemberContact : DMemberContact = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
-    val poDBMemberEmail : DMemberEmailInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
-    val poLodgeInfo : DLodgeInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
-    val poPositionInfo : DPositionInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetPosition() as DPositionInfo
-    val poTitleInfo : DTitleInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetTitle() as DTitleInfo
-    val poProvinceInfo : DProvinceInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
-    val poTownInfo : DTownInfo = ML_DBF.Companion.getDatabase(loInstance)?.GetTownCity() as DTownInfo
-    val poLodgeCalendar : DLodgeCalendar = ML_DBF.Companion.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
-    val poOfficers : DOfficer = ML_DBF.Companion.getDatabase(loInstance)?.GetOfficer() as DOfficer
-    val poOfficerHistory : DOfficerHistory = ML_DBF.Companion.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+    val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
+    val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
+    val poDBMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
+    val poDBMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
+    val poDBMemberEmail : DMemberEmailInfo = ML_DBF.getDatabase(loInstance)?.GetMemberEmail() as DMemberEmailInfo
+    val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance)?.GetLodge() as DLodgeInfo
+    val poPositionInfo : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
+    val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(loInstance)?.GetTitle() as DTitleInfo
+    val poProvinceInfo : DProvinceInfo = ML_DBF.getDatabase(loInstance)?.GetProvince() as DProvinceInfo
+    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
+    val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
+    val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
 
-    fun ObserverMemberInfoByUserID() : LiveData<DMemberInfo.MemberDashboardInfo> {
+    fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
         return poDBMember.ObserveMemberInfoByUserID(
             TextFormatter()
@@ -80,7 +87,21 @@ class Dashboard(loInstance : Context) {
 
     fun ObserveMemberList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poDBMember.ObserveMemberListByFilter(fsMemberIDx, fsDateFrom, fsDateTo)
 
-    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<DOfficer.OfficerList>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
+    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
+
+    fun ObserveOfficerHistory(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerHistory>> = poOfficerHistory.ObserveOfficerHistory( fsMemberIDx, fsDateFrom, fsDateTo)
+
+    fun GetMemberAddress(fsMemberID : String) : LiveData<List<TownProvince>> {
+        return poDBMemberAddress.GetMemberAddress(fsMemberID)
+    }
+
+    fun GetMemberContact(fsMemberID: String) : LiveData<List<EMemberContactInfo>> {
+        return poDBMemberContact.GetMemberContact(fsMemberID)
+    }
+
+    fun GetMemberEmail(fsMemberID: String) : LiveData<List<EMemberEmailInfo>> {
+        return poDBMemberEmail.GetMemberEmail(fsMemberID)
+    }
 
     fun GetLodgeInfo() : ELodgeInfo {
 
@@ -706,7 +727,7 @@ class Dashboard(loInstance : Context) {
                 }
 
                 val params : JSONObject = JSONObject().also {
-                    it.put("fsMemberIDx", fsMemberIDx)
+                    it.put("sGLPIDNoX", fsMemberIDx)
                     it.put("dFromxx", fdFromxx)
                     it.put("dToxx", fsDto)
                 }

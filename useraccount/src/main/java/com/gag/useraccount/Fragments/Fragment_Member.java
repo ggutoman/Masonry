@@ -41,6 +41,7 @@ import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
 import org.gag.appdriver.App.Adapters.TitleAdapter;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
@@ -99,7 +100,7 @@ public class Fragment_Member extends Fragment {
     private MemberEmailAdapter MemberEmailAdapter;
 
     private List<String> paramSponsors = new ArrayList<>();
-    private List<DTownInfo.TownProvince> paramTownProvince= new ArrayList<>();
+    private List<TownProvince> paramTownProvince= new ArrayList<>();
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
 
@@ -108,7 +109,7 @@ public class Fragment_Member extends Fragment {
     private String lsSelectTitle;
 
     private EMemberInfo loMemberInfo;
-    private DTownInfo.TownProvince loSelectAddress;
+    private TownProvince loSelectAddress;
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
 
@@ -318,14 +319,14 @@ public class Fragment_Member extends Fragment {
                 loMemberInfo = eMemberInfo;
 
                 //initialize address, and email with exisitng list
-                mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<DTownInfo.TownProvince>>() {
+                mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<TownProvince>>() {
                     @Override
-                    public void onChanged(List<DTownInfo.TownProvince> townProvinces) {
+                    public void onChanged(List<TownProvince> townProvinces) {
 
                         if (townProvinces == null) return;
 
                         mviewModel.ClearAddress();
-                        for (DTownInfo.TownProvince loTown : townProvinces){
+                        for (TownProvince loTown : townProvinces){
 
                             mviewModel.AddMemberAddress(
                                     loTown.getPsAddrsIDx(),
@@ -477,9 +478,9 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.HasNewAddress().observe(getViewLifecycleOwner(), new Observer<List<DTownInfo.TownProvince>>() {
+        mviewModel.HasNewAddress().observe(getViewLifecycleOwner(), new Observer<List<TownProvince>>() {
             @Override
-            public void onChanged(List<DTownInfo.TownProvince> memberAddresses) {
+            public void onChanged(List<TownProvince> memberAddresses) {
 
                 //initialize parameter, list for address entry
                 paramTownProvince = memberAddresses;
@@ -674,7 +675,7 @@ public class Fragment_Member extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                loSelectAddress = (DTownInfo.TownProvince) adapterView.getItemAtPosition(i);
+                loSelectAddress = (TownProvince) adapterView.getItemAtPosition(i);
                 lnSelectAddress = i;
 
                 auto_town.setText(loSelectAddress.getPsTownProvNme(), false);
@@ -728,7 +729,7 @@ public class Fragment_Member extends Fragment {
 
                 poDialogAddMember.ShowAddress(new Dialog_Add_Member_Info.OnAddress() {
                     @Override
-                    public void OnAddress(DTownInfo.TownProvince loProvince) {
+                    public void OnAddress(TownProvince loProvince) {
 
                         mviewModel.AddMemberAddress(
                                 "",
@@ -757,7 +758,7 @@ public class Fragment_Member extends Fragment {
 
                 mviewModel.ReplaceAddress(
                         lnSelectAddress,
-                        new DTownInfo.TownProvince(
+                        new TownProvince(
                                 loSelectAddress.getPsAddrsIDx(),
                                 loSelectAddress.getPsTownIDxx(),
                                 loSelectAddress.getPsProvIDxx(),
@@ -1089,14 +1090,21 @@ public class Fragment_Member extends Fragment {
                         int hasHomeAddr = 0;
 
                         List<EMemberAddress> laAddressParams = new ArrayList<>();
-                        for (DTownInfo.TownProvince townProvince : paramTownProvince){
+                        for (TownProvince townProvince : paramTownProvince){
                             Log.d("Address added ", townProvince.getPsTownProvNme());
+
+                            String lsAddress;
+                            if (townProvince.getPsAddrsIDx() == null || townProvince.getPsAddrsIDx().isEmpty()){
+                                lsAddress = townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme();
+                            }else {
+                                lsAddress = townProvince.getPsAddressx();
+                            }
 
                             laAddressParams.add(
                                     new EMemberAddress(
                                             townProvince.getPsAddrsIDx(),
                                             loMemberInfo == null ? "" : loMemberInfo.getSMemberID(),
-                                            townProvince.getPsAddressx() + ", " + townProvince.getPsTownProvNme(),
+                                            lsAddress,
                                             townProvince.getPsTownIDxx(),
                                             townProvince.isHomeAddr(),
                                             townProvince.isActive(),

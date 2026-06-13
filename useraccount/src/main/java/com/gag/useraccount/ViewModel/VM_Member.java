@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
@@ -32,7 +33,7 @@ import java.util.function.Consumer;
 public class VM_Member extends AndroidViewModel {
 
     private final MutableLiveData<List<String>> laSponsors;
-    private final MutableLiveData<List<DTownInfo.TownProvince>> laAddress;
+    private final MutableLiveData<List<TownProvince>> laAddress;
     private final MutableLiveData<List<EMemberContactInfo>> laContact;
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
@@ -93,7 +94,7 @@ public class VM_Member extends AndroidViewModel {
 
     public void AddMemberAddress(String fsAddressIDx, String fsTownIDx, String fsProvIDx, String fsProvNme, String fsAddressx, String isHomeAddrssx, String isActive){
 
-        DTownInfo.TownProvince loAddress = new DTownInfo.TownProvince(
+        TownProvince loAddress = new TownProvince(
                 fsAddressIDx,
                 fsTownIDx,
                 fsProvIDx,
@@ -103,7 +104,7 @@ public class VM_Member extends AndroidViewModel {
                 isActive
         );
 
-        List<DTownInfo.TownProvince> currentList = laAddress.getValue();
+        List<TownProvince> currentList = laAddress.getValue();
 
         if (currentList == null) {
             currentList = new ArrayList<>();
@@ -112,9 +113,9 @@ public class VM_Member extends AndroidViewModel {
         laAddress.setValue(currentList);
     }
 
-    public void ReplaceAddress(int index, DTownInfo.TownProvince loAddress){
+    public void ReplaceAddress(int index, TownProvince loAddress){
 
-        List<DTownInfo.TownProvince> currentList = laAddress.getValue();
+        List<TownProvince> currentList = laAddress.getValue();
 
         if (currentList == null) return;
 
@@ -232,11 +233,11 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveTitleList();
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> SearchTown(String fsSearch){
+    public LiveData<List<TownProvince>> SearchTown(String fsSearch){
         return poAccount.SearchTown(fsSearch);
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> HasNewAddress(){
+    public LiveData<List<TownProvince>> HasNewAddress(){
         return laAddress;
     }
 
@@ -252,7 +253,7 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetMemberGLPID(fsGLPIDxx);
     }
 
-    public LiveData<List<DTownInfo.TownProvince>> GetMemberAddress(String fsMemberID){
+    public LiveData<List<TownProvince>> GetMemberAddress(String fsMemberID){
         return poAccount.GetMemberAddress(fsMemberID);
     }
 
@@ -273,7 +274,7 @@ public class VM_Member extends AndroidViewModel {
     }
 
     public LiveData<EOfficer> ObserveOfficerInfo(String fsMemberIDxx, String fsYearIDxx){
-        return poAccount.ObserveOfficeInfo(fsMemberIDxx, fsYearIDxx);
+        return poAccount.ObserveOfficerInfo(fsMemberIDxx, fsYearIDxx);
     }
 
     public List<String> GetCivilStatus(){
@@ -334,26 +335,36 @@ public class VM_Member extends AndroidViewModel {
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
 
-        CompletableFuture<Boolean> poDownloadAddress = poAccount.DownloadMemberAddress(fsMemberIDxx);
-        CompletableFuture<Boolean> poDownloadContact = poAccount.DownloadMemberContact(fsMemberIDxx);
-        CompletableFuture<Boolean> poDownloadEmail = poAccount.DownloadMemberEmail(fsMemberIDxx);
-
         foCallback.Loading();
-        CompletableFuture.allOf(poDownloadAddress, poDownloadContact, poDownloadEmail).thenRun(new Runnable() {
+
+        //store all threads into hash set, to execute one by one and avoid memory leakage
+        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                List.of(
+                        poAccount.DownloadMemberAddress(fsMemberIDxx),
+                        poAccount.DownloadMemberContact(fsMemberIDxx),
+                        poAccount.DownloadMemberEmail(fsMemberIDxx)
+                )
+        );
+
+        //initialize task result holder
+        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+        for (CompletableFuture<Boolean> task : laTasks){
+
+            poResult = poResult.thenCompose(aBoolean -> {
+                if (!aBoolean) return CompletableFuture.completedFuture(false);
+                return task;
+            });
+        }
+
+        //get the result
+        poResult.thenAccept(new Consumer<Boolean>() {
             @Override
-            public void run() {
-
-                try {
-
-                    if (!poDownloadAddress.get() || !poDownloadContact.get() || !poDownloadEmail.get()){
-                        foCallback.Finished("Failed to download member information:\n\n" + poAccount.GetMessage());
-                        return;
-                    }
-                    foCallback.Finished("Sucessfully downloaded member information");
-
-                }catch (Exception e){
-                    foCallback.Finished("Failed to download member information:\n\n" + e.getMessage());
+            public void accept(Boolean aBoolean) {
+                if (!aBoolean){
+                    foCallback.Finished("Failed to download member information:\n\n" + poAccount.getMessage());
+                    return;
                 }
+                foCallback.Finished("Successfully downloaded member information");
             }
         });
     }

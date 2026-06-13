@@ -35,8 +35,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.Room.DataObject.DMemberInfo;
-import org.gag.appdriver.Room.DataObject.DOfficer;
+import org.gag.appdriver.App.Models.MemberDashboardInfo;
+import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +54,7 @@ public class Fragment_Home extends Fragment {
     private Adapter_Officer_List loOfficerAdapter;
 
     private ConstraintLayout layout_no_record, layout_records;
+    private MaterialTextView mtv_no_record;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -85,9 +86,9 @@ public class Fragment_Home extends Fragment {
 
     private void InitData(){
 
-        mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<DMemberInfo.MemberDashboardInfo>() {
+        mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<MemberDashboardInfo>() {
             @Override
-            public void onChanged(DMemberInfo.MemberDashboardInfo eMemberInfo) {
+            public void onChanged(MemberDashboardInfo eMemberInfo) {
 
                 if (eMemberInfo == null) return;
 
@@ -109,7 +110,7 @@ public class Fragment_Home extends Fragment {
                 mtv_lodge.setText(eMemberInfo.getSLodgeNme());
 
                 //do not display list of officers and members for unatuthorized users
-                if (getArguments() == null || getArguments().getInt("user_level") < 1){
+                if (getArguments() == null || getArguments().getInt("user_level") <= 1){
                     layout_no_record.setVisibility(View.GONE);
                     layout_records.setVisibility(View.GONE);
                     layout_footer.setVisibility(View.VISIBLE);
@@ -128,6 +129,7 @@ public class Fragment_Home extends Fragment {
         tab_layout = view.findViewById(R.id.tab_layout);
         layout_records = view.findViewById(R.id.layout_records);
         layout_no_record = view.findViewById(R.id.layout_no_record);
+        mtv_no_record = view.findViewById(R.id.mtv_no_record);
         btn_filter= view.findViewById(R.id.btn_filter);
         til_search = view.findViewById(R.id.til_search);
         tie_search = view.findViewById(R.id.tie_search);
@@ -321,6 +323,8 @@ public class Fragment_Home extends Fragment {
                     if (eMemberInfos == null || eMemberInfos.size() < 1){
                         layout_no_record.setVisibility(View.VISIBLE);
                         rcv_home.setVisibility(View.GONE);
+
+                        mtv_no_record.setText("No members found on this lodge");
                         return;
                     }
                     layout_no_record.setVisibility(View.GONE);
@@ -353,21 +357,23 @@ public class Fragment_Home extends Fragment {
             });
         }else {
 
-            mviewModel.ObserveOfficerList(lsMemberId, lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<DOfficer.OfficerList>>() {
+            mviewModel.ObserveOfficerList(lsMemberId, lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<OfficerInfo>>() {
                 @Override
-                public void onChanged(List<DOfficer.OfficerList> officerLists) {
+                public void onChanged(List<OfficerInfo> officerInfos) {
 
-                    if (officerLists == null || officerLists.size() < 1){
+                    if (officerInfos == null || officerInfos.size() < 1){
                         layout_no_record.setVisibility(View.VISIBLE);
                         rcv_home.setVisibility(View.GONE);
+
+                        mtv_no_record.setText("No officers found on this lodge");
                         return;
                     }
                     layout_no_record.setVisibility(View.GONE);
                     rcv_home.setVisibility(View.VISIBLE);
 
-                    loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerLists, new Adapter_Officer_List.OnSelect() {
+                    loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerInfos, new Adapter_Officer_List.OnSelect() {
                         @Override
-                        public void Selected(DOfficer.OfficerList poItem) {
+                        public void Selected(OfficerInfo poItem) {
 
                             Fragment loDetail = new Fragment_Assign_Officer();
 

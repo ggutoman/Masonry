@@ -2,7 +2,6 @@ package com.gag.masonry.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import com.gag.masonry.R;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.Room.DataObject.DOfficer;
+import org.gag.appdriver.App.Models.OfficerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,21 +23,21 @@ import java.util.stream.Collectors;
 public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_List.Adapter_Member_List_Holder> {
 
     private final Context loInstance;
-    private final List<DOfficer.OfficerList> laOfficers;
+    private final List<OfficerInfo> laOfficers;
     private final Adapter_OfficerList_Filter loFilter;
     private final OnSelect poCallback;
 
-    private List<DOfficer.OfficerList> laOfficersFiltered;
+    private List<OfficerInfo> laOfficersFiltered;
 
     public Adapter_OfficerList_Filter GetFilter(){
         return loFilter;
     }
 
     public interface OnSelect{
-        void Selected(DOfficer.OfficerList poItem);
+        void Selected(OfficerInfo poItem);
     }
 
-    public Adapter_Officer_List(Context foContext, List<DOfficer.OfficerList> faMembers, OnSelect foCallback){
+    public Adapter_Officer_List(Context foContext, List<OfficerInfo> faMembers, OnSelect foCallback){
         this.loInstance = foContext;
         this.laOfficers = faMembers;
         this.laOfficersFiltered = laOfficers;
@@ -59,7 +58,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
     @Override
     public void onBindViewHolder(@NonNull Adapter_Member_List_Holder holder, int position) {
 
-        DOfficer.OfficerList loOfficer = laOfficersFiltered.get(position);
+        OfficerInfo loOfficer = laOfficersFiltered.get(position);
 
         holder.mtv_name.setText(loOfficer.getSMemberNme());
         holder.mtv_position.setText(loOfficer.getSPositionNme());
@@ -121,10 +120,10 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
                 laOfficersFiltered = laOfficers;
             }else {
 
-                List<DOfficer.OfficerList> filterSearch = new ArrayList<>();
+                List<OfficerInfo> filterSearch = new ArrayList<>();
 
                 //first filter, via search text
-                for (DOfficer.OfficerList loOfficer : laOfficers){
+                for (OfficerInfo loOfficer : laOfficers){
 
                     if (loOfficer.getSMemberNme().toLowerCase().contains(charSequence.toString().toLowerCase()) ||
                             loOfficer.getSPositionNme().toLowerCase().contains(charSequence.toString().toLowerCase())){
@@ -151,7 +150,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
 
-            laOfficersFiltered = (List<DOfficer.OfficerList>) filterResults.values;
+            laOfficersFiltered = (List<OfficerInfo>) filterResults.values;
             loAdapter.notifyDataSetChanged();
         }
     }
