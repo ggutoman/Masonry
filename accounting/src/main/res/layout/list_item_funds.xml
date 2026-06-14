@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_transaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="M2026050600001"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1500.00"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_transaction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2026-06-05"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="For Approval"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_transaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="M2026050600002"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="10000.00"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_transaction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2026-06-05"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Approved"
+            android:textColor="@android:color/holo_green_dark"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

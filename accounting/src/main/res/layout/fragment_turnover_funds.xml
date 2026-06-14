@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Lodge Fund"/>
+            android:text="Lodge Fund Entry"/>
 
         <View
             android:layout_width="match_parent"
@@ -76,7 +76,7 @@
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Turnover Balance"
+            android:text="Fund Amount"
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="30dp"/>
 
@@ -94,33 +94,6 @@
                 android:text="0.00"/>
 
         </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/TextInputStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ending Balance">
-
-            <com.google.android.material.textfield.TextInputEditText
-                style="@style/TextInputStyle.Edittext"
-                android:id="@+id/tie_ending_bal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:text="0.00"
-                android:enabled="false"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="N/A"
-            android:layout_marginHorizontal="10dp"
-            android:gravity="end"
-            android:alpha="0.8"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="match_parent"
@@ -147,8 +120,18 @@
             android:id="@+id/btn_submit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Fund"
+            android:text="Submit"
             android:layout_marginTop="10dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Disapprove"
+            android:layout_marginTop="10dp"
+            android:textStyle="normal"
+            android:visibility="gone"
+            android:backgroundTint="@color/material_error_red"/>
 
     </LinearLayout>
 
