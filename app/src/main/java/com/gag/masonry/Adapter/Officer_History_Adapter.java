@@ -99,12 +99,44 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
                 new OfficerHistoryExpandableAdapter(memberName, yearMap);
 
         holder.rcv_details.setAdapter(expandableAdapter);
+
+        holder.rcv_details.setOnGroupExpandListener(groupPosition -> {
+            setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
+        });
+
+        holder.rcv_details.setOnGroupCollapseListener(groupPosition -> {
+            setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
+        });
     }
 
 
     @Override
     public int getItemCount() {
         return laNmes.size();
+    }
+
+    public static void setListViewHeightBasedOnChildren(ExpandableListView listView, OfficerHistoryExpandableAdapter adapter) {
+        int totalHeight = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.EXACTLY);
+
+        for (int i = 0; i < adapter.getGroupCount(); i++) {
+            View groupItem = adapter.getGroupView(i, false, null, listView);
+            groupItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += groupItem.getMeasuredHeight();
+
+            if (listView.isGroupExpanded(i)) {
+                for (int j = 0; j < adapter.getChildrenCount(i); j++) {
+                    View listItem = adapter.getChildView(i, j, false, null, listView);
+                    listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+                    totalHeight += listItem.getMeasuredHeight();
+                }
+            }
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight; // walang + divider
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 
     public static class VH_Officer_History extends RecyclerView.ViewHolder{

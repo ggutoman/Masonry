@@ -3,7 +3,9 @@ package org.gag.appdriver.Room.DataObject
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Upsert
+import androidx.sqlite.db.SimpleSQLiteQuery
 import org.gag.appdriver.App.Models.OfficerHistory
 import org.gag.appdriver.Room.Entities.EOfficerHistory
 
@@ -35,4 +37,7 @@ interface DOfficerHistory {
             "BETWEEN :fsDateFrom AND :fsDateTo " +
             "GROUP BY a.sTransNox ORDER BY a.dTransact DESC")
     fun ObserveOfficerHistory(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerHistory>>
+
+    @RawQuery()
+    fun SearchFilterHistory(sql : SimpleSQLiteQuery) : List<OfficerHistory>
 }

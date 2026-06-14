@@ -53,8 +53,11 @@ public class OfficerHistoryExpandableAdapter extends BaseExpandableListAdapter {
                     .inflate(R.layout.list_menu_parent, parent, false);
         }
 
+        ConstraintLayout layout_group = convertView.findViewById(R.id.layout_group);
         MaterialTextView tvYear = convertView.findViewById(R.id.mtv_title);
         ShapeableImageView img_icon = convertView.findViewById(R.id.img_icon);
+
+        layout_group.setPadding(15, 15, 0, 0);
 
         img_icon.setVisibility(View.GONE);
         tvYear.setText(yearIds.get(groupPosition));

@@ -3,6 +3,7 @@ package org.gag.appdriver.App.Core
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.sqlite.db.SimpleSQLiteQuery
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +91,28 @@ class Dashboard(loInstance : Context) {
     fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficers.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun ObserveOfficerHistory(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerHistory>> = poOfficerHistory.ObserveOfficerHistory( fsMemberIDx, fsDateFrom, fsDateTo)
+
+    fun SearchOfficerHistory(fsCondition : String) : List<OfficerHistory>{
+
+        val lsSql : String = "SELECT " +
+                                "a.sTransNox," +
+                                "a.sYearIDxx," +
+                                "b.sMemberID," +
+                                "c.nYearxxxx, " +
+                                "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
+                                "a.dTransact," +
+                                "a.cOldStatx," +
+                                "a.cNewStatx," +
+                                "d.sPositnDs " +
+                                "FROM Officer_History a " +
+                                "JOIN Member_Info b ON a.sMemberID = b.sMemberID " +
+                                "JOIN Lodge_Calendar c ON a.sYearIDxx = c.sYearIDxx " +
+                                "JOIN  Position_Info d ON (a.sPositnCd = d.sPositnCd) " +
+                            "WHERE $fsCondition " +
+                            "GROUP BY a.sTransNox ORDER BY a.dTransact DESC";
+
+        return poOfficerHistory.SearchFilterHistory(SimpleSQLiteQuery(lsSql))
+    }
 
     fun GetMemberAddress(fsMemberID : String) : LiveData<List<TownProvince>> {
         return poDBMemberAddress.GetMemberAddress(fsMemberID)
