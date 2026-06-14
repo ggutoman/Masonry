@@ -43,6 +43,7 @@ public class VM_Main extends AndroidViewModel {
     private final Dashboard poDashboard;
     private final UserAccount poAccount;
 
+    private final MutableLiveData<String> lsFilter = new MutableLiveData<>();
     private final MutableLiveData<HashMap<String, ArrayList<String>>> laMemberInfoOthers = new MutableLiveData<>();
 
     public interface InitData{
@@ -71,6 +72,10 @@ public class VM_Main extends AndroidViewModel {
         laMemberInfoOthers.setValue(faMemberInfoOthers);
     }
 
+    public void FilterOfficerHistory(String fsCondition){
+        lsFilter.setValue(fsCondition);
+    }
+
     public EUserInfo GetUserInfo(){
         return poDashboard.getPoDBUser().GetUserInfo();
     }
@@ -85,6 +90,14 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<MemberDashboardInfo> ObserveMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
+    }
+
+    public LiveData<String> FilterHistory(){
+        return lsFilter;
+    }
+
+    public List<OfficerHistory> SearchOfficerHistory(String fsFilter){
+        return poDashboard.SearchOfficerHistory(fsFilter);
     }
 
     public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx, String fsDfrom, String fsDto) {

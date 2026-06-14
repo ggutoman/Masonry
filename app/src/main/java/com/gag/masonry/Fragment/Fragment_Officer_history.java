@@ -1,5 +1,6 @@
 package com.gag.masonry.Fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -43,6 +44,7 @@ public class Fragment_Officer_history extends Fragment {
     private Message_Dialog poMessage;
     private Officer_History_Adapter loAdapter;
 
+    private String lsQuery;
     private String lsdFrom, lsDto;
 
     private TextInputEditText tie_search;
@@ -82,22 +84,38 @@ public class Fragment_Officer_history extends Fragment {
         rcv_officer_list = view.findViewById(R.id.rcv_officer_list);
     }
 
+    private String GetBaseQuery() {
+        return " (a.dTransact BETWEEN '" + lsdFrom + "' AND '" + lsDto + "') ";
+    }
+
     private void InitDataReceiver(){
 
+        lsQuery = GetBaseQuery();
+
+        //if glp id is passed, add to condition to filter only one officer information
         String lsMemberID;
         if (getArguments() == null || getArguments().getString("fsGLPIDxx").isEmpty()){
-            lsMemberID = "";
+
+            mViewmodel.SearchOfficerHistory(lsQuery);
         }else {
             lsMemberID = getArguments().getString("fsGLPIDxx");
+
+            //initialize default filter with member id
+            lsQuery += " AND (b.sGLPIDNoX= '" + lsMemberID + "') ";
+
+            mViewmodel.SearchOfficerHistory(lsQuery);
         }
 
-        mViewmodel.ObserveOfficerHistory(lsMemberID, lsdFrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<OfficerHistory>>() {
+        mViewmodel.FilterHistory().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onChanged(List<OfficerHistory> eOfficerHistories) {
+            public void onChanged(String s) {
 
-                if (eOfficerHistories == null) return;
+                if (s.isEmpty()) return;
 
-                loAdapter = new Officer_History_Adapter(eOfficerHistories);
+                loAdapter = new Officer_History_Adapter(mViewmodel.SearchOfficerHistory(lsQuery + s));
+
+                loAdapter.notifyDataSetChanged();
 
                 rcv_officer_list.setAdapter(loAdapter);
                 rcv_officer_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
@@ -106,6 +124,26 @@ public class Fragment_Officer_history extends Fragment {
     }
 
     private void InitListener(){
+
+        tie_search.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                //if empty search, query with default filter
+                if (charSequence.length() < 1){
+                    mViewmodel.SearchOfficerHistory(lsQuery);
+                }else {
+                    mViewmodel.FilterOfficerHistory(" AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + charSequence.toString() + "%' ");
+                }
+            }
+        });
 
         btn_filter.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,12 +172,11 @@ public class Fragment_Officer_history extends Fragment {
                                     //set date range parameters for downloading history
                                     lsdFrom = mViewmodel.GetFormattedDate(selection.first);
                                     lsDto = mViewmodel.GetFormattedDate(selection.second);
+
+                                    InitDataReceiver();
                                 }
                             });
                             loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
-                            InitDataReceiver();
-
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_download){
