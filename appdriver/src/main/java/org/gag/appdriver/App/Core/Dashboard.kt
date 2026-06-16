@@ -137,6 +137,8 @@ class Dashboard(loInstance : Context) {
 
     fun ClearMemberData(){
 
+        poLodgeInfo.DeleteLodge()
+        poLodgeCalendar.DeleteLodgeCalendar()
         poDBMember.DeleteMember()
         poDBMemberAddress.DeletMemberAddress()
         poDBMemberContact.DeleteMemberContact()
@@ -750,9 +752,10 @@ class Dashboard(loInstance : Context) {
                 }
 
                 val params : JSONObject = JSONObject().also {
-                    it.put("sGLPIDNoX", fsMemberIDx)
                     it.put("dFromxx", fdFromxx)
                     it.put("dToxx", fsDto)
+
+                    if (fsMemberIDx.isNotEmpty()) it.put("sGLPIDNoX", fsMemberIDx)
                 }
 
                 httpInstance.makeRequest(

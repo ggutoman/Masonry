@@ -1,6 +1,5 @@
-package com.gag.masonry.Fragment;
+package com.gag.accounting.Disbursement.Fragments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,59 +21,53 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import com.gag.masonry.R;
-import com.gag.masonry.ViewModel.VM_Main;
+import com.gag.accounting.Disbursement.Adapter.Adapter_Fund_List;
+import com.gag.accounting.Disbursement.ViewModel.VM_Funds;
+import com.gag.accounting.R;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-
-import com.gag.masonry.Adapter.Officer_History_Adapter;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Models.OfficerHistory;
+import org.gag.appdriver.Room.Entities.EFundTurnOver;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Fragment_Officer_history extends Fragment {
+public class Fragment_Fund_History extends Fragment {
 
-    private VM_Main mViewmodel;
-    private LoadDialog poDialog;
+    private VM_Funds mViewModel;
     private Message_Dialog poMessage;
-    private Officer_History_Adapter loAdapter;
+    private LoadDialog poLoad;
+    private Adapter_Fund_List loAdapter;
 
-    private String lsQuery;
-    private String lsdFrom, lsDto;
+    private String lsDfrom, lsDto;
 
     private ConstraintLayout layout_no_record;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
-    private RecyclerView rcv_officer_list;
-
+    private RecyclerView rcv_fund_list;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment__officer_history, container, false);
+        View view = inflater.inflate(R.layout.layout_fund_history, container, false);
 
-        mViewmodel = new ViewModelProvider(requireActivity()).get(VM_Main.class);
-        poDialog = new LoadDialog(requireActivity());
+        mViewModel = new ViewModelProvider(requireActivity()).get(VM_Funds.class);
         poMessage = new Message_Dialog(requireActivity());
+        poLoad = new LoadDialog(requireActivity());
 
-        poDialog.InitDialog();
         poMessage.InitDialog();
+        poLoad.InitDialog();
 
-        lsdFrom = mViewmodel.GetFirstQuarter();
-        lsDto = mViewmodel.GetCurrentDate();
-
-        DownloadList();
+        lsDfrom = mViewModel.GetCurrentDate();
+        lsDto = mViewModel.GetCurrentDate();
 
         InitViews(view);
-        InitListener();
         InitDataReceiver();
+        InitListener();
 
         return view;
     }
@@ -85,53 +77,58 @@ public class Fragment_Officer_history extends Fragment {
         layout_no_record = view.findViewById(R.id.layout_no_record);
         tie_search = view.findViewById(R.id.tie_search);
         btn_filter = view.findViewById(R.id.btn_filter);
-        rcv_officer_list = view.findViewById(R.id.rcv_officer_list);
-    }
-
-    private String GetBaseQuery() {
-        return " (a.dTransact BETWEEN '" + lsdFrom + "' AND '" + lsDto + "') ";
+        rcv_fund_list = view.findViewById(R.id.rcv_fund_list);
     }
 
     private void InitDataReceiver(){
 
-        lsQuery = GetBaseQuery();
-
-        //if glp id is passed, add to condition to filter only one officer information
-        String lsMemberID;
-        if (getArguments() == null || getArguments().getString("fsGLPIDxx").isEmpty()){
-
-            mViewmodel.FilterOfficerHistory(" ");
-        }else {
-            lsMemberID = getArguments().getString("fsGLPIDxx");
-
-            //initialize default filter with member id
-            lsQuery += " AND (b.sGLPIDNoX= '" + lsMemberID + "') ";
-
-            mViewmodel.FilterOfficerHistory(" AND (b.sGLPIDNoX= '" + lsMemberID + "') ");
+        //require year id to load transaction history
+        if (getArguments() == null || getArguments().getString("year_id") == null || getArguments().getString("year_id").isEmpty()){
+            Toast.makeText(requireActivity(), "Transaction id is not loaded", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        mViewmodel.FilterHistory().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @SuppressLint("NotifyDataSetChanged")
+        mViewModel.ObserveFundTurnoverList(getArguments().getString("year_id"), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EFundTurnOver>>() {
             @Override
-            public void onChanged(String s) {
+            public void onChanged(List<EFundTurnOver> eFundTurnOvers) {
 
-                if (s.isEmpty()) return;
-
-                List<OfficerHistory> laHistory = mViewmodel.SearchOfficerHistory(lsQuery + s);
-                if (laHistory == null || laHistory.size() < 1){
+                if (eFundTurnOvers == null){
+                    rcv_fund_list.setVisibility(View.GONE);
                     layout_no_record.setVisibility(View.VISIBLE);
-                    rcv_officer_list.setVisibility(View.GONE);
                     return;
                 }
+
+                loAdapter = new Adapter_Fund_List(requireActivity(), eFundTurnOvers);
+
+                rcv_fund_list.setAdapter(loAdapter);
+                rcv_fund_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+
+                rcv_fund_list.setVisibility(View.VISIBLE);
                 layout_no_record.setVisibility(View.GONE);
-                rcv_officer_list.setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
-                loAdapter = new Officer_History_Adapter(laHistory);
+    private void DownloadList(){
 
-                loAdapter.notifyDataSetChanged();
+        if (getArguments() == null) return;
 
-                rcv_officer_list.setAdapter(loAdapter);
-                rcv_officer_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+        mViewModel.DownloadFunds(getArguments().getString("year_id"), lsDfrom, lsDto, new VM_Funds.OnSubmit() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Downloading funds. Please wait . . .");
+            }
+
+            @Override
+            public void OnSucces() {
+                poLoad.DismissDialog();
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -139,7 +136,6 @@ public class Fragment_Officer_history extends Fragment {
     private void InitListener(){
 
         tie_search.addTextChangedListener(new TextWatcher() {
-
             @Override
             public void afterTextChanged(Editable editable) {}
 
@@ -149,12 +145,9 @@ public class Fragment_Officer_history extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                //if empty search, query with default filter
-                if (charSequence.length() < 1){
-                    mViewmodel.SearchOfficerHistory(lsQuery);
-                }else {
-                    mViewmodel.FilterOfficerHistory(" AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + charSequence.toString() + "%' ");
-                }
+                if (loAdapter == null) return;
+
+                loAdapter.GetFilter().filter(charSequence.toString());
             }
         });
 
@@ -165,7 +158,7 @@ public class Fragment_Officer_history extends Fragment {
 
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
-                loMenu.getMenuInflater().inflate(R.menu.menu_filter_officer_history, loMenu.getMenu());
+                loMenu.getMenuInflater().inflate(R.menu.menu_filter_funds, loMenu.getMenu());
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -183,13 +176,15 @@ public class Fragment_Officer_history extends Fragment {
                                 public void onPositiveButtonClick(Pair<Long, Long> selection) {
 
                                     //set date range parameters for downloading history
-                                    lsdFrom = mViewmodel.GetFormattedDate(selection.first);
-                                    lsDto = mViewmodel.GetFormattedDate(selection.second);
+                                    lsDfrom = mViewModel.GetFormattedDate(selection.first);
+                                    lsDto = mViewModel.GetFormattedDate(selection.second);
 
+                                    //filter list by date
                                     InitDataReceiver();
                                 }
                             });
                             loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_download){
@@ -203,10 +198,10 @@ public class Fragment_Officer_history extends Fragment {
                                 public void onPositiveButtonClick(Pair<Long, Long> selection) {
 
                                     //set date range parameters for downloading history
-                                    lsdFrom = mViewmodel.GetFormattedDate(selection.first);
-                                    lsDto = mViewmodel.GetFormattedDate(selection.second);
+                                    lsDfrom = mViewModel.GetFormattedDate(selection.first);
+                                    lsDto = mViewModel.GetFormattedDate(selection.second);
 
-                                    poMessage.ShowMessage(2,  "Do you want download list of member entries within " + lsdFrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                    poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                         @Override
                                         public void OnPositive(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
@@ -227,34 +222,37 @@ public class Fragment_Officer_history extends Fragment {
                             return true;
 
                         }
+
+//                        else if (menuItem.getItemId() == R.id.action_item_all){
+//                            InitFilterStatus(-1);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_inactive){
+//                            InitFilterStatus(0);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_active){
+//                            InitFilterStatus(1);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_suspended){
+//                            InitFilterStatus(2);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_reassign){
+//                            InitFilterStatus(2);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_remove){
+//                            InitFilterStatus(3);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_resign){
+//                            InitFilterStatus(4);
+//                            return true;
+//                        }else if (menuItem.getItemId() == R.id.action_item_decease){
+//                            InitFilterStatus(5);
+//                            return true;
+//                        }
                         return false;
                     }
                 });
+
             }
         });
-    }
-
-    private void DownloadList(){
-
-        String lsMemberID;
-        if (getArguments() == null || getArguments().getString("fsGLPIDxx").isEmpty()){
-            lsMemberID = "";
-        }else {
-            lsMemberID = getArguments().getString("fsGLPIDxx");
-        }
-
-        mViewmodel.DownloadOfficerHistory(lsMemberID, lsdFrom, lsDto, new VM_Main.OnDownloadData() {
-            @Override
-            public void OnDownload() {
-                poDialog.ShowDialog("Downloading history. Plaese wait . .");
-            }
-
-            @Override
-            public void OnFinished(String fsMessage) {
-                poDialog.DismissDialog();
-                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
 }

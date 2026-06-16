@@ -36,6 +36,14 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="15dp"/>
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Generates ID once submitted to server"
+            android:textSize="13sp"
+            android:alpha="0.7"
+            android:layout_marginHorizontal="10dp"/>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
@@ -65,11 +73,9 @@
             android:hint="Select Lodge Year">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                style="@style/DropdownStyleTheme"
                 android:id="@+id/auto_lodge_cal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"/>
+                android:layout_height="wrap_content"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 

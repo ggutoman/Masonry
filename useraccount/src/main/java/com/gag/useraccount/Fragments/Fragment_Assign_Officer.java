@@ -31,7 +31,7 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
 import org.gag.appdriver.App.Adapters.MemberAdapter;
 import org.gag.appdriver.App.Adapters.PositionAdapter;
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EPosition;
@@ -52,7 +52,7 @@ public class Fragment_Assign_Officer extends Fragment {
     private PositionAdapter loPositionAdapter;
 
     private EOfficer loOfficer;
-    private DLodgeCalendar.LodgeCalendarList loSelectCalendar;
+    private LodgeCalendarList loSelectCalendar;
     private EMemberInfo loSelectMember;
     private EPosition loSelectPosition;
 
@@ -176,10 +176,10 @@ public class Fragment_Assign_Officer extends Fragment {
                     tie_remarks.setVisibility(View.VISIBLE);
                 }
 
-                mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<DLodgeCalendar.LodgeCalendarList>>() {
+                mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @SuppressLint("SetTextI18n")
                     @Override
-                    public void onChanged(List<DLodgeCalendar.LodgeCalendarList> lodgeCalendarLists) {
+                    public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
 
                         if (lodgeCalendarLists == null) return;
 
@@ -286,7 +286,7 @@ public class Fragment_Assign_Officer extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                loSelectCalendar= (DLodgeCalendar.LodgeCalendarList) adapterView.getItemAtPosition(i);
+                loSelectCalendar= (LodgeCalendarList) adapterView.getItemAtPosition(i);
                 tie_yearid.setText(loSelectCalendar.getSLodgeNme() + " (" + loSelectCalendar.getNYearxxxx() + ")");
 
                 lsSelectCalendar = loSelectCalendar.getSYearIDxx();

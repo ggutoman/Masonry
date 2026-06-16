@@ -37,6 +37,7 @@
 
        <com.google.android.material.textfield.TextInputLayout
            style="@style/CustomDropDownTilStyle"
+           android:id="@+id/til_lodge"
            android:layout_width="match_parent"
            android:layout_height="wrap_content">
 

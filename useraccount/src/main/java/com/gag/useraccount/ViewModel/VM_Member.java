@@ -8,11 +8,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
-import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
@@ -265,7 +264,7 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetMemberEmail(fsMemberID);
     }
 
-    public LiveData<List<DLodgeCalendar.LodgeCalendarList>> GetLodgeCalendar(){
+    public LiveData<List<LodgeCalendarList>> GetLodgeCalendar(){
         return poAccount.ObserveLodgeCalendarList();
     }
 
@@ -327,10 +326,6 @@ public class VM_Member extends AndroidViewModel {
 
     public String GenerateGLPID(){
         return poAccount.GenerateGLPID();
-    }
-
-    public boolean IsDateCompared(String fsDate1, String fsDate2){
-        return poDate.IsDateCompared(fsDate1, fsDate2);
     }
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
@@ -442,23 +437,6 @@ public class VM_Member extends AndroidViewModel {
                     return null;
                 });
 
-    }
-
-    public void CreateLodgeCalendar(ELodgeCalendar foLodgeCalendar, VM_Account.OnSubmit foCallback){
-
-        foCallback.onLoad();
-
-        poAccount.CreateLodgeCalendar(foLodgeCalendar).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.onError(poAccount.GetMessage());
-                    return;
-                }
-                foCallback.onSuccess();
-            }
-        });
     }
 
     public void AssignOfficer(EOfficer foOfficer, String fsRemarksx, VM_Account.OnSubmit foCallback){
