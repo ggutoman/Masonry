@@ -7,29 +7,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.R;
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LodgeCalendarAdapter extends ArrayAdapter<DLodgeCalendar.LodgeCalendarList> {
+public class LodgeCalendarAdapter extends ArrayAdapter<LodgeCalendarList> {
 
     private final Context loContext;
-    public final List<DLodgeCalendar.LodgeCalendarList> lodges;
+    public final List<LodgeCalendarList> lodges;
 
-    public List<DLodgeCalendar.LodgeCalendarList> lodgesFiltered;
+    public List<LodgeCalendarList> lodgesFiltered;
 
-    public LodgeCalendarAdapter(@NonNull Context context, int resource, @NonNull List<DLodgeCalendar.LodgeCalendarList> objects) {
+    public LodgeCalendarAdapter(@NonNull Context context, int resource, @NonNull List<LodgeCalendarList> objects) {
         super(context, resource, objects);
 
         loContext = context;
@@ -65,7 +62,7 @@ public class LodgeCalendarAdapter extends ArrayAdapter<DLodgeCalendar.LodgeCalen
 
     @Nullable
     @Override
-    public DLodgeCalendar.LodgeCalendarList getItem(int position) {
+    public LodgeCalendarList getItem(int position) {
         return lodgesFiltered.get(position);
     }
 
@@ -76,11 +73,11 @@ public class LodgeCalendarAdapter extends ArrayAdapter<DLodgeCalendar.LodgeCalen
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
 
-                List<DLodgeCalendar.LodgeCalendarList> results = new ArrayList<>();
+                List<LodgeCalendarList> results = new ArrayList<>();
                 if (constraint == null || constraint.length() == 0) {
                     results.addAll(lodges);
                 } else {
-                    for (DLodgeCalendar.LodgeCalendarList lodgeCalendar : lodges) {
+                    for (LodgeCalendarList lodgeCalendar : lodges) {
 
                         if (lodgeCalendar.getSLodgeNme().toLowerCase().contains(constraint.toString().toLowerCase()) ||
                                 lodgeCalendar.getNYearxxxx().equalsIgnoreCase(constraint.toString().toLowerCase())) {
@@ -97,7 +94,7 @@ public class LodgeCalendarAdapter extends ArrayAdapter<DLodgeCalendar.LodgeCalen
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                lodgesFiltered = (List<DLodgeCalendar.LodgeCalendarList>) results.values;
+                lodgesFiltered = (List<LodgeCalendarList>) results.values;
                 notifyDataSetChanged();
             }
         };

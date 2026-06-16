@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import org.gag.appdriver.Room.DataObject.DFundTurnover
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
@@ -18,6 +19,7 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.EProvinceInfo
+import org.gag.appdriver.Room.Entities.EFundTurnOver
 import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberAddress
@@ -45,7 +47,8 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EMemberEmailInfo::class,
         ELodgeCalendar::class,
         EOfficer::class,
-        EOfficerHistory::class
+        EOfficerHistory::class,
+        EFundTurnOver::class
     ],
     version = 1,
     exportSchema = false
@@ -65,6 +68,7 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetLodgeCalendar() : DLodgeCalendar
     abstract fun GetOfficer() : DOfficer
     abstract fun GetOfficerHistory() : DOfficerHistory
+    abstract fun GetFundTurnOver() : DFundTurnover
 
     companion object {
 

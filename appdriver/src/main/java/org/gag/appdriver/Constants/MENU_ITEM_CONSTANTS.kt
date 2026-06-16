@@ -27,22 +27,32 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         1
     ),
 
-    MENU_ITEM_TURNOVER_FUNDS(
-        "Turnover Funds",
-        "DISB001",
-        "DISB",
+    /**LODGE INFO**/
+    MENU_ITEM_CREATE_LODGE(
+        "Create Lodge",
+        "LDGE0001",
+        "LDGE",
         1,
-        1
+        4
     ),
 
-    MENU_ITEM_CREATE_LODGE(
+    MENU_ITEM_CREATE_LODGE_YEAR(
         "Create Lodge Calendar",
-        "MEM001",
-        "MEM",
+        "LDGE0002",
+        "LDGE",
         1,
         2
     ),
 
+    MENU_ITEM_LODGE_CALENDARS(
+        "View Lodge Calendars",
+        "LDGE0003",
+        "LDGE",
+        1,
+        2
+    ),
+
+    /**MEMBER INFO**/
     MENU_ITEM_CREATE_MEMBER(
     "Add Member",
     "MEM002",
@@ -57,5 +67,29 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     "MEM",
     1,
     2
+    ),
+
+    MENU_ITEM_OFFICER_HISTORY(
+        "Officer History",
+        "MEM004",
+        "MEM",
+        1,
+        2
+    ),
+
+    MENU_ITEM_TURNOVER_FUNDS(
+        "Turnover Funds",
+        "FND001",
+        "FND",
+        1,
+        1
+    ),
+
+    MENU_ITEM_FUNDS_HISTORY(
+        "Fund History",
+        "FND002",
+        "FND",
+        1,
+        1
     )
 }

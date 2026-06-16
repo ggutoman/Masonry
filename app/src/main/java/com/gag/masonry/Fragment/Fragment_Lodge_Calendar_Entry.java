@@ -1,4 +1,4 @@
-package com.gag.useraccount.Fragments;
+package com.gag.masonry.Fragment;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -18,14 +18,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.gag.useraccount.R;
-import com.gag.useraccount.ViewModel.VM_Account;
-import com.gag.useraccount.ViewModel.VM_Member;
+import com.gag.masonry.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapter;
+import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -35,17 +35,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 import java.util.List;
 
-public class Fragment_Lodge extends Fragment {
+public class Fragment_Lodge_Calendar_Entry extends Fragment {
 
-    private VM_Member mviewModel;
-    private ELodgeInfo poSelectedLodge;
+    private VM_Lodge mviewModel;
     private LoadDialog poLoading;
     private Message_Dialog poMessage;
     private Calendar loCalendar;
 
+    private String lsSelectCalendar;
+    private ELodgeCalendar lodgeCalendar;
     private int lnYearPicked = 1;
 
     private MaterialAutoCompleteTextView auto_lodge;
+    private TextInputLayout til_lodge;
     private TextInputEditText tie_year, tie_valid_until;
     private MaterialButton btn_save;
 
@@ -53,9 +55,9 @@ public class Fragment_Lodge extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.fragment_lodge, container, false);
+        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.fragment_lodge_calendar_entry, container, false);
 
-        mviewModel = new ViewModelProvider(requireActivity()).get(VM_Member.class);
+        mviewModel = new ViewModelProvider(requireActivity()).get(VM_Lodge.class);
         poLoading = new LoadDialog(requireActivity());
         poMessage = new Message_Dialog(requireActivity());
         loCalendar = Calendar.getInstance();
@@ -63,32 +65,122 @@ public class Fragment_Lodge extends Fragment {
         poLoading.InitDialog();
         poMessage.InitDialog();
 
+        InitViews(view);
+        InitDataReceiver();
+        InitListener();
+
+        return view;
+    }
+
+    private void InitViews(View view){
+
+        til_lodge = view.findViewById(R.id.til_lodge);
         auto_lodge = view.findViewById(R.id.auto_lodge);
         tie_year = view.findViewById(R.id.tie_year);
         tie_valid_until = view.findViewById(R.id.tie_valid_until);
         btn_save = view.findViewById(R.id.btn_save);
 
-        mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+    }
+
+    private void InitDataReceiver(){
+
+        if (getArguments() == null){
+            lsSelectCalendar = "";
+
+            til_lodge.setEnabled(true);
+            btn_save.setText("Create Lodge");
+        }else {
+
+            if (getArguments().getString("year_id") == null || getArguments().getString("year_id").isEmpty()){
+
+                poMessage.ShowMessage(1, "Could not load calendar info", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull androidx.appcompat.app.AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        requireActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .remove(Fragment_Lodge_Calendar_Entry.this)
+                                .commit();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull androidx.appcompat.app.AlertDialog poDialog) {}
+                });
+                return;
+            }
+            til_lodge.setEnabled(false);
+            btn_save.setText("Update Lodge Calendar");
+
+            lsSelectCalendar = getArguments().getString("year_id") == null ? "" : getArguments().getString("year_id");
+        }
+
+        //Load the lodge calendar
+        mviewModel.GetLodgeCalendarInfo(lsSelectCalendar).observe(getViewLifecycleOwner(), new Observer<ELodgeCalendar>() {
             @Override
-            public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+            public void onChanged(ELodgeCalendar eLodgeCalendar) {
 
-                if (eLodgeInfos == null) return;
+                if (eLodgeCalendar == null){
 
-                auto_lodge.setAdapter(new LodgeAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        eLodgeInfos)
-                );
+                    //initialize default values
+                    lodgeCalendar = new ELodgeCalendar(
+                            "",
+                            "",
+                            "",
+                            mviewModel.GetCurrentDate(),
+                            "1900-00-00",
+                            mviewModel.GetCurrentDate(),
+                            mviewModel.GetCurrentDateTime()
+                    );
+                }else {
+
+                    //initialize object with loaded information
+                    lodgeCalendar = eLodgeCalendar;
+                    lnYearPicked = Integer.parseInt(eLodgeCalendar.getNYearxxxx());
+
+                    tie_year.setText(lodgeCalendar.getNYearxxxx());
+                    tie_valid_until.setText(lodgeCalendar.getDThruDate());
+                }
+
+                //get lodge list
+                mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+                    @Override
+                    public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+
+                        if (eLodgeInfos == null) return;
+
+                        auto_lodge.setAdapter(new LodgeAdapter(
+                                requireActivity(),
+                                android.R.layout.simple_spinner_dropdown_item,
+                                eLodgeInfos)
+                        );
+
+                        eLodgeInfos.stream()
+                                .filter(loCalendar -> loCalendar.getSLodgeIDx()
+                                        .equalsIgnoreCase(lodgeCalendar.getSLodgeIDx()))
+                                .findFirst()
+                                .ifPresent(loCalendar ->{
+
+                                    auto_lodge.setText(loCalendar.getSLodgeNme(), false);
+                                });
+                    }
+                });
             }
         });
+
+    }
+
+    private void InitListener(){
 
         auto_lodge.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                poSelectedLodge = (ELodgeInfo) adapterView.getItemAtPosition(i);
+                ELodgeInfo poSelectedLodge = (ELodgeInfo) adapterView.getItemAtPosition(i);
 
                 auto_lodge.setText(poSelectedLodge.getSLodgeNme(), false);
+                lodgeCalendar.setSLodgeIDx(poSelectedLodge.getSLodgeIDx());
             }
         });
 
@@ -108,8 +200,11 @@ public class Fragment_Lodge extends Fragment {
                         .setTitle("Select Year")
                         .setView(yearPicker)
                         .setPositiveButton("OK", (dialog, which) -> {
-                            tie_year.setText(String.valueOf(yearPicker.getValue()));
+
                             lnYearPicked = yearPicker.getValue();
+
+                            tie_year.setText(String.valueOf(yearPicker.getValue()));
+                            lodgeCalendar.setNYearxxxx(String.valueOf(yearPicker.getValue()));
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
@@ -124,8 +219,11 @@ public class Fragment_Lodge extends Fragment {
                 DatePickerDialog loValidPicker = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+
                         String formatted = String.format("%04d-%02d-%02d", i, i1 + 1, i2);
+
                         tie_valid_until.setText(formatted);
+                        lodgeCalendar.setDThruDate(formatted);
                     }
                 }, lnYearPicked,
                         loCalendar.get(Calendar.MONTH),
@@ -148,38 +246,28 @@ public class Fragment_Lodge extends Fragment {
 
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view){
 
-                if (poSelectedLodge == null){
+                if (lodgeCalendar.getSLodgeIDx().isEmpty()){
                     Toast.makeText(requireActivity(), "Please select a lodge first", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (tie_year.getText() == null || tie_year.getText().toString().isEmpty()){
+                if (lodgeCalendar.getNYearxxxx().isEmpty()){
                     Toast.makeText(requireActivity(), "Please select preferred year", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (tie_valid_until.getText() == null || tie_valid_until.getText().toString().isEmpty()){
+                if (lodgeCalendar.getDThruDate().isEmpty()){
                     Toast.makeText(requireActivity(), "Please select validity date", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 //if date behind the current, do not proceed
-                if (mviewModel.IsDateCompared(tie_valid_until.getText().toString(), mviewModel.GetCurrentDate())){
+                if (mviewModel.IsDateCompared(lodgeCalendar.getDThruDate(), mviewModel.GetCurrentDate())){
                     Toast.makeText(requireActivity(), "Validity date should not be earlier than the current date", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                ELodgeCalendar lodgeCalendar = new ELodgeCalendar(
-                        "",
-                        poSelectedLodge.getSLodgeIDx(),
-                        tie_year.getText() == null ? "" : tie_year.getText().toString(),
-                        mviewModel.GetCurrentDate(),
-                        tie_valid_until.getText() == null ? "1900-00-00" : tie_valid_until.getText().toString(),
-                        mviewModel.GetCurrentDate(),
-                        mviewModel.GetCurrentDateTime()
-                );
 
                 poMessage.ShowMessage(2, "Is your lodge information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
@@ -191,14 +279,15 @@ public class Fragment_Lodge extends Fragment {
                     public void OnNegative(androidx.appcompat.app.@NotNull AlertDialog poMessage1) {
                         poMessage1.dismiss();
 
-                        mviewModel.CreateLodgeCalendar(lodgeCalendar, new VM_Account.OnSubmit() {
+                        mviewModel.CreateLodgeCalendar(lodgeCalendar, new VM_Lodge.OnDownload() {
+
                             @Override
-                            public void onLoad() {
+                            public void OnLoad() {
                                 poLoading.ShowDialog("Creating lodge calendar. Please wait . .");
                             }
 
                             @Override
-                            public void onSuccess() {
+                            public void OnSuccess() {
                                 poLoading.DismissDialog();
 
                                 poMessage.InitDialog();
@@ -218,7 +307,7 @@ public class Fragment_Lodge extends Fragment {
                             }
 
                             @Override
-                            public void onError(String fsError) {
+                            public void OnError(String fsError) {
                                 poLoading.DismissDialog();
 
                                 poMessage.ShowMessage(0, fsError, "Okay", "", new Message_Dialog.OnDialogClick() {
@@ -237,7 +326,6 @@ public class Fragment_Lodge extends Fragment {
             }
         });
 
-
-        return view;
     }
+
 }

@@ -12,6 +12,9 @@ interface DLodgeInfo {
     @Upsert(ELodgeInfo::class)
     fun SaveLodge(lodge : ELodgeInfo)
 
+    @Query("DELETE FROM Lodge_Info")
+    fun DeleteLodge()
+
     @Query("SELECT * FROM Lodge_Info WHERE sLodgeIDx= :fsLodgeIDx")
     fun GetLodgeInfo(fsLodgeIDx : String): ELodgeInfo
 
