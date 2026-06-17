@@ -26,11 +26,18 @@ public class Adapter_Fund_List extends RecyclerView.Adapter<Adapter_Fund_List.VH
     private final Context loInstance;
     private final List<EFundTurnOver> laTurnOvers;
     private final Adapter_Fund_List_Filter loFilter = new Adapter_Fund_List_Filter(this);
+    private final OnSelectFund loCallback;
+
     private List<EFundTurnOver> laTurnOversFiltered;
 
-    public Adapter_Fund_List(Context context, List<EFundTurnOver> faTurnOvers){
+    public interface OnSelectFund{
+        void OnSelect(EFundTurnOver loTurnover);
+    }
+
+    public Adapter_Fund_List(Context context, List<EFundTurnOver> faTurnOvers, OnSelectFund foCallback){
         loInstance = context;
         laTurnOvers = faTurnOvers;
+        loCallback = foCallback;
         laTurnOversFiltered = faTurnOvers;
     }
 
@@ -77,6 +84,14 @@ public class Adapter_Fund_List extends RecyclerView.Adapter<Adapter_Fund_List.VH
                 holder.mtv_status.setTextColor(Color.GRAY);
                 break;
         }
+
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                loCallback.OnSelect(laTurnOversFiltered.get(position));
+            }
+        });
     }
 
     @Override
@@ -142,11 +157,13 @@ public class Adapter_Fund_List extends RecyclerView.Adapter<Adapter_Fund_List.VH
 
     public static class VH_Fund_List extends RecyclerView.ViewHolder {
 
+        private View view;
         private MaterialTextView mtv_transaction, mtv_fund_amount, mtv_date, mtv_status;
 
         public VH_Fund_List(@NonNull View itemView) {
             super(itemView);
 
+            view = itemView;
             mtv_transaction = itemView.findViewById(R.id.mtv_transaction);
             mtv_fund_amount = itemView.findViewById(R.id.mtv_fund_amount);
             mtv_date = itemView.findViewById(R.id.mtv_date);

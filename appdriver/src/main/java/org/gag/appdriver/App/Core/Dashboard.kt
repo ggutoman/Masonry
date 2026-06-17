@@ -32,6 +32,7 @@ import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DFundTurnover
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
@@ -76,6 +77,7 @@ class Dashboard(loInstance : Context) {
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+    val poFunds : DFundTurnover = ML_DBF.getDatabase(loInstance)?.GetFundTurnOver() as DFundTurnover
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -139,6 +141,9 @@ class Dashboard(loInstance : Context) {
 
         poLodgeInfo.DeleteLodge()
         poLodgeCalendar.DeleteLodgeCalendar()
+
+        poFunds.DeleteFunds()
+
         poDBMember.DeleteMember()
         poDBMemberAddress.DeletMemberAddress()
         poDBMemberContact.DeleteMemberContact()

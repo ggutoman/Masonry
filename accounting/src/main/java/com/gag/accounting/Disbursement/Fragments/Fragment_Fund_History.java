@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -98,7 +99,23 @@ public class Fragment_Fund_History extends Fragment {
                     return;
                 }
 
-                loAdapter = new Adapter_Fund_List(requireActivity(), eFundTurnOvers);
+                loAdapter = new Adapter_Fund_List(requireActivity(), eFundTurnOvers, new Adapter_Fund_List.OnSelectFund() {
+                    @Override
+                    public void OnSelect(EFundTurnOver loTurnover) {
+
+                        Fragment_Turnover_Funds loApproval = new Fragment_Turnover_Funds();
+
+                        Bundle loBundle = new Bundle();
+                        loBundle.putString("transact_id", loTurnover.getSTransNox());
+
+                        loApproval.setArguments(loBundle);
+
+                        FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, loApproval);
+                        loTransaction.addToBackStack("fund_entry");
+                        loTransaction.commit();
+                    }
+                });
 
                 rcv_fund_list.setAdapter(loAdapter);
                 rcv_fund_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
@@ -122,6 +139,8 @@ public class Fragment_Fund_History extends Fragment {
             @Override
             public void OnSucces() {
                 poLoad.DismissDialog();
+
+                InitDataReceiver();
             }
 
             @Override

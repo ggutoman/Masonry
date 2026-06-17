@@ -1,5 +1,6 @@
 package com.gag.accounting.Disbursement.Fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,6 +23,7 @@ import com.gag.accounting.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
@@ -44,6 +46,7 @@ public class Fragment_Turnover_Funds extends Fragment {
 
     private String lsTransactID;
 
+    private MaterialTextView mtv_status;
     private TextInputEditText tie_transaction_no, tie_fund_amt, tie_remarks;
     private MaterialAutoCompleteTextView auto_lodge_cal;
     private MaterialButton btn_submit, btn_cancel;
@@ -73,82 +76,137 @@ public class Fragment_Turnover_Funds extends Fragment {
     private void InitViews(View view){
 
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
+        mtv_status = view.findViewById(R.id.mtv_status);
         auto_lodge_cal = view.findViewById(R.id.auto_lodge_cal);
         tie_fund_amt = view.findViewById(R.id.tie_fund_amt);
         tie_remarks = view.findViewById(R.id.tie_remarks);
         btn_submit = view.findViewById(R.id.btn_submit);
         btn_cancel = view.findViewById(R.id.btn_cancel);
-
-        //show approve and disapprove buttons if transaction id is passed
-        if (lsTransactID.isEmpty()){
-            btn_submit.setText("Create Fund Turnover");
-            btn_cancel.setVisibility(View.GONE);
-            return;
-        }
-        btn_submit.setText("Approve");
-        btn_submit.setText("Disapprove");
-
-        btn_cancel.setVisibility(View.VISIBLE);
     }
 
     private void InitDataReceiver(){
-
-        //initiallize default data
-        loTurnover = new EFundTurnOver(
-                "",
-                mViewmodel.GetCurrentDate(),
-                "",
-                "0.00",
-                "0.00",
-                "",
-                "1",
-                "",
-                "",
-                mViewmodel.GetUserID(),
-                mViewmodel.GetCurrentDate(),
-                mViewmodel.GetCurrentDateTime()
-        );
 
         //load transaction details
         mViewmodel.ObserveFundTurnovers(lsTransactID).observe(getViewLifecycleOwner(), new Observer<EFundTurnOver>() {
             @Override
             public void onChanged(EFundTurnOver eFundTurnOvers) {
 
-                if (eFundTurnOvers == null) return;
+                if (eFundTurnOvers == null){
 
-                loTurnover = eFundTurnOvers;
+                    //initiallize default data
+                    loTurnover = new EFundTurnOver(
+                            lsTransactID,
+                            mViewmodel.GetCurrentDate(),
+                            "",
+                            "0.00",
+                            "0.00",
+                            "",
+                            "1",
+                            "",
+                            "",
+                            mViewmodel.GetUserInfo().getSUserIDxx(),
+                            mViewmodel.GetCurrentDate(),
+                            mViewmodel.GetCurrentDateTime()
+                    );
 
-                tie_transaction_no.setText(eFundTurnOvers.getSTransNox());
-                tie_fund_amt.setText(eFundTurnOvers.getNAmountxx());
-                tie_remarks.setText(eFundTurnOvers.getSRemarksx());
-            }
-        });
+                }else {
 
-        mViewmodel.GetLodgeCalendars().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
-            @Override
-            public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
+                    //initialize new data
+                    loTurnover = eFundTurnOvers;
+                }
 
-                if (lodgeCalendarLists == null) return;
+                tie_transaction_no.setText(loTurnover.getSTransNox());
+                tie_fund_amt.setText(loTurnover.getNAmountxx());
+                tie_remarks.setText(loTurnover.getSRemarksx());
 
-                loLodgeCalAdapter = new LodgeCalendarAdapter(
-                        requireActivity(),
-                        org.gag.appdriver.R.layout.adapter_list_lodge_calendar,
-                        lodgeCalendarLists
-                );
-                auto_lodge_cal.setAdapter(loLodgeCalAdapter);
+                if (lsTransactID.isEmpty()){
 
-                if (loTurnover == null) return;
+                    btn_submit.setText("Create Fund");
 
-                //load transactions year id
-                lodgeCalendarLists.stream()
-                        .filter(loCalendar -> loCalendar.getSYearIDxx()
-                                .equalsIgnoreCase(loTurnover.getSYearIDxx()))
-                        .findFirst()
-                        .ifPresent(loCalendar ->{
+                    btn_submit.setVisibility(View.VISIBLE);
+                    btn_cancel.setVisibility(View.GONE);
 
-                            auto_lodge_cal.setText(loCalendar.getSLodgeNme() + "(" + loCalendar.getNYearxxxx() + ")", false);
-                            loSelectedCal = loCalendar;
-                        });
+                }else {
+
+                    switch (loTurnover.getCTranStat()){
+
+                        case "1":
+                            mtv_status.setText("Pending for Approval");
+                            mtv_status.setTextColor(Color.GRAY);
+                            break;
+                        case "2":
+                            mtv_status.setText("Approved");
+                            mtv_status.setTextColor(Color.GREEN);
+                            break;
+                        case "3":
+                            mtv_status.setText("Disapproved");
+                            mtv_status.setTextColor(Color.RED);
+                            break;
+                    }
+
+                    //pending for approval, allowed for update of entry for regular members
+                    if (loTurnover.getCTranStat().equalsIgnoreCase("1")){
+
+                        //for regular user, allow update of fund entry, admiin or officers are allowed to approve or verify funds
+                        if (mViewmodel.GetUserInfo().getNUserLevl() < 2){
+                            btn_submit.setText("Update Fund");
+
+                            btn_submit.setVisibility(View.VISIBLE);
+                            btn_cancel.setVisibility(View.GONE);
+                        }else {
+
+                            //do not allow modification of fields, only approval and disapproval
+                            auto_lodge_cal.setEnabled(false);
+                            tie_transaction_no.setEnabled(false);
+                            tie_fund_amt.setEnabled(false);
+                            tie_remarks.setEnabled(false);
+
+                            btn_submit.setText("Approve Fund");
+                            btn_cancel.setText("Disapprove Fund");
+
+                            btn_submit.setVisibility(View.VISIBLE);
+                            btn_cancel.setVisibility(View.VISIBLE);
+                        }
+
+                    }else {
+
+                        //hide all buttons and disable the fields
+                        btn_submit.setVisibility(View.GONE);
+                        btn_cancel.setVisibility(View.GONE);
+
+                        auto_lodge_cal.setEnabled(false);
+                        tie_transaction_no.setEnabled(false);
+                        tie_fund_amt.setEnabled(false);
+                        tie_remarks.setEnabled(false);
+                    }
+                }
+
+                //observe lodge calendars
+                mViewmodel.GetLodgeCalendars().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
+                    @Override
+                    public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
+
+                        if (lodgeCalendarLists == null) return;
+
+                        loLodgeCalAdapter = new LodgeCalendarAdapter(
+                                requireActivity(),
+                                org.gag.appdriver.R.layout.adapter_list_lodge_calendar,
+                                lodgeCalendarLists
+                        );
+                        auto_lodge_cal.setAdapter(loLodgeCalAdapter);
+
+                        //load transactions year id
+                        lodgeCalendarLists.stream()
+                                .filter(loCalendar -> loCalendar.getSYearIDxx()
+                                        .equalsIgnoreCase(loTurnover.getSYearIDxx()))
+                                .findFirst()
+                                .ifPresent(loCalendar ->{
+
+                                    auto_lodge_cal.setText(loCalendar.getSLodgeNme() + "(" + loCalendar.getNYearxxxx() + ")", false);
+                                    loSelectedCal = loCalendar;
+                                });
+                    }
+                });
             }
         });
     }
@@ -172,6 +230,134 @@ public class Fragment_Turnover_Funds extends Fragment {
             return false;
         }
         return true;
+    }
+
+    private void CreateFund(){
+
+        mViewmodel.CreateFundTurnover(loTurnover, new VM_Funds.OnSubmit() {
+            @Override
+            public void OnLoad() {
+                poLoading.ShowDialog("Submitting fund. Please wait...");
+            }
+
+            @Override
+            public void OnSucces() {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(0, "Fund has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        //retun to previous fragment
+                        requireActivity().getSupportFragmentManager()
+                                .popBackStack("turnover_funds", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss(); }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
+
+    }
+
+    private void UpdateFund(){
+
+        mViewmodel.UpdateFundTurnover(loTurnover, new VM_Funds.OnSubmit() {
+            @Override
+            public void OnLoad() {
+                poLoading.ShowDialog("Updating fund. Please wait...");
+            }
+
+            @Override
+            public void OnSucces() {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(0, "Fund has been updated successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        //retun to previous fragment
+                        requireActivity().getSupportFragmentManager()
+                                .popBackStack("fund_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss(); }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
+    }
+
+    private void ApproveFund(){
+
+        mViewmodel.ApproveFundTurnover(loTurnover, new VM_Funds.OnSubmit() {
+            @Override
+            public void OnLoad() {
+                poLoading.ShowDialog("Approving fund. Please wait...");
+            }
+
+            @Override
+            public void OnSucces() {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(0, loTurnover.getCTranStat().equalsIgnoreCase("2") ? "Fund has been approved successfully" : "Fund has been disapproved successfully",
+                        "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        //retun to previous fragment
+                        requireActivity().getSupportFragmentManager()
+                                .popBackStack("fund_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoading.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss(); }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
     }
 
     private void InitListener(){
@@ -213,7 +399,20 @@ public class Fragment_Turnover_Funds extends Fragment {
                 loTurnover.setNAmountxx(tie_fund_amt.getText() == null ? "0.00" : tie_fund_amt.getText().toString());
                 loTurnover.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                //initialize message based on text displayed
+                String lsDialog = "Is your information complete?";
+                switch (btn_submit.getText().toString()){
+                    case "Update Fund":
+                        UpdateFund();
+                        break;
+                    case "":
+                        loTurnover.setCTranStat("2");
+                        ApproveFund();
+                        break;
+                }
+
+                poMessage.ShowMessage(2, !btn_submit.getText().toString().equalsIgnoreCase("Approve Fund") ? "Is your information complete?" : "Are you sure you want to approve this fund?",
+                        "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
@@ -223,44 +422,47 @@ public class Fragment_Turnover_Funds extends Fragment {
                     public void OnNegative(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
 
-                        mViewmodel.CreateFundTurnover(loTurnover, new VM_Funds.OnSubmit() {
-                            @Override
-                            public void OnLoad() {
-                                poLoading.ShowDialog("Submitting fund turnover. Please wait...");
-                            }
+                        switch (btn_submit.getText().toString()){
+                            case "Create Fund":
+                                CreateFund();
+                                break;
+                            case "Update Fund":
+                                UpdateFund();
+                                break;
+                            case "Approve Fund":
+                                loTurnover.setCTranStat("2");
+                                ApproveFund();
+                                break;
+                        }
+                    }
+                });
+            }
+        });
 
-                            @Override
-                            public void OnSucces() {
-                                poLoading.DismissDialog();
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                                poMessage.ShowMessage(0, "Fund submitted successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
+                if (!IsEntryOkay()){
+                    return;
+                }
 
-                                        //retun to previous fragment
-                                        requireActivity().getSupportFragmentManager()
-                                                .popBackStack("turnover_funds", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                    }
+                loTurnover.setSYearIDxx(loSelectedCal.getSYearIDxx());
+                loTurnover.setNAmountxx(tie_fund_amt.getText() == null ? "0.00" : tie_fund_amt.getText().toString());
+                loTurnover.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
 
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                });
-                            }
+                poMessage.ShowMessage(2, "Are you sure you want to disapprove this fund?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
 
-                            @Override
-                            public void OnFailed(String fsMessage) {
-                                poLoading.DismissDialog();
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
 
-                                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss(); }
-
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                });
-                            }
-                        });
+                        loTurnover.setCTranStat("3");
+                        ApproveFund();
                     }
                 });
             }

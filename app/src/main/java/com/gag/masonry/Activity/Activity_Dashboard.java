@@ -15,23 +15,21 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.gag.accounting.Disbursement.Fragments.Fragment_Fund_History;
 import com.gag.accounting.Disbursement.Fragments.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
+import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
 import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 
-import com.gag.masonry.Fragment.Fragment_Child_Container;
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_Entry;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
-import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
-import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -279,10 +277,8 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.addToBackStack("lodge_calendar_entry");
                 break;
             case "LDGE0003":
-
-                //call fragment with another container as it calls another fragment too
-                fragmentTransaction.replace(R.id.layout_container, Fragment_Child_Container.newInstance("lodge_calendar_list"));
-                fragmentTransaction.addToBackStack("child_container");
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_List());
+                fragmentTransaction.addToBackStack("lodge_calendar_list");
 
                 break;
             case "MEM002":
@@ -312,8 +308,8 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "FND002":
 
                 //call fragment with another container as it calls another fragment too
-                fragmentTransaction.replace(R.id.layout_container, Fragment_Child_Container.newInstance("fund_history"));
-                fragmentTransaction.addToBackStack("child_container");
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_List());
+                fragmentTransaction.addToBackStack("fund_history");
                 break;
 
         }

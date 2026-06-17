@@ -31,6 +31,7 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Adapters.LodgeCalendarListAdapter;
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -127,7 +128,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                                     loDetail.setArguments(loBundle);
 
-                                    fragmentTransaction.replace(R.id.frame_child, loDetail);
+                                    fragmentTransaction.replace(R.id.layout_container, loDetail);
                                     fragmentTransaction.addToBackStack("lodge_calendar_entry");
                                     break;
 
@@ -141,7 +142,8 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                                     loFund.setArguments(loBundle);
 
-                                    fragmentTransaction.replace(R.id.frame_child, loFund);
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("fund_history", loFund));
                                     fragmentTransaction.addToBackStack("fund_history");
                                     break;
                             }

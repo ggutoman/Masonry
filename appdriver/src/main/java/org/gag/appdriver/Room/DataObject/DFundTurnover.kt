@@ -12,6 +12,9 @@ interface DFundTurnover {
     @Upsert
     fun SaveTurnover(eTunover: EFundTurnOver)
 
+    @Query("DELETE FROM Fund_Turnover")
+    fun DeleteFunds()
+
     @Query("SELECT * FROM Fund_Turnover WHERE sTransNox= :fsTransNox")
     fun ObserveTurnover(fsTransNox : String): LiveData<EFundTurnOver>
 
