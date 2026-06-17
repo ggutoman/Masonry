@@ -10,6 +10,7 @@ import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.Entities.EFundTurnOver;
+import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -43,8 +44,8 @@ public class VM_Funds extends AndroidViewModel {
         return poFunds.ObserveTurnoverList(fsYearID, fsDfrom, fsDto);
     }
 
-    public String GetUserID(){
-        return poFunds.GetUserID();
+    public EUserInfo GetUserInfo(){
+        return poFunds.GetUserInfo();
     }
 
     public String GetCurrentDate(){
@@ -79,13 +80,53 @@ public class VM_Funds extends AndroidViewModel {
         });
     }
 
+    public void UpdateFundTurnover(EFundTurnOver foTurnover, OnSubmit foCallback) {
+
+        foCallback.OnLoad();
+
+        poFunds.UpdateFundTurnover(foTurnover).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poFunds.getMessage());
+                    return;
+                }
+                foCallback.OnSucces();
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFailed("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void ApproveFundTurnover(EFundTurnOver foTurnover, OnSubmit foCallback) {
+
+        foCallback.OnLoad();
+
+        poFunds.ApproveFundTurnover(foTurnover).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poFunds.getMessage());
+                    return;
+                }
+                foCallback.OnSucces();
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFailed("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
     public void DownloadFunds(String fsYearID, String fsDfrom, String fsDto, OnSubmit focallBack){
 
+        focallBack.OnLoad();
         poFunds.DownloadFundHistory(fsYearID, fsDfrom, fsDto).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
-                focallBack.OnLoad();
                 if (!aBoolean){
                     focallBack.OnFailed(poFunds.getMessage());
                     return;

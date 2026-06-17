@@ -29,6 +29,36 @@
             android:background="@android:color/darker_gray"
             android:layout_marginBottom="10dp"/>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_status_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintWidth_percent="0.5"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="N/A"
+                android:alpha="0.6"
+                android:textSize="16sp"
+                android:gravity="end"
+                app:layout_constraintStart_toEndOf="@+id/mtv_status_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="0.5"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -127,7 +157,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Submit"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="10dp"
+            android:visibility="gone"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancel"
