@@ -18,6 +18,9 @@ interface DLodgeInfo {
     @Query("SELECT * FROM Lodge_Info WHERE sLodgeIDx= :fsLodgeIDx")
     fun GetLodgeInfo(fsLodgeIDx : String): ELodgeInfo
 
+    @Query("SELECT * FROM Lodge_Info WHERE sLodgeIDx= :fsLodgeIDx")
+    fun ObserveLodgeInfo(fsLodgeIDx : String): LiveData<ELodgeInfo>
+
     @Query("SELECT * FROM Lodge_Info")
     fun ObserveLodgeList() : LiveData<List<ELodgeInfo>>
 }

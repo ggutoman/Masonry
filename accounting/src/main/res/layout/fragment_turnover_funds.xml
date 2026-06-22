@@ -17,6 +17,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Title"
+            android:id="@+id/mtv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -41,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:text="Status"
                 android:textSize="16sp"
+                android:alpha="0.7"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintWidth_percent="0.5"/>
 
@@ -112,7 +114,7 @@
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Fund Amount"
+            android:text="Turnover Amount"
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="30dp"/>
 
@@ -158,6 +160,7 @@
             android:layout_height="wrap_content"
             android:text="Submit"
             android:layout_marginTop="10dp"
+            android:padding="10dp"
             android:visibility="gone"/>
 
         <com.google.android.material.button.MaterialButton
@@ -166,6 +169,7 @@
             android:layout_height="wrap_content"
             android:text="Disapprove"
             android:layout_marginTop="10dp"
+            android:padding="10dp"
             android:textStyle="normal"
             android:visibility="gone"
             android:backgroundTint="@color/material_error_red"/>

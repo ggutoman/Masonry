@@ -10,6 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.material.textview.MaterialTextView;
+
+import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 
 import java.util.List;
@@ -33,11 +36,16 @@ public class LodgeAdapter extends ArrayAdapter<ELodgeInfo> {
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = LayoutInflater.from(loContext);
-            view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            view = inflater.inflate(R.layout.adapter_list_lodge, parent, false);
         }
 
-        TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(lodges.get(position).getSLodgeNme());
+        MaterialTextView mtv_name = view.findViewById(R.id.mtv_name);
+        MaterialTextView mtv_address = view.findViewById(R.id.mtv_address);
+
+        mtv_name.setText(lodges.get(position).getSLodgeNme());
+
+        String lsFullAddress = lodges.get(position).getSAddressx() +  ", " + lodges.get(position).getSTownName() + " " + lodges.get(position).getSProvName();
+        mtv_address.setText(lsFullAddress);
 
         return view;
 

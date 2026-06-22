@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +29,6 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 
 import com.gag.masonry.Adapter.Officer_History_Adapter;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.OfficerHistory;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -59,7 +57,7 @@ public class Fragment_Officer_history extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment__officer_history, container, false);
+        View view = inflater.inflate(R.layout.fragment_officer_history, container, false);
 
         mViewmodel = new ViewModelProvider(requireActivity()).get(VM_Main.class);
         poDialog = new LoadDialog(requireActivity());

@@ -7,12 +7,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ELodgeInfo(
     var sLodgeIDx: String,
-    var sLodgeNme: String,
-    var sAddressx: String,
-    var sTownName: String,
-    var sZippCode: String,
-    var sProvName: String,
-    var sServerIP: String
+    var sLodgeNme: String?,
+    var sAddressx: String?,
+    var sTownName: String?,
+    var sZippCode: String?,
+    var sProvName: String?,
+    var sServerIP: String?
 ){
 
 }

@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import org.gag.appdriver.Room.DataObject.DAnnualDetail
+import org.gag.appdriver.Room.DataObject.DAnnualMaster
+import org.gag.appdriver.Room.DataObject.DFundLedger
+import org.gag.appdriver.Room.DataObject.DFundMaster
 import org.gag.appdriver.Room.DataObject.DFundTurnover
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
@@ -19,6 +23,10 @@ import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.EProvinceInfo
+import org.gag.appdriver.Room.Entities.EAnnualDetail
+import org.gag.appdriver.Room.Entities.EAnnualMaster
+import org.gag.appdriver.Room.Entities.EFundLedger
+import org.gag.appdriver.Room.Entities.EFundMaster
 import org.gag.appdriver.Room.Entities.EFundTurnOver
 import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
@@ -47,8 +55,12 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EMemberEmailInfo::class,
         ELodgeCalendar::class,
         EOfficer::class,
+        EFundMaster::class,
+        EFundLedger::class,
         EOfficerHistory::class,
-        EFundTurnOver::class
+        EFundTurnOver::class,
+        EAnnualMaster::class,
+        EAnnualDetail::class
     ],
     version = 1,
     exportSchema = false
@@ -68,7 +80,11 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetLodgeCalendar() : DLodgeCalendar
     abstract fun GetOfficer() : DOfficer
     abstract fun GetOfficerHistory() : DOfficerHistory
+    abstract fun GetFundMaster() : DFundMaster
+    abstract fun GetFundLedger() : DFundLedger
     abstract fun GetFundTurnOver() : DFundTurnover
+    abstract fun GetAnnualMaster() : DAnnualMaster
+    abstract fun GetAnnualDetail() : DAnnualDetail
 
     companion object {
 

@@ -5,38 +5,27 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="7.5dp">
+    android:padding="10dp">
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/mtv_type"
+        android:id="@+id/mtv_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="N/A"
         android:alpha="0.7"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.6"/>
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/mtv_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="1900-00-00"
-        android:textSize="13sp"
-        android:alpha="0.7"
-        app:layout_constraintTop_toBottomOf="@+id/mtv_type"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.6"/>
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/mtv_amount_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="N/A"
-        android:gravity="end"
-        android:alpha="0.7"
-        app:layout_constraintStart_toEndOf="@+id/mtv_type"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/mtv_amt_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Amount Due:"
+        android:alpha="0.7"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.5"/>
 
     <com.google.android.material.textview.MaterialTextView
         style="@style/Text_Header"
@@ -45,8 +34,9 @@
         android:layout_height="wrap_content"
         android:text="0.00"
         android:gravity="end"
-        app:layout_constraintTop_toBottomOf="@+id/mtv_amount_label"
-        app:layout_constraintStart_toEndOf="@+id/mtv_date"
+        app:layout_constraintStart_toEndOf="@+id/mtv_amt_label"
+        app:layout_constraintTop_toTopOf="@+id/mtv_amt_label"
+        app:layout_constraintBottom_toBottomOf="@+id/mtv_amt_label"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <View

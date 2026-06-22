@@ -13,6 +13,7 @@ import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.Models.LodgeCalendarList
+import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
@@ -21,13 +22,14 @@ import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
+import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
-class LodgeCalendar(loInstance : Context) {
+class Lodge(loInstance : Context) {
 
     lateinit var message : String
 
@@ -36,6 +38,7 @@ class LodgeCalendar(loInstance : Context) {
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance).GetLodge()
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val dateRepository : DateRepository = DateRepository()
     val encryptObj : HashRepository = HashRepository()
 
@@ -45,10 +48,15 @@ class LodgeCalendar(loInstance : Context) {
 
     fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
 
-    fun GetLodgeCalendarList(fsDateFrom : String, fsDateTo : String) : LiveData<List<LodgeCalendarList>> =
-                                    poLodgeCalendar.GetLodgeCalendarList(
-                                                                TextFormatter().ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":").getOrNull(0) ?: "",
-                                                                                fsDateFrom, fsDateTo)
+    fun GetLodgeCalendarList(fsLodgeIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList(fsLodgeIDx, fsDateFrom, fsDateTo)
+
+    fun SearchTown(fsSearch : String) : LiveData<List<TownProvince>> {
+        return poTownInfo.SearchTown("%$fsSearch%")
+    }
+
+    fun GetTownInfo(fsSearch : String) : TownProvince {
+        return poTownInfo.GetTownInfo(fsSearch)
+    }
 
     fun GetCurrentDate() : String = dateRepository.GetCurrentDate()
 
@@ -59,6 +67,81 @@ class LodgeCalendar(loInstance : Context) {
     fun GetFormattedLongDate(foLongDate : Long) : String = dateRepository.FormatLongDate(foLongDate)
 
     fun IsDateCompared( fsDate1 : String, fsDate2 : String) : Boolean = dateRepository.IsDateCompared( fsDate1, fsDate2)
+
+    @SuppressLint("MissingPermission")
+    fun CreateLodge(loLodge : ELodgeInfo) : CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val loParams = JSONObject().apply {
+                    put("sLodgeNme", loLodge.sLodgeNme)
+                    put("sAddressx", loLodge.sAddressx)
+                    put("sTownName", loLodge.sTownName)
+                    put("sZippCode", loLodge.sZippCode)
+                    put("sProvName", loLodge.sProvName)
+
+                    //set year id for update of record, if exists
+                    if (!loLodge.sLodgeIDx.isNullOrEmpty()) put("sLodgeIDx", loLodge.sLodgeIDx)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_LODGE.fsURL,
+                    loParams,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //initialize new year id from result
+                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
+
+                            loLodge.sLodgeIDx = loResult.GetPayload()
+                            poLodgeInfo.SaveLodge(loLodge)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
 
     @SuppressLint("MissingPermission")
     fun CreateLodgeCalendar(loLodgeCalendar : ELodgeCalendar) : CompletableFuture<Boolean> {

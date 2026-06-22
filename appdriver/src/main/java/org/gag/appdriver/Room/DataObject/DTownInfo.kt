@@ -26,4 +26,17 @@ interface DTownInfo {
             "AND (a.sTownName || ',' || b.sDescript) LIKE :fsSearch ")
     fun SearchTown(fsSearch : String): LiveData<List<TownProvince>>
 
+    @Query("SELECT " +
+            "'' AS psAddrsIDx, " +
+            "a.sTownIDxx AS psTownIDxx, " +
+            "b.sProvIDxx AS psProvIDxx, " +
+            "(a.sTownName || ', ' || b.sDescript) AS psTownProvNme, " +
+            "'' AS psAddressx, " +
+            "'0' AS isHomeAddr, " +
+            "'0' AS isActive " +
+            "FROM Town_City a, Province b " +
+            "WHERE a.sProvIDxx = b.sProvIDxx " +
+            "AND a.sTownIDxx = :fsSearch ")
+    fun GetTownInfo(fsSearch : String): TownProvince
+
 }
