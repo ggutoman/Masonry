@@ -298,7 +298,7 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
 
                                         requireActivity()
                                                 .getSupportFragmentManager()
-                                                .popBackStack("lodge_calendar_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                                .popBackStack("lodge_calendar_list", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

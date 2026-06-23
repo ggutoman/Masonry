@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = "Annual_Detail", primaryKeys = ["sTransNox", "sMemberID"])
 data class EAnnualDetail(
-    val sTransNox: String,
-    val nEntryNox: String,
-    val sMemberID: String,
-    val nAmtDuexx: String?,
-    val nAmtPaidx: String?,
-    val cExemptID: String?,
-    val sRemarksx: String?,
-    val dModified: String?,
-    val dTimeStmp: String?
+    var sTransNox: String,
+    var nEntryNox: String,
+    var sMemberID: String,
+    var nAmtDuexx: String?,
+    var nAmtPaidx: String?,
+    var cExemptID: String?,
+    var sRemarksx: String?,
+    var dModified: String?,
+    var dTimeStmp: String?
 )

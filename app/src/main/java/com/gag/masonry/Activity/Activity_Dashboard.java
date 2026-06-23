@@ -15,6 +15,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
+import com.gag.accounting.Fragments.Annual.Fragment_Annual_Entry;
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
@@ -238,6 +240,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "FND004":
                     InitView("FND004");
                     break;
+                case "FND005":
+                    InitView("FND005");
+                    break;
                 case "MEM001":
                     InitView("MEM001");
                     break;
@@ -289,11 +294,11 @@ public class Activity_Dashboard extends AppCompatActivity {
                 break;
             case "LDGE0003": //lodge calendars
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_calendar_list");
+                fragmentTransaction.addToBackStack("lodge_list");
                 break;
             case "LDGE0004": //lodge list
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_list");
+                fragmentTransaction.addToBackStack("lodge_calendar_list");
                 break;
             case "MEM002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
@@ -317,15 +322,19 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
                 fragmentTransaction.addToBackStack("turnover_funds");
                 break;
-            case "FND002": //lodge fund entries information
+            case "FND002":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("annual_due_entry");
+                break;
+            case "FND003": //lodge fund entries information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("fund_history");
                 break;
-            case "FND003": //lodge fund summary information
+            case "FND004": //lodge fund summary information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_fund_information");
                 break;
-            case "FND004":
+            case "FND005":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_dues");
                 break;

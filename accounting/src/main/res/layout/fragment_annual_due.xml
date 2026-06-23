@@ -184,15 +184,16 @@
 
                             <com.google.android.material.textfield.TextInputLayout
                                 style="@style/CustomDropDownTilStyle"
+                                android:id="@+id/til_lodge_cal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Select Lodge Year">
+                                android:hint="Select Lodge Year"
+                                android:enabled="false">
 
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/auto_lodge_cal"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:enabled="false"/>
+                                    android:layout_height="wrap_content"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -377,12 +378,30 @@
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
-                                <CheckBox
-                                    android:id="@+id/chk_exempt"
-                                    android:layout_width="wrap_content"
+                                <androidx.constraintlayout.widget.ConstraintLayout
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="Exempt"
-                                    android:layout_gravity="end"/>
+                                    android:layout_marginHorizontal="10dp">
+
+                                    <com.google.android.material.textview.MaterialTextView
+                                        android:id="@+id/btn_save_detail"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:text="SAVE"
+                                        android:textColor="?attr/colorPrimary"
+                                        app:layout_constraintStart_toStartOf="parent"
+                                        app:layout_constraintTop_toTopOf="@+id/chk_exempt"
+                                        app:layout_constraintBottom_toBottomOf="@+id/chk_exempt"
+                                        android:visibility="gone"/>
+
+                                    <CheckBox
+                                        android:id="@+id/chk_exempt"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Exempt"
+                                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                                </androidx.constraintlayout.widget.ConstraintLayout>
 
                             </LinearLayout>
 

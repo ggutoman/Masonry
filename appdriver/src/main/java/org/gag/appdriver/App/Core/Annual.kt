@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadAnnualInfo
 import org.gag.appdriver.App.DataModels.DownloadError
+import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadSaveFund
 import org.gag.appdriver.App.Models.AnnualMembers
 import org.gag.appdriver.App.Models.LodgeCalendarList
@@ -23,9 +24,12 @@ import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
+import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
+import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.ML_DBF
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 
@@ -42,6 +46,7 @@ class Annual(instance : Context) {
     val poAnnualMaster : DAnnualMaster = ML_DBF.getDatabase(instance)?.GetAnnualMaster() as DAnnualMaster
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(instance)?.GetAnnualDetail() as DAnnualDetail
     val poLodgeYear : DLodgeCalendar = ML_DBF.getDatabase(instance)?.GetLodgeCalendar() as DLodgeCalendar
+    val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance)?.GetMemberDao() as DMemberInfo
 
     fun GetUserID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -52,6 +57,8 @@ class Annual(instance : Context) {
     fun GetCurrentDateTime() : String = dateRepository.GetCurrentDateTime()
 
     fun GetLodgeCalendars(fsLodgeIDxx : String) : LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(fsLodgeIDxx)
+
+    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
 
     fun GetAnnualMaster(fsYearIDxx : String) : LiveData<EAnnualMaster> = poAnnualMaster.GetAnnualMaster(fsYearIDxx)
 
@@ -92,6 +99,105 @@ class Annual(instance : Context) {
 
                             //save detail
                             loDetail.forEach { loItem ->
+                                poAnnualDetail.SaveAnnualDetail(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun SaveAnnualDue(loMaster : EAnnualMaster, loDetail : List<EAnnualDetail>) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize array of parameters for details
+                    val loDetailParams = JSONArray()
+
+                    loDetail.forEach { loItem ->
+                        val obj = JSONObject().apply {
+
+                            //add transaction no to parameters, if not empty
+                            if (loItem.sTransNox.isNotEmpty()) put("sTransNox", loItem.sTransNox)
+
+                            put("sMemberID", loItem.sMemberID)
+                            put("nAmtDuexx", loItem.nAmtDuexx)
+                            put("nAmtPaidx", loItem.nAmtPaidx)
+                            put("cExemptID", loItem.cExemptID)
+                            put("sRemarksx", loItem.sRemarksx)
+                        }
+                        loDetailParams.put(obj)
+                    }
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+
+                        //add transaction no to parameters, if not empty
+                        if (loMaster.sTransNox.isNotEmpty()) put("sTransNox", loMaster.sTransNox)
+
+                        put("sYearIDxx", loMaster.sYearIDxx)
+                        put("dDueDatex", loMaster.dDueDatex)
+                        put("nTranTotl", loMaster.nTranTotl)
+                        put("nCollTotl", loMaster.nCollTotl)
+                        put("cTranStat", loMaster.cTranStat)
+                        put("sRemarksx", loMaster.sRemarksx)
+                        put("detail", loDetailParams)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ANNUAL_DUES.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
+
+                            //save master with generated key
+                            loMaster.sTransNox = resultData.GetPayload()
+                            poAnnualMaster.SaveAnnualMaster(loMaster)
+
+                            //save detail
+                            loDetail.forEach { loItem ->
+                                loItem.sTransNox = loMaster.sTransNox
                                 poAnnualDetail.SaveAnnualDetail(loItem)
                             }
 

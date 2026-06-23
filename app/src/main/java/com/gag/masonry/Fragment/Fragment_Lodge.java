@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -38,7 +39,7 @@ public class Fragment_Lodge extends Fragment {
     private ELodgeInfo poLodge;
     private TownCityAdapter TownProvAdapter;
 
-    private String lsTwnIDx, lsProvIDx;
+    private String lsTwnIDx, lsProvIDx, lsStackIDxx;
 
     private TextInputEditText tieLodgeName;
     private TextInputEditText tieAddress;
@@ -56,6 +57,13 @@ public class Fragment_Lodge extends Fragment {
         mViewmodel = new ViewModelProvider(requireActivity()).get(VM_Lodge.class);
         poLoad = new LoadDialog(requireActivity());
         poMessage = new Message_Dialog(requireActivity());
+
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         poLoad.InitDialog();
         poMessage.InitDialog();
@@ -215,14 +223,14 @@ public class Fragment_Lodge extends Fragment {
                         mViewmodel.CreateLodge(poLodge, new VM_Lodge.OnDownload() {
                             @Override
                             public void OnLoad() {
-                                poLoad.ShowDialog("Creating Lodge. Please wait . . .");
+                                poLoad.ShowDialog("Saving Lodge. Please wait . . .");
                             }
 
                             @Override
                             public void OnSuccess() {
                                 poLoad.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Lodge has been created successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                poMessage.ShowMessage(0, "Lodge has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
@@ -241,6 +249,9 @@ public class Fragment_Lodge extends Fragment {
                                                 "",
                                                 ""
                                         );
+
+                                        requireActivity().getSupportFragmentManager()
+                                                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

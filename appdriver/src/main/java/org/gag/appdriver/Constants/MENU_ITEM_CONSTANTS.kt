@@ -44,20 +44,20 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         2
     ),
 
-    MENU_ITEM_LODGE_CALENDARS(
-        "View Lodge Calendars",
+    MENU_ITEM_VIEW_LODGE(
+        "View Lodges",
         "LDGE0003",
         "LDGE",
         1,
-        2
+        4
     ),
 
-    MENU_ITEM_VIEW_LODGE(
-        "View Lodges",
+    MENU_ITEM_LODGE_CALENDARS(
+        "View Lodge Calendars",
         "LDGE0004",
         "LDGE",
         1,
-        4
+        2
     ),
 
     /**MEMBER INFO**/
@@ -86,16 +86,24 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
     ),
 
     MENU_ITEM_TURNOVER_FUNDS(
-        "Turnover Funds",
+        "Create Funds",
         "FND001",
         "FND",
         1,
         1
     ),
 
+    MENU_ITEM_CREATE_ANNUAL(
+        "Create Annual Billing",
+        "FND002",
+        "FND",
+        1,
+        2
+    ),
+
     MENU_ITEM_FUNDS_HISTORY(
         "Fund History",
-        "FND002",
+        "FND003",
         "FND",
         1,
         1
@@ -103,7 +111,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
 
     MENU_ITEM_LODGE_FUND_INFO(
         "View Funds",
-        "FND003",
+        "FND004",
         "FND",
         1,
         1
@@ -111,7 +119,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
 
     MENU_ITEM_LODGE_ANNUAL_HISTORY(
         "View Annual Dues",
-        "FND004",
+        "FND005",
         "FND",
         1,
         1

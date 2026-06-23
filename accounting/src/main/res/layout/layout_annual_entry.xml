@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:elevation="10dp"
     app:cardUseCompatPadding="true"
+    app:cardCornerRadius="15dp"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -29,7 +30,7 @@
             android:hint="Select Member">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/auto_lodge_cal"
+                android:id="@+id/auto_lodge_member"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -93,17 +94,6 @@
             android:text="Add Detail"
             android:layout_marginTop="10dp"
             android:padding="10dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cancel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Disapprove"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:textStyle="normal"
-            android:backgroundTint="@color/material_error_red"
-            android:visibility="gone"/>
 
     </LinearLayout>
 

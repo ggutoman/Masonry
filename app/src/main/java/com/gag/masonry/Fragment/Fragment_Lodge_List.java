@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;import com.gag.masonry.R;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -93,9 +94,7 @@ public class Fragment_Lodge_List extends Fragment {
                                     //should open the lodge information
                                     Fragment_Lodge loLodge = new Fragment_Lodge();
 
-                                    loBundle = new Bundle();
                                     loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-
                                     loLodge.setArguments(loBundle);
 
                                     ///add to child container, as bridge to initiate another fragment after call
@@ -109,9 +108,7 @@ public class Fragment_Lodge_List extends Fragment {
 
                                     Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
 
-                                    loBundle = new Bundle();
                                     loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-
                                     loFund.setArguments(loBundle);
 
                                     //add to child container, as bridge to initiate another fragment after call
@@ -124,9 +121,7 @@ public class Fragment_Lodge_List extends Fragment {
                                     //should open the lodge information
                                     Fragment_Lodge_Calendar_List loCalendarlist = new Fragment_Lodge_Calendar_List();
 
-                                    loBundle = new Bundle();
                                     loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-
                                     loCalendarlist.setArguments(loBundle);
 
                                     ///add to child container, as bridge to initiate another fragment after call
@@ -139,16 +134,29 @@ public class Fragment_Lodge_List extends Fragment {
                                 case "fund_history":
                                     Fragment_Lodge_Calendar_List loCalendars = new Fragment_Lodge_Calendar_List();
 
-                                    loBundle = new Bundle();
                                     loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-
                                     loCalendars.setArguments(loBundle);
 
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_funds", loCalendars));
                                     fragmentTransaction.addToBackStack("lodge_funds");
 
-                                //view lodge year annual due entries
+                                    break;
+
+                                //create lodge annual due entry
+                                case "annual_due_entry":
+                                    Fragment_Annual_Due loAnnualEntry = new Fragment_Annual_Due();
+
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+                                    loAnnualEntry.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_entry", loAnnualEntry));
+                                    fragmentTransaction.addToBackStack("annual_due_entry");
+
+                                    break;
+
+                                //view lodge year annual due info
                                 case "lodge_annual_dues":
 
                                     Fragment_Lodge_Calendar_List loAnnuals = new Fragment_Lodge_Calendar_List();

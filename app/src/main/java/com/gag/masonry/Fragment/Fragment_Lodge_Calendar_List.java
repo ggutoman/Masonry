@@ -49,7 +49,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
     private Message_Dialog poMessage;
     private LoadDialog poLoad;
 
-    private String lsdFrom, lsdTo;
+    private String lsdFrom, lsdTo, lsStackIDxx;
 
     private ConstraintLayout layout_no_record;
     private TextInputEditText tie_search;
@@ -69,6 +69,13 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
         poMessage.InitDialog();
         poLoad.InitDialog();
+
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         lsdFrom = mviewModel.GetFirstQuarter();
         lsdTo = mviewModel.GetCurrentDate();
@@ -109,63 +116,56 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                     @Override
                     public void Selected(LodgeCalendarList poItem) {
 
-                        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
-                        if (count > 0) {
+                        FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                        Bundle loBundle = new Bundle();
 
-                            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
-                            String name = entry.getName() == null ? "" : entry.getName();
+                        switch (lsStackIDxx){
 
-                            FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                            Bundle loBundle = new Bundle();
+                            //view lodge calendar info
+                            case "lodge_calendars":
 
-                            switch (name){
-
-                                //view lodge calendar info
-                                case "lodge_calendars":
-
-                                    Fragment_Lodge_Calendar_Entry loDetail = new Fragment_Lodge_Calendar_Entry();
+                                Fragment_Lodge_Calendar_Entry loDetail = new Fragment_Lodge_Calendar_Entry();
 
 
-                                    loBundle.putString("year_id", poItem.getSYearIDxx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
 
-                                    loDetail.setArguments(loBundle);
+                                loDetail.setArguments(loBundle);
 
-                                    fragmentTransaction.replace(R.id.layout_container, loDetail);
-                                    fragmentTransaction.addToBackStack("lodge_calendar_list");
-                                    break;
+                                fragmentTransaction.replace(R.id.layout_container, loDetail);
+                                fragmentTransaction.addToBackStack("lodge_calendar_list");
+                                break;
 
-                                //open turnover fund history
-                                case "lodge_funds":
+                            //open turnover fund history
+                            case "lodge_funds":
 
-                                    Fragment_Fund_History loFund = new Fragment_Fund_History();
+                                Fragment_Fund_History loFund = new Fragment_Fund_History();
 
-                                    loBundle = new Bundle();
-                                    loBundle.putString("year_id", poItem.getSYearIDxx());
+                                loBundle = new Bundle();
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
 
-                                    loFund.setArguments(loBundle);
+                                loFund.setArguments(loBundle);
 
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("fund_history", loFund));
-                                    fragmentTransaction.addToBackStack("fund_history");
-                                    break;
-                                //open lodge calendar annual dues
-                                case "lodge_annual_dues_info":
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("fund_history", loFund));
+                                fragmentTransaction.addToBackStack("fund_history");
+                                break;
+                            //open lodge calendar annual dues
+                            case "lodge_annual_dues_info":
 
-                                    Fragment_Annual_Due loAnnual = new Fragment_Annual_Due();
+                                Fragment_Annual_Due loAnnual = new Fragment_Annual_Due();
 
-                                    loBundle = new Bundle();
-                                    loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                    loBundle.putString("year_id", poItem.getSYearIDxx());
+                                loBundle = new Bundle();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
 
-                                    loAnnual.setArguments(loBundle);
+                                loAnnual.setArguments(loBundle);
 
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_info", loAnnual));
-                                    fragmentTransaction.addToBackStack("annual_due_info");
-                                    break;
-                            }
-                            fragmentTransaction.commit();
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_info", loAnnual));
+                                fragmentTransaction.addToBackStack("annual_due_info");
+                                break;
                         }
+                        fragmentTransaction.commit();
 
                     }
                 });

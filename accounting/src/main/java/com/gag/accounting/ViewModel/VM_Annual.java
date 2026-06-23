@@ -1,6 +1,7 @@
 package com.gag.accounting.ViewModel;
 
 import android.app.Application;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,10 +12,16 @@ import org.gag.appdriver.App.Core.Annual;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.TownProvince;
+import org.gag.appdriver.Room.Entities.EAnnualDetail;
 import org.gag.appdriver.Room.Entities.EAnnualMaster;
+import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class VM_Annual extends AndroidViewModel {
@@ -46,7 +53,31 @@ public class VM_Annual extends AndroidViewModel {
         return poAnnual.GetCurrentDateTime();
     }
 
-    public void AddAnnualDetail(String fsMemberID, String fsMemberNme, String fsExemptID, String fsRemarksx, String fsAmtDuexx, String fsAmtPaidx){
+    public List<String> GetAmountTypes(){
+        return new ArrayList<>(List.of("Amount Due", "Amount Paid"));
+    }
+
+    public LiveData<List<AnnualMembers>> GetAnnualDetail(){
+        return GetAnnualDetail;
+    }
+
+    public LiveData<List<LodgeCalendarList>> GetLodgeCalendars(String fsLodgeIDxx){
+        return poAnnual.GetLodgeCalendars(fsLodgeIDxx);
+    }
+
+    public LiveData<List<EMemberInfo>> GetMemberList(){
+        return poAnnual.ObserveMemberList();
+    }
+
+    public LiveData<EAnnualMaster> GetAnnualMaster(String fsYearIDxx){
+        return poAnnual.GetAnnualMaster(fsYearIDxx);
+    }
+
+    public LiveData<List<AnnualMembers>> GetAnnualDetail(String fsTransNox){
+        return poAnnual.GetAnnualDetail(fsTransNox);
+    }
+
+    public boolean AddAnnualDetail(String fsMemberID, String fsMemberNme, String fsExemptID, String fsRemarksx, String fsAmtDuexx, String fsAmtPaidx){
 
         AnnualMembers loItem = new AnnualMembers(
                 fsMemberID,
@@ -59,31 +90,47 @@ public class VM_Annual extends AndroidViewModel {
 
         List<AnnualMembers> currentList = GetAnnualDetail.getValue();
 
+        //do not allow adding of duplicate members
+        boolean isAlreadyAdded = false;
+        for (AnnualMembers loMember : currentList){
+            if (loMember.getSMemberID().equalsIgnoreCase(loItem.getSMemberID())){
+                isAlreadyAdded = true;
+                break;
+            }
+        }
+        if (isAlreadyAdded) return false;
+
         if (currentList == null) {
             currentList = new ArrayList<>();
         }
         currentList.add(loItem);
         GetAnnualDetail.setValue(currentList);
+
+        return true;
+    }
+
+    public void ReplaceAnnualDetail(int fnIndex, String fnAmountDue, String fnAmountPaid, String fsRemarks, String fcExempt){
+
+        List<AnnualMembers> currentList = GetAnnualDetail.getValue();
+
+        if (currentList == null) return;
+
+        AnnualMembers loDetail = new AnnualMembers(
+                currentList.get(fnIndex).getSMemberID(),
+                currentList.get(fnIndex).getSMemberNme(),
+                fcExempt,
+                fsRemarks,
+                fnAmountDue,
+                fnAmountPaid
+        );
+
+        currentList.set(fnIndex, loDetail);
+        GetAnnualDetail.setValue(currentList);
+
     }
 
     public void ClearDetail(){
         GetAnnualDetail.setValue(new ArrayList<>());
-    }
-
-    public LiveData<List<AnnualMembers>> GetAnnualDetail(){
-        return GetAnnualDetail;
-    }
-
-    public LiveData<List<LodgeCalendarList>> GetLodgeCalendars(String fsLodgeIDxx){
-        return poAnnual.GetLodgeCalendars(fsLodgeIDxx);
-    }
-
-    public LiveData<EAnnualMaster> GetAnnualMaster(String fsYearIDxx){
-        return poAnnual.GetAnnualMaster(fsYearIDxx);
-    }
-
-    public LiveData<List<AnnualMembers>> GetAnnualDetail(String fsTransNox){
-        return poAnnual.GetAnnualDetail(fsTransNox);
     }
 
     public void DownloadAnnual(String fsYearIDxx, OnTransaction foCallback){
@@ -100,5 +147,56 @@ public class VM_Annual extends AndroidViewModel {
                 foCallback.OnSuccess();
             }
         });
+    }
+
+    public void CreateAnnualDue(EAnnualMaster foMaster, List<AnnualMembers> foDetail, OnTransaction foCallback){
+
+        try {
+
+            foCallback.OnLoad();
+
+            double ldbl_trantotal = 0.00;
+            double ldbl_collectotal = 0.00;
+
+            List<EAnnualDetail> loDetail = new ArrayList<>();
+            for (int i = 0; i < foDetail.size(); i++){
+
+                loDetail.add(
+                        new EAnnualDetail(
+                                "",
+                                String.valueOf(i),
+                                foDetail.get(i).getSMemberID(),
+                                foDetail.get(i).getNAmtDuexx(),
+                                foDetail.get(i).getNAmtPaidx(),
+                                foDetail.get(i).getCExemptID(),
+                                foDetail.get(i).getSRemarksx(),
+                                poAnnual.GetCurrentDate(),
+                                poAnnual.GetCurrentDateTime()
+                        )
+                );
+
+                ldbl_trantotal += Double.parseDouble(loDetail.get(i).getNAmtDuexx());
+                ldbl_collectotal += Double.parseDouble(loDetail.get(i).getNAmtPaidx());
+            }
+
+            //initialize master total from collected details
+            foMaster.setNTranTotl(String.valueOf(ldbl_trantotal));
+            foMaster.setNCollTotl(String.valueOf(ldbl_collectotal));
+
+            poAnnual.SaveAnnualDue(foMaster, loDetail).thenAccept(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean aBoolean) {
+
+                    if (!aBoolean){
+                        foCallback.OnFailed(poAnnual.getMessage());
+                        return;
+                    }
+                    foCallback.OnSuccess();
+                }
+            });
+
+        }catch (Exception e){
+            foCallback.OnFailed(e.getMessage());
+        }
     }
 }

@@ -3,7 +3,7 @@ package org.gag.appdriver.Constants
 enum class API_CONSTANTS(val fsURL : String){
 
     /**ACCOUNTS**/
-    URL_BASE_SERVER("http://192.165.29.63/Masonry/app/"),
+    URL_BASE_SERVER("http://192.165.29.118/Masonry/app/"),
 //    URL_BASE_SERVER("http://192.168.100.22/Masonry/app/"),
     URL_LOGIN_ACCOUNT("accounts/sign_in.php"),
     URL_CREATE_ACCOUNT("accounts/sign_up.php"),
@@ -40,5 +40,6 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_APPROVE_FUND_TURNOVER("accounting/funds/approve_fund_turnover.php"),
     URL_DOWNLOAD_FUND_INFO("accounting/funds/lodge_fund_info.php"),
     URL_CREATE_FUND_HISTORY("accounting/funds/fund_turnover_info.php"),
-    URL_DOWNLOAD_ANNUAL_DUES("accounting/annual/annual_dues_info.php")
+    URL_DOWNLOAD_ANNUAL_DUES("accounting/annual/annual_dues_info.php"),
+    URL_CREATE_ANNUAL_DUES("accounting/annual/new_annual_dues.php")
 }
