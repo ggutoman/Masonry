@@ -57,37 +57,6 @@
                             android:orientation="vertical"
                             android:padding="5dp">
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp">
-
-                                <com.google.android.material.textview.MaterialTextView
-                                    style="@style/Text_Header"
-                                    android:id="@+id/mtv_status_label"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="Status"
-                                    android:textSize="16sp"
-                                    android:alpha="0.7"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintWidth_percent="0.5"/>
-
-                                <com.google.android.material.textview.MaterialTextView
-                                    style="@style/Text_Header"
-                                    android:id="@+id/mtv_status"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="N/A"
-                                    android:alpha="0.6"
-                                    android:textSize="16sp"
-                                    android:gravity="end"
-                                    app:layout_constraintStart_toEndOf="@+id/mtv_status_label"
-                                    app:layout_constraintEnd_toEndOf="parent"
-                                    app:layout_constraintWidth_percent="0.5"/>
-
-                            </androidx.constraintlayout.widget.ConstraintLayout>
-
                             <View
                                 android:layout_width="match_parent"
                                 android:layout_height="0.6dp"
@@ -121,6 +90,22 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="none"
                                     android:enabled="false"/>
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/CustomDropDownTilStyle"
+                                android:id="@+id/til_status"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Status"
+                                android:visibility="gone">
+
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    style="@style/DropdownStyleTheme"
+                                    android:id="@+id/auto_status"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -427,15 +412,6 @@
                     android:layout_height="wrap_content"
                     android:text="Save Billing"
                     app:layout_constraintBottom_toTopOf="@+id/btn_disapprove"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_disapprove"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Disapprove Billing"
-                    android:visibility="gone"
-                    android:backgroundTint="@color/material_error_red"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
 
             </LinearLayout>
 

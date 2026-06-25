@@ -2,7 +2,6 @@ package com.gag.accounting.Fragments.Annual;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,11 +18,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.gag.accounting.Dialog.Dialog_Annual_Entry;
@@ -37,6 +36,7 @@ import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.AnnualMemberAdapter;
 import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Room.Entities.EAnnualMaster;
@@ -46,9 +46,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Fragment_Annual_Due extends Fragment {
 
@@ -64,18 +62,17 @@ public class Fragment_Annual_Due extends Fragment {
 
     private List<AnnualMembers> laDetail;
     private String lsYearIDxx, lsLodgeIDxx, lsStackIDxx;
-    private int lnSelectDetail = -1;
+    private int lnSelectDetail = -1, lnSelectStatus = -1;
 
 
-    private MaterialTextView mtv_status, btn_download, btn_view, btn_save_detail,  mtv_totaltrans,  mtv_totalcoll;
-    private MaterialAutoCompleteTextView auto_lodge_cal, auto_lodge_member;
-    private TextInputLayout til_lodge_cal;
+    private MaterialTextView btn_download, btn_view, btn_save_detail,  mtv_totaltrans,  mtv_totalcoll;
+    private MaterialAutoCompleteTextView auto_lodge_cal, auto_lodge_member, auto_status;
+    private TextInputLayout til_lodge_cal, til_status;
     private TextInputEditText tie_transaction_no, tie_due, tie_remarks, tie_paid_amount, tie_due_amount, tie_remarks_detail;
     private CheckBox chk_exempt;
     private ImageButton btn_add_member;
     private ConstraintLayout layout_tools;
-    private LinearLayout layout_buttons;
-    private MaterialButton btn_save, btn_disapprove;
+    private MaterialButton btn_save;
 
 
     @Override
@@ -107,6 +104,7 @@ public class Fragment_Annual_Due extends Fragment {
 
                 case "annual_due_info":
                     til_lodge_cal.setEnabled(false);
+                    til_status.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
 
                     DownloadInfo();
@@ -114,6 +112,7 @@ public class Fragment_Annual_Due extends Fragment {
 
                 case "annual_due_entry":
                     til_lodge_cal.setEnabled(true);
+                    til_status.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
 
                     InitDataReceiver();
@@ -126,7 +125,6 @@ public class Fragment_Annual_Due extends Fragment {
 
     private void InitViews(View view){
 
-        mtv_status = view.findViewById(R.id.mtv_status);
         btn_download = view.findViewById(R.id.btn_download);
         btn_view = view.findViewById(R.id.btn_view);
         mtv_totaltrans = view.findViewById(R.id.mtv_totaltrans);
@@ -134,7 +132,9 @@ public class Fragment_Annual_Due extends Fragment {
 
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
         til_lodge_cal = view.findViewById(R.id.til_lodge_cal);
+        til_status = view.findViewById(R.id.til_status);
         auto_lodge_cal = view.findViewById(R.id.auto_lodge_cal);
+        auto_status = view.findViewById(R.id.auto_status);
         auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
         tie_due = view.findViewById(R.id.tie_due);
         tie_remarks = view.findViewById(R.id.tie_remarks);
@@ -144,12 +144,10 @@ public class Fragment_Annual_Due extends Fragment {
         chk_exempt = view.findViewById(R.id.chk_exempt);
 
         layout_tools = view.findViewById(R.id.layout_tools);
-        layout_buttons = view.findViewById(R.id.layout_buttons);
 
         btn_save_detail = view.findViewById(R.id.btn_save_detail);
         btn_add_member = view.findViewById(R.id.btn_add_member);
         btn_save = view.findViewById(R.id.btn_save);
-        btn_disapprove = view.findViewById(R.id.btn_disapprove);
 
 
     }
@@ -157,7 +155,7 @@ public class Fragment_Annual_Due extends Fragment {
     private void DownloadInfo(){
 
         if (getArguments() == null) return;
-        mViewModel.DownloadAnnual(getArguments().getString("year_id"), new VM_Annual.OnTransaction() {
+        mViewModel.DownloadAnnual(lsLodgeIDxx, lsYearIDxx, "", "", new VM_Annual.OnTransaction() {
             @Override
             public void OnLoad() {
                 poLoad.ShowDialog("Downloading annual billing. Please wait . .");
@@ -167,6 +165,7 @@ public class Fragment_Annual_Due extends Fragment {
             public void OnSuccess() {
                 poLoad.DismissDialog();
 
+                Toast.makeText(requireActivity(), "Annual billing downloaded successfully", Toast.LENGTH_SHORT).show();
                 InitDataReceiver();
             }
 
@@ -178,8 +177,6 @@ public class Fragment_Annual_Due extends Fragment {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
-
-                        InitDataReceiver();
                     }
 
                     @Override
@@ -213,7 +210,7 @@ public class Fragment_Annual_Due extends Fragment {
             @Override
             public void onChanged(EAnnualMaster eAnnualMaster) {
 
-                ClearFields(new ArrayList<>(List.of(mtv_status, tie_transaction_no, auto_lodge_cal, tie_due, tie_remarks, mtv_totaltrans, mtv_totalcoll, auto_lodge_member, tie_due_amount, tie_paid_amount, tie_remarks_detail, chk_exempt)), true);
+                ClearFields(new ArrayList<>(List.of(tie_transaction_no, auto_lodge_cal, tie_due, tie_remarks, mtv_totaltrans, mtv_totalcoll, auto_lodge_member, tie_due_amount, tie_paid_amount, tie_remarks_detail, chk_exempt)), true);
 
                 if (eAnnualMaster == null){
 
@@ -237,21 +234,13 @@ public class Fragment_Annual_Due extends Fragment {
                 tie_due.setText(poAnualMaster.getDDueDatex());
                 tie_remarks.setText(poAnualMaster.getSRemarksx());
 
-                switch (poAnualMaster.getCTranStat()){
-
-                    case "1":
-                        mtv_status.setText("Pending for Approval");
-                        mtv_status.setTextColor(Color.GRAY);
-                        break;
-                    case "2":
-                        mtv_status.setText("Approved");
-                        mtv_status.setTextColor(Color.GREEN);
-                        break;
-                    case "3":
-                        mtv_status.setText("Disapproved");
-                        mtv_status.setTextColor(Color.RED);
-                        break;
-                }
+                lnSelectStatus = Integer.parseInt(poAnualMaster.getCTranStat());
+                auto_status.setAdapter(new ArrayAdapter<>(
+                        requireActivity(),
+                        androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                        mViewModel.GetStatus()
+                ));
+                auto_status.setText(mViewModel.GetStatus().get(lnSelectStatus -1), false);
 
                 mViewModel.GetLodgeCalendars(lsLodgeIDxx).observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @SuppressLint("SetTextI18n")
@@ -266,11 +255,13 @@ public class Fragment_Annual_Due extends Fragment {
 
                         auto_lodge_cal.setAdapter(poCalAdapter);
 
-                        if (poAnualMaster.getSYearIDxx() == null || poAnualMaster.getSYearIDxx().isEmpty()) return;
+                        if (poAnualMaster == null || poAnualMaster.getSYearIDxx().isEmpty()) return;
                         for (LodgeCalendarList loItem : lodgeCalendarLists){
 
                             if (loItem.getSYearIDxx().equalsIgnoreCase(poAnualMaster.getSYearIDxx())){
-                                auto_lodge_cal.setText(loItem.getSLodgeNme() + "(" + loItem.getNYearxxxx() + ")", true);
+
+                                loSelectCalendar = loItem;
+                                auto_lodge_cal.setText(loSelectCalendar.getSLodgeNme() + "(" + loSelectCalendar.getNYearxxxx() + ")", true);
                             }
                         }
                     }
@@ -287,6 +278,7 @@ public class Fragment_Annual_Due extends Fragment {
                         for (AnnualMembers loItem : annualMembers){
 
                             if (!mViewModel.AddAnnualDetail(
+                                    loItem.getSTransNox(),
                                     loItem.getSMemberID(),
                                     loItem.getSMemberNme(),
                                     loItem.getCExemptID(),
@@ -314,8 +306,8 @@ public class Fragment_Annual_Due extends Fragment {
                         double ldbl_paid = 0.00, ldbl_due = 0.00;
                         for (AnnualMembers loAnnual : annualMembers){
 
-                            ldbl_paid += Double.parseDouble(loAnnual.getNAmtDuexx());
-                            ldbl_due += Double.parseDouble(loAnnual.getNAmtPaidx());
+                            ldbl_paid += Double.parseDouble(loAnnual.getNAmtPaidx());
+                            ldbl_due += Double.parseDouble(loAnnual.getNAmtDuexx());
                         }
 
                         mtv_totaltrans.setText(String.valueOf(ldbl_due));
@@ -373,6 +365,15 @@ public class Fragment_Annual_Due extends Fragment {
 
                 loValidPicker.show();
 
+            }
+        });
+
+        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                lnSelectStatus = i + 1;
+                auto_status.setText(mViewModel.GetStatus().get(i), false);
             }
         });
 
@@ -478,6 +479,26 @@ public class Fragment_Annual_Due extends Fragment {
             }
         });
 
+        btn_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Fragment_Annual_Summary loSummary = new Fragment_Annual_Summary();
+
+                Bundle loBundle = new Bundle();
+                loBundle.putString("year_id", lsYearIDxx);
+                loBundle.putString("lodge_id", lsLodgeIDxx);
+
+                loSummary.setArguments(loBundle);
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("annual_summary", loSummary))
+                        .addToBackStack("annual_summary")
+                        .commit();
+            }
+        });
+
         btn_add_member.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -492,6 +513,7 @@ public class Fragment_Annual_Due extends Fragment {
                     public void OnSubmit(AnnualMembers loEntry) {
 
                         if (!mViewModel.AddAnnualDetail(
+                                "",
                                 loEntry.getSMemberID(),
                                 loEntry.getSMemberNme(),
                                 loEntry.getCExemptID(),
@@ -530,10 +552,32 @@ public class Fragment_Annual_Due extends Fragment {
             @Override
             public void onClick(View view) {
 
+                //check transaction's primary required fields if valid
+                if (poAnualMaster == null){
+                    Toast.makeText(requireActivity(), "Transaction is not initialized", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (lnSelectStatus < 1) {
+                    Toast.makeText(requireActivity(), "Status is not initialized", Toast.LENGTH_SHORT).show();
+                    auto_lodge_cal.requestFocus();
+                    return;
+                } else if (loSelectCalendar == null || loSelectCalendar.getSYearIDxx().isEmpty()) {
+                    Toast.makeText(requireActivity(), "Lodge Year is not initialized", Toast.LENGTH_SHORT).show();
+                    auto_lodge_cal.requestFocus();
+                    return;
+                } else if (tie_due.getText() == null || tie_due.getText().toString().isEmpty() || tie_due.getText().toString().equalsIgnoreCase("1900-00-00")) {
+                    Toast.makeText(requireActivity(), "Due Date is not initialized", Toast.LENGTH_SHORT).show();
+                    tie_due.requestFocus();
+                    return;
+                } else if (laDetail == null || laDetail.size() < 1){
+                    Toast.makeText(requireActivity(), "Transaction Detail is empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 //initialize master properties
                 poAnualMaster.setSYearIDxx(loSelectCalendar.getSYearIDxx());
                 poAnualMaster.setDDueDatex(tie_due.getText().toString());
-                poAnualMaster.setSRemarksx(tie_remarks.getText().toString());
+                poAnualMaster.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
+                poAnualMaster.setCTranStat(String.valueOf(lnSelectStatus));
 
                 poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
@@ -545,7 +589,7 @@ public class Fragment_Annual_Due extends Fragment {
                     public void OnNegative(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
 
-                        mViewModel.CreateAnnualDue(poAnualMaster, laDetail, new VM_Annual.OnTransaction() {
+                        mViewModel.SaveAnnualDue(poAnualMaster, laDetail, new VM_Annual.OnTransaction() {
                             @Override
                             public void OnLoad() {
                                 poLoad.ShowDialog("Creating annual dues. Please wait . . .");

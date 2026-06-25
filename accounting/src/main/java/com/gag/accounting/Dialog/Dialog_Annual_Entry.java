@@ -159,6 +159,7 @@ public class Dialog_Annual_Entry {
                 }
 
                 AnnualMembers loMembers = new AnnualMembers(
+                        "",
                         loSelectMember.getSMemberID(),
                         loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(),
                         chk_exempt.isChecked() ? "1" : "0",

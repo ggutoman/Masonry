@@ -1,7 +1,6 @@
 package com.gag.accounting.ViewModel;
 
 import android.app.Application;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -10,18 +9,15 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.Annual;
 import org.gag.appdriver.App.Models.AnnualMembers;
+import org.gag.appdriver.App.Models.AnnualSummary;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
-import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.Entities.EAnnualDetail;
 import org.gag.appdriver.Room.Entities.EAnnualMaster;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class VM_Annual extends AndroidViewModel {
@@ -49,12 +45,32 @@ public class VM_Annual extends AndroidViewModel {
         return poAnnual.GetCurrentDate();
     }
 
+    public String GetFormattedDate(String fsDate, String fsFormat){
+        return poAnnual.FormatDateString(fsDate, fsFormat);
+    }
+
+    public Date GetStringDate(String fsDate, String fsFormat){
+        return poAnnual.ConvertStringDate(fsDate, fsFormat);
+    }
+
+    public String GetFormatDateString(Date fsDate, String fsFormat){
+        return poAnnual.ConvertDateString(fsDate, fsFormat);
+    }
+
+    public String GetFormatLongDate(long fsDate){
+        return poAnnual.FormatLongDate(fsDate);
+    }
+
     public String GetCurrentDateTime(){
         return poAnnual.GetCurrentDateTime();
     }
 
     public List<String> GetAmountTypes(){
         return new ArrayList<>(List.of("Amount Due", "Amount Paid"));
+    }
+
+    public List<String> GetStatus(){
+        return new ArrayList<>(List.of("Active", "Approve", "Disapprove"));
     }
 
     public LiveData<List<AnnualMembers>> GetAnnualDetail(){
@@ -77,9 +93,22 @@ public class VM_Annual extends AndroidViewModel {
         return poAnnual.GetAnnualDetail(fsTransNox);
     }
 
-    public boolean AddAnnualDetail(String fsMemberID, String fsMemberNme, String fsExemptID, String fsRemarksx, String fsAmtDuexx, String fsAmtPaidx){
+    public LiveData<List<EAnnualMaster>> GetAnnualSummary(String fsLodgeIDxx, String fsYearFrom, String fsYearTo){
+        return poAnnual.GetAnnualMasterSummary(fsLodgeIDxx, fsYearFrom, fsYearTo);
+    }
+
+    public AnnualSummary GetAnnualDetailSummary(String fsTransNox){
+        return poAnnual.GetAnnualDetailSummary(fsTransNox);
+    }
+
+    public LiveData<List<AnnualSummary>> GetAnnualMemberInfo(){
+        return poAnnual.GetAnnualMemberInfo();
+    }
+
+    public boolean AddAnnualDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fsExemptID, String fsRemarksx, String fsAmtDuexx, String fsAmtPaidx){
 
         AnnualMembers loItem = new AnnualMembers(
+                fsTransNox,
                 fsMemberID,
                 fsMemberNme,
                 fsExemptID,
@@ -116,6 +145,7 @@ public class VM_Annual extends AndroidViewModel {
         if (currentList == null) return;
 
         AnnualMembers loDetail = new AnnualMembers(
+                currentList.get(fnIndex).getSTransNox(),
                 currentList.get(fnIndex).getSMemberID(),
                 currentList.get(fnIndex).getSMemberNme(),
                 fcExempt,
@@ -133,10 +163,10 @@ public class VM_Annual extends AndroidViewModel {
         GetAnnualDetail.setValue(new ArrayList<>());
     }
 
-    public void DownloadAnnual(String fsYearIDxx, OnTransaction foCallback){
+    public void DownloadAnnual(String fsLodgeIDxx, String fsYearIDxx, String fsYearFrom, String fsYearTo, OnTransaction foCallback){
 
         foCallback.OnLoad();
-        poAnnual.DownloadAnnualDue(fsYearIDxx).thenAccept(new Consumer<Boolean>() {
+        poAnnual.DownloadAnnualDue(fsLodgeIDxx, fsYearIDxx, fsYearFrom, fsYearTo).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -149,7 +179,23 @@ public class VM_Annual extends AndroidViewModel {
         });
     }
 
-    public void CreateAnnualDue(EAnnualMaster foMaster, List<AnnualMembers> foDetail, OnTransaction foCallback){
+    public void DownloadAnnualMembers(OnTransaction foCallback){
+
+        foCallback.OnLoad();
+        poAnnual.DownloadAnnualMember().thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poAnnual.getMessage());
+                    return;
+                }
+                foCallback.OnSuccess();
+            }
+        });
+    }
+
+    public void SaveAnnualDue(EAnnualMaster foMaster, List<AnnualMembers> foDetail, OnTransaction foCallback){
 
         try {
 
@@ -163,7 +209,7 @@ public class VM_Annual extends AndroidViewModel {
 
                 loDetail.add(
                         new EAnnualDetail(
-                                "",
+                                foDetail.get(i).getSTransNox(),
                                 String.valueOf(i),
                                 foDetail.get(i).getSMemberID(),
                                 foDetail.get(i).getNAmtDuexx(),

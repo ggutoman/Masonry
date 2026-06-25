@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
+import com.gag.accounting.Fragments.Annual.Fragment_Annual_Summary;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;import com.gag.masonry.R;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -169,6 +170,19 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_dues_info", loAnnuals));
                                     fragmentTransaction.addToBackStack("lodge_annual_dues_info");
+                                    break;
+
+                                //view annual summary
+                                case "lodge_annual_information":
+
+                                    Fragment_Annual_Summary loAnnSummary = new Fragment_Annual_Summary();
+
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+                                    loAnnSummary.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_info", loAnnSummary));
+                                    fragmentTransaction.addToBackStack("annual_info");
                                     break;
 
                             }

@@ -33,7 +33,7 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         "Funds",
         "FND",
         1,
-        1
+        2
     ),
 
     MENU_ACCOUNTS(

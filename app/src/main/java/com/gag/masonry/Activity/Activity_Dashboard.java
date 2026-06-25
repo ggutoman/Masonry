@@ -3,7 +3,6 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -15,13 +14,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
-import com.gag.accounting.Fragments.Annual.Fragment_Annual_Entry;
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge;
-import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
 import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
@@ -243,6 +239,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "FND005":
                     InitView("FND005");
                     break;
+                case "FND006":
+                    InitView("FND006");
+                    break;
                 case "MEM001":
                     InitView("MEM001");
                     break;
@@ -337,6 +336,10 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "FND005":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_dues");
+                break;
+            case "FND006": //lodge annual summary information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_annual_information");
                 break;
 
         }

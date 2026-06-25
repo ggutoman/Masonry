@@ -84,10 +84,6 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
 
-    public MemberDashboardInfo GetMemberInfo(String fsUserIDxx){
-        return poDashboard.getPoDBMember().GetMemberParameters(fsUserIDxx);
-    }
-
     public LiveData<MemberDashboardInfo> ObserveMemberInfo(){
         return poDashboard.ObserverMemberInfoByUserID();
     }
@@ -118,10 +114,6 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
         return poDashboard.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
-    }
-
-    public LiveData<List<OfficerHistory>> ObserveOfficerHistory(String fsMemberIDx, String fsDfrom, String fsDto) {
-        return poDashboard.ObserveOfficerHistory(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public LiveData<HashMap<String, ArrayList<String>>> ObserveMemberInfoList(){

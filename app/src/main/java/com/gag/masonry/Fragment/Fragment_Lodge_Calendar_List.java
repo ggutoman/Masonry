@@ -77,8 +77,11 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
             lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
 
-        lsdFrom = mviewModel.GetFirstQuarter();
-        lsdTo = mviewModel.GetCurrentDate();
+        String lsCurrentYear = mviewModel.GetFormatDate(mviewModel.GetCurrentDate(), "yyyy");
+
+        //initialize default range of date to display for the whole year
+        lsdFrom = mviewModel.GetFormatDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
+        lsdTo =  mviewModel.GetFormatDate(lsCurrentYear + "-12-30", "yyyy-MM-dd");
 
         InitViews(view);
         InitDataReceiver();

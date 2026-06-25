@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    app:cardElevation="10dp"
+    app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_transaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:alpha="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_year"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:alpha="0.5"
+            android:gravity="end"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@+id/mtv_transaction"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_transaction"
+            app:layout_constraintStart_toEndOf="@+id/mtv_transaction"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:alpha="0.5"
+            android:textSize="13sp"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_transaction"
+            app:layout_constraintStart_toStartOf="@+id/mtv_transaction"
+            app:layout_constraintEnd_toEndOf="@+id/mtv_transaction"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_due"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A "
+            android:textSize="14sp"
+            android:alpha="0.5"
+            android:gravity="end"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintStart_toEndOf="@+id/mtv_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/mtv_status"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_status"/>
+
+        <View
+            android:id="@+id/view_divider"
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:layout_marginTop="5dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_due"
+            app:layout_constraintStart_toStartOf="@+id/mtv_due"
+            app:layout_constraintEnd_toEndOf="@+id/mtv_year"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_totaltrans_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Transaction:"
+            android:alpha="0.7"
+            android:layout_marginTop="15dp"
+            app:layout_constraintTop_toBottomOf="@+id/view_divider"
+            app:layout_constraintStart_toStartOf="@+id/mtv_transaction"
+            app:layout_constraintEnd_toEndOf="@+id/mtv_transaction"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_totalcoll_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Collection:"
+            android:alpha="0.7"
+            android:layout_marginTop="3dp"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_totaltrans_label"
+            app:layout_constraintStart_toStartOf="@+id/mtv_totaltrans_label"
+            app:layout_constraintEnd_toEndOf="@+id/mtv_totaltrans_label"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_totaltrans"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="0.00"
+            android:layout_marginStart="1dp"
+            android:gravity="end"
+            app:layout_constraintTop_toTopOf="@+id/mtv_totaltrans_label"
+            app:layout_constraintStart_toEndOf="@+id/mtv_totaltrans_label"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_totalcoll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="0.00"
+            android:gravity="end"
+            android:layout_marginEnd="1dp"
+            app:layout_constraintTop_toTopOf="@+id/mtv_totalcoll_label"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_totalcoll_label"
+            app:layout_constraintStart_toEndOf="@+id/mtv_totalcoll_label"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -6,6 +6,7 @@ import org.gag.appdriver.Constants.DATE_CONSTANTS
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -154,4 +155,39 @@ class DateRepository {
             formatter.format(date!!)
         }
     }
+
+    fun ConvertStringDate(input: String, fsFormat: String): Date? {
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
+            val localDate = LocalDate.parse(input, formatter)
+
+
+            val instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            Date.from(instant)
+        } else {
+
+            val parser = SimpleDateFormat(fsFormat, Locale.getDefault())
+            parser.parse(input)
+        }
+    }
+
+    fun ConvertDateString(date: Date, fsFormat: String): String {
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
+            val instant = date.toInstant()
+            val localDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+            formatter.format(localDateTime)
+        } else {
+
+            val formatter = SimpleDateFormat(fsFormat, Locale.getDefault())
+            formatter.format(date)
+        }
+    }
+
+
 }
