@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Core.Lodge;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.Entities.EFundLedger;
 import org.gag.appdriver.Room.Entities.ELodgeCalendar;
@@ -51,7 +52,7 @@ public class VM_Lodge extends AndroidViewModel {
         return poFunds.ObserveLodgeInfo(fsLodgeIDx);
     }
 
-    public LiveData<List<ELodgeInfo>> GetLodgeList() {
+    public LiveData<List<LodgeInfo>> GetLodgeList() {
         return poLodge.GetLodges();
     }
 

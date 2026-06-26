@@ -3,7 +3,6 @@ package com.gag.masonry.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,15 +30,16 @@ import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 import com.gag.useraccount.Fragments.Fragment_Member;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.Adapter_Annual_Member_Info;
-import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.AnnualSummary;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerInfo;
@@ -55,7 +55,7 @@ public class Fragment_Home extends Fragment {
     private VM_Annual mAnnualViewModel;
     private Message_Dialog poMessage;
 
-    private MaterialTextView mtv_username, mtv_lodge, btn_download_pledge;
+    private MaterialTextView mtv_username, mtv_lodge;
     private TabLayout tab_layout;
     private Adapter_Member_List loMemberAdaoter;
     private Adapter_Officer_List loOfficerAdapter;
@@ -63,12 +63,14 @@ public class Fragment_Home extends Fragment {
 
     private ConstraintLayout layout_no_record, layout_records, layout_no_record_pledge;
     private LinearLayout layout_pledges;
-    private MaterialTextView mtv_no_record;
+    private MaterialTextView mtv_no_record, btn_download;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
     private RecyclerView rcv_home, rcv_pledges;
-    private View layout_footer;
+    private BottomNavigationView bar_menu;
+
+    private int bottomBarSelect = 0;
 
     private String lsDfrom, lsDto, lsMemberId;
 
@@ -113,12 +115,11 @@ public class Fragment_Home extends Fragment {
         rcv_home = view.findViewById(R.id.rcv_home);
 
         //member objects
+        bar_menu = view.findViewById(R.id.bar_menu);
+        btn_download = view.findViewById(R.id.btn_download);
         rcv_pledges = view.findViewById(R.id.rcv_pledges);
         layout_pledges = view.findViewById(R.id.layout_pledges);
         layout_no_record_pledge = view.findViewById(R.id.layout_no_record_pledge);
-        btn_download_pledge = view.findViewById(R.id.btn_download_pledge);
-
-        layout_footer = view.findViewById(R.id.layout_footer);
     }
 
     private void InitData(){
@@ -147,12 +148,11 @@ public class Fragment_Home extends Fragment {
                 mtv_lodge.setText(eMemberInfo.getSLodgeNme());
 
                 //display the following based on user level, USER (FUND ENTRIES & ANNUAL DUES), ADMIN/OWNER(MEMBERS & OFFICERS LIST )
-                if (getArguments() == null || getArguments().getInt("user_level") <= 1){
+                if (getArguments() == null || getArguments().getInt("user_level") < 1){
 
                     //show officer objects for member
                     layout_records.setVisibility(View.GONE);
 
-                    layout_footer.setVisibility(View.VISIBLE);
                     layout_pledges.setVisibility(View.VISIBLE);
                     rcv_pledges.setVisibility(View.VISIBLE);
 
@@ -162,8 +162,6 @@ public class Fragment_Home extends Fragment {
 
                     //hide officer objects for member
                     layout_records.setVisibility(View.VISIBLE);
-
-                    layout_footer.setVisibility(View.GONE);
                     layout_pledges.setVisibility(View.GONE);
 
                     InitOfficerList();
@@ -193,6 +191,9 @@ public class Fragment_Home extends Fragment {
                     loMemberAdaoter = new Adapter_Member_List(requireActivity(), eMemberInfos, new Adapter_Member_List.OnSelect() {
                         @Override
                         public void Selected(EMemberInfo foMember) {
+
+                            //do not allow viewing and editing of member details for users with acc level (1)
+                            if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
 
                             Fragment loDetail = new Fragment_Member();
 
@@ -234,6 +235,9 @@ public class Fragment_Home extends Fragment {
                     loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerInfos, new Adapter_Officer_List.OnSelect() {
                         @Override
                         public void Selected(OfficerInfo poItem) {
+
+                            //do not allow viewing and editing of officer details for users with acc level (1)
+                            if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
 
                             Fragment loDetail = new Fragment_Assign_Officer();
 
@@ -301,7 +305,6 @@ public class Fragment_Home extends Fragment {
                     layout_no_record_pledge.setVisibility(View.VISIBLE);
                     rcv_pledges.setVisibility(View.GONE);
 
-                    mtv_no_record.setText("No pledges found on this lodge");
                     return;
                 }
                 layout_no_record_pledge.setVisibility(View.GONE);
@@ -314,7 +317,7 @@ public class Fragment_Home extends Fragment {
         });
     }
 
-    private void DownloadMemberPledges(){
+    private void DownloadMemberDues(){
 
         mAnnualViewModel.DownloadAnnualMembers(new VM_Annual.OnTransaction() {
             @Override
@@ -512,7 +515,32 @@ public class Fragment_Home extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        btn_download_pledge.setOnClickListener(view -> DownloadMemberPledges());
+        bar_menu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                if (item.getItemId() == com.gag.accounting.R.id.action_item_dues) {
+                    bottomBarSelect = 0;
+                    return true;
+                }else if (item.getItemId() == com.gag.accounting.R.id.action_item_project) {
+                    bottomBarSelect = 1;
+                    return true;
+                }else if (item.getItemId() == com.gag.accounting.R.id.action_item_pledges) {
+                    bottomBarSelect = 2;
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        btn_download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (bottomBarSelect == 0) DownloadMemberDues();
+            }
+        });
     }
 
     private void InitFilterStatus(int status){

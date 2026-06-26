@@ -12,17 +12,18 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 
 import java.util.List;
 
-public class LodgeAdapter extends ArrayAdapter<ELodgeInfo> {
+public class LodgeAdapter extends ArrayAdapter<LodgeInfo> {
 
     private final Context loContext;
-    public final List<ELodgeInfo> lodges;
+    public final List<LodgeInfo> lodges;
 
-    public LodgeAdapter(@NonNull Context context, int resource, @NonNull List<ELodgeInfo> objects) {
+    public LodgeAdapter(@NonNull Context context, int resource, @NonNull List<LodgeInfo> objects) {
         super(context, resource, objects);
 
         loContext = context;

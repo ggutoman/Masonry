@@ -41,7 +41,7 @@ public class Adapter_Annual_Member_Info extends RecyclerView.Adapter<Adapter_Ann
         holder.mtv_transaction.setText(laList.get(position).getSTransNox());
         holder.mtv_totaltrans.setText(String.valueOf(laList.get(position).getNTotalTrans()));
         holder.mtv_totalcoll.setText(String.valueOf(laList.get(position).getNTotalColl()));
-        holder.mtv_year.setText(laList.get(position).getNYearxx());
+        holder.mtv_year.setText("L.Y " + laList.get(position).getNYearxx());
         holder.mtv_due.setText(laList.get(position).getDDueDate());
 
         switch (laList.get(position).getCTranStat()){

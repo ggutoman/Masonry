@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
@@ -26,20 +27,20 @@ public class LodgeAdapterList extends RecyclerView.Adapter<LodgeAdapterList.VH_L
 
     private final Context loContext;
     private final SelectItem loCallback;
-    public final List<ELodgeInfo> lodges;
+    public final List<LodgeInfo> lodges;
     private final Adapter_Lodge_List_Filter loFilter;
 
-    public List<ELodgeInfo> lodgesFiltered;
+    public List<LodgeInfo> lodgesFiltered;
 
     public Adapter_Lodge_List_Filter GetFilter(){
         return loFilter;
     }
 
     public interface SelectItem{
-        void OnSelect(ELodgeInfo lodge);
+        void OnSelect(LodgeInfo lodge);
     }
 
-    public LodgeAdapterList( @NonNull Context context, @NonNull List<ELodgeInfo> objects, SelectItem foCallback){
+    public LodgeAdapterList( @NonNull Context context, @NonNull List<LodgeInfo> objects, SelectItem foCallback){
 
         loContext = context;
         lodges = objects;
@@ -96,10 +97,10 @@ public class LodgeAdapterList extends RecyclerView.Adapter<LodgeAdapterList.VH_L
                 lodgesFiltered = lodges;
             }else {
 
-                List<ELodgeInfo> filterSearch = new ArrayList<>();
+                List<LodgeInfo> filterSearch = new ArrayList<>();
 
                 //first filter, via search text
-                for (ELodgeInfo loLodge : lodges){
+                for (LodgeInfo loLodge : lodges){
 
                     if (loLodge.getSLodgeNme().toLowerCase().contains(charSequence.toString().toLowerCase()) ||
                             loLodge.getSAddressx().toLowerCase().contains(charSequence.toString().toLowerCase()) ||
@@ -124,7 +125,7 @@ public class LodgeAdapterList extends RecyclerView.Adapter<LodgeAdapterList.VH_L
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
 
-            lodgesFiltered = (List<ELodgeInfo>) filterResults.values;
+            lodgesFiltered = (List<LodgeInfo>) filterResults.values;
             loAdapter.notifyDataSetChanged();
         }
     }

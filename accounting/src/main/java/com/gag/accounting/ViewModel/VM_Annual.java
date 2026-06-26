@@ -14,6 +14,7 @@ import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Room.Entities.EAnnualDetail;
 import org.gag.appdriver.Room.Entities.EAnnualMaster;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +54,10 @@ public class VM_Annual extends AndroidViewModel {
         return poAnnual.ConvertStringDate(fsDate, fsFormat);
     }
 
+    public EUserInfo GetUserInfo(){
+        return poAnnual.GetUserInfo();
+    }
+
     public String GetFormatDateString(Date fsDate, String fsFormat){
         return poAnnual.ConvertDateString(fsDate, fsFormat);
     }
@@ -67,10 +72,6 @@ public class VM_Annual extends AndroidViewModel {
 
     public List<String> GetAmountTypes(){
         return new ArrayList<>(List.of("Amount Due", "Amount Paid"));
-    }
-
-    public List<String> GetStatus(){
-        return new ArrayList<>(List.of("Active", "Approve", "Disapprove"));
     }
 
     public LiveData<List<AnnualMembers>> GetAnnualDetail(){
@@ -230,6 +231,29 @@ public class VM_Annual extends AndroidViewModel {
             foMaster.setNCollTotl(String.valueOf(ldbl_collectotal));
 
             poAnnual.SaveAnnualDue(foMaster, loDetail).thenAccept(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean aBoolean) {
+
+                    if (!aBoolean){
+                        foCallback.OnFailed(poAnnual.getMessage());
+                        return;
+                    }
+                    foCallback.OnSuccess();
+                }
+            });
+
+        }catch (Exception e){
+            foCallback.OnFailed(e.getMessage());
+        }
+    }
+
+    public void ApproveAnnualDue(EAnnualMaster foMaster, OnTransaction foCallback){
+
+        try {
+
+            foCallback.OnLoad();
+
+            poAnnual.ApproveAnnualDue(foMaster).thenAccept(new Consumer<Boolean>() {
                 @Override
                 public void accept(Boolean aBoolean) {
 

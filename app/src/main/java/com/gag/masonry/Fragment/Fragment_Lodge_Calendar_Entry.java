@@ -25,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapter;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
@@ -144,9 +145,9 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                 }
 
                 //get lodge list
-                mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+                mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
                     @Override
-                    public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+                    public void onChanged(List<LodgeInfo> eLodgeInfos) {
 
                         if (eLodgeInfos == null) return;
 

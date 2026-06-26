@@ -13,6 +13,7 @@ import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.Models.LodgeCalendarList
+import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
@@ -46,7 +47,7 @@ class Lodge(loInstance : Context) {
 
     fun GetLodgeCalendarInfo( sYearIDx : String) : LiveData<ELodgeCalendar> = poLodgeCalendar.ObserveLodgeCalendarInfo(sYearIDx)
 
-    fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
+    fun GetLodges() : LiveData<List<LodgeInfo>> = poLodgeInfo.ObserveLodgeList()
 
     fun GetLodgeCalendarList(fsLodgeIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList(fsLodgeIDx, fsDateFrom, fsDateTo)
 

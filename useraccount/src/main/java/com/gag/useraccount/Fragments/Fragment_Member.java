@@ -41,6 +41,7 @@ import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
 import org.gag.appdriver.App.Adapters.TitleAdapter;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.DataObject.DTownInfo;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
@@ -415,9 +416,9 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+        mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
             @Override
-            public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+            public void onChanged(List<LodgeInfo> eLodgeInfos) {
 
                 if (eLodgeInfos.size() < 1) return;
 

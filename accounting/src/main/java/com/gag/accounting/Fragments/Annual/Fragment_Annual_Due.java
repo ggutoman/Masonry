@@ -62,17 +62,17 @@ public class Fragment_Annual_Due extends Fragment {
 
     private List<AnnualMembers> laDetail;
     private String lsYearIDxx, lsLodgeIDxx, lsStackIDxx;
-    private int lnSelectDetail = -1, lnSelectStatus = -1;
+    private int lnSelectDetail = -1;
 
 
-    private MaterialTextView btn_download, btn_view, btn_save_detail,  mtv_totaltrans,  mtv_totalcoll;
-    private MaterialAutoCompleteTextView auto_lodge_cal, auto_lodge_member, auto_status;
-    private TextInputLayout til_lodge_cal, til_status;
+    private MaterialTextView btn_download, btn_view, btn_save_detail,  mtv_totaltrans,  mtv_totalcoll, mtv_status;
+    private MaterialAutoCompleteTextView auto_lodge_cal, auto_lodge_member;
+    private TextInputLayout til_lodge_cal;
     private TextInputEditText tie_transaction_no, tie_due, tie_remarks, tie_paid_amount, tie_due_amount, tie_remarks_detail;
     private CheckBox chk_exempt;
     private ImageButton btn_add_member;
     private ConstraintLayout layout_tools;
-    private MaterialButton btn_save;
+    private MaterialButton btn_save, btn_disapprove;
 
 
     @Override
@@ -104,7 +104,6 @@ public class Fragment_Annual_Due extends Fragment {
 
                 case "annual_due_info":
                     til_lodge_cal.setEnabled(false);
-                    til_status.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
 
                     DownloadInfo();
@@ -112,7 +111,6 @@ public class Fragment_Annual_Due extends Fragment {
 
                 case "annual_due_entry":
                     til_lodge_cal.setEnabled(true);
-                    til_status.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
 
                     InitDataReceiver();
@@ -132,9 +130,8 @@ public class Fragment_Annual_Due extends Fragment {
 
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
         til_lodge_cal = view.findViewById(R.id.til_lodge_cal);
-        til_status = view.findViewById(R.id.til_status);
         auto_lodge_cal = view.findViewById(R.id.auto_lodge_cal);
-        auto_status = view.findViewById(R.id.auto_status);
+        mtv_status = view.findViewById(R.id.mtv_status);
         auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
         tie_due = view.findViewById(R.id.tie_due);
         tie_remarks = view.findViewById(R.id.tie_remarks);
@@ -148,8 +145,7 @@ public class Fragment_Annual_Due extends Fragment {
         btn_save_detail = view.findViewById(R.id.btn_save_detail);
         btn_add_member = view.findViewById(R.id.btn_add_member);
         btn_save = view.findViewById(R.id.btn_save);
-
-
+        btn_disapprove = view.findViewById(R.id.btn_disapprove);
     }
 
     private void DownloadInfo(){
@@ -204,6 +200,19 @@ public class Fragment_Annual_Due extends Fragment {
         }
     }
 
+    private void AllowFields(boolean fsAllowed){
+
+        btn_add_member.setEnabled(fsAllowed);
+        auto_lodge_cal.setEnabled(fsAllowed);
+        tie_due.setEnabled(fsAllowed);
+        tie_remarks.setEnabled(fsAllowed);
+        tie_due_amount.setEnabled(fsAllowed);
+        tie_paid_amount.setEnabled(fsAllowed);
+        tie_remarks_detail.setEnabled(fsAllowed);
+        chk_exempt.setEnabled(fsAllowed);
+
+    }
+
     private void InitDataReceiver(){
 
         mViewModel.GetAnnualMaster(lsYearIDxx).observe(getViewLifecycleOwner(), new Observer<EAnnualMaster>() {
@@ -234,13 +243,41 @@ public class Fragment_Annual_Due extends Fragment {
                 tie_due.setText(poAnualMaster.getDDueDatex());
                 tie_remarks.setText(poAnualMaster.getSRemarksx());
 
-                lnSelectStatus = Integer.parseInt(poAnualMaster.getCTranStat());
-                auto_status.setAdapter(new ArrayAdapter<>(
-                        requireActivity(),
-                        androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                        mViewModel.GetStatus()
-                ));
-                auto_status.setText(mViewModel.GetStatus().get(lnSelectStatus -1), false);
+                //pending for approval, allowed for update of entry for accounts with user level
+                if (poAnualMaster.getCTranStat().equalsIgnoreCase("1")){
+
+                    mtv_status.setText("Pending for Approval");
+
+                    //for regular user, allow update of fund entry, admin or officers are allowed to approve or verify funds
+                    if ((mViewModel.GetUserInfo() == null ? 1 : mViewModel.GetUserInfo().getNUserLevl()) < 2){
+                        btn_save.setText("Save Billing");
+
+                        //allow modifications if pending but account level is USER level
+                        AllowFields(true);
+
+                        btn_save.setVisibility(View.VISIBLE);
+                        btn_disapprove.setVisibility(View.GONE);
+                    }else {
+                        btn_save.setText("Approve");
+                        btn_disapprove.setText("Disapprove");
+
+                        btn_save.setVisibility(View.VISIBLE);
+                        btn_disapprove.setVisibility(View.VISIBLE);
+
+                        //allow modifications if pending but account level is NOT USER level
+                        AllowFields(false);
+                    }
+
+                }else{
+
+                    mtv_status.setText(poAnualMaster.getCTranStat().equalsIgnoreCase("2") ? "Approved" : "Disapproved");
+
+                    //allow modifications if NOT PENDING
+                    AllowFields(false);
+
+                    btn_save.setVisibility(View.GONE);
+                    btn_disapprove.setVisibility(View.GONE);
+                }
 
                 mViewModel.GetLodgeCalendars(lsLodgeIDxx).observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @SuppressLint("SetTextI18n")
@@ -319,6 +356,145 @@ public class Fragment_Annual_Due extends Fragment {
         });
     }
 
+    private void SaveAnnual(){
+
+        //check transaction's primary required fields if valid
+        if (poAnualMaster == null){
+            Toast.makeText(requireActivity(), "Transaction is not initialized", Toast.LENGTH_SHORT).show();
+            return;
+        }else if (loSelectCalendar == null || loSelectCalendar.getSYearIDxx().isEmpty()) {
+            Toast.makeText(requireActivity(), "Lodge Year is not initialized", Toast.LENGTH_SHORT).show();
+            auto_lodge_cal.requestFocus();
+            return;
+        } else if (tie_due.getText() == null || tie_due.getText().toString().isEmpty() || tie_due.getText().toString().equalsIgnoreCase("1900-00-00")) {
+            Toast.makeText(requireActivity(), "Due Date is not initialized", Toast.LENGTH_SHORT).show();
+            tie_due.requestFocus();
+            return;
+        } else if (laDetail == null || laDetail.size() < 1){
+            Toast.makeText(requireActivity(), "Transaction Detail is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        //initialize master properties
+        poAnualMaster.setSYearIDxx(loSelectCalendar.getSYearIDxx());
+        poAnualMaster.setDDueDatex(tie_due.getText().toString());
+        poAnualMaster.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
+
+        poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+            @Override
+            public void OnPositive(@NotNull AlertDialog poDialog) {
+                poDialog.dismiss();
+            }
+
+            @Override
+            public void OnNegative(@NotNull AlertDialog poDialog) {
+                poDialog.dismiss();
+
+                mViewModel.SaveAnnualDue(poAnualMaster, laDetail, new VM_Annual.OnTransaction() {
+                    @Override
+                    public void OnLoad() {
+                        poLoad.ShowDialog("Creating annual dues. Please wait . . .");
+                    }
+
+                    @Override
+                    public void OnSuccess() {
+                        poLoad.DismissDialog();
+
+                        poMessage.ShowMessage(0, "Annual due saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                requireActivity().getSupportFragmentManager()
+                                        .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void OnFailed(String fsMessage) {
+                        poLoad.DismissDialog();
+
+                        poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                    }
+                });
+            }
+        });
+
+    }
+
+    private void ApproveAnnual(String fsStatus){
+
+        poMessage.ShowMessage(2, "Are you sure you want to " + (fsStatus.equalsIgnoreCase("2") ? "approve" : "disapprove") + " this transaction?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+            @Override
+            public void OnPositive(@NotNull AlertDialog poDialog) {
+                poDialog.dismiss();
+            }
+
+            @Override
+            public void OnNegative(@NotNull AlertDialog poDialog) {
+                poDialog.dismiss();
+
+                if (poAnualMaster == null){
+                    Toast.makeText(requireActivity(), "Transaction is not initialized", Toast.LENGTH_SHORT).show();
+                    return;
+                }else if(poAnualMaster.getSTransNox().isEmpty()){
+                    Toast.makeText(requireActivity(), "Transaction ID not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //set status change
+                poAnualMaster.setCTranStat(fsStatus);
+
+                //save status change
+                mViewModel.ApproveAnnualDue(poAnualMaster, new VM_Annual.OnTransaction() {
+                    @Override
+                    public void OnLoad() {
+                        poLoad.ShowDialog("Saving approval. Please wait . . .");
+                    }
+
+                    @Override
+                    public void OnSuccess() {
+                        poLoad.DismissDialog();
+
+                        poMessage.ShowMessage(0, "Approval has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                requireActivity().getSupportFragmentManager()
+                                        .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                    }
+
+                    @Override
+                    public void OnFailed(String fsMessage) {
+                        poLoad.DismissDialog();
+
+                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+    }
+
     private void InitListener(){
 
         auto_lodge_cal.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -365,15 +541,6 @@ public class Fragment_Annual_Due extends Fragment {
 
                 loValidPicker.show();
 
-            }
-        });
-
-        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lnSelectStatus = i + 1;
-                auto_status.setText(mViewModel.GetStatus().get(i), false);
             }
         });
 
@@ -552,86 +719,21 @@ public class Fragment_Annual_Due extends Fragment {
             @Override
             public void onClick(View view) {
 
-                //check transaction's primary required fields if valid
-                if (poAnualMaster == null){
-                    Toast.makeText(requireActivity(), "Transaction is not initialized", Toast.LENGTH_SHORT).show();
-                    return;
-                } else if (lnSelectStatus < 1) {
-                    Toast.makeText(requireActivity(), "Status is not initialized", Toast.LENGTH_SHORT).show();
-                    auto_lodge_cal.requestFocus();
-                    return;
-                } else if (loSelectCalendar == null || loSelectCalendar.getSYearIDxx().isEmpty()) {
-                    Toast.makeText(requireActivity(), "Lodge Year is not initialized", Toast.LENGTH_SHORT).show();
-                    auto_lodge_cal.requestFocus();
-                    return;
-                } else if (tie_due.getText() == null || tie_due.getText().toString().isEmpty() || tie_due.getText().toString().equalsIgnoreCase("1900-00-00")) {
-                    Toast.makeText(requireActivity(), "Due Date is not initialized", Toast.LENGTH_SHORT).show();
-                    tie_due.requestFocus();
-                    return;
-                } else if (laDetail == null || laDetail.size() < 1){
-                    Toast.makeText(requireActivity(), "Transaction Detail is empty", Toast.LENGTH_SHORT).show();
-                    return;
+                if (btn_save.getText().toString().equalsIgnoreCase("Save Billing")){
+
+                    SaveAnnual();
+                }else {
+
+                    ApproveAnnual("2");
                 }
+            }
+        });
 
-                //initialize master properties
-                poAnualMaster.setSYearIDxx(loSelectCalendar.getSYearIDxx());
-                poAnualMaster.setDDueDatex(tie_due.getText().toString());
-                poAnualMaster.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
-                poAnualMaster.setCTranStat(String.valueOf(lnSelectStatus));
+        btn_disapprove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                    @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-                    }
-
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-
-                        mViewModel.SaveAnnualDue(poAnualMaster, laDetail, new VM_Annual.OnTransaction() {
-                            @Override
-                            public void OnLoad() {
-                                poLoad.ShowDialog("Creating annual dues. Please wait . . .");
-                            }
-
-                            @Override
-                            public void OnSuccess() {
-                                poLoad.DismissDialog();
-
-                                poMessage.ShowMessage(0, "Annual due saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-
-                                        requireActivity().getSupportFragmentManager()
-                                                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                    }
-
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void OnFailed(String fsMessage) {
-                                poLoad.DismissDialog();
-
-                                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                });
-                            }
-                        });
-                    }
-                });
+                ApproveAnnual("3");
             }
         });
     }

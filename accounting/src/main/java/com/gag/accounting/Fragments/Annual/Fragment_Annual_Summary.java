@@ -212,7 +212,7 @@ public class Fragment_Annual_Summary extends Fragment {
 
                 }else{
 
-                    mtv_lodge_name.setText(lodgeCalendarLists.get(0).getSLodgeNme());
+                    if (lodgeCalendarLists.size() > 0) mtv_lodge_name.setText(lodgeCalendarLists.get(0).getSLodgeNme());
                     mtv_lodge_year.setVisibility(View.GONE);
 
                     mtv_transaction.setText("Transaction Summary");

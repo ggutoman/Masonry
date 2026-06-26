@@ -34,6 +34,7 @@ import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
+import org.gag.appdriver.Room.DataObject.DFundLedger
 import org.gag.appdriver.Room.DataObject.DFundTurnover
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
@@ -80,6 +81,7 @@ class Dashboard(loInstance : Context) {
     val poOfficers : DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
     val poFunds : DFundTurnover = ML_DBF.getDatabase(loInstance)?.GetFundTurnOver() as DFundTurnover
+    val poLedger : DFundLedger = ML_DBF.getDatabase(loInstance)?.GetFundLedger() as DFundLedger
     val poAnnualMaster: DAnnualMaster = ML_DBF.getDatabase(loInstance)?.GetAnnualMaster() as DAnnualMaster
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(loInstance)?.GetAnnualDetail() as DAnnualDetail
 
@@ -145,6 +147,7 @@ class Dashboard(loInstance : Context) {
         poLodgeCalendar.DeleteLodgeCalendar()
 
         poFunds.DeleteFunds()
+        poLedger.DeleteLedger()
         poAnnualMaster.Clear()
         poAnnualDetail.Clear()
 

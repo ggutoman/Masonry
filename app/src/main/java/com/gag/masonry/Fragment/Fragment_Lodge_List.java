@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapterList;
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
 
@@ -62,9 +63,9 @@ public class Fragment_Lodge_List extends Fragment {
 
     private void InitDataReceiver(){
 
-        mViewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+        mViewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
             @Override
-            public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+            public void onChanged(List<LodgeInfo> eLodgeInfos) {
 
                 if (eLodgeInfos == null){
                     layout_no_record.setVisibility(View.VISIBLE);
@@ -76,7 +77,7 @@ public class Fragment_Lodge_List extends Fragment {
 
                 loAdapter = new LodgeAdapterList(requireActivity(), eLodgeInfos, new LodgeAdapterList.SelectItem() {
                     @Override
-                    public void OnSelect(ELodgeInfo lodge) {
+                    public void OnSelect(LodgeInfo lodge) {
 
                         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
 

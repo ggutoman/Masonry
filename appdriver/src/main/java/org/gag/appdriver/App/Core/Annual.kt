@@ -27,9 +27,11 @@ import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONArray
 import org.json.JSONObject
@@ -46,10 +48,13 @@ class Annual(instance : Context) {
     val dateRepository : DateRepository = DateRepository()
     val encryptObj : HashRepository = HashRepository()
 
+    val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance)?.GetUserDao() as DUserInfo
     val poAnnualMaster : DAnnualMaster = ML_DBF.getDatabase(instance)?.GetAnnualMaster() as DAnnualMaster
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(instance)?.GetAnnualDetail() as DAnnualDetail
     val poLodgeYear : DLodgeCalendar = ML_DBF.getDatabase(instance)?.GetLodgeCalendar() as DLodgeCalendar
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance)?.GetMemberDao() as DMemberInfo
+
+    fun GetUserInfo() : EUserInfo  = poUserInfo.GetUserInfo()
 
     fun GetUserID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -292,6 +297,71 @@ class Annual(instance : Context) {
                                 loItem.sTransNox = loMaster.sTransNox
                                 poAnnualDetail.SaveAnnualDetail(loItem)
                             }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun ApproveAnnualDue(loMaster : EAnnualMaster) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+
+                        put("sTransNox", loMaster.sTransNox)
+                        put("cTranStat", loMaster.cTranStat)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_APPROVE_ANNUAL_DUES.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save status change
+                            poAnnualMaster.SaveAnnualMaster(loMaster)
 
                             true
                         }
