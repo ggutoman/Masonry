@@ -84,38 +84,31 @@
                                 android:layout_height="wrap_content">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    style="@style/TextInputStyle.Edittext"
                                     android:id="@+id/tie_transaction_no"
+                                    style="@style/TextInputStyle.Edittext"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:inputType="none"
-                                    android:enabled="false"/>
+                                    android:enabled="false"
+                                    android:inputType="none" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/TextInputStyle"
+                                android:id="@+id/til_dtransact"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="12dp">
+                                android:hint="Date Transact">
 
-                                <com.google.android.material.textview.MaterialTextView
-                                    android:id="@+id/mtv_date_transact"
-                                    android:layout_width="0dp"
+                                <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/TextInputStyle.Edittext"
+                                    android:id="@+id/tie_dtransact"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="N/A"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintWidth_percent="0.5"/>
+                                    android:enabled="false"
+                                    android:inputType="none"/>
 
-                                <com.google.android.material.textview.MaterialTextView
-                                    android:id="@+id/mtv_status"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="N/A"
-                                    android:gravity="end"
-                                    app:layout_constraintEnd_toEndOf="parent"
-                                    app:layout_constraintWidth_percent="0.5"/>
-
-                            </androidx.constraintlayout.widget.ConstraintLayout>
+                            </com.google.android.material.textfield.TextInputLayout>
 
                         </LinearLayout>
 
@@ -171,23 +164,21 @@
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Project Master"
+                                android:text="Project Details"
                                 android:padding="10dp"
                                 android:background="@android:color/darker_gray"/>
 
                             <com.google.android.material.textfield.TextInputLayout
-                                style="@style/TextInputStyle"
+                                style="@style/CustomDropDownTilStyle"
+                                android:id="@+id/til_lodge_cal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Name of the Project">
+                                android:hint="Select Lodge Year">
 
-                                <com.google.android.material.textfield.TextInputEditText
-                                    style="@style/TextInputStyle.Edittext"
-                                    android:id="@+id/tie_name"
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/auto_lodge_cal"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="none"
-                                    android:enabled="false"/>
+                                    android:layout_height="wrap_content"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -200,6 +191,38 @@
 
                                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/auto_proj_type"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"/>
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/CustomDropDownTilStyle"
+                                android:id="@+id/til_status"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Select Project Status">
+
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/auto_status"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"/>
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/TextInputStyle"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Name of the Project">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/TextInputStyle.Edittext"
+                                    android:id="@+id/tie_name"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"/>
 
@@ -251,7 +274,7 @@
                                     <com.google.android.material.textview.MaterialTextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:text="Project Details"
+                                        android:text="Members Pledge"
                                         android:background="@android:color/darker_gray"
                                         android:padding="10dp"
                                         android:layout_marginTop="20dp"
@@ -259,7 +282,7 @@
                                         app:layout_constraintEnd_toEndOf="parent"/>
 
                                     <ImageButton
-                                        android:id="@+id/btn_add_member"
+                                        android:id="@+id/btn_add_detail"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:src="@drawable/baseline_add_circle_24"
@@ -287,14 +310,14 @@
                                             android:id="@+id/mtv_totaltrans_label"
                                             android:layout_width="0dp"
                                             android:layout_height="wrap_content"
-                                            android:text="Total Transaction:"
+                                            android:text="Total Pledges:"
                                             android:layout_marginTop="10dp"
                                             app:layout_constraintStart_toStartOf="parent"
                                             app:layout_constraintWidth_percent="0.5"/>
 
                                         <com.google.android.material.textview.MaterialTextView
                                             style="@style/Text_Header"
-                                            android:id="@+id/mtv_totaltrans"
+                                            android:id="@+id/mtv_totalpledge"
                                             android:layout_width="0dp"
                                             android:layout_height="wrap_content"
                                             android:text="0.00"
@@ -308,7 +331,7 @@
                                             android:id="@+id/mtv_totalcoll_label"
                                             android:layout_width="0dp"
                                             android:layout_height="wrap_content"
-                                            android:text="Total Collection:"
+                                            android:text="Total Contributions:"
                                             android:layout_marginTop="10dp"
                                             app:layout_constraintTop_toBottomOf="@+id/mtv_totaltrans_label"
                                             app:layout_constraintStart_toStartOf="@+id/mtv_totaltrans_label"
@@ -317,7 +340,7 @@
 
                                         <com.google.android.material.textview.MaterialTextView
                                             style="@style/Text_Header"
-                                            android:id="@+id/mtv_totalcoll"
+                                            android:id="@+id/mtv_totalcontri"
                                             android:layout_width="0dp"
                                             android:layout_height="wrap_content"
                                             android:text="0.00"
@@ -369,26 +392,10 @@
 
                                 <com.google.android.material.textfield.TextInputLayout
                                     style="@style/TextInputStyle"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:hint="OR No">
-
-                                    <com.google.android.material.textfield.TextInputEditText
-                                        style="@style/TextInputStyle.Edittext"
-                                        android:id="@+id/tie_or_no"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="N/A"
-                                        android:inputType="numberDecimal"/>
-
-                                </com.google.android.material.textfield.TextInputLayout>
-
-                                <com.google.android.material.textfield.TextInputLayout
-                                    style="@style/TextInputStyle"
                                     android:id="@+id/til_pledge_date"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:hint="Validity Date">
+                                    android:hint="Promised Date">
 
                                     <com.google.android.material.textfield.TextInputEditText
                                         style="@style/TextInputStyle.Edittext"
@@ -417,6 +424,29 @@
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="(Only if applicable)"
+                                    android:layout_margin="5dp"
+                                    android:alpha="0.7"/>
+
+                                <com.google.android.material.textfield.TextInputLayout
+                                    style="@style/TextInputStyle"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="OR No">
+
+                                    <com.google.android.material.textfield.TextInputEditText
+                                        style="@style/TextInputStyle.Edittext"
+                                        android:id="@+id/tie_or_no"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="numberDecimal"
+                                        android:maxLength="10"/>
+
+                                </com.google.android.material.textfield.TextInputLayout>
+
                                 <com.google.android.material.textfield.TextInputLayout
                                     style="@style/TextInputStyle"
                                     android:layout_width="match_parent"
@@ -439,7 +469,8 @@
                                     android:text="SAVE"
                                     android:gravity="end"
                                     android:textColor="?attr/colorPrimary"
-                                    android:padding="10dp"/>
+                                    android:padding="10dp"
+                                    android:visibility="gone"/>
 
                             </LinearLayout>
 
@@ -464,14 +495,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Save Project"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_disapprove"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Disapprove"
-                    android:backgroundTint="@color/material_error_red"
-                    android:visibility="gone"/>
 
             </LinearLayout>
 

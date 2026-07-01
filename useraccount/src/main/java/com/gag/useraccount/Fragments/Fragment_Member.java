@@ -1109,7 +1109,7 @@ public class Fragment_Member extends Fragment {
                                             townProvince.getPsTownIDxx(),
                                             townProvince.isHomeAddr(),
                                             townProvince.isActive(),
-                                            mviewModel.GetUserID(),
+                                            mviewModel.GetUserID() == null ? "" : mviewModel.GetUserID(),
                                             mviewModel.GetCurrentDate(),
                                             mviewModel.GetCurrentDateTime()
                                     )
@@ -1182,7 +1182,7 @@ public class Fragment_Member extends Fragment {
                                             contactInfo.getSContctNo(),
                                             contactInfo.getSRemarksx(),
                                             contactInfo.getCRecdStat(),
-                                            mviewModel.GetUserID(),
+                                            mviewModel.GetUserID() == null ? "" : mviewModel.GetUserID(),
                                             mviewModel.GetCurrentDate(),
                                             mviewModel.GetCurrentDateTime()
 
@@ -1219,7 +1219,7 @@ public class Fragment_Member extends Fragment {
                                             eMemberEmailInfo.getSMemberID(),
                                             eMemberEmailInfo.getSEmailAdd(),
                                             eMemberEmailInfo.getCRecdStat(),
-                                            mviewModel.GetUserID(),
+                                            mviewModel.GetUserID() == null ? "" : mviewModel.GetUserID(),
                                             mviewModel.GetCurrentDate(),
                                             mviewModel.GetCurrentDateTime()
                                     )

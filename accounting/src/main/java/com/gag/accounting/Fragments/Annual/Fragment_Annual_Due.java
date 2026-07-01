@@ -231,7 +231,7 @@ public class Fragment_Annual_Due extends Fragment {
                             "0.00",
                             "0.00",
                             "1",
-                            mViewModel.GetUserID(),
+                            mViewModel.GetUserID() == null ? "" : mViewModel.GetUserID(),
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
@@ -329,6 +329,7 @@ public class Fragment_Annual_Due extends Fragment {
                     }
                 });
 
+                //get current list
                 mViewModel.GetAnnualDetail().observe(getViewLifecycleOwner(), new Observer<List<AnnualMembers>>() {
                     @Override
                     public void onChanged(List<AnnualMembers> annualMembers) {
@@ -549,6 +550,7 @@ public class Fragment_Annual_Due extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 if (poDetailAdapter == null) return;
+
                 loSelectedDetail = poDetailAdapter.getItem(i);
                 lnSelectDetail = i;
 

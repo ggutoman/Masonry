@@ -29,7 +29,7 @@ public class Adapter_Annual_Members extends RecyclerView.Adapter<Adapter_Annual_
         return new VH_Annual_Summary(
                 LayoutInflater.from(parent.getContext())
                         .inflate(
-                                R.layout.adapter_list_annual_members,
+                                R.layout.list_annual_members,
                                 parent,
                                 false)
         );

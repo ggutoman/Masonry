@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.7"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:gravity="end"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@+id/mtv_name"
+            app:layout_constraintTop_toTopOf="@+id/mtv_name"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1900-00-00"
+            android:textSize="13sp"
+            android:gravity="end"
+            app:layout_constraintStart_toEndOf="@+id/mtv_type"
+            app:layout_constraintWidth_percent="0.5"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

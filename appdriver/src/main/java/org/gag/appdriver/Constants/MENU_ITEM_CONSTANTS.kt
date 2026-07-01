@@ -93,17 +93,9 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         1
     ),
 
-    MENU_ITEM_CREATE_ANNUAL(
-        "Create Annual Billing",
-        "FND002",
-        "FND",
-        1,
-        1
-    ),
-
     MENU_ITEM_FUNDS_HISTORY(
         "Fund History",
-        "FND003",
+        "FND002",
         "FND",
         1,
         1
@@ -111,25 +103,49 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
 
     MENU_ITEM_FUND_SUMMARY(
         "Fund Summary",
-        "FND004",
+        "FND003",
         "FND",
+        1,
+        1
+    ),
+
+    MENU_ITEM_CREATE_ANNUAL(
+        "Create Annual Billing",
+        "ANNL001",
+        "ANNL",
         1,
         1
     ),
 
     MENU_ITEM_LODGE_ANNUAL_HISTORY(
         "Annual Billing History",
-        "FND005",
-        "FND",
+        "ANNL002",
+        "ANNL",
         1,
         1
     ),
 
     MENU_ITEM_LODGE_ANNUAL_SUMMARY(
         "Annual Summary",
-        "FND006",
-        "FND",
+        "ANNL003",
+        "ANNL",
         1,
         1
-    )
+    ),
+
+    MENU_ITEM_CREATE_PROJECTS(
+        "Create Project",
+        "PROJ001",
+        "PROJ",
+        1,
+        1
+    ),
+
+    MENU_ITEM_PROJECTS(
+        "Project History",
+        "PROJ002",
+        "PROJ",
+        1,
+        1
+    ),
 }

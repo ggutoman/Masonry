@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.AnnualSummary;
 
 import java.util.List;
@@ -30,7 +29,7 @@ public class Adapter_Annual_Summary extends RecyclerView.Adapter<Adapter_Annual_
         return new VH_Annual_Summary(
                 LayoutInflater.from(parent.getContext())
                         .inflate(
-                                R.layout.adapter_list_annuals,
+                                R.layout.list_annuals,
                                 parent,
                                 false)
         );

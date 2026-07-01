@@ -29,9 +29,25 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
     ),
 
     MENU_FUNDS(
-        R.drawable.baseline_receipts,
+        R.drawable.baseline_funds,
         "Funds",
         "FND",
+        1,
+        1
+    ),
+
+    MENU_ANNUAL(
+        R.drawable.baseline_due,
+        "Annual",
+        "ANNL",
+        1,
+        1
+    ),
+
+    MENU_PROJECTS(
+        R.drawable.baseline_project,
+        "Projects",
+        "PROJ",
         1,
         1
     ),

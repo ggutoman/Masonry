@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_by_date"
+        android:orderInCategory="100"
+        android:title="By Date"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_item_filter"
+                android:title="Filter"/>
+
+            <item
+                android:id="@+id/action_item_download"
+                android:title="Download"/>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_by_type"
+        android:orderInCategory="100"
+        android:title="By Type"
+        app:showAsAction="never" >
+
+        <menu>
+            <item
+                android:id="@+id/action_item_all_type"
+                android:title="All"/>
+
+            <item
+                android:id="@+id/action_item_brick"
+                android:title="Brick"/>
+
+            <item
+                android:id="@+id/action_item_stone"
+                android:title="Stone"/>
+
+            <item
+                android:id="@+id/action_item_concrete"
+                android:title="Concrete"/>
+
+            <item
+                android:id="@+id/action_item_glass"
+                android:title="Glass Block"/>
+
+            <item
+                android:id="@+id/action_item_adobe"
+                android:title="Adobe"/>
+
+            <item
+                android:id="@+id/action_item_reinforce"
+                android:title="Reinforced"/>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_by_status"
+        android:orderInCategory="100"
+        android:title="By Status"
+        app:showAsAction="never" >
+
+        <menu>
+            <item
+                android:id="@+id/action_item_all_status"
+                android:title="All"/>
+
+            <item
+                android:id="@+id/action_item_plan"
+                android:title="Planned"/>
+
+            <item
+                android:id="@+id/action_item_on_going"
+                android:title="On Going"/>
+
+            <item
+                android:id="@+id/action_item_on_hold"
+                android:title="On Hold"/>
+
+            <item
+                android:id="@+id/action_item_complete"
+                android:title="Completed"/>
+
+            <item
+                android:id="@+id/action_item_cancelled"
+                android:title="Cancelled"/>
+
+        </menu>
+
+    </item>
+
+</menu>

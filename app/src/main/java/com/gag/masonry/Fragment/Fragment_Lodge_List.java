@@ -19,7 +19,10 @@ import android.view.ViewGroup;
 
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Summary;
-import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;import com.gag.masonry.R;
+import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
+import com.gag.accounting.Fragments.Project.Fragment_Project;
+import com.gag.accounting.Fragments.Project.Fragment_Project_History;
+import com.gag.masonry.R;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapterList;
@@ -184,6 +187,34 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_info", loAnnSummary));
                                     fragmentTransaction.addToBackStack("annual_info");
+                                    break;
+
+                                //project entry
+                                case "project_entry":
+
+                                    Fragment_Project loProject = new Fragment_Project();
+
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+                                    loProject.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_entry", loProject));
+                                    fragmentTransaction.addToBackStack("project_entry");
+                                    break;
+
+                                //project history
+                                case "project_information":
+
+                                    Fragment_Lodge_Calendar_List loProjects = new Fragment_Lodge_Calendar_List();
+
+                                    loBundle = new Bundle();
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+
+                                    loProjects.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_information", loProjects));
+                                    fragmentTransaction.addToBackStack("project_information");
                                     break;
 
                             }

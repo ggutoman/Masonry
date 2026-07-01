@@ -49,7 +49,11 @@ class DateRepository {
         }
     }
 
-
+    /**
+     * fnCount => count to calendar
+     * fnDateIndex => index to count
+     * fbIsAdd => is add or subtract
+     * **/
     @SuppressLint("SimpleDateFormat")
     fun GetCountedDate(fnCount : Int, fnDateIndex : Int, fbIsAdd : Boolean) : String{
 

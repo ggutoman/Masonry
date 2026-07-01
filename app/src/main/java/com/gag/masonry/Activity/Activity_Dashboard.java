@@ -233,15 +233,6 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "FND003":
                     InitView("FND003");
                     break;
-                case "FND004":
-                    InitView("FND004");
-                    break;
-                case "FND005":
-                    InitView("FND005");
-                    break;
-                case "FND006":
-                    InitView("FND006");
-                    break;
                 case "MEM001":
                     InitView("MEM001");
                     break;
@@ -253,6 +244,21 @@ public class Activity_Dashboard extends AppCompatActivity {
                     break;
                 case "MEM004":
                     InitView("MEM004");
+                    break;
+                case "ANNL001":
+                    InitView("ANNL001");
+                    break;
+                case "ANNL002":
+                    InitView("ANNL002");
+                    break;
+                case "ANNL003":
+                    InitView("ANNL003");
+                    break;
+                case "PROJ001":
+                    InitView("PROJ001");
+                    break;
+                case "PROJ002":
+                    InitView("PROJ002");
                     break;
             }
 
@@ -321,25 +327,33 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
                 fragmentTransaction.addToBackStack("turnover_funds");
                 break;
-            case "FND002":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("annual_due_entry");
-                break;
-            case "FND003": //lodge fund entries information
+            case "FND002": //lodge fund entries information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("fund_history");
                 break;
-            case "FND004": //lodge fund summary information
+            case "FND003": //lodge fund summary information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_fund_information");
                 break;
-            case "FND005":
+            case "ANNL001": //annual due entry
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("annual_due_entry");
+                break;
+            case "ANNL002": //annual due information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_dues");
                 break;
-            case "FND006": //lodge annual summary information
+            case "ANNL003": //lodge annual summary information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_information");
+                break;
+            case "PROJ001": //project information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_entry");
+                break;
+            case "PROJ002": //project history
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_information");
                 break;
 
         }
