@@ -22,6 +22,12 @@ interface DLodgeCalendar {
     @Query("SELECT a.sYearIDxx sYearIDxx, a.sLodgeIDx sLodgeIDx, a.nYearxxxx nYearxxxx," +
             "a.dFromDate dFromDate, a.dThruDate dThruDate, b.sLodgeNme sLodgeNme " +
             "FROM Lodge_Calendar a, Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) " +
+            "WHERE a.sYearIDxx = :fsYearIDxx GROUP BY a.sYearIDxx LIMIT 1")
+    fun GetLodgeYearInfo(fsYearIDxx : String): LiveData<LodgeCalendarList>
+
+    @Query("SELECT a.sYearIDxx sYearIDxx, a.sLodgeIDx sLodgeIDx, a.nYearxxxx nYearxxxx," +
+            "a.dFromDate dFromDate, a.dThruDate dThruDate, b.sLodgeNme sLodgeNme " +
+            "FROM Lodge_Calendar a, Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) " +
             "WHERE a.sLodgeIDx = :fsLodgeIDxx")
     fun GetLodgeCalendarList(fsLodgeIDxx : String): LiveData<List<LodgeCalendarList>>
 

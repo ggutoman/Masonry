@@ -1,86 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="15dp">
+    android:padding="7.5dp">
 
     <com.google.android.material.textview.MaterialTextView
-        style="@style/Text_Header"
+        android:id="@+id/mtv_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="N/A"
+        android:alpha="0.7"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.6"/>
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/mtv_date"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="June 6, 2026"
-        android:alpha="0.7"/>
+        android:text="1900-00-00"
+        android:textSize="13sp"
+        android:alpha="0.7"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_type"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.6"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/mtv_amount_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="N/A"
+        android:gravity="end"
+        android:alpha="0.7"
+        app:layout_constraintStart_toEndOf="@+id/mtv_type"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.google.android.material.textview.MaterialTextView
         style="@style/Text_Header"
-        android:id="@+id/mtv_transaction"
-        android:layout_width="match_parent"
+        android:id="@+id/mtv_amount"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="M2026050100001"
-        android:padding="15dp"
-        android:alpha="0.8"/>
+        android:text="0.00"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_amount_label"
+        app:layout_constraintStart_toEndOf="@+id/mtv_date"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <com.google.android.material.textview.MaterialTextView
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fund Turnover / Balance Forward"
-        android:paddingStart="20dp"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0.6dp"
         android:layout_marginTop="10dp"
-        android:paddingStart="20dp">
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_amount"/>
 
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_amount_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Amount In"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.4"/>
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_amountl"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="15000.00"
-            app:layout_constraintStart_toEndOf="@+id/mtv_amount_label"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.6"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:paddingStart="20dp">
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_balance_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Balance"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.4"/>
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_balance"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="15000.00"
-            app:layout_constraintStart_toEndOf="@+id/mtv_balance_label"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.6"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

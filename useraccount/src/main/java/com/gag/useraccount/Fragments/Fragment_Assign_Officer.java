@@ -409,7 +409,7 @@ public class Fragment_Assign_Officer extends Fragment {
                                 loSelectMember.getSMemberID(),
                                 String.valueOf(lnSelectLevel),
                                 String.valueOf(lnSelectStatus),
-                                mViewmodel.GetUserID(),
+                                mViewmodel.GetUserID() == null ? "" : mViewmodel.GetUserID(),
                                 mViewmodel.GetCurrentDate(),
                                 mViewmodel.GetCurrentDateTime()
                         );

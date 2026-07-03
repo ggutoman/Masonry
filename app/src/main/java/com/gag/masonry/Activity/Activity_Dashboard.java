@@ -3,7 +3,6 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -15,21 +14,21 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.gag.accounting.Disbursement.Fragments.Fragment_Turnover_Funds;
+import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
-import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
+import com.gag.masonry.Fragment.Fragment_Lodge;
 import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 
-import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_Entry;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
+import com.gag.masonry.Fragment.Fragment_Lodge_List;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -222,11 +221,20 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "LDGE0003":
                     InitView("LDGE0003");
                     break;
+                case "LDGE0004":
+                    InitView("LDGE0004");
+                    break;
                 case "FND001":
                     InitView("FND001");
                     break;
                 case "FND002":
                     InitView("FND002");
+                    break;
+                case "FND003":
+                    InitView("FND003");
+                    break;
+                case "FND004":
+                    InitView("FND004");
                     break;
                 case "MEM001":
                     InitView("MEM001");
@@ -239,6 +247,30 @@ public class Activity_Dashboard extends AppCompatActivity {
                     break;
                 case "MEM004":
                     InitView("MEM004");
+                    break;
+                case "ANNL001":
+                    InitView("ANNL001");
+                    break;
+                case "ANNL002":
+                    InitView("ANNL002");
+                    break;
+                case "ANNL003":
+                    InitView("ANNL003");
+                    break;
+                case "ANNL004":
+                    InitView("ANNL004");
+                    break;
+                case "PROJ001":
+                    InitView("PROJ001");
+                    break;
+                case "PROJ002":
+                    InitView("PROJ002");
+                    break;
+                case "PROJ003":
+                    InitView("PROJ003");
+                    break;
+                case "PROJ004":
+                    InitView("PROJ004");
                     break;
             }
 
@@ -270,16 +302,20 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.addToBackStack("home");
                 break;
             case "LDGE0001":
-                Toast.makeText(Activity_Dashboard.this, "Feature under maintenance", Toast.LENGTH_SHORT).show();
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge());
+                fragmentTransaction.addToBackStack("lodge_entry");
                 break;
             case "LDGE0002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_Entry());
                 fragmentTransaction.addToBackStack("lodge_calendar_entry");
                 break;
-            case "LDGE0003":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_List());
+            case "LDGE0003": //lodge calendars
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_list");
+                break;
+            case "LDGE0004": //lodge list
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_calendar_list");
-
                 break;
             case "MEM002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
@@ -300,16 +336,52 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.addToBackStack("view_account");
                 break;
             case "FND001":
-                Fragment_Turnover_Funds loTurnOver = new Fragment_Turnover_Funds();
-
-                fragmentTransaction.replace(R.id.layout_container, loTurnOver);
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
                 fragmentTransaction.addToBackStack("turnover_funds");
                 break;
-            case "FND002":
-
-                //call fragment with another container as it calls another fragment too
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_List());
+            case "FND002": //lodge fund entries information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("fund_history");
+                break;
+            case "FND003": //lodge fund summary information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_fund_information");
+                break;
+            case "FND004": //lodge fund approval
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_fund_approval");
+                break;
+            case "ANNL001": //annual due entry
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("annual_due_entry");
+                break;
+            case "ANNL002": //annual due information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_annual_dues");
+                break;
+            case "ANNL003": //lodge annual summary information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_annual_information");
+                break;
+            case "ANNL004": //lodge annual approval
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_annual_approval");
+                break;
+            case "PROJ001": //project information
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_entry");
+                break;
+            case "PROJ002": //project history
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_information");
+                break;
+            case "PROJ003": //project history
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_summary");
+                break;
+            case "PROJ004": //project status change
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_status");
                 break;
 
         }

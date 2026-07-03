@@ -3,13 +3,11 @@ package com.gag.masonry.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import com.gag.masonry.Activity.Activity_Dashboard;
 import com.gag.masonry.Adapter.Adapter_MemberInfoList;
-import com.gag.masonry.Adapter.Adapter_Member_List;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Account;
@@ -34,13 +30,8 @@ import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
-import org.gag.appdriver.Libraries.DateUtil.DateRepository;
-import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
-import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
@@ -78,7 +69,7 @@ public class Fragment_UserInfo extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment__user_info, container, false);
+        View view = inflater.inflate(R.layout.fragment_user_info, container, false);
 
         mViewModel = new ViewModelProvider(requireActivity()).get(VM_Main.class);
 

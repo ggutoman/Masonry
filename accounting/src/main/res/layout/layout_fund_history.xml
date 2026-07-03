@@ -15,8 +15,8 @@
             style="@style/Text_Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="Lodge Funds" />
+            android:padding="20dp"
+            android:text="Turnover Fund List" />
 
         <View
             android:layout_width="match_parent"
@@ -85,7 +85,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15sp"
-                android:text="No history found"
+                android:text="No fund entries found"
                 android:alpha="0.5"
                 app:layout_constraintTop_toBottomOf="@+id/icon_no_record"/>
 

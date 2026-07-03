@@ -15,6 +15,7 @@ import androidx.core.graphics.drawable.toDrawable
 class Message_Dialog(instance : Context) {
 
     val context : Context = instance
+    var isCancellable : Boolean = false
 
     lateinit var poDialog : AlertDialog
     lateinit var icon_status : ShapeableImageView
@@ -27,6 +28,10 @@ class Message_Dialog(instance : Context) {
         fun OnNegative(poDialog : AlertDialog)
     }
 
+    fun IsCancellable(bCancellable : Boolean){
+        isCancellable = bCancellable
+    }
+
     fun InitDialog(){
 
         LayoutInflater.from(context).inflate(R.layout.layout_message, null).let {
@@ -34,7 +39,7 @@ class Message_Dialog(instance : Context) {
             AlertDialog.Builder(context)
                 .setCancelable(false)
                 .setView(it).let {
-                    poDialog = it.create().also { it.setCancelable(false) }
+                    poDialog = it.create().also { it.setCancelable(isCancellable) }
                 }
 
             icon_status = it.findViewById(R.id.icon_status)

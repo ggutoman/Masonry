@@ -16,6 +16,7 @@ import org.gag.appdriver.App.DataModels.DownloadMemberContact
 import org.gag.appdriver.App.DataModels.DownloadMemberEmail
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.Models.LodgeCalendarList
+import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
@@ -88,7 +89,7 @@ class UserAccount(instance : Context) {
 
     fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.ObserveUserInfo()
 
-    fun GetLodges() : LiveData<List<ELodgeInfo>> = poLodgeInfo.ObserveLodgeList()
+    fun GetLodges() : LiveData<List<LodgeInfo>> = poLodgeInfo.ObserveLodgeList()
 
     fun SearchTown(fsSearch : String) : LiveData<List<TownProvince>> {
         return poTownInfo.SearchTown("%$fsSearch%")

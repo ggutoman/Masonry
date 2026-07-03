@@ -25,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapter;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.ELodgeInfo;
@@ -88,7 +89,7 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
             lsSelectCalendar = "";
 
             til_lodge.setEnabled(true);
-            btn_save.setText("Create Lodge");
+            btn_save.setText("Create Lodge Calendar");
         }else {
 
             if (getArguments().getString("year_id") == null || getArguments().getString("year_id").isEmpty()){
@@ -144,9 +145,9 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                 }
 
                 //get lodge list
-                mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<ELodgeInfo>>() {
+                mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
                     @Override
-                    public void onChanged(List<ELodgeInfo> eLodgeInfos) {
+                    public void onChanged(List<LodgeInfo> eLodgeInfos) {
 
                         if (eLodgeInfos == null) return;
 
@@ -192,8 +193,6 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                 int currentYear = loCalendar.get(Calendar.YEAR);
 
                 yearPicker.setMinValue(currentYear);
-                yearPicker.setMaxValue(currentYear + 10);
-
                 yearPicker.setValue(currentYear);
 
                 new AlertDialog.Builder(requireContext())
@@ -298,7 +297,7 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
 
                                         requireActivity()
                                                 .getSupportFragmentManager()
-                                                .popBackStack("lodge_calendar_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                                .popBackStack("lodge_calendar_list", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

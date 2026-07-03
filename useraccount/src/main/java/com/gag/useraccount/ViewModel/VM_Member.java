@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
@@ -224,7 +225,7 @@ public class VM_Member extends AndroidViewModel {
         return laSponsors;
     }
 
-    public LiveData<List<ELodgeInfo>> GetLodgeList() {
+    public LiveData<List<LodgeInfo>> GetLodgeList() {
         return poAccount.GetLodges();
     }
 

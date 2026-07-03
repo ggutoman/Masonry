@@ -16,7 +16,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ACC002",
         "ACC",
         1,
-        1
+        0
     ),
 
     MENU_ITEM_LOD_ACCOUNT(
@@ -24,7 +24,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ACC003",
         "ACC",
         1,
-        1
+        0
     ),
 
     /**LODGE INFO**/
@@ -44,9 +44,17 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         2
     ),
 
+    MENU_ITEM_VIEW_LODGE(
+        "View Lodges",
+        "LDGE0003",
+        "LDGE",
+        1,
+        4
+    ),
+
     MENU_ITEM_LODGE_CALENDARS(
         "View Lodge Calendars",
-        "LDGE0003",
+        "LDGE0004",
         "LDGE",
         1,
         2
@@ -91,5 +99,85 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "FND",
         1,
         1
+    ),
+
+    MENU_ITEM_FUND_SUMMARY(
+        "Fund Summary",
+        "FND003",
+        "FND",
+        1,
+        1
+    ),
+
+    MENU_ITEM_FUND_APPROVAL(
+        "Fund Approval",
+        "FND004",
+        "FND",
+        1,
+        2
+    ),
+
+    MENU_ITEM_CREATE_ANNUAL(
+        "Create Annual Billing",
+        "ANNL001",
+        "ANNL",
+        1,
+        1
+    ),
+
+    MENU_ITEM_LODGE_ANNUAL_HISTORY(
+        "Annual Billing History",
+        "ANNL002",
+        "ANNL",
+        1,
+        1
+    ),
+
+    MENU_ITEM_LODGE_ANNUAL_SUMMARY(
+        "Annual Summary",
+        "ANNL003",
+        "ANNL",
+        1,
+        1
+    ),
+
+    MENU_ITEM_LODGE_ANNUAL_APPROVAL(
+        "Annual Approval",
+        "ANNL004",
+        "ANNL",
+        1,
+        2
+    ),
+
+    MENU_ITEM_CREATE_PROJECTS(
+        "Create Project",
+        "PROJ001",
+        "PROJ",
+        1,
+        1
+    ),
+
+    MENU_ITEM_PROJECTS(
+        "Project History",
+        "PROJ002",
+        "PROJ",
+        1,
+        1
+    ),
+
+    MENU_ITEM_PROJECTS_SUMMARY(
+        "Project Summary",
+        "PROJ003",
+        "PROJ",
+        1,
+        1
+    ),
+
+    MENU_ITEM_PROJECTS_STATUS(
+        "Project Status",
+        "PROJ004",
+        "PROJ",
+        1,
+        2
     )
 }
