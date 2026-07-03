@@ -108,19 +108,6 @@ public class Fragment_Lodge_List extends Fragment {
 
                                     break;
 
-                                //view lodge fund summary
-                                case "lodge_fund_information":
-
-                                    Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
-
-                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-                                    loFund.setArguments(loBundle);
-
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_info", loFund));
-                                    fragmentTransaction.addToBackStack("lodge_fund_info");
-                                    break;
-
                                 //view lodge calendar list
                                 case "lodge_calendar_list":
                                     //should open the lodge information
@@ -135,6 +122,19 @@ public class Fragment_Lodge_List extends Fragment {
 
                                     break;
 
+                                //view lodge fund summary
+                                case "lodge_fund_information":
+
+                                    Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
+
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+                                    loFund.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_info", loFund));
+                                    fragmentTransaction.addToBackStack("lodge_fund_info");
+                                    break;
+
                                 //view lodge fund entries
                                 case "fund_history":
                                     Fragment_Lodge_Calendar_List loCalendars = new Fragment_Lodge_Calendar_List();
@@ -145,6 +145,19 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_funds", loCalendars));
                                     fragmentTransaction.addToBackStack("lodge_funds");
+
+                                    break;
+
+                                //approve lodge fund
+                                case "lodge_fund_approval":
+                                    Fragment_Lodge_Calendar_List loFundApproval = new Fragment_Lodge_Calendar_List();
+
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+                                    loFundApproval.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_approval", loFundApproval));
+                                    fragmentTransaction.addToBackStack("lodge_fund_approval");
 
                                     break;
 
@@ -174,6 +187,21 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_dues_info", loAnnuals));
                                     fragmentTransaction.addToBackStack("lodge_annual_dues_info");
+                                    break;
+
+                                //view lodge year annual due approval
+                                case "lodge_annual_approval":
+
+                                    Fragment_Lodge_Calendar_List loAnnualapproval = new Fragment_Lodge_Calendar_List();
+
+                                    loBundle = new Bundle();
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+
+                                    loAnnualapproval.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_approval", loAnnualapproval));
+                                    fragmentTransaction.addToBackStack("lodge_annual_approval");
                                     break;
 
                                 //view annual summary

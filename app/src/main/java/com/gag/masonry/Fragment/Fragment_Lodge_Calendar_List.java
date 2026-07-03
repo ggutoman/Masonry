@@ -154,6 +154,22 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("fund_history", loFund));
                                 fragmentTransaction.addToBackStack("fund_history");
                                 break;
+
+                            //open turnover fund approval
+                            case "lodge_fund_approval":
+
+                                Fragment_Fund_History loFundApproval = new Fragment_Fund_History();
+
+                                loBundle = new Bundle();
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+
+                                loFundApproval.setArguments(loBundle);
+
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_approval", loFundApproval));
+                                fragmentTransaction.addToBackStack("lodge_fund_approval");
+                                break;
+
                             //open lodge calendar annual dues
                             case "lodge_annual_dues_info":
 
@@ -168,6 +184,21 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                 //add to child container, as bridge to initiate another fragment after call
                                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_info", loAnnual));
                                 fragmentTransaction.addToBackStack("annual_due_info");
+                                break;
+                            //open lodge calendar annual dues approval
+                            case "lodge_annual_approval":
+
+                                Fragment_Annual_Due loAnnualApproval = new Fragment_Annual_Due();
+
+                                loBundle = new Bundle();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+
+                                loAnnualApproval.setArguments(loBundle);
+
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_approval", loAnnualApproval));
+                                fragmentTransaction.addToBackStack("lodge_annual_approval");
                                 break;
                             //open project history
                             case "project_information":

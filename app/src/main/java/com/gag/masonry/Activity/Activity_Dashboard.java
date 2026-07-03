@@ -233,6 +233,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "FND003":
                     InitView("FND003");
                     break;
+                case "FND004":
+                    InitView("FND004");
+                    break;
                 case "MEM001":
                     InitView("MEM001");
                     break;
@@ -253,6 +256,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                     break;
                 case "ANNL003":
                     InitView("ANNL003");
+                    break;
+                case "ANNL004":
+                    InitView("ANNL004");
                     break;
                 case "PROJ001":
                     InitView("PROJ001");
@@ -341,6 +347,10 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_fund_information");
                 break;
+            case "FND004": //lodge fund approval
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_fund_approval");
+                break;
             case "ANNL001": //annual due entry
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("annual_due_entry");
@@ -352,6 +362,10 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "ANNL003": //lodge annual summary information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_information");
+                break;
+            case "ANNL004": //lodge annual approval
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("lodge_annual_approval");
                 break;
             case "PROJ001": //project information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());

@@ -109,6 +109,14 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         1
     ),
 
+    MENU_ITEM_FUND_APPROVAL(
+        "Fund Approval",
+        "FND004",
+        "FND",
+        1,
+        2
+    ),
+
     MENU_ITEM_CREATE_ANNUAL(
         "Create Annual Billing",
         "ANNL001",
@@ -131,6 +139,14 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "ANNL",
         1,
         1
+    ),
+
+    MENU_ITEM_LODGE_ANNUAL_APPROVAL(
+        "Annual Approval",
+        "ANNL004",
+        "ANNL",
+        1,
+        2
     ),
 
     MENU_ITEM_CREATE_PROJECTS(

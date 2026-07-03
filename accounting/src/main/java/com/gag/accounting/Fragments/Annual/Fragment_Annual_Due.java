@@ -103,6 +103,7 @@ public class Fragment_Annual_Due extends Fragment {
             switch (lsStackIDxx){
 
                 case "annual_due_info":
+                case "lodge_annual_approval":
                     til_lodge_cal.setEnabled(false);
                     layout_tools.setVisibility(View.VISIBLE);
 
@@ -235,49 +236,34 @@ public class Fragment_Annual_Due extends Fragment {
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
+
                 }else {
+
                     poAnualMaster = eAnnualMaster;
+
                 }
 
                 tie_transaction_no.setText(poAnualMaster.getSTransNox());
                 tie_due.setText(poAnualMaster.getDDueDatex());
                 tie_remarks.setText(poAnualMaster.getSRemarksx());
+                btn_save.setText(poAnualMaster.getCTranStat().equalsIgnoreCase("1") && !lsStackIDxx.equalsIgnoreCase("lodge_annual_approval") ? "Save Billing" : "Approve");
 
-                //pending for approval, allowed for update of entry for accounts with user level
-                if (poAnualMaster.getCTranStat().equalsIgnoreCase("1")){
+                switch (poAnualMaster.getCTranStat()){
 
-                    mtv_status.setText("Pending for Approval");
-
-                    //for regular user, allow update of fund entry, admin or officers are allowed to approve or verify funds
-                    if ((mViewModel.GetUserInfo() == null ? 1 : mViewModel.GetUserInfo().getNUserLevl()) < 2){
-                        btn_save.setText("Save Billing");
-
-                        //allow modifications if pending but account level is USER level
-                        AllowFields(true);
-
-                        btn_save.setVisibility(View.VISIBLE);
-                        btn_disapprove.setVisibility(View.GONE);
-                    }else {
-                        btn_save.setText("Approve");
-                        btn_disapprove.setText("Disapprove");
-
-                        btn_save.setVisibility(View.VISIBLE);
-                        btn_disapprove.setVisibility(View.VISIBLE);
-
-                        //allow modifications if pending but account level is NOT USER level
-                        AllowFields(false);
-                    }
-
-                }else{
-
-                    mtv_status.setText(poAnualMaster.getCTranStat().equalsIgnoreCase("2") ? "Approved" : "Disapproved");
-
-                    //allow modifications if NOT PENDING
-                    AllowFields(false);
-
-                    btn_save.setVisibility(View.GONE);
-                    btn_disapprove.setVisibility(View.GONE);
+                    case "1":
+                        mtv_status.setText("Pending for Approval");
+                        break;
+                    case "2":
+                        mtv_status.setText("Approved");
+                        break;
+                    case "3":
+                        mtv_status.setText("Disapproved");
+                        break;
                 }
+                AllowFields(poAnualMaster.getCTranStat().equalsIgnoreCase("1") && !lsStackIDxx.equalsIgnoreCase("lodge_annual_approval"));
+
+                btn_save.setVisibility(poAnualMaster.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
+                btn_disapprove.setVisibility(poAnualMaster.getCTranStat().equalsIgnoreCase("1") && lsStackIDxx.equalsIgnoreCase("lodge_annual_approval") ? View.VISIBLE : View.GONE);
 
                 mViewModel.GetLodgeCalendars(lsLodgeIDxx).observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @SuppressLint("SetTextI18n")

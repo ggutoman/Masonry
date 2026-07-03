@@ -140,23 +140,6 @@ public class Fragment_Project extends Fragment {
         tie_paid_amount.setEnabled(fisAllowed);
     }
 
-    private void ClearFields(List<View> fields, boolean clearAdapter) {
-
-        for (View view : fields) {
-
-            if (view instanceof TextInputEditText){
-                ((TextInputEditText) view).setText("");
-            }else if (view instanceof MaterialAutoCompleteTextView){
-                ((MaterialAutoCompleteTextView) view).setText("");
-                if (clearAdapter) ((MaterialAutoCompleteTextView) view).setAdapter(null);
-            }else if (view instanceof CheckBox){
-                ((CheckBox) view).setChecked(false);
-            }else if (view instanceof MaterialButton){
-                view.setVisibility(View.GONE);
-            }
-        }
-    }
-
     private void InitDataReceiver(){
 
         //check if selected lodge id has been initialized for the project
@@ -184,7 +167,13 @@ public class Fragment_Project extends Fragment {
 
         //allow status change, based on root navigation
         String lsStackID = (getArguments() == null || getArguments().getString("stack_id") == null) ? "" : getArguments().getString("stack_id");
-        btn_change_status.setVisibility(!lsStackID.equalsIgnoreCase("project_status") ? View.GONE : View.VISIBLE);
+
+        btn_add_detail.setEnabled(!lsStackID.equalsIgnoreCase("project_status"));
+
+        btn_change_status.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.VISIBLE : View.GONE);
+        btn_save.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.GONE : View.VISIBLE);
+
+        AllowFields(!lsStackID.equalsIgnoreCase("project_status"));
 
         //load master
         mViewModel.GetProject(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EProjectMaster>() {
