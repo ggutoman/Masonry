@@ -26,6 +26,7 @@
             android:text="N/A"
             android:gravity="end"
             android:textSize="13sp"
+            android:layout_marginEnd="5dp"
             app:layout_constraintStart_toEndOf="@+id/mtv_name"
             app:layout_constraintTop_toTopOf="@+id/mtv_name"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_name"

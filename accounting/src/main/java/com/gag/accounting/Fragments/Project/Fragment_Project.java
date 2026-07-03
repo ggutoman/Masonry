@@ -18,11 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.gag.accounting.Dialog.Dialog_Project_Entry;
+import com.gag.accounting.Dialog.Dialog_Project_Status;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.button.MaterialButton;
@@ -32,11 +34,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
-import org.gag.appdriver.App.Adapters.MemberAdapter;
-import org.gag.appdriver.App.Adapters.ProjectMemberrAdapter;
+import com.gag.accounting.Adapter.Project.Adapter_Project_Member_Entry;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.ProjectDetail;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -55,7 +55,7 @@ public class Fragment_Project extends Fragment {
     private LoadDialog poLoad;
     private EProjectMaster loMaster;
     private List<ProjectDetail> laDetails = new ArrayList<>();
-    private ProjectMemberrAdapter loProjectDetailAdapter;
+    private Adapter_Project_Member_Entry loProjectDetailAdapter;
 
     private String lsLodgeIDx, lsTransNox;
     private int lnSelectStatus = -1, lnSelectDetail = -1, lnSelectType = -1;
@@ -64,8 +64,8 @@ public class Fragment_Project extends Fragment {
     private ConstraintLayout layout_tools;
     private TextInputLayout til_lodge_cal, til_proj_type;
     private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_or_no, tie_pledge_date, tie_pledge_amount, tie_paid_amount;
-    private MaterialAutoCompleteTextView auto_status, auto_proj_type, auto_lodge_member, auto_lodge_cal;
-    private MaterialTextView btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb;
+    private MaterialAutoCompleteTextView auto_proj_type, auto_lodge_member, auto_lodge_cal;
+    private MaterialTextView btn_change_status, btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb, mtv_status;
     private ImageButton btn_add_detail;
     private MaterialButton btn_save;
 
@@ -100,7 +100,7 @@ public class Fragment_Project extends Fragment {
 
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
         tie_dtransact = view.findViewById(R.id.tie_dtransact);
-        auto_status = view.findViewById(R.id.auto_status);
+        mtv_status = view.findViewById(R.id.mtv_status);
         tie_name = view.findViewById(R.id.tie_name);
         auto_proj_type = view.findViewById(R.id.auto_proj_type);
         tie_due = view.findViewById(R.id.tie_due);
@@ -123,6 +123,7 @@ public class Fragment_Project extends Fragment {
         btn_save = view.findViewById(R.id.btn_save);
         btn_add_detail = view.findViewById(R.id.btn_add_detail);
         btn_save_detail = view.findViewById(R.id.btn_save_detail);
+        btn_change_status = view.findViewById(R.id.btn_change_status);
     }
 
     private void AllowFields(boolean fisAllowed){
@@ -137,6 +138,23 @@ public class Fragment_Project extends Fragment {
         tie_pledge_amount.setEnabled(fisAllowed);
         tie_or_no.setEnabled(fisAllowed);
         tie_paid_amount.setEnabled(fisAllowed);
+    }
+
+    private void ClearFields(List<View> fields, boolean clearAdapter) {
+
+        for (View view : fields) {
+
+            if (view instanceof TextInputEditText){
+                ((TextInputEditText) view).setText("");
+            }else if (view instanceof MaterialAutoCompleteTextView){
+                ((MaterialAutoCompleteTextView) view).setText("");
+                if (clearAdapter) ((MaterialAutoCompleteTextView) view).setAdapter(null);
+            }else if (view instanceof CheckBox){
+                ((CheckBox) view).setChecked(false);
+            }else if (view instanceof MaterialButton){
+                view.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void InitDataReceiver(){
@@ -158,19 +176,15 @@ public class Fragment_Project extends Fragment {
             return;
         }
 
-        tie_dtransact.setText(mViewModel.GetCurrentDate());
-
-        auto_status.setAdapter(new ArrayAdapter<String>(
-                requireActivity(),
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                mViewModel.GetProjectStatus()
-        ));
-
         auto_proj_type.setAdapter(new ArrayAdapter<String>(
                 requireActivity(),
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
                 mViewModel.GetProjectTypes()
         ));
+
+        //allow status change, based on root navigation
+        String lsStackID = (getArguments() == null || getArguments().getString("stack_id") == null) ? "" : getArguments().getString("stack_id");
+        btn_change_status.setVisibility(!lsStackID.equalsIgnoreCase("project_status") ? View.GONE : View.VISIBLE);
 
         //load master
         mViewModel.GetProject(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EProjectMaster>() {
@@ -202,6 +216,25 @@ public class Fragment_Project extends Fragment {
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
+                switch (loMaster.getCTranStat()){
+
+                    case "0":
+                        mtv_status.setText("Planned");
+                        break;
+                    case "1":
+                        mtv_status.setText("On Going"); //disbursement happens
+                        break;
+                    case "2":
+                        mtv_status.setText("On Hold");
+                        break;
+                    case "3":
+                        mtv_status.setText("Completed"); //disbursement happens
+                        break;
+                    case "4":
+                        mtv_status.setText("Cancelled");
+                        break;
+                }
+
                 //enable selection
                 AllowFields(!(loMaster.getCTranStat().equalsIgnoreCase("3") || loMaster.getCTranStat().equalsIgnoreCase("4")));
 
@@ -210,11 +243,11 @@ public class Fragment_Project extends Fragment {
 
                 tie_transaction_no.setText(loMaster.getSProjctCd());
                 tie_dtransact.setText(loMaster.getDTransact());
-                auto_status.setText(mViewModel.GetProjectStatus().get(Integer.parseInt(loMaster.getCTranStat())), false);
                 tie_name.setText(loMaster.getSProjctNm());
                 auto_proj_type.setText(mViewModel.GetProjectTypes().get(Integer.parseInt(loMaster.getCProjctTp())), false);
                 tie_due.setText(loMaster.getDDueDatex());
                 tie_remarks.setText(loMaster.getSRemarksx());
+                mtv_totaldisb.setText(loMaster.getNDisbTotl());
 
                 mViewModel.GetLodgeCalendars(lsLodgeIDx).observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @SuppressLint("SetTextI18n")
@@ -248,7 +281,7 @@ public class Fragment_Project extends Fragment {
             @Override
             public void onChanged(List<ProjectDetail> projectDetails) {
 
-                if (projectDetails == null || projectDetails.size() < 1) return;
+                if (projectDetails == null) return;
 
                 mViewModel.ClearDetail();
                 for (ProjectDetail loItem : projectDetails){
@@ -271,10 +304,10 @@ public class Fragment_Project extends Fragment {
             @Override
             public void onChanged(List<ProjectDetail> eProjectDetails) {
 
-                if (eProjectDetails == null || eProjectDetails.size() < 1) return;
+                if (eProjectDetails == null) return;
                 laDetails = eProjectDetails;
 
-                loProjectDetailAdapter = new ProjectMemberrAdapter(requireActivity(), android.R.layout.simple_dropdown_item_1line, eProjectDetails);
+                loProjectDetailAdapter = new Adapter_Project_Member_Entry(requireActivity(), android.R.layout.simple_dropdown_item_1line, eProjectDetails);
 
                 //load list
                 auto_lodge_member.setAdapter(loProjectDetailAdapter);
@@ -295,7 +328,7 @@ public class Fragment_Project extends Fragment {
 
     private void DownloadInfo(){
 
-        mViewModel.DownloadProjectInformation(lsTransNox, "", new VM_Projects.OnDownload() {
+        mViewModel.DownloadProjectInformation(lsTransNox, new VM_Projects.OnDownload() {
             @Override
             public void OnLoad() {
                 poLoad.ShowDialog("Downloading project information. Please wait . .");
@@ -341,15 +374,6 @@ public class Fragment_Project extends Fragment {
             }
         });
 
-        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lnSelectStatus = i;
-                auto_status.setText(mViewModel.GetProjectStatus().get(lnSelectStatus), false);
-            }
-        });
-
         tie_due.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -385,7 +409,7 @@ public class Fragment_Project extends Fragment {
                 if (loProjectDetailAdapter == null) return;
 
                 loSelectDetail = loProjectDetailAdapter.getItem(i);
-                lnSelectDetail = i;
+                lnSelectDetail = loProjectDetailAdapter.loProject.indexOf(loSelectDetail);
 
                 //display details
                 auto_lodge_member.setText(loSelectDetail.getSMemberNme());
@@ -405,12 +429,12 @@ public class Fragment_Project extends Fragment {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
 
-                        String ls_dPledge = i + "-" + (i1 + 1) + "-" + i2;
-                        tie_pledge_date.setText(ls_dPledge);
+                        String formatted = String.format("%04d-%02d-%02d", i, i1 + 1, i2);
+                        tie_pledge_date.setText(formatted);
 
                         if (loSelectDetail == null) return;
 
-                        if (!ls_dPledge.equals(loSelectDetail.getDPledgexx())){
+                        if (!formatted.equals(loSelectDetail.getDPledgexx())){
                             btn_save_detail.setVisibility(View.VISIBLE);
                         }else{
                             btn_save_detail.setVisibility(View.GONE);
@@ -505,6 +529,18 @@ public class Fragment_Project extends Fragment {
             @Override
             public void onClick(View view) {
 
+                Fragment_Project_Summary loSummary = new Fragment_Project_Summary();
+                Bundle loBundle = new Bundle();
+
+                loBundle.putString("year_id", lsTransNox);
+                loBundle.putString("project_cd", lsTransNox);
+                loSummary.setArguments(loBundle);
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(org.gag.appdriver.R.id.frame_child, loSummary, "project_summary")
+                        .addToBackStack("project_summary")
+                        .commit();
             }
         });
 
@@ -521,7 +557,7 @@ public class Fragment_Project extends Fragment {
                             @Override
                             public void OnSubmit(ProjectDetail loEntry) {
 
-                                mViewModel.AddProjectDetail(
+                                if (!mViewModel.AddProjectDetail(
                                         loEntry.getSProjectCd(),
                                         loEntry.getSMemberID(),
                                         loEntry.getSMemberNme(),
@@ -529,7 +565,10 @@ public class Fragment_Project extends Fragment {
                                         loEntry.getDPledgexx(),
                                         loEntry.getNPledgexx(),
                                         loEntry.getNAmtPaidx()
-                                );
+                                    )
+                                ){
+                                    Toast.makeText(requireActivity(), "Pledge of the same member should not have the same date", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
                 );
@@ -541,13 +580,22 @@ public class Fragment_Project extends Fragment {
             @Override
             public void onClick(View view) {
 
-                mViewModel.ReplaceProjectDetail(
+                if (loSelectDetail == null){
+                    Toast.makeText(requireActivity(), "Please select a detail", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (!mViewModel.ReplaceProjectDetail(
                         lnSelectDetail,
+                        loSelectDetail.getSMemberID(),
                         tie_or_no.getText() == null ? "" : tie_or_no.getText().toString(),
                         tie_pledge_date.getText() == null ? "1900-00-00" : tie_pledge_date.getText().toString(),
-                        tie_pledge_amount.getText() == null ? "" : tie_pledge_amount.getText().toString(),
-                        tie_paid_amount.getText() == null ? "" : tie_paid_amount.getText().toString()
-                );
+                        tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString(),
+                        tie_paid_amount.getText() == null ? "0.00" : tie_paid_amount.getText().toString()
+                )){
+                    Toast.makeText(requireActivity(), "Pledge of the same member should not have the same date", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 btn_save_detail.setVisibility(View.GONE);
             }
@@ -633,6 +681,72 @@ public class Fragment_Project extends Fragment {
                         });
                     }
                 });
+            }
+        });
+
+        btn_change_status.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Dialog_Project_Status loStatus = new Dialog_Project_Status(requireActivity(), loMaster == null ? "" : loMaster.getSProjctNm(), mViewModel, new Dialog_Project_Status.OnSubmitEntry() {
+                    @Override
+                    public void OnSubmit(String fStatus, String fDisbAmount) {
+
+                        poMessage.ShowMessage(2, "Are you sure you want to change the status?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                //set transaction properties for status change
+                                if (loMaster == null || loMaster.getSProjctCd().isEmpty()){
+                                    Toast.makeText(requireActivity(), "Project is not initialized for status update", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                loMaster.setCTranStat(fStatus);
+                                loMaster.setNDisbTotl(fDisbAmount);
+
+                                mViewModel.UpdateProjectStatus(loMaster, new VM_Projects.OnTransaction() {
+                                    @Override
+                                    public void OnLoad() {
+                                        poLoad.ShowDialog("Updating project status. Please wait . .");
+                                    }
+
+                                    @Override
+                                    public void OnSuccess() {
+                                        poLoad.DismissDialog();
+                                        Toast.makeText(requireActivity(), "Project status has been changed successfully", Toast.LENGTH_SHORT).show();
+
+                                        InitDataReceiver();
+                                    }
+
+                                    @Override
+                                    public void OnFailed(String fsMessage) {
+                                        poLoad.DismissDialog();
+
+                                        poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                            @Override
+                                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                poDialog.dismiss();
+
+                                                InitDataReceiver();
+                                            }
+
+                                            @Override
+                                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                loStatus.Show();
             }
         });
     }

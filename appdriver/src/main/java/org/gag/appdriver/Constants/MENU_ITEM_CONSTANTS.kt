@@ -148,4 +148,20 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         1,
         1
     ),
+
+    MENU_ITEM_PROJECTS_SUMMARY(
+        "Project Summary",
+        "PROJ003",
+        "PROJ",
+        1,
+        1
+    ),
+
+    MENU_ITEM_PROJECTS_STATUS(
+        "Project Status",
+        "PROJ004",
+        "PROJ",
+        1,
+        2
+    )
 }

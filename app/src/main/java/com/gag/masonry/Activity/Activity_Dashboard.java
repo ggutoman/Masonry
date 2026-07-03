@@ -260,6 +260,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "PROJ002":
                     InitView("PROJ002");
                     break;
+                case "PROJ003":
+                    InitView("PROJ003");
+                    break;
+                case "PROJ004":
+                    InitView("PROJ004");
+                    break;
             }
 
             return true;
@@ -354,6 +360,14 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "PROJ002": //project history
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("project_information");
+                break;
+            case "PROJ003": //project history
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_summary");
+                break;
+            case "PROJ004": //project status change
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("project_status");
                 break;
 
         }

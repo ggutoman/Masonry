@@ -174,6 +174,8 @@ public class Fragment_Annual_Summary extends Fragment {
 
                             mtv_transaction.setText(eAnnualMaster.getSTransNox());
                             mtv_due_date.setText("Due Until: " + mViewModel.GetFormattedDate(eAnnualMaster.getDDueDatex(), "MMMM d, yyyy"));
+                            mtv_trans.setText("0.00");
+                            mtv_collect.setText("0.00");
 
                             mViewModel.GetAnnualDetail(eAnnualMaster.getSTransNox()).observe(getViewLifecycleOwner(), new Observer<List<AnnualMembers>>() {
                                 @Override

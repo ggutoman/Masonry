@@ -76,10 +76,6 @@ public class VM_Lodge extends AndroidViewModel {
         return poLodge.GetCurrentDate();
     }
 
-    public String GetFirstQuarter(){
-        return poLodge.GetCountDate(4, 0, false);
-    }
-
     public String GetCurrentDateTime(){
         return poLodge.GetCurrentDateTime();
     }

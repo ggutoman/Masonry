@@ -11,10 +11,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
+import org.gag.appdriver.App.DataModels.DownloadMemberProjects
 import org.gag.appdriver.App.DataModels.DownloadProjectDetail
 import org.gag.appdriver.App.DataModels.DownloadProjectInfo
 import org.gag.appdriver.App.DataModels.DownloadProjects
 import org.gag.appdriver.App.Models.LodgeCalendarList
+import org.gag.appdriver.App.Models.MemberPledges
+import org.gag.appdriver.App.Models.MemberProjects
 import org.gag.appdriver.App.Models.ProjectDetail
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
@@ -26,6 +29,7 @@ import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DProjects
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EProjectDetail
 import org.gag.appdriver.Room.Entities.EProjectMaster
@@ -69,13 +73,19 @@ class Projects(instance : Context) {
 
     fun GetLodgeCalendars(fsLodgeIDxx : String) : LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(fsLodgeIDxx)
 
+    fun GetLodgeCalendarInfo(fsLodgeIDxx : String) : LiveData<LodgeCalendarList> = poLodgeYear.GetLodgeYearInfo(fsLodgeIDxx)
+
     fun GetProject(fsProjectCd : String) : LiveData<EProjectMaster> = poProjects.GetProjectMasterTransaction(fsProjectCd)
 
     fun GetProjectDetails(fsProjectCd : String) : LiveData<List<ProjectDetail>> = poProjects.GetProjectDetails(fsProjectCd)
 
+    fun GetPledgeSummary(fsProjectCd : String, fsDfrom : String, fsDto : String) : LiveData<List<ProjectDetail>> = poProjects.GetPledgeSummary(fsProjectCd, fsDfrom, fsDto)
+
     fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
 
     fun GetProjectList(fsYearIDxx: String, fsDfrom : String, fsDto : String) : LiveData<List<EProjectMaster>> = poProjects.GetProjectMasterList(fsYearIDxx, fsDfrom, fsDto)
+
+    fun GetMemberPledges(fsMemberIDxx : String, fsDfrom : String, fsDto : String) : LiveData<List<MemberPledges>> = poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto)
 
     @SuppressLint("MissingPermission")
     fun SaveProject(loMaster : EProjectMaster, loDetail : List<EProjectDetail>) : CompletableFuture<Boolean>{
@@ -137,11 +147,78 @@ class Projects(instance : Context) {
                             loMaster.sProjctCd = resultData.GetPayload()
                             poProjects.SaveMaster(loMaster)
 
-                            //save detail
+                            //clear and save detail
+                            if(loMaster.sProjctCd.isNotEmpty()) { poProjects.DeleteDetail(loMaster.sProjctCd) }
                             loDetail.forEach { loItem ->
                                 loItem.sProjctCd = loMaster.sProjctCd
                                 poProjects.SaveDetail(loItem)
                             }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun UpdateProjectStatus(loMaster : EProjectMaster) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+
+                        put("sProjctCd", loMaster.sProjctCd)
+                        put("nDisbTotl", loMaster.nDisbTotl)
+                        put("cTranStat", loMaster.cTranStat)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_PROJECT_STATUS.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            //save master
+                            poProjects.SaveMaster(loMaster)
 
                             true
                         }
@@ -309,7 +386,7 @@ class Projects(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadProjectDetails(fsProjectCd : String, fsMemberID : String) : CompletableFuture<Boolean>{
+    fun DownloadProjectDetails(fsProjectCd : String) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
 
@@ -323,9 +400,6 @@ class Projects(instance : Context) {
                     //initialize master parameters
                     val loParams = JSONObject().apply {
                         put("sProjctCd", fsProjectCd)
-
-                        //filter with member if needed
-                        if (fsMemberID.isNotEmpty()) put("sMemberID", fsMemberID)
                     }
 
                     when (val response = httpInstance.makeRequest(
@@ -340,6 +414,73 @@ class Projects(instance : Context) {
 
                             //save detail
                             resultData.GetPayload().forEach { loItem -> poProjects.SaveDetail(loItem) }
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadProjectMembers(fsMemberID : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+                        put("sMemberID", fsMemberID)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_PROJECT_MEMBER.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadMemberProjects>(response.data.body())
+
+                            val loProjects : MemberProjects = resultData.GetPayload()
+
+                            //save master and detail
+                            loProjects.detail.forEach { loItem -> poProjects.SaveDetail(loItem) }
+                            loProjects.master.forEach { loItem -> poProjects.SaveMaster(loItem) }
+
                             true
                         }
 

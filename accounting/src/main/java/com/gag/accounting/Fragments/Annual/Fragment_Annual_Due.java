@@ -503,6 +503,7 @@ public class Fragment_Annual_Due extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 if (poCalAdapter == null) return;
+
                 loSelectCalendar = poCalAdapter.getItem(i);
 
                 auto_lodge_cal.setText(loSelectCalendar.getSLodgeNme() + "(" + loSelectCalendar.getNYearxxxx() + ")", false);

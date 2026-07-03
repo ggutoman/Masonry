@@ -10,7 +10,9 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.Projects;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ProjectDetail;
+import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectDetail;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
@@ -81,12 +83,20 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetLodgeCalendars(fsLodgeIDxx);
     }
 
+    public LiveData<LodgeCalendarList> GetLodgeCalendarInfo(String fsYearIDxx){
+        return poProjects.GetLodgeCalendarInfo(fsYearIDxx);
+    }
+
     public LiveData<EProjectMaster> GetProject(String fsProjectCd){
         return poProjects.GetProject(fsProjectCd);
     }
 
     public LiveData<List<ProjectDetail>> GetProjectDetails(String fsProjectCd){
         return poProjects.GetProjectDetails(fsProjectCd);
+    }
+
+    public LiveData<List<ProjectDetail>> GetPledgeSummary(String fsProjectCd, String fsDfrom, String fsDto){
+        return poProjects.GetPledgeSummary(fsProjectCd, fsDfrom, fsDto);
     }
 
     public LiveData<List<ProjectDetail>> GetProjectList(){
@@ -101,7 +111,11 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetProjectList(fsYearIDxx, fsDfrom, fsDto);
     }
 
-    public void AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
+    public LiveData<List<MemberPledges>> GetMemberPledges(String fsMemberIDxx, String fsDfrom, String fsDto){
+        return poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto);
+    }
+
+    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
 
         ProjectDetail loProject = new ProjectDetail(
                 fsTransNox,
@@ -114,18 +128,51 @@ public class VM_Projects extends AndroidViewModel {
         );
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
-
         if (currentList == null) {
             currentList = new ArrayList<>();
         }
+
+        boolean exists = false;
+        for (ProjectDetail detail : currentList) {
+
+            if (detail.getSMemberID().equalsIgnoreCase(fsMemberID) &&
+                    detail.getDPledgexx().equalsIgnoreCase(fdPledge)) {
+
+                exists = true;
+                break;
+            }
+        }
+        if (exists) {
+            return false;
+        }
         currentList.add(loProject);
+
         GetProjectDetail.setValue(currentList);
+
+        return true;
     }
 
-    public void ReplaceProjectDetail(int fnIndex, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
+    public boolean ReplaceProjectDetail(int fnIndex, String fsMemberID, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
-        if (currentList == null) return;
+        if (currentList == null) return false;
+
+        boolean hasSamePledge = false;
+        for (int i = 0; i < currentList.size(); i++){
+
+            if (currentList.get(i).getSMemberID().equalsIgnoreCase(fsMemberID) && i != fnIndex) {
+
+                if (currentList.get(i).getDPledgexx().equalsIgnoreCase(fdPledge)){
+                    hasSamePledge = true;
+                    break;
+                }
+            }
+        }
+
+        //do not replace if the same date of pledge of same member entry
+        if (hasSamePledge){
+            return false;
+        }
 
         ProjectDetail loItem = new ProjectDetail(
                 currentList.get(fnIndex).getSProjectCd(),
@@ -137,8 +184,9 @@ public class VM_Projects extends AndroidViewModel {
                 fnAmtPaid
         );
         currentList.set(fnIndex, loItem);
-        GetProjectDetail.setValue(currentList);
 
+        GetProjectDetail.setValue(currentList);
+        return true;
     }
 
     public void ClearDetail(){
@@ -230,6 +278,23 @@ public class VM_Projects extends AndroidViewModel {
         });
     }
 
+    public void UpdateProjectStatus(EProjectMaster foMaster, OnTransaction foCallback){
+
+        foCallback.OnLoad();
+
+        poProjects.UpdateProjectStatus(foMaster).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poProjects.getMessage());
+                }else{
+                    foCallback.OnSuccess();
+                }
+            }
+        });
+    }
+
     public void DownloadProjects(String fsYearIDxx, String fsDfrom, String fsDto, OnTransaction foCallback){
 
         foCallback.OnLoad();
@@ -246,7 +311,7 @@ public class VM_Projects extends AndroidViewModel {
         });
     }
 
-    public void DownloadProjectInformation(String fsProjectCd, String fsMemberID, OnDownload foCallback){
+    public void DownloadProjectInformation(String fsProjectCd, OnDownload foCallback){
 
         foCallback.OnLoad();
 
@@ -254,7 +319,7 @@ public class VM_Projects extends AndroidViewModel {
         HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
                 List.of(
                         poProjects.DownloadProjectInfo(fsProjectCd),
-                        poProjects.DownloadProjectDetails(fsProjectCd, fsMemberID)
+                        poProjects.DownloadProjectDetails(fsProjectCd)
                 )
         );
 
@@ -279,5 +344,22 @@ public class VM_Projects extends AndroidViewModel {
                 foCallback.OnFinished("Successfully downloaded information");
             }
         });
+    }
+
+    public void DownloadDashboardledges(String fsMemberID, OnTransaction foCallback){
+
+        foCallback.OnLoad();
+        poProjects.DownloadProjectMembers(fsMemberID).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poProjects.getMessage());
+                    return;
+                }
+                foCallback.OnSuccess();
+            }
+        });
+
     }
 }

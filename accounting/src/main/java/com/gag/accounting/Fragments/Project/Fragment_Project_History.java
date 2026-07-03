@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -42,7 +43,7 @@ public class Fragment_Project_History extends Fragment {
     private LoadDialog poLoading;
     private Adapter_Project_List loAdapter;
 
-    private String lsDfrom, lsDto;
+    private String lsDfrom, lsDto, lsStackIDxx;
 
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -66,6 +67,13 @@ public class Fragment_Project_History extends Fragment {
 
         poMessage.InitDialog();
         poLoading.InitDialog();
+
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         InitViews(view);
         InitDataReceiver();
@@ -150,6 +158,7 @@ public class Fragment_Project_History extends Fragment {
 
                         loBundle.putString("lodge_id", getArguments().getString("lodge_id"));
                         loBundle.putString("project_cd", loProj.getSProjctCd());
+                        loBundle.putString("stack_id", lsStackIDxx);
                         loProject.setArguments(loBundle);
 
                         //add to child container, as bridge to initiate another fragment after call

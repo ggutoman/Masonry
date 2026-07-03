@@ -1,4 +1,4 @@
-package org.gag.appdriver.App.Adapters;
+package com.gag.accounting.Adapter.Project;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,25 +6,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.gag.appdriver.App.Models.AnnualMembers;
+import com.google.android.material.textview.MaterialTextView;
+
 import org.gag.appdriver.App.Models.ProjectDetail;
+import org.gag.appdriver.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectMemberrAdapter extends ArrayAdapter<ProjectDetail> {
+public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
 
     private final Context loContext;
     public final List<ProjectDetail> loProject;
 
     public List<ProjectDetail> loProjectFiltered;
 
-    public ProjectMemberrAdapter(@NonNull Context context, int resource, @NonNull List<ProjectDetail> objects) {
+    public Adapter_Project_Member_Entry(@NonNull Context context, int resource, @NonNull List<ProjectDetail> objects) {
         super(context, resource, objects);
 
         loContext = context;
@@ -39,12 +40,17 @@ public class ProjectMemberrAdapter extends ArrayAdapter<ProjectDetail> {
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = LayoutInflater.from(loContext);
-            view = inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+            view = inflater.inflate(R.layout.list_pledge_member_entry, parent, false);
         }
 
 
-        TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(loProjectFiltered.get(position).getSMemberNme());
+        MaterialTextView mtv_name = view.findViewById(R.id.mtv_name);
+        MaterialTextView mtv_amt_pledge = view.findViewById(R.id.mtv_amt_pledge);
+        MaterialTextView mtv_date = view.findViewById(R.id.mtv_date);
+
+        mtv_name.setText(loProjectFiltered.get(position).getSMemberNme());
+        mtv_amt_pledge.setText(loProjectFiltered.get(position).getNPledgexx());
+        mtv_date.setText(loProjectFiltered.get(position).getDPledgexx());
 
         return view;
 

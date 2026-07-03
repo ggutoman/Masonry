@@ -142,7 +142,8 @@ public class Dialog_Project_Entry {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
 
-                        tie_pledge_date.setText(i + "-" + (i1 + 1) + "-" + i2);
+                        String formatted = String.format("%04d-%02d-%02d", i, i1 + 1, i2);
+                        tie_pledge_date.setText(formatted);
                     }
                 }, loCalendar.get(Calendar.YEAR),
                         loCalendar.get(Calendar.MONTH),

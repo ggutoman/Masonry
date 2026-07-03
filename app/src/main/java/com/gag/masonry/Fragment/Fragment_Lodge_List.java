@@ -217,6 +217,36 @@ public class Fragment_Lodge_List extends Fragment {
                                     fragmentTransaction.addToBackStack("project_information");
                                     break;
 
+                                //project summary
+                                case "project_summary":
+
+                                    Fragment_Lodge_Calendar_List loProjSummary = new Fragment_Lodge_Calendar_List();
+
+                                    loBundle = new Bundle();
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+
+                                    loProjSummary.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_summary", loProjSummary));
+                                    fragmentTransaction.addToBackStack("project_summary");
+                                    break;
+
+                                //project status
+                                case "project_status":
+
+                                    Fragment_Lodge_Calendar_List loProjStatus = new Fragment_Lodge_Calendar_List();
+
+                                    loBundle = new Bundle();
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+
+                                    loProjStatus.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_status", loProjStatus));
+                                    fragmentTransaction.addToBackStack("project_status");
+                                    break;
+
                             }
                             fragmentTransaction.commit();
                         }

@@ -109,6 +109,8 @@ public class Activity_Main extends AppCompatActivity {
 
                                 if (memberDashboardInfo == null) return;
 
+                                if (eUserInfo == null) return;
+
                                 /**DOUBLE CHECK CREDENTIALS. ALTHOUGH IT IS ALREADY VALIDATED ON SERVER SIDE**/
 
                                 //initialize user level based on matching credentials, if mismatch then hide menus

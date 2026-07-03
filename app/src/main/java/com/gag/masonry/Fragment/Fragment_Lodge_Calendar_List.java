@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
 import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
 import com.gag.accounting.Fragments.Project.Fragment_Project_History;
+import com.gag.accounting.Fragments.Project.Fragment_Project_Summary;
 import com.gag.masonry.R;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -168,7 +169,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_info", loAnnual));
                                 fragmentTransaction.addToBackStack("annual_due_info");
                                 break;
-                            //open lodge calendar annual dues
+                            //open project history
                             case "project_information":
 
                                 Fragment_Project_History loProjHistory = new Fragment_Project_History();
@@ -182,6 +183,37 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                 //add to child container, as bridge to initiate another fragment after call
                                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_info", loProjHistory));
                                 fragmentTransaction.addToBackStack("project_info");
+                                break;
+                            //open lodge calendar project summary
+                            case "project_summary":
+
+                                Fragment_Project_Summary loProjSummary = new Fragment_Project_Summary();
+
+                                loBundle = new Bundle();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+
+                                loProjSummary.setArguments(loBundle);
+
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_summary", loProjSummary));
+                                fragmentTransaction.addToBackStack("project_summary");
+                                break;
+
+                            //open project info with change status
+                            case "project_status":
+
+                                Fragment_Project_History loProjStatus = new Fragment_Project_History();
+
+                                loBundle = new Bundle();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+
+                                loProjStatus.setArguments(loBundle);
+
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_status", loProjStatus));
+                                fragmentTransaction.addToBackStack("project_status");
                                 break;
                         }
                         fragmentTransaction.commit();
