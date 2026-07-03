@@ -165,16 +165,6 @@ public class Fragment_Project extends Fragment {
                 mViewModel.GetProjectTypes()
         ));
 
-        //allow status change, based on root navigation
-        String lsStackID = (getArguments() == null || getArguments().getString("stack_id") == null) ? "" : getArguments().getString("stack_id");
-
-        btn_add_detail.setEnabled(!lsStackID.equalsIgnoreCase("project_status"));
-
-        btn_change_status.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.VISIBLE : View.GONE);
-        btn_save.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.GONE : View.VISIBLE);
-
-        AllowFields(!lsStackID.equalsIgnoreCase("project_status"));
-
         //load master
         mViewModel.GetProject(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EProjectMaster>() {
             @Override
@@ -224,8 +214,16 @@ public class Fragment_Project extends Fragment {
                         break;
                 }
 
+                //allow status change, based on root navigation
+                String lsStackID = (getArguments() == null || getArguments().getString("stack_id") == null) ? "" : getArguments().getString("stack_id");
+
+                btn_add_detail.setEnabled(!lsStackID.equalsIgnoreCase("project_status"));
+
+                btn_change_status.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.VISIBLE : View.GONE);
+                btn_save.setVisibility(lsStackID.equalsIgnoreCase("project_status") ? View.GONE : View.VISIBLE);
+
                 //enable selection
-                AllowFields(!(loMaster.getCTranStat().equalsIgnoreCase("3") || loMaster.getCTranStat().equalsIgnoreCase("4")));
+                AllowFields(!(loMaster.getCTranStat().equalsIgnoreCase("3") || loMaster.getCTranStat().equalsIgnoreCase("4")) && !lsStackID.equalsIgnoreCase("project_status"));
 
                 lnSelectStatus = Integer.parseInt(loMaster.getCTranStat());
                 lnSelectType = Integer.parseInt(loMaster.getCProjctTp());
