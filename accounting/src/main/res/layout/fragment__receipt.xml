@@ -178,13 +178,15 @@
                                 android:background="@android:color/darker_gray"/>
 
                             <com.google.android.material.textfield.TextInputLayout
-                                style="@style/CustomDropDownTilStyle"
+                                style="@style/TextInputStyle"
                                 android:id="@+id/til_lodge_cal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Select Lodge Member">
+                                android:hint="Member Name"
+                                android:enabled="false">
 
-                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/TextInputStyle.Edittext"
                                     android:id="@+id/auto_lodge_member"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"/>
@@ -343,7 +345,8 @@
                                         android:id="@+id/tie_trans_amount"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:text="0.00"/>
+                                        android:text="0.00"
+                                        android:enabled="false"/>
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -358,7 +361,8 @@
                                         android:id="@+id/tie_paid_amount"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:text="0.00"/>
+                                        android:text="0.00"
+                                        android:enabled="false"/>
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -394,7 +398,8 @@
                     android:id="@+id/btn_save"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Save Project"/>
+                    android:text="Save Project"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 
