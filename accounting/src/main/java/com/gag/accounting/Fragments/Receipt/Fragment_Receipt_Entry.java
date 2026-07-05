@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 
 import com.gag.accounting.R;
 
-public class Fragment_Receipt extends Fragment {
+public class Fragment_Receipt_Entry extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

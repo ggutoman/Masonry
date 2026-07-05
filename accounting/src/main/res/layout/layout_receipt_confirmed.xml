@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/Text_Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="12200.00"
+        android:textStyle="bold"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_confirm_receipt"
+        android:scaleType="fitCenter"
+       android:layout_marginTop="10dp" />
+
+</LinearLayout>

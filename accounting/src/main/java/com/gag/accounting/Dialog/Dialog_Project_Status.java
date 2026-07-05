@@ -131,7 +131,7 @@ public class Dialog_Project_Status {
                         }
                         break;
                     default:
-                        if (ldbl_disb >= 0){
+                        if (ldbl_disb > 0){
                             isDisbAllowed = false;
                             Toast.makeText(loInstance, "Disbursement amount is not allowed for the selected status", Toast.LENGTH_SHORT).show();
                         }
