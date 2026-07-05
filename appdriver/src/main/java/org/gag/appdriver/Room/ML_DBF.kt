@@ -20,6 +20,7 @@ import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProjects
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
+import org.gag.appdriver.Room.DataObject.DReceipt
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
@@ -40,6 +41,8 @@ import org.gag.appdriver.Room.Entities.EOfficerHistory
 import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.EProjectDetail
 import org.gag.appdriver.Room.Entities.EProjectMaster
+import org.gag.appdriver.Room.Entities.EReceiptDetail
+import org.gag.appdriver.Room.Entities.EReceiptMaster
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.Entities.EUserInfo
@@ -65,7 +68,9 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EAnnualMaster::class,
         EAnnualDetail::class,
         EProjectMaster::class,
-        EProjectDetail::class
+        EProjectDetail::class,
+        EReceiptMaster::class,
+        EReceiptDetail::class
     ],
     version = 1,
     exportSchema = false
@@ -91,6 +96,7 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetAnnualMaster() : DAnnualMaster
     abstract fun GetAnnualDetail() : DAnnualDetail
     abstract fun GetProject() : DProjects
+    abstract fun GetReceipt() : DReceipt
 
     companion object {
 
