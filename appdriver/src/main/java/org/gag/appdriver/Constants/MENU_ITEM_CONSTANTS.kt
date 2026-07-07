@@ -179,5 +179,21 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "PROJ",
         1,
         2
+    ),
+
+    MENU_ITEM_RECEIPTS(
+        "Create Receipt",
+        "RCPT001",
+        "RCPT",
+        1,
+        1
+    ),
+
+    MENU_ITEM_RECEIPTS_ISSUED(
+        "Issued Receipts",
+        "RCPT002",
+        "RCPT",
+        1,
+        1
     )
 }

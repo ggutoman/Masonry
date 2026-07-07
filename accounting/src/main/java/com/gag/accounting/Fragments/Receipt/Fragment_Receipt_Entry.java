@@ -1,13 +1,18 @@
 package com.gag.accounting.Fragments.Receipt;
 
+import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
+
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +23,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.gag.accounting.Adapter.Receipt.Adapter_Receipt_Sources;
 import com.gag.accounting.Adapter.Receipt.Adapter_Receipt_Transactions;
+import com.gag.accounting.Dialog.Dialog_Receipt_Entry;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
@@ -26,10 +33,12 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Core.Annual;
-import org.gag.appdriver.App.Models.AnnualMembers;
+import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
+import org.gag.appdriver.Utilities.LoadDialog;
+import org.gag.appdriver.Utilities.Message_Dialog;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,43 +46,28 @@ import java.util.List;
 public class Fragment_Receipt_Entry extends Fragment {
 
     private VM_Receipts mViewModel;
+    private Message_Dialog poMessage;
+    private LoadDialog poLoading;
+
     private String lsTransNox, lsMemberID;
     private EReceiptMaster loReceipt;
-    private List<EReceiptDetail> laTransactions;
+    private List<ReceiptDetail> laDetails;
 
+    private int lnSelectPaym = -1;
     private String lsSelectType;
-    private EReceiptDetail loSelectDetail;
+    private ReceiptDetail loSelectDetail;
 
-    // TextViews
-    private MaterialTextView mtv_title;
-    private MaterialTextView mtv_status;
-    private MaterialTextView btn_download;
-    private MaterialTextView btn_view;
-    private MaterialTextView mtv_totaltrans_label;
-    private MaterialTextView mtv_totalpledge;
-    private MaterialTextView btn_save_detail;
+    private MaterialTextView mtv_title, mtv_status, btn_download, btn_view, mtv_totaltrans_label, mtv_totalpledge, btn_save_detail;
 
-    // TextInputEditTexts
-    private TextInputEditText tie_transaction_no;
-    private TextInputEditText tie_dtransact;
-    private TextInputEditText tie_or;
-    private TextInputEditText tie_remarks;
-    private TextInputEditText tie_trans_amount;
-    private TextInputEditText tie_paid_amount;
+    private TextInputEditText tie_transaction_no, tie_dtransact, tie_or, tie_remarks, tie_paid_amount,  auto_lodge_member;
 
-    // AutoCompleteTextViews
-    private MaterialAutoCompleteTextView auto_lodge_member;
-    private MaterialAutoCompleteTextView auto_pay_type;
-    private MaterialAutoCompleteTextView auto_source_type;
-    private MaterialAutoCompleteTextView auto_source_transaction;
+    private MaterialAutoCompleteTextView auto_pay_type, auto_source_type, auto_source_transaction;
 
-    // Buttons
     private ImageButton btn_add_detail;
+
     private MaterialButton btn_save;
 
-    // Layouts
     private ConstraintLayout layout_tools;
-    private LinearLayout layout_buttons;
 
 
     @Override
@@ -83,16 +77,22 @@ public class Fragment_Receipt_Entry extends Fragment {
         View view = inflater.inflate(R.layout.fragment__receipt, container, false);
 
         mViewModel = new ViewModelProvider(requireActivity()).get(VM_Receipts.class);
-        laTransactions = new ArrayList<>();
+        laDetails = new ArrayList<>();
+        poLoading = new LoadDialog(requireActivity());
+        poMessage = new Message_Dialog(requireActivity());
+
+        poLoading.InitDialog();
+        poMessage.InitDialog();
 
         InitViews(view);
+        InitDataReceiver();
+        InitListener();
 
         return view;
     }
 
     private void InitViews(View view){
 
-        // TextViews
         mtv_title        = view.findViewById(R.id.mtv_title);
         mtv_status       = view.findViewById(R.id.mtv_status);
         btn_download     = view.findViewById(R.id.btn_download);
@@ -101,27 +101,21 @@ public class Fragment_Receipt_Entry extends Fragment {
         mtv_totalpledge  = view.findViewById(R.id.mtv_totalpledge);
         btn_save_detail  = view.findViewById(R.id.btn_save_detail);
 
-// TextInputEditTexts
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
         tie_dtransact      = view.findViewById(R.id.tie_dtransact);
         tie_or             = view.findViewById(R.id.tie_or);
         tie_remarks        = view.findViewById(R.id.tie_remarks);
-        tie_trans_amount   = view.findViewById(R.id.tie_trans_amount);
         tie_paid_amount    = view.findViewById(R.id.tie_paid_amount);
 
-// AutoCompleteTextViews
-        auto_lodge_member       = view.findViewById(R.id.auto_lodge_member);
-        auto_pay_type           = view.findViewById(R.id.auto_pay_type);
-        auto_source_type        = view.findViewById(R.id.auto_source_type);
+        auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
+        auto_pay_type = view.findViewById(R.id.auto_pay_type);
+        auto_source_type = view.findViewById(R.id.auto_source_type);
         auto_source_transaction = view.findViewById(R.id.auto_source_transaction);
 
-// Buttons
         btn_add_detail = view.findViewById(R.id.btn_add_detail);
-        btn_save       = view.findViewById(R.id.btn_save);
+        btn_save = view.findViewById(R.id.btn_save);
 
-// Layouts
-        layout_tools   = view.findViewById(R.id.layout_tools);
-        layout_buttons = view.findViewById(R.id.layout_buttons);
+        layout_tools = view.findViewById(R.id.layout_tools);
 
     }
 
@@ -130,7 +124,7 @@ public class Fragment_Receipt_Entry extends Fragment {
         if (getArguments() == null || getArguments().getString("member_id") == null){
             Toast.makeText(requireActivity(), "Member ID is not initialized", Toast.LENGTH_SHORT).show();
 
-            requireActivity().getSupportFragmentManager().popBackStack("receipt_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            requireActivity().getSupportFragmentManager().popBackStack("receipt_entry", POP_BACK_STACK_INCLUSIVE);
             return;
         }
         lsMemberID = getArguments() == null || getArguments().getString("member_id") == null ? "" : getArguments().getString("member_id");
@@ -142,18 +136,19 @@ public class Fragment_Receipt_Entry extends Fragment {
                 mViewModel.GetPaymentTypes()
         ));
 
-        auto_source_type.setAdapter(new ArrayAdapter<>(
-                requireActivity(),
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                mViewModel.GetSources()
-        ));
+        auto_source_type.setAdapter(
+                new Adapter_Receipt_Sources(
+                    requireActivity(),
+                    mViewModel.GetSources()
+            )
+        );
 
         mViewModel.ObserveReceiptMaster(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EReceiptMaster>() {
             @Override
             public void onChanged(EReceiptMaster eReceiptMaster) {
 
                 //clear fields
-                ClearFields(List.of(auto_lodge_member, auto_pay_type, tie_or, tie_remarks, auto_source_type, auto_source_transaction, tie_trans_amount, tie_paid_amount), true);
+                ClearFields(List.of(auto_lodge_member, tie_or, tie_remarks, auto_source_transaction, tie_paid_amount), true);
 
                 if (eReceiptMaster == null){
 
@@ -172,10 +167,16 @@ public class Fragment_Receipt_Entry extends Fragment {
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
+                    layout_tools.setVisibility(View.GONE);
+
                 }else {
 
                     loReceipt = eReceiptMaster;
+                    layout_tools.setVisibility(View.VISIBLE);
                 }
+
+                //get payment form
+                lnSelectPaym = Integer.parseInt(loReceipt.getCPaymForm());
 
                 //display master values
                 tie_transaction_no.setText(loReceipt.getSTransNox());
@@ -187,45 +188,91 @@ public class Fragment_Receipt_Entry extends Fragment {
                         mtv_status.setText("Open");
                         break;
                     case "1":
-                        mtv_status.setText("Approve");
+                        mtv_status.setText("Confirmed");
                         break;
-                    case "2":
-                        mtv_status.setText("Disapprove");
+                    case "3":
+                        mtv_status.setText("Cancelled");
+                        break;
+                    case "4":
+                        mtv_status.setText("Void");
                         break;
                 }
-
-                AllowFields(List.of(auto_pay_type, tie_or, tie_remarks, btn_add_detail, tie_paid_amount) ,loReceipt.getCTranStat().equalsIgnoreCase("0"));
+                btn_save.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
                 auto_lodge_member.setText(mViewModel.GetMemberInfo(lsMemberID).getSFrstName() + " " + mViewModel.GetMemberInfo(lsMemberID).getSLastName());
+                auto_pay_type.setText(mViewModel.GetPaymentTypes().get(Integer.parseInt(loReceipt.getCPaymForm())), false);
                 tie_or.setText(loReceipt.getSORNoxxxx());
                 tie_remarks.setText(loReceipt.getSRemarksx());
 
-                //get selected transaction
-                mViewModel.ObserveSelectTransaction().observe(getViewLifecycleOwner(), new Observer<String>() {
+                AllowFields(List.of(auto_pay_type, tie_or, tie_remarks, btn_add_detail, tie_paid_amount), loReceipt.getCTranStat().equalsIgnoreCase("0"));
+
+                //load existing details of record
+                mViewModel.ObserveReceiptDetail(lsTransNox).observe(getViewLifecycleOwner(), new Observer<List<EReceiptDetail>>() {
                     @Override
-                    public void onChanged(String s) {
+                    public void onChanged(List<EReceiptDetail> eReceiptDetails) {
 
-                        //load list of transactions from type
-                        mViewModel.ObserveReceiptDetail(loReceipt.getSTransNox()).observe(getViewLifecycleOwner(), new Observer<List<EReceiptDetail>>() {
-                            @Override
-                            public void onChanged(List<EReceiptDetail> eReceiptDetails) {
+                        if (eReceiptDetails == null) return;
 
-                                if (eReceiptDetails == null) return;
+                        mViewModel.ClearDetail();
+                        for (EReceiptDetail loDetail : eReceiptDetails){
 
-                                for (EReceiptDetail loDetail : eReceiptDetails){
-
-                                    //load list of transactions based on selected type
-                                    if (loDetail.getSSourceCD().equalsIgnoreCase(s)){
-                                        laTransactions.add(loDetail);
-                                    }
-                                }
-
-                                Adapter_Receipt_Transactions loAdapter = new Adapter_Receipt_Transactions( requireActivity(), laTransactions)
-                                //auto_source_transaction.setAdapter(loAdapter);
-                            }
-                        });
+                            mViewModel.AddReceiptDetail(
+                                    loDetail.getSTransNox(),
+                                    loDetail.getSSourceCD(),
+                                    loDetail.getSSourceNo(),
+                                    loDetail.getNAmtPaidx()
+                            );
+                        }
                     }
                 });
+            }
+        });
+
+        mViewModel.ObserveSelectType().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+                if (s == null) return;
+
+                mViewModel.ObserveReceiptDetail().observe(getViewLifecycleOwner(), new Observer<List<ReceiptDetail>>() {
+                    @Override
+                    public void onChanged(List<ReceiptDetail> receiptDetails) {
+
+                        if (receiptDetails == null) return;
+
+                        //collect all transaction details
+                        laDetails = receiptDetails;
+
+                        //filter details to display from selected type
+                        List<ReceiptDetail> laTransactions = new ArrayList<>();
+                        double ldbl_totalpaid = 0.00;
+                        for (ReceiptDetail loDetail : laDetails){
+
+                            //if source code match the selected type
+                            if (loDetail.getSSourceCD().equalsIgnoreCase(s)){
+                                laTransactions.add(loDetail);
+
+                                ldbl_totalpaid += Double.parseDouble(loDetail.getNAmtPaidx());
+                            }
+                        }
+                        mtv_totalpledge.setText(String.valueOf(ldbl_totalpaid));
+
+                        //clear adapter for new list
+                        auto_source_transaction.setText("");
+                        tie_paid_amount.setText("0.00");
+
+                        auto_source_transaction.setAdapter(null);
+
+                        auto_source_transaction.setAdapter(
+                                new Adapter_Receipt_Transactions(
+                                        requireActivity(),
+                                        R.layout.list_receipt_details,
+                                        laTransactions
+                                )
+                        );
+                    }
+                });
+
             }
         });
     }
@@ -257,6 +304,16 @@ public class Fragment_Receipt_Entry extends Fragment {
 
     private void InitListener(){
 
+        auto_pay_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if (auto_pay_type == null) return;
+
+                lnSelectPaym = mViewModel.GetPaymentTypes().indexOf((String) auto_pay_type.getAdapter().getItem(i));
+            }
+        });
+
         auto_source_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -264,7 +321,14 @@ public class Fragment_Receipt_Entry extends Fragment {
                 if (auto_source_type.getAdapter() == null) return;
 
                 lsSelectType = mViewModel.GetSources().get(i).getFsID();
-                mViewModel.SelectTransaction(lsSelectType);
+
+                auto_source_type.setText(mViewModel.GetSources().get(i).getFsDescript());
+                mViewModel.SelectType(lsSelectType);
+
+                //enable amount field if selected type
+                tie_paid_amount.setEnabled(!(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ")));
+
+                btn_save_detail.setVisibility(View.GONE);
             }
         });
 
@@ -274,7 +338,159 @@ public class Fragment_Receipt_Entry extends Fragment {
 
                 if (auto_source_transaction.getAdapter() == null) return;
 
-                mViewModel.SelectTransaction(lsSelectType);
+                loSelectDetail = (ReceiptDetail) auto_source_transaction.getAdapter().getItem(i);
+
+                auto_source_transaction.setText(loSelectDetail.getSSourceNo());
+                tie_paid_amount.setText(loSelectDetail.getNAmtPaidx());
+
+                btn_save_detail.setVisibility(View.GONE);
+            }
+        });
+
+        tie_paid_amount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (charSequence.length() < 1 || loSelectDetail == null){
+                    return;
+                }
+
+                if (!(loSelectDetail.getSSourceCD().equalsIgnoreCase("DUES") || loSelectDetail.getSSourceCD().equalsIgnoreCase("PROJ]"))){
+                    btn_save_detail.setVisibility(Double.parseDouble(loSelectDetail.getNAmtPaidx()) != Double.parseDouble(charSequence.toString()) ? View.VISIBLE : View.GONE);
+                }else {
+                    btn_save_detail.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        btn_download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mViewModel.DownloadReceiptInfo(loReceipt.getSTransNox(), new VM_Receipts.OnDownload() {
+                    @Override
+                    public void OnLoad() {
+                        poLoading.ShowDialog("Downloading receipt information. Please wait . .");
+                    }
+
+                    @Override
+                    public void OnFinished(String fsMessage) {
+                        poLoading.DismissDialog();
+
+                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                        InitDataReceiver();
+                    }
+                });
+            }
+        });
+
+        btn_add_detail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Dialog_Receipt_Entry loReceipt = new Dialog_Receipt_Entry(
+                        requireActivity(),
+                        lsMemberID,
+                        mViewModel,
+                        getViewLifecycleOwner(),
+                        new Dialog_Receipt_Entry.OnSubmitEntry() {
+                            @Override
+                            public void OnSubmit(ReceiptDetail loEntry) {
+
+                                if (!mViewModel.AddReceiptDetail(
+                                        lsTransNox,
+                                        loEntry.getSSourceCD(),
+                                        loEntry.getSSourceNo(),
+                                        loEntry.getNAmtPaidx()
+                                )){
+                                    Toast.makeText(requireActivity(), "Transaction is already added", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        }
+                );
+                loReceipt.Show();
+            }
+        });
+
+        btn_save_detail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (loSelectDetail == null) {
+                    Toast.makeText(requireActivity(), "Please select a detail", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                mViewModel.ReplaceDetail(laDetails.indexOf(loSelectDetail), tie_paid_amount.getText().toString());
+
+                view.setVisibility(View.GONE);
+            }
+        });
+
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (loReceipt == null){
+                    Toast.makeText(requireActivity(), "Receipt information is not initailized", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if (laDetails == null || laDetails.size() < 1) {
+                    Toast.makeText(requireActivity(), "Please enter atleast one detail", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //initialize primary receipt details
+                loReceipt.setSORNoxxxx(tie_or.getText() == null ? "" : tie_or.getText().toString());
+                loReceipt.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
+
+               poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                   @Override
+                   public void OnPositive(@NotNull AlertDialog poDialog) {
+                       poDialog.dismiss();
+                   }
+
+                   @Override
+                   public void OnNegative(@NotNull AlertDialog poDialog) {
+                       poDialog.dismiss();
+
+                       mViewModel.SaveReceipt(loReceipt, laDetails, new VM_Receipts.OnTransaction() {
+                           @Override
+                           public void OnLoad() {
+                               poLoading.ShowDialog("Saving receipt. Please wait . .");
+                           }
+
+                           @Override
+                           public void OnSuccess() {
+                               poLoading.DismissDialog();
+
+                               requireActivity().getSupportFragmentManager().popBackStack("receipt_entry", POP_BACK_STACK_INCLUSIVE);
+                           }
+
+                           @Override
+                           public void OnFailed(String fsMessage) {
+                               poLoading.DismissDialog();
+
+                               poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                   @Override
+                                   public void OnPositive(@NotNull AlertDialog poDialog) {
+                                       poDialog.dismiss();
+                                   }
+
+                                   @Override
+                                   public void OnNegative(@NotNull AlertDialog poDialog) {
+                                       poDialog.dismiss();
+                                   }
+                               });
+                           }
+                       });
+                   }
+               });
             }
         });
     }

@@ -52,6 +52,14 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         1
     ),
 
+    MENU_RECEIPT(
+        R.drawable.baseline_receipts,
+        "Receipts",
+        "RCPT",
+        1,
+        1
+    ),
+
     MENU_ACCOUNTS(
         R.drawable.baseline_settings,
         "Settings",

@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
+import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge;
@@ -272,6 +273,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "PROJ004":
                     InitView("PROJ004");
                     break;
+                case "RCPT001":
+                    InitView("RCPT001");
+                    break;
+                case "RCPT002":
+                    InitView("RCPT002");
+                    break;
             }
 
             return true;
@@ -382,6 +389,14 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "PROJ004": //project status change
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("project_status");
+                break;
+            case "RCPT001": //receipt entry
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("receipt_entry");
+                break;
+            case "RCPT002": //receipt list
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Issued_Receipts());
+                fragmentTransaction.addToBackStack("receipt_list");
                 break;
 
         }

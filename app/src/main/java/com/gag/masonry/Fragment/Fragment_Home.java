@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gag.accounting.Adapter.Project.Adapter_Project_Members;
 import com.gag.accounting.ViewModel.VM_Annual;
 import com.gag.accounting.ViewModel.VM_Projects;
-import com.gag.masonry.Adapter.Adapter_Member_List;
+import org.gag.appdriver.App.Adapters.Adapter_Member_List;
 import com.gag.masonry.Adapter.Adapter_Officer_List;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;

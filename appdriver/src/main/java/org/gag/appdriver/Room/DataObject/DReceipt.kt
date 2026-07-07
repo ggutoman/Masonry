@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Room.Entities.EReceiptDetail
 import org.gag.appdriver.Room.Entities.EReceiptMaster
 
@@ -24,4 +25,27 @@ interface DReceipt {
 
     @Query("SELECT * FROM Receipts_Detail WHERE sTransNox= :fsTransNox")
     fun ObserveReceiptDetail(fsTransNox : String) : LiveData<List<EReceiptDetail>>
+
+    @Query("SELECT " +
+                        "a.sMemberID sMemberID, " +
+                        "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
+                        "a.dTransact dTransact, " +
+                        "a.cPaymForm cPaymForm, " +
+                        "a.sORNoxxxx sORNoxxxx, " +
+                        "a.cSendStat cSendStat, " +
+                        "a.cTranStat cTranStat, " +
+                        "a.nTotlPaid nTotlPaid " +
+                    "FROM " +
+                        "Receipts_Master a " +
+                    "JOIN " +
+                        "Member_Info b " +
+                    "ON " +
+                        "a.sMemberID = b.sMemberID " +
+                    "WHERE " +
+                        "a.dTransact " +
+                    "BETWEEN " +
+                        ":fDfrom " +
+                    "AND " +
+                        ":fDto")
+    fun ObserveReceiptMasterList(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>>
 }

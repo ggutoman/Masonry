@@ -164,7 +164,7 @@ class Annual(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadAnnualMember() : CompletableFuture<Boolean>{
+    fun DownloadAnnualMember(fsMemberID : String) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
 
@@ -175,9 +175,14 @@ class Annual(instance : Context) {
                     false
                 } else {
 
+                    //set member id parameter, if not empty
+                    val loParams = JSONObject().apply {
+                        if (fsMemberID.isNotEmpty()) put("sMemberID", fsMemberID)
+                    }
+
                     when (val response = httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_MEMBER_ANNUALS.fsURL,
-                        JSONObject(),
+                        loParams,
                         mapOf(
                             "access-token" to session.getokenID()
                         )

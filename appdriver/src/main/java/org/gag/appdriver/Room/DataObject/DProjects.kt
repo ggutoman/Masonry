@@ -73,6 +73,7 @@ interface DProjects {
     fun GetPledgeSummary(fsProjectCd : String, fsDfrom : String, fsDto : String) : LiveData<List<ProjectDetail>>
 
     @Query("SELECT " +
+                        "a.sProjctCd sProjctCd, " +
                         "a.sProjctNm sProjctNm, " +
                         "a.cTranStat cTranStat, " +
                         "b.dPledgexx dPledgexx, " +
@@ -99,6 +100,31 @@ interface DProjects {
                         "b.dPledgexx " +
                     "DESC")
     fun GetMemberPledges(fsMemberIDxx : String, fsDfrom : String, fsDto : String) : LiveData<List<MemberPledges>>
+
+    @Query("SELECT " +
+                        "a.sProjctCd sProjctCd, " +
+                        "a.sProjctNm sProjctNm, " +
+                        "a.cTranStat cTranStat, " +
+                        "b.dPledgexx dPledgexx, " +
+                        "b.nPledgexx nPledgexx, " +
+                        "b.sORNoxxxx sORNoxxxx, " +
+                        "b.nAmtPaidx nAmtPaidx " +
+                    "FROM " +
+                        "Project_Master a " +
+                    "JOIN " +
+                        "Project_Detail b " +
+                    "ON " +
+                        "(a.sProjctCd = b.sProjctCd) " +
+                    "WHERE " +
+                        "b.sMemberID= :fsMemberIDxx " +
+                    "AND " +
+                        "b.nAmtPaidx > 0 " +
+                    "GROUP BY " +
+                        "a.sProjctCd, b.dPledgexx " +
+                    "ORDER BY " +
+                        "b.dPledgexx " +
+                    "DESC")
+    fun GetMemberPledges(fsMemberIDxx : String) : LiveData<List<MemberPledges>>
 
     @Query("SELECT * FROM Project_Master WHERE sYearIDxx= :fsYearIDxx AND dDueDatex BETWEEN :fsDfrom AND :fsDto")
     fun GetProjectMasterList(fsYearIDxx : String, fsDfrom : String, fsDto : String) : LiveData<List<EProjectMaster>>

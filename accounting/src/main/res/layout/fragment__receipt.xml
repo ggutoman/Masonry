@@ -182,14 +182,14 @@
                                 android:id="@+id/til_lodge_cal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Member Name"
-                                android:enabled="false">
+                                android:hint="Member Name">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/TextInputStyle.Edittext"
                                     android:id="@+id/auto_lodge_member"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"/>
+                                    android:layout_height="wrap_content"
+                                    android:enabled="false"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -219,7 +219,8 @@
                                     style="@style/TextInputStyle.Edittext"
                                     android:id="@+id/tie_or"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"/>
+                                    android:layout_height="wrap_content"
+                                    android:maxLength="10"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -261,7 +262,7 @@
                                     <ImageButton
                                         android:id="@+id/btn_add_detail"
                                         android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
+                                        android:layout_height="match_parent"
                                         android:src="@drawable/baseline_add_circle_24"
                                         android:backgroundTint="@android:color/transparent"
                                         app:layout_constraintTop_toTopOf="parent"
@@ -331,22 +332,6 @@
                                         android:id="@+id/auto_source_transaction"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"/>
-
-                                </com.google.android.material.textfield.TextInputLayout>
-
-                                <com.google.android.material.textfield.TextInputLayout
-                                    style="@style/TextInputStyle"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:hint="Amount To Pay">
-
-                                    <com.google.android.material.textfield.TextInputEditText
-                                        style="@style/TextInputStyle.Edittext"
-                                        android:id="@+id/tie_trans_amount"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="0.00"
-                                        android:enabled="false"/>
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
