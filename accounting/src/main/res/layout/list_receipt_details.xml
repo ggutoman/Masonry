@@ -5,7 +5,7 @@
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="5dp">
 
         <LinearLayout
             android:id="@+id/layout_trans"
@@ -39,9 +39,19 @@
             android:layout_height="wrap_content"
             android:text="0.00"
             android:gravity="end"
+            android:textSize="16sp"
             app:layout_constraintStart_toEndOf="@+id/layout_trans"
             app:layout_constraintTop_toTopOf="@+id/layout_trans"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.5"/>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0.6dp"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@+id/layout_trans"
+        app:layout_constraintStart_toStartOf="@+id/layout_trans"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

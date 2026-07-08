@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -33,6 +34,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
@@ -54,10 +56,10 @@ public class Fragment_Receipt_Entry extends Fragment {
     private List<ReceiptDetail> laDetails;
 
     private int lnSelectPaym = -1;
-    private String lsSelectType;
+    private String lsStackIDxx, lsSelectType;
     private ReceiptDetail loSelectDetail;
 
-    private MaterialTextView mtv_title, mtv_status, btn_download, btn_view, mtv_totaltrans_label, mtv_totalpledge, btn_save_detail;
+    private MaterialTextView mtv_status, btn_download, btn_view, mtv_totaltrans_label, mtv_totalpledge, btn_save_detail;
 
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_or, tie_remarks, tie_paid_amount,  auto_lodge_member;
 
@@ -81,6 +83,13 @@ public class Fragment_Receipt_Entry extends Fragment {
         poLoading = new LoadDialog(requireActivity());
         poMessage = new Message_Dialog(requireActivity());
 
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
+
         poLoading.InitDialog();
         poMessage.InitDialog();
 
@@ -88,12 +97,13 @@ public class Fragment_Receipt_Entry extends Fragment {
         InitDataReceiver();
         InitListener();
 
+        if (!lsTransNox.isEmpty()) DownloadList();
+
         return view;
     }
 
     private void InitViews(View view){
 
-        mtv_title        = view.findViewById(R.id.mtv_title);
         mtv_status       = view.findViewById(R.id.mtv_status);
         btn_download     = view.findViewById(R.id.btn_download);
         btn_view         = view.findViewById(R.id.btn_view);
@@ -124,7 +134,7 @@ public class Fragment_Receipt_Entry extends Fragment {
         if (getArguments() == null || getArguments().getString("member_id") == null){
             Toast.makeText(requireActivity(), "Member ID is not initialized", Toast.LENGTH_SHORT).show();
 
-            requireActivity().getSupportFragmentManager().popBackStack("receipt_entry", POP_BACK_STACK_INCLUSIVE);
+            requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
             return;
         }
         lsMemberID = getArguments() == null || getArguments().getString("member_id") == null ? "" : getArguments().getString("member_id");
@@ -175,6 +185,10 @@ public class Fragment_Receipt_Entry extends Fragment {
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
+                //reset selections
+                lsSelectType = null;
+                loSelectDetail = null;
+
                 //get payment form
                 lnSelectPaym = Integer.parseInt(loReceipt.getCPaymForm());
 
@@ -197,7 +211,9 @@ public class Fragment_Receipt_Entry extends Fragment {
                         mtv_status.setText("Void");
                         break;
                 }
+
                 btn_save.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_save_detail.setVisibility(View.GONE);
 
                 auto_lodge_member.setText(mViewModel.GetMemberInfo(lsMemberID).getSFrstName() + " " + mViewModel.GetMemberInfo(lsMemberID).getSLastName());
                 auto_pay_type.setText(mViewModel.GetPaymentTypes().get(Integer.parseInt(loReceipt.getCPaymForm())), false);
@@ -302,6 +318,23 @@ public class Fragment_Receipt_Entry extends Fragment {
         }
     }
 
+    private void DownloadList(){
+
+        mViewModel.DownloadReceiptInfo(lsTransNox, new VM_Receipts.OnDownload() {
+            @Override
+            public void OnLoad() {
+                poLoading.ShowDialog("Downloading receipt information. Please wait . .");
+            }
+
+            @Override
+            public void OnFinished(String fsMessage) {
+                poLoading.DismissDialog();
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
     private void InitListener(){
 
         auto_pay_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -325,9 +358,12 @@ public class Fragment_Receipt_Entry extends Fragment {
                 auto_source_type.setText(mViewModel.GetSources().get(i).getFsDescript());
                 mViewModel.SelectType(lsSelectType);
 
-                //enable amount field if selected type
-                tie_paid_amount.setEnabled(!(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ")));
-
+                //enable amount field, if open status and selected type if due or project, else, disable
+                if (loReceipt.getCTranStat().equalsIgnoreCase("0")){
+                    tie_paid_amount.setEnabled(!(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ")));
+                }else{
+                    tie_paid_amount.setEnabled(false);
+                }
                 btn_save_detail.setVisibility(View.GONE);
             }
         });
@@ -372,21 +408,27 @@ public class Fragment_Receipt_Entry extends Fragment {
         btn_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DownloadList();
+            }
+        });
 
-                mViewModel.DownloadReceiptInfo(loReceipt.getSTransNox(), new VM_Receipts.OnDownload() {
-                    @Override
-                    public void OnLoad() {
-                        poLoading.ShowDialog("Downloading receipt information. Please wait . .");
-                    }
+        btn_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                    @Override
-                    public void OnFinished(String fsMessage) {
-                        poLoading.DismissDialog();
+                Fragment_Receipt_Detail loReceiptDetail = new Fragment_Receipt_Detail();
+                FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
 
-                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-                        InitDataReceiver();
-                    }
-                });
+                Bundle loBundle = new Bundle();
+                loBundle.putString("member_id", lsMemberID);
+                loBundle.putString("transaction_id", lsTransNox);
+
+                loReceiptDetail.setArguments(loBundle);
+
+                //add to child container, as bridge to initiate another fragment after call
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_detail", loReceiptDetail));
+                fragmentTransaction.addToBackStack("receipt_detail");
+                fragmentTransaction.commit();
             }
         });
 
@@ -446,6 +488,7 @@ public class Fragment_Receipt_Entry extends Fragment {
                 }
 
                 //initialize primary receipt details
+                loReceipt.setCPaymForm(String.valueOf(lnSelectPaym));
                 loReceipt.setSORNoxxxx(tie_or.getText() == null ? "" : tie_or.getText().toString());
                 loReceipt.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
 
@@ -469,7 +512,7 @@ public class Fragment_Receipt_Entry extends Fragment {
                            public void OnSuccess() {
                                poLoading.DismissDialog();
 
-                               requireActivity().getSupportFragmentManager().popBackStack("receipt_entry", POP_BACK_STACK_INCLUSIVE);
+                               requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
                            }
 
                            @Override

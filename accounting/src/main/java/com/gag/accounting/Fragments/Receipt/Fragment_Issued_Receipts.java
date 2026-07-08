@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +25,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.gag.accounting.Adapter.Receipt.Adapter_Issued_Receipts;
+import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -32,6 +34,7 @@ import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.ReceiptMasterList;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -135,6 +138,20 @@ public class Fragment_Issued_Receipts extends Fragment {
                         new Adapter_Issued_Receipts.OnSelectItem() {
                             @Override
                             public void OnSelec(ReceiptMasterList loItem) {
+
+                                Fragment_Receipt_Entry loEntry = new Fragment_Receipt_Entry();
+
+                                Bundle loBundle = new Bundle();
+                                loBundle.putString("member_id", loItem.getSMemberID());
+                                loBundle.putString("transaction_id", loItem.getSTransNox());
+
+                                loEntry.setArguments(loBundle);
+
+                                requireActivity().getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_list", loEntry))
+                                        .addToBackStack("receipt_list")
+                                        .commit();
 
                             }
                         }

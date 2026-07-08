@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,8 @@ import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
+import org.gag.appdriver.Libraries.File.FileHelper
+import org.gag.appdriver.Libraries.File.FileHelper.FileResult
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
@@ -48,6 +51,7 @@ import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.util.Date
 import java.util.concurrent.CompletableFuture
 
@@ -60,6 +64,7 @@ class Receipts(instance : Context) {
     val httpInstance : KTORepository = KTORepository(instance)
     val dateRepository : DateRepository = DateRepository()
     val encryptObj : HashRepository = HashRepository()
+    val fileHelper : FileHelper = FileHelper(instance)
 
     val poLodgeYear : DLodgeCalendar = ML_DBF.getDatabase(instance)?.GetLodgeCalendar() as DLodgeCalendar
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance)?.GetUserDao() as DUserInfo
@@ -98,6 +103,37 @@ class Receipts(instance : Context) {
 
     fun ObserveReceiptMasterList(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>> = poReceipt.ObserveReceiptMasterList(fDfrom, fDto)
 
+    fun CreateFileFromView(layoutView : View, fileNme : String) : CompletableFuture<FileResult>{
+
+        val future = CompletableFuture<FileResult>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                fileHelper.CreateFileFromView(layoutView, fileNme).let {
+
+                    if (!it.isSuccess){
+                        message = fileHelper.GetMessage()
+                    }
+
+                    //return the file after initializing message
+                    it
+                }
+            } catch (ex: Exception) {
+                message =  ex.message.toString()
+
+                FileResult(false, File(""))
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
     @SuppressLint("MissingPermission")
     fun DownloadReceipt(fsTransNox : String) : CompletableFuture<Boolean>{
 
@@ -135,7 +171,6 @@ class Receipts(instance : Context) {
                             loReceipt.detail.forEach { loItem ->
                                 poReceipt.SaveReceiptDetail(loItem)
                             }
-
                             true
                         }
 
@@ -367,7 +402,7 @@ class Receipts(instance : Context) {
                     }
 
                     when (val response = httpInstance.makeRequest(
-                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_PROJECT_STATUS.fsURL,
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_RECEIPT_STATUS.fsURL,
                         loParams,
                         mapOf(
                             "access-token" to session.getokenID()

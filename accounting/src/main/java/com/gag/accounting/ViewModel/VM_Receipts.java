@@ -1,6 +1,8 @@
 package com.gag.accounting.ViewModel;
 
 import android.app.Application;
+import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -16,12 +18,14 @@ import org.gag.appdriver.App.Models.ProjectDetail;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.App.Models.ReceiptMasterList;
 import org.gag.appdriver.Constants.RECEIPT_CONSTANTS;
+import org.gag.appdriver.Libraries.File.FileHelper;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectDetail;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +43,12 @@ public class VM_Receipts extends AndroidViewModel {
     public interface OnTransaction{
         void OnLoad();
         void OnSuccess();
+        void OnFailed(String fsMessage);
+    }
+
+    public interface OnShareFile{
+        void OnLoad();
+        void OnSuccess(File file);
         void OnFailed(String fsMessage);
     }
 
@@ -121,6 +131,21 @@ public class VM_Receipts extends AndroidViewModel {
 
     public LiveData<List<ReceiptMasterList>> GetReceiptMasterList(String fDfrom, String fDto){
         return poReceipt.ObserveReceiptMasterList(fDfrom, fDto);
+    }
+
+    public void CreateFileFromView(View layoutView, String fileNme, OnShareFile foCallback){
+
+        foCallback.OnLoad();
+        poReceipt.CreateFileFromView(layoutView, fileNme).thenAccept(new Consumer<FileHelper.FileResult>() {
+            @Override
+            public void accept(FileHelper.FileResult fileResult) {
+                if (!fileResult.isSuccess()){
+                    foCallback.OnFailed(fileResult.getFile().toString());
+                    return;
+                }
+                foCallback.OnSuccess(fileResult.getFile());
+            }
+        });
     }
 
     public boolean AddReceiptDetail(String fsTransNox, String fsSourceCd, String fsSourceNo, String fnAmtPaid){
@@ -326,7 +351,7 @@ public class VM_Receipts extends AndroidViewModel {
         });
     }
 
-    public void UpdateProjectStatus(EReceiptMaster foMaster, OnTransaction foCallback){
+    public void UpdateReceiptStatus(EReceiptMaster foMaster, OnTransaction foCallback){
 
         foCallback.OnLoad();
 

@@ -30,6 +30,8 @@ import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import com.gag.masonry.Fragment.Fragment_Lodge_List;
+
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -395,7 +397,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.addToBackStack("receipt_entry");
                 break;
             case "RCPT002": //receipt list
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Issued_Receipts());
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("receipt_list", new Fragment_Issued_Receipts()));
                 fragmentTransaction.addToBackStack("receipt_list");
                 break;
 

@@ -27,6 +27,7 @@ interface DReceipt {
     fun ObserveReceiptDetail(fsTransNox : String) : LiveData<List<EReceiptDetail>>
 
     @Query("SELECT " +
+                        "a.sTransNox sTransNox, " +
                         "a.sMemberID sMemberID, " +
                         "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
                         "a.dTransact dTransact, " +

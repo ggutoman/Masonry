@@ -15,9 +15,7 @@
         android:roundIcon="@drawable/masonry_logo"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".Fragment.Fragment_Members_Officers"
-            android:exported="false" />
+
         <activity
             android:name=".Activity.Activity_Main"
             android:exported="true"
@@ -31,9 +29,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".Activity.Activity_Dashboard"
             android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+        
     </application>
 
 </manifest>
