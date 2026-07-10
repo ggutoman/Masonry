@@ -87,6 +87,8 @@ class Projects(instance : Context) {
 
     fun GetMemberPledges(fsMemberIDxx : String, fsDfrom : String, fsDto : String) : LiveData<List<MemberPledges>> = poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto)
 
+    fun GetLodgeProjects(fsLodgeIDxx: String) : LiveData<List<EProjectMaster>> = poProjects.GetLodgeProjects(fsLodgeIDxx)
+
     @SuppressLint("MissingPermission")
     fun SaveProject(loMaster : EProjectMaster, loDetail : List<EProjectDetail>) : CompletableFuture<Boolean>{
 
@@ -276,6 +278,72 @@ class Projects(instance : Context) {
 
                     when (val response = httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_PROJECTS.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadProjects>(response.data.body())
+
+                            //save detail
+                            resultData.GetPayload().forEach { loItem ->
+                                poProjects.SaveMaster(loItem)
+                            }
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadLodgeProjects(fsLodgeIDxx : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+
+                        put("sLodgeIDxx", fsLodgeIDxx)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_LODGE_PROJECTS.fsURL,
                         loParams,
                         mapOf(
                             "access-token" to session.getokenID()

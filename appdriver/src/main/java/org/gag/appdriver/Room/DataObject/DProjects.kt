@@ -129,4 +129,7 @@ interface DProjects {
     @Query("SELECT * FROM Project_Master WHERE sYearIDxx= :fsYearIDxx AND dDueDatex BETWEEN :fsDfrom AND :fsDto")
     fun GetProjectMasterList(fsYearIDxx : String, fsDfrom : String, fsDto : String) : LiveData<List<EProjectMaster>>
 
+    @Query("SELECT * FROM Project_Master a JOIN Lodge_Calendar b ON (a.sYearIDxx = b.sYearIDxx) WHERE b.sLodgeIDx= :fsLodgeIDxx GROUP BY a.sProjctCd")
+    fun GetLodgeProjects(fsLodgeIDxx : String) : LiveData<List<EProjectMaster>>
+
 }

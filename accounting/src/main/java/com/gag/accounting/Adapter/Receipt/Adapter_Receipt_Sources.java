@@ -9,12 +9,10 @@ import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Constants.RECEIPT_CONSTANTS;
 
 import java.util.List;
@@ -40,7 +38,7 @@ public class Adapter_Receipt_Sources extends ArrayAdapter<RECEIPT_CONSTANTS> {
         if (view == null) {
 
             LayoutInflater inflater = LayoutInflater.from(loInstance);
-            view = inflater.inflate(R.layout.list_receipt_sources, parent, false);
+            view = inflater.inflate(R.layout.list_item_sources, parent, false);
         }
 
         MaterialTextView mtv_descr= view.findViewById(R.id.mtv_descr);

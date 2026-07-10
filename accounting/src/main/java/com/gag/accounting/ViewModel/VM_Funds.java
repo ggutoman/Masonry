@@ -122,22 +122,6 @@ public class VM_Funds extends AndroidViewModel {
         });
     }
 
-    public void DownloadFundInfo(String fsDfrom, String fsDto, OnSubmit focallBack){
-
-        focallBack.OnLoad();
-        poFunds.DownloadFundMasterLedger(fsDfrom, fsDto).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    focallBack.OnFailed(poFunds.getMessage());
-                    return;
-                }
-                focallBack.OnSucces();
-            }
-        });
-    }
-
     public void DownloadFunds(String fsYearID, String fsDfrom, String fsDto, OnSubmit focallBack){
 
         focallBack.OnLoad();

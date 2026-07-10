@@ -62,7 +62,7 @@ public class Fragment_Receipt_Detail extends Fragment {
     private LoadDialog poLoad;
     private Message_Dialog poMessage;
 
-    private String lsMemberID, lsTransNox;
+    private String lsStackIDxx, lsMemberID, lsTransNox;
 
     private View layoutView;
     private MaterialTextView mtv_transno;
@@ -84,11 +84,32 @@ public class Fragment_Receipt_Detail extends Fragment {
     private final ActivityResultLauncher<Intent> shareLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
 
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Toast.makeText(requireActivity(), "Share Successful", Toast.LENGTH_SHORT).show();
-                }else {
-                    Toast.makeText(requireActivity(), "Share Cancelled", Toast.LENGTH_SHORT).show();
-                }
+                //some apps will always return cancelled, so sent receipts is not validated and is open to update whether cancelled or not
+                if (loReceipt == null) return;
+
+                //initialize cSendStat to sent, and update record
+                loReceipt.setCSendStat("1");
+
+                mViewModel.UpdateReceiptStatus(loReceipt, new VM_Receipts.OnTransaction() {
+                    @Override
+                    public void OnLoad() {
+                        poLoad.ShowDialog("Saving receipt. Please wait. .");
+                    }
+
+                    @Override
+                    public void OnSuccess() {
+                        poLoad.DismissDialog();
+
+                        //reload transaction, to display share button after approving
+                        InitDataReceiver();
+                    }
+
+                    @Override
+                    public void OnFailed(String fsMessage) {
+                        poLoad.DismissDialog();
+                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
             });
 
 
@@ -109,11 +130,14 @@ public class Fragment_Receipt_Detail extends Fragment {
         if (count > 0) {
 
             FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
 
         InitViews(layoutView);
         InitDataReceiver();
         InitListener();
+
+        DownloadList();
 
         return layoutView;
     }
@@ -161,8 +185,8 @@ public class Fragment_Receipt_Detail extends Fragment {
                 mtv_or.setText(loReceipt.getSORNoxxxx());
 
                 //display buttons based on status
-                layout_buttons.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
-                btn_share.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("1") && loReceipt.getCSendStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                layout_buttons.setVisibility(lsStackIDxx.equalsIgnoreCase("receipt_confirm") && loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_share.setVisibility(lsStackIDxx.equalsIgnoreCase("receipt_confirm") && loReceipt.getCTranStat().equalsIgnoreCase("1") && loReceipt.getCSendStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
                 switch (loReceipt.getCPaymForm()){
 
@@ -210,7 +234,7 @@ public class Fragment_Receipt_Detail extends Fragment {
         });
     }
 
-    private void ShareReceipt(File file, String packageName) {
+    private void ShareReceipt(File file) {
 
         try {
 
@@ -224,9 +248,8 @@ public class Fragment_Receipt_Detail extends Fragment {
             shareIntent.setType("image/png");
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            shareIntent.setPackage(packageName);
 
-            shareLauncher.launch(shareIntent);
+            shareLauncher.launch(Intent.createChooser(shareIntent, "Share via"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -261,7 +284,7 @@ public class Fragment_Receipt_Detail extends Fragment {
                 poDialog.dismiss();
 
                 //initialize status first, then update
-                loReceipt.setCTranStat("1");
+                loReceipt.setCTranStat(fsTranStat);
                 mViewModel.UpdateReceiptStatus(loReceipt, new VM_Receipts.OnTransaction() {
                     @Override
                     public void OnLoad() {
@@ -282,6 +305,22 @@ public class Fragment_Receipt_Detail extends Fragment {
                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
                     }
                 });
+            }
+        });
+    }
+
+    private void DownloadList(){
+
+        mViewModel.DownloadReceiptInfo(lsTransNox, new VM_Receipts.OnDownload() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Downloading receipt information. Please wait . .");
+            }
+
+            @Override
+            public void OnFinished(String fsMessage) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -330,7 +369,7 @@ public class Fragment_Receipt_Detail extends Fragment {
                         poLoad.DismissDialog();
                         view.setVisibility(View.VISIBLE);
 
-                        ShareReceipt(file, "com.facebook.orca");
+                        ShareReceipt(file);
                     }
 
                     @Override

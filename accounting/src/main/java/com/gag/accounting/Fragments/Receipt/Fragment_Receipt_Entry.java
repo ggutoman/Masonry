@@ -59,7 +59,7 @@ public class Fragment_Receipt_Entry extends Fragment {
     private String lsStackIDxx, lsSelectType;
     private ReceiptDetail loSelectDetail;
 
-    private MaterialTextView mtv_status, btn_download, btn_view, mtv_totaltrans_label, mtv_totalpledge, btn_save_detail;
+    private MaterialTextView mtv_status, btn_download, btn_view, mtv_totalpledge, btn_save_detail;
 
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_or, tie_remarks, tie_paid_amount,  auto_lodge_member;
 
@@ -107,7 +107,6 @@ public class Fragment_Receipt_Entry extends Fragment {
         mtv_status       = view.findViewById(R.id.mtv_status);
         btn_download     = view.findViewById(R.id.btn_download);
         btn_view         = view.findViewById(R.id.btn_view);
-        mtv_totaltrans_label = view.findViewById(R.id.mtv_totaltrans_label);
         mtv_totalpledge  = view.findViewById(R.id.mtv_totalpledge);
         btn_save_detail  = view.findViewById(R.id.btn_save_detail);
 
@@ -332,7 +331,6 @@ public class Fragment_Receipt_Entry extends Fragment {
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     private void InitListener(){
@@ -341,8 +339,7 @@ public class Fragment_Receipt_Entry extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                if (auto_pay_type == null) return;
-
+                if (auto_pay_type.getAdapter() == null) return;
                 lnSelectPaym = mViewModel.GetPaymentTypes().indexOf((String) auto_pay_type.getAdapter().getItem(i));
             }
         });
@@ -426,8 +423,8 @@ public class Fragment_Receipt_Entry extends Fragment {
                 loReceiptDetail.setArguments(loBundle);
 
                 //add to child container, as bridge to initiate another fragment after call
-                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_detail", loReceiptDetail));
-                fragmentTransaction.addToBackStack("receipt_detail");
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loReceiptDetail));
+                fragmentTransaction.addToBackStack(lsStackIDxx);
                 fragmentTransaction.commit();
             }
         });

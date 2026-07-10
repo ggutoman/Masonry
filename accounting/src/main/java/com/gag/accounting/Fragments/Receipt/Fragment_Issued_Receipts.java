@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,14 +52,13 @@ public class Fragment_Issued_Receipts extends Fragment {
     private Adapter_Issued_Receipts loAdapter;
 
     private TabLayout layout_tab;
-    private TabItem tab_open, tab_confirmed;
     private ConstraintLayout layout_no_record;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
     private RecyclerView rcv_list;
 
     private int lnTabSelected;
-    private String lsDfrom, lsDto;
+    private String lsStackIDxx, lsDfrom, lsDto;
     private List<String> laStatus;
 
     @Override
@@ -75,11 +75,17 @@ public class Fragment_Issued_Receipts extends Fragment {
         poLoad.InitDialog();
 
         lnTabSelected = 0;
+        laStatus = List.of("0");
+
         lsDfrom = mViewModel.GetCountedDate(7, 1, false);
         lsDto = mViewModel.GetCurrentDate();
 
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
 
-        laStatus = lnTabSelected < 1 ? List.of("0") : List.of("0", "1", "3", "4");
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         InitViews(view);
         InitListener();
@@ -93,8 +99,6 @@ public class Fragment_Issued_Receipts extends Fragment {
     private void InitViews(View view){
 
         layout_tab = view.findViewById(R.id.layout_tab);
-        tab_open = view.findViewById(R.id.tab_open);
-        tab_confirmed = view.findViewById(R.id.tab_confirmed);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
@@ -134,24 +138,47 @@ public class Fragment_Issued_Receipts extends Fragment {
                 }
 
                 loAdapter = new Adapter_Issued_Receipts(
-                        receiptMasterLists,
+                        filteredList,
                         new Adapter_Issued_Receipts.OnSelectItem() {
                             @Override
                             public void OnSelec(ReceiptMasterList loItem) {
 
-                                Fragment_Receipt_Entry loEntry = new Fragment_Receipt_Entry();
+                                FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
 
+                                Fragment loFragment;
                                 Bundle loBundle = new Bundle();
-                                loBundle.putString("member_id", loItem.getSMemberID());
-                                loBundle.putString("transaction_id", loItem.getSTransNox());
 
-                                loEntry.setArguments(loBundle);
+                                switch (lsStackIDxx){
 
-                                requireActivity().getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_list", loEntry))
-                                        .addToBackStack("receipt_list")
-                                        .commit();
+                                    case "issued_receipt":
+
+                                        loFragment = new Fragment_Receipt_Entry();
+
+                                        loBundle.putString("member_id", loItem.getSMemberID());
+                                        loBundle.putString("transaction_id", loItem.getSTransNox());
+
+                                        loFragment.setArguments(loBundle);
+
+                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("issued_receipt", loFragment))
+                                            .addToBackStack("issued_receipt");
+
+                                        break;
+
+                                    case "receipt_confirm":
+
+                                        loFragment = new Fragment_Receipt_Detail();
+
+                                        loBundle.putString("member_id", loItem.getSMemberID());
+                                        loBundle.putString("transaction_id", loItem.getSTransNox());
+
+                                        loFragment.setArguments(loBundle);
+
+                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_confirm", loFragment))
+                                                .addToBackStack("receipt_confirm");
+
+                                        break;
+                                }
+                                loTransaction.commit();
 
                             }
                         }
@@ -193,7 +220,7 @@ public class Fragment_Issued_Receipts extends Fragment {
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_receipts, loMenu.getMenu());
 
                 //hide category filtering if tab is for unconfirmed status only
-                loMenu.getMenu().findItem (R.id.action_by_category).setVisible(lnTabSelected < 1);
+                loMenu.getMenu().findItem (R.id.action_by_category).setVisible(lnTabSelected > 0);
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

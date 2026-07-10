@@ -17,6 +17,12 @@ interface DReceipt {
     @Upsert(entity = EReceiptDetail::class)
     fun SaveReceiptDetail(foDetail : EReceiptDetail)
 
+    @Query("DELETE FROM Receipts_Master")
+    fun DeleteReceiptMaster()
+
+    @Query("DELETE FROM Receipts_Detail")
+    fun DeleteReceiptDetails()
+
     @Query("DELETE FROM Receipts_Detail WHERE sTransNox= :fsTransNox")
     fun DeleteReceiptDetails(fsTransNox : String)
 

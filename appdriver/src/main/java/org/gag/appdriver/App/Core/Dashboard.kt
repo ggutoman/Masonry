@@ -47,6 +47,7 @@ import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProjects
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
+import org.gag.appdriver.Room.DataObject.DReceipt
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
@@ -86,6 +87,7 @@ class Dashboard(loInstance : Context) {
     val poAnnualMaster: DAnnualMaster = ML_DBF.getDatabase(loInstance)?.GetAnnualMaster() as DAnnualMaster
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(loInstance)?.GetAnnualDetail() as DAnnualDetail
     val poProjects: DProjects = ML_DBF.getDatabase(loInstance)?.GetProject() as DProjects
+    val poReceipts: DReceipt = ML_DBF.getDatabase(loInstance)?.GetReceipt() as DReceipt
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -150,11 +152,15 @@ class Dashboard(loInstance : Context) {
 
         poFunds.DeleteFunds()
         poLedger.DeleteLedger()
+
         poAnnualMaster.Clear()
         poAnnualDetail.Clear()
 
         poProjects.DeleteMaster()
         poProjects.DeleteDetail()
+
+        poReceipts.DeleteReceiptMaster()
+        poReceipts.DeleteReceiptDetails()
 
         poDBMember.DeleteMember()
         poDBMemberAddress.DeletMemberAddress()

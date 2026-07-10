@@ -247,7 +247,6 @@ class Receipts(instance : Context) {
 
                             //clear and save detail
                             loReceipt.detail.forEach { loItem -> poReceipt.SaveReceiptDetail(loItem) }
-
                             true
                         }
 
@@ -399,6 +398,7 @@ class Receipts(instance : Context) {
 
                         put("sTransNox", loReceipt.sTransNox)
                         put("cTranStat", loReceipt.cTranStat)
+                        put("cSendStat", loReceipt.cSendStat)
                     }
 
                     when (val response = httpInstance.makeRequest(

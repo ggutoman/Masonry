@@ -195,5 +195,29 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "RCPT",
         1,
         1
+    ),
+
+    MENU_ITEM_RECEIPT_CONFIRMATIOND(
+        "Confirm Receipts",
+        "RCPT003",
+        "RCPT",
+        1,
+        1
+    ),
+
+    MENU_ITEM_DISBURSEMENT(
+        "Create Disbursement",
+        "DISB001",
+        "DISB",
+        1,
+        1
+    ),
+
+    MENU_ITEM_DISBURSEMENT_HISTORY(
+        "Disbursement History",
+        "DISB002",
+        "DISB",
+        1,
+        1
     )
 }
