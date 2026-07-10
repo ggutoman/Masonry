@@ -1,83 +1,123 @@
 package com.gag.accounting.Adapter.Receipt;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.ReceiptDetail;
+import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Adapter_Receipt_Transactions extends RecyclerView.Adapter<Adapter_Receipt_Transactions.VH_Receipt>{
+public class Adapter_Receipt_Transactions extends ArrayAdapter<ReceiptDetail> {
 
     private final Context loInstance;
-    private final List<EReceiptDetail> laDetails;
+    private final List<ReceiptDetail> laDetails;
 
-    public Adapter_Receipt_Transactions(Context foInstance, List<EReceiptDetail> faDetails){
-        loInstance = foInstance;
-        laDetails = faDetails;
+    private List<ReceiptDetail> laDetailsFiltered;
+
+    public Adapter_Receipt_Transactions(@NonNull Context context, int resource, @NonNull List<ReceiptDetail> objects) {
+        super(context, resource, objects);
+
+        loInstance = context;
+        laDetails = objects;
+        laDetailsFiltered = objects;
+    }
+
+    @SuppressLint("SetTextI18n")
+    @NonNull
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+        View view = convertView;
+        if (view == null) {
+            LayoutInflater inflater = LayoutInflater.from(loInstance);
+            view = inflater.inflate(R.layout.list_receipt_details, parent, false);
+        }
+
+        MaterialTextView mtv_src_no = view.findViewById(R.id.mtv_src_no);
+        MaterialTextView mtv_src_amount = view.findViewById(R.id.mtv_src_amount);
+        MaterialTextView mtv_src_code = view.findViewById(R.id.mtv_src_code);
+
+        mtv_src_no.setText(laDetailsFiltered.get(position).getSSourceNo());
+        mtv_src_amount.setText(laDetailsFiltered.get(position).getNAmtPaidx());
+
+        mtv_src_no.setVisibility(laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("DUES") || laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
+
+        switch (laDetailsFiltered.get(position).getSSourceCD()){
+
+            case "DUES":
+                mtv_src_code.setText("Annual Dues");
+                break;
+            case "PROJ":
+                mtv_src_code.setText("Project");
+                break;
+            case "BINT":
+                mtv_src_code.setText("Bank Interest");
+                break;
+            case "OTHR":
+                mtv_src_code.setText("Others");
+                break;
+        }
+        return view;
+
+    }
+
+    @Override
+    public int getCount() {
+        return laDetailsFiltered.size();
+    }
+
+    @Nullable
+    @Override
+    public ReceiptDetail getItem(int position) {
+        return laDetailsFiltered.get(position);
     }
 
     @NonNull
     @Override
-    public VH_Receipt onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
 
-        return new VH_Receipt(
-                LayoutInflater
-                        .from(loInstance)
-                        .inflate(R.layout.list_receipt_details, parent, false)
-        );
+                List<ReceiptDetail> results = new ArrayList<>();
+                if (constraint == null || constraint.length() == 0) {
+                    results.addAll(laDetails);
+                } else {
+                    for (ReceiptDetail loDetail : laDetails) {
+
+                        if (loDetail.getSSourceNo().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                            results.add(loDetail);
+                        }
+                    }
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = results;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                laDetailsFiltered = (List<ReceiptDetail>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull VH_Receipt holder, int position) {
 
-        holder.mtv_src_no.setText(laDetails.get(position).getSSourceNo());
-
-        switch (laDetails.get(position).getSSourceCD()){
-
-            case "DUES":
-                holder.mtv_src_code.setText("Annual Due");
-                break;
-            case "PROJ":
-                holder.mtv_src_code.setText("Project");
-                break;
-            case "BINT":
-                holder.mtv_src_code.setText("Bank Interest");
-                break;
-            case "OTH":
-                holder.mtv_src_code.setText("Others");
-                break;
-        }
-
-        holder.mtv_src_amount.setText(laDetails.get(position).getNAmtPaidx());
-    }
-
-    @Override
-    public int getItemCount() {
-        return laDetails.size();
-    }
-
-    public static class VH_Receipt extends RecyclerView.ViewHolder {
-
-        private final MaterialTextView mtv_src_no;
-        private final MaterialTextView mtv_src_amount;
-        private final MaterialTextView mtv_src_code;
-
-        public VH_Receipt(@NonNull View itemView) {
-            super(itemView);
-
-            mtv_src_no = itemView.findViewById(R.id.mtv_src_no);
-            mtv_src_amount = itemView.findViewById(R.id.mtv_src_amount);
-            mtv_src_code = itemView.findViewById(R.id.mtv_src_code);
-
-        }
-    }
 }

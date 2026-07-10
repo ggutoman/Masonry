@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_by_date"
+        android:orderInCategory="100"
+        android:title="By Date"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_item_filter"
+                android:title="Filter"/>
+
+            <item
+                android:id="@+id/action_item_download"
+                android:title="Download"/>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/action_by_category"
+        android:orderInCategory="100"
+        android:title="By Status"
+        app:showAsAction="never" >
+
+        <menu>
+            <item
+                android:id="@+id/action_item_all"
+                android:title="All"/>
+
+            <item
+                android:id="@+id/action_item_for_open"
+                android:title="Open"/>
+
+            <item
+                android:id="@+id/action_item_confirmed"
+                android:title="Confirmed"/>
+
+            <item
+                android:id="@+id/action_item_release"
+                android:title="Released"/>
+
+            <item
+                android:id="@+id/action_item_cancelled"
+                android:title="Cancelled"/>
+
+            <item
+                android:id="@+id/action_item_void"
+                android:title="Void"/>
+
+            <item
+                android:id="@+id/action_item_completed"
+                android:title="Completed"/>
+
+        </menu>
+
+    </item>
+
+</menu>

@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <com.google.android.material.card.MaterialCardView
+    <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:orientation="vertical"
-        app:cardElevation="5dp"
-        app:cardUseCompatPadding="true">
+        android:padding="5dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp">
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_src_no"
+        <LinearLayout
+            android:id="@+id/layout_trans"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="N/A"
+            android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.5"/>
+            app:layout_constraintWidth_percent="0.5">
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_src_no"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="N/A"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Header"
+                android:id="@+id/mtv_src_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="N/A"
+                android:alpha="0.7"/>
+
+        </LinearLayout>
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
@@ -29,22 +39,19 @@
             android:layout_height="wrap_content"
             android:text="0.00"
             android:gravity="end"
-            app:layout_constraintStart_toEndOf="@+id/mtv_src_no"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@+id/layout_trans"
+            app:layout_constraintTop_toTopOf="@+id/layout_trans"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.5"/>
 
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_src_code"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="N/A"
-            android:alpha="0.7"
-            app:layout_constraintTop_toBottomOf="@+id/mtv_src_no"
-            app:layout_constraintStart_toStartOf="@+id/mtv_src_no"
-            app:layout_constraintEnd_toEndOf="@+id/mtv_src_no"
-            app:layout_constraintWidth_percent="0.5"/>
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0.6dp"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@+id/layout_trans"
+        app:layout_constraintStart_toStartOf="@+id/layout_trans"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>

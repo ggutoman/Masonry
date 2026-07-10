@@ -14,7 +14,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
+import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
+import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge;
@@ -29,6 +32,8 @@ import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import com.gag.masonry.Fragment.Fragment_Lodge_List;
+
+import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
@@ -272,6 +277,21 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "PROJ004":
                     InitView("PROJ004");
                     break;
+                case "RCPT001":
+                    InitView("RCPT001");
+                    break;
+                case "RCPT002":
+                    InitView("RCPT002");
+                    break;
+                case "RCPT003":
+                    InitView("RCPT003");
+                    break;
+                case "DISB001":
+                    InitView("DISB001");
+                    break;
+                case "DISB002":
+                    InitView("DISB002");
+                    break;
             }
 
             return true;
@@ -382,6 +402,26 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "PROJ004": //project status change
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("project_status");
+                break;
+            case "RCPT001": //receipt entry
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
+                fragmentTransaction.addToBackStack("receipt_entry");
+                break;
+            case "RCPT002": //receipt list
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("issued_receipt", new Fragment_Issued_Receipts()));
+                fragmentTransaction.addToBackStack("issued_receipt");
+                break;
+            case "RCPT003": //confirm receipts
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("receipt_confirm", new Fragment_Issued_Receipts()));
+                fragmentTransaction.addToBackStack("receipt_confirm");
+                break;
+            case "DISB001": //create disbursement
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_entry", new Fragment_Disbursement()));
+                fragmentTransaction.addToBackStack("disbursement_entry");
+                break;
+            case "DISB002": //view disbursements
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_list", new Fragment_Disbursement_History()));
+                fragmentTransaction.addToBackStack("disbursement_list");
                 break;
 
         }

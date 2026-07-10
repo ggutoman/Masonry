@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
+import org.gag.appdriver.Room.DataObject.DDisbursement
 import org.gag.appdriver.Room.DataObject.DFundLedger
 import org.gag.appdriver.Room.DataObject.DFundMaster
 import org.gag.appdriver.Room.DataObject.DFundTurnover
@@ -27,6 +28,7 @@ import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.EProvinceInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
+import org.gag.appdriver.Room.Entities.EDisbursement
 import org.gag.appdriver.Room.Entities.EFundLedger
 import org.gag.appdriver.Room.Entities.EFundMaster
 import org.gag.appdriver.Room.Entities.EFundTurnOver
@@ -70,7 +72,8 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EProjectMaster::class,
         EProjectDetail::class,
         EReceiptMaster::class,
-        EReceiptDetail::class
+        EReceiptDetail::class,
+        EDisbursement::class
     ],
     version = 1,
     exportSchema = false
@@ -97,6 +100,7 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetAnnualDetail() : DAnnualDetail
     abstract fun GetProject() : DProjects
     abstract fun GetReceipt() : DReceipt
+    abstract fun GetDisbursement() : DDisbursement
 
     companion object {
 

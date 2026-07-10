@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.View
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -15,14 +16,21 @@ import org.gag.appdriver.App.DataModels.DownloadMemberProjects
 import org.gag.appdriver.App.DataModels.DownloadProjectDetail
 import org.gag.appdriver.App.DataModels.DownloadProjectInfo
 import org.gag.appdriver.App.DataModels.DownloadProjects
+import org.gag.appdriver.App.DataModels.DownloadReceiptInfo
+import org.gag.appdriver.App.DataModels.DownloadReceiptList
 import org.gag.appdriver.App.Models.AnnualMembers
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.MemberPledges
 import org.gag.appdriver.App.Models.MemberProjects
 import org.gag.appdriver.App.Models.ProjectDetail
+import org.gag.appdriver.App.Models.ReceiptInfo
+import org.gag.appdriver.App.Models.ReceiptList
+import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
+import org.gag.appdriver.Libraries.File.FileHelper
+import org.gag.appdriver.Libraries.File.FileHelper.FileResult
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
@@ -43,6 +51,7 @@ import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.util.Date
 import java.util.concurrent.CompletableFuture
 
@@ -55,11 +64,13 @@ class Receipts(instance : Context) {
     val httpInstance : KTORepository = KTORepository(instance)
     val dateRepository : DateRepository = DateRepository()
     val encryptObj : HashRepository = HashRepository()
+    val fileHelper : FileHelper = FileHelper(instance)
 
     val poLodgeYear : DLodgeCalendar = ML_DBF.getDatabase(instance)?.GetLodgeCalendar() as DLodgeCalendar
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance)?.GetUserDao() as DUserInfo
     val poReceipt : DReceipt = ML_DBF.getDatabase(instance)?.GetReceipt() as DReceipt
     val poAnnual : DAnnualDetail = ML_DBF.getDatabase(instance)?.GetAnnualDetail() as DAnnualDetail
+    val poProjects : DProjects = ML_DBF.getDatabase(instance)?.GetProject() as DProjects
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance)?.GetMemberDao() as DMemberInfo
 
     fun GetUserInfo() : EUserInfo  = poUserInfo.GetUserInfo()
@@ -87,6 +98,188 @@ class Receipts(instance : Context) {
     fun ObserveReceiptDetail(fsTransnox: String) : LiveData<List<EReceiptDetail>> = poReceipt.ObserveReceiptDetail(fsTransnox)
 
     fun ObserveAnnualReceipts(fsMemberIDxx: String) : LiveData<List<AnnualMembers>> = poAnnual.GetAnnualMemberDetail(fsMemberIDxx)
+
+    fun ObserveProjectReceipts(fsMemberIDxx: String) : LiveData<List<MemberPledges>> = poProjects.GetMemberPledges(fsMemberIDxx)
+
+    fun ObserveReceiptMasterList(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>> = poReceipt.ObserveReceiptMasterList(fDfrom, fDto)
+
+    fun CreateFileFromView(layoutView : View, fileNme : String) : CompletableFuture<FileResult>{
+
+        val future = CompletableFuture<FileResult>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                fileHelper.CreateFileFromView(layoutView, fileNme).let {
+
+                    if (!it.isSuccess){
+                        message = fileHelper.GetMessage()
+                    }
+
+                    //return the file after initializing message
+                    it
+                }
+            } catch (ex: Exception) {
+                message =  ex.message.toString()
+
+                FileResult(false, File(""))
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadReceipt(fsTransNox : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply { put("sTransNox", fsTransNox) }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_RECEIPT.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadReceiptInfo>(response.data.body())
+
+                            //save master with generated key
+                            val loReceipt : ReceiptInfo = resultData.GetPayload()
+
+                            poReceipt.SaveReceiptMaster(loReceipt.master)
+
+                            //clear detail first to get the accurate data from server
+                            poReceipt.DeleteReceiptDetails(loReceipt.master.sTransNox)
+
+                            //clear and save detail
+                            loReceipt.detail.forEach { loItem ->
+                                poReceipt.SaveReceiptDetail(loItem)
+                            }
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadReceiptList(fDfromxx : String, fDToxx : String, faTranStat : List<String>) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    //initialize master parameters
+                    val loParams = JSONObject().apply {
+                        put("dFromxx", fDfromxx)
+                        put("dToxx", fDToxx)
+                        put("status", JSONArray(faTranStat))
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_RECEIPT_LIST.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadReceiptList>(response.data.body())
+
+                            //save master with generated key
+                            val loReceipt : ReceiptList = resultData.GetPayload()
+
+                            loReceipt.master.forEach { loitem->
+
+                                poReceipt.SaveReceiptMaster(loitem)
+
+                                //clear detail first to get the accurate data from server
+                                poReceipt.DeleteReceiptDetails(loitem.sTransNox)
+                            }
+
+                            //clear and save detail
+                            loReceipt.detail.forEach { loItem -> poReceipt.SaveReceiptDetail(loItem) }
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
 
     @SuppressLint("MissingPermission")
     fun SaveReceipt(loMaster : EReceiptMaster, loDetail : List<EReceiptDetail>) : CompletableFuture<Boolean>{
@@ -128,6 +321,7 @@ class Receipts(instance : Context) {
                         put("sMemberID", loMaster.sMemberID)
                         put("cPaymForm", loMaster.cPaymForm)
                         put("sORNoxxxx", loMaster.sORNoxxxx)
+                        put("sRemarksx", loMaster.sRemarksx)
                         put("cTranStat", loMaster.cTranStat)
                         put("detail", loDetailParams)
                     }
@@ -204,10 +398,11 @@ class Receipts(instance : Context) {
 
                         put("sTransNox", loReceipt.sTransNox)
                         put("cTranStat", loReceipt.cTranStat)
+                        put("cSendStat", loReceipt.cSendStat)
                     }
 
                     when (val response = httpInstance.makeRequest(
-                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_PROJECT_STATUS.fsURL,
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_RECEIPT_STATUS.fsURL,
                         loParams,
                         mapOf(
                             "access-token" to session.getokenID()

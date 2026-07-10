@@ -19,9 +19,9 @@ import android.view.ViewGroup;
 
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
 import com.gag.accounting.Fragments.Annual.Fragment_Annual_Summary;
+import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
-import com.gag.accounting.Fragments.Project.Fragment_Project_History;
 import com.gag.masonry.R;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -29,7 +29,6 @@ import org.gag.appdriver.App.Adapters.LodgeAdapterList;
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 
 import java.util.List;
 
@@ -275,6 +274,20 @@ public class Fragment_Lodge_List extends Fragment {
                                     fragmentTransaction.addToBackStack("project_status");
                                     break;
 
+                                //receipt entry
+                                case "receipt_entry":
+
+                                    Fragment_Member_List loReceiptMembers = new Fragment_Member_List();
+
+                                    loBundle = new Bundle();
+                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
+
+                                    loReceiptMembers.setArguments(loBundle);
+
+                                    //add to child container, as bridge to initiate another fragment after call
+                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("receipt_entry", loReceiptMembers));
+                                    fragmentTransaction.addToBackStack("receipt_entry");
+                                    break;
                             }
                             fragmentTransaction.commit();
                         }

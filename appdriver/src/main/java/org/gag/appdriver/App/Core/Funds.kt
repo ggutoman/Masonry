@@ -12,9 +12,12 @@ import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadFundInfo
 import org.gag.appdriver.App.DataModels.DownloadFundList
+import org.gag.appdriver.App.DataModels.DownloadLodgeFundList
 import org.gag.appdriver.App.DataModels.DownloadSaveFund
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.LodgeFundInfo
+import org.gag.appdriver.App.Models.LodgeFundMasterList
+import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
@@ -58,13 +61,18 @@ class Funds(instance : Context) {
                                                                                                 .getOrNull(0) ?: ""
                                                                                         )
 
+
     fun GetLodgeInfo(fsLodgeIDxx : String) : ELodgeInfo = poLodge.GetLodgeInfo(fsLodgeIDxx)
 
     fun ObserveLodgeInfo(fsLodgeIDxx : String) : LiveData<ELodgeInfo> = poLodge.ObserveLodgeInfo(fsLodgeIDxx)
 
+    fun ObserveLodgeList() : LiveData<List<LodgeInfo>> = poLodge.ObserveLodgeList()
+
     fun ObserveLedgers(fsLodgeIDxx: String, fsDfromx: String, fsDTox: String): LiveData<List<EFundLedger>> = poLodgeFundLedger.ObserveLedgers(fsLodgeIDxx, fsDfromx, fsDTox)
 
     fun GetUserInfo() : EUserInfo  = poUserInfo.GetUserInfo()
+
+    fun ObserveLodgeFunds(fsLodgeIDxx : String) : LiveData<List<LodgeFundMasterList>> = poLodgeFundMaster.ObserveLodgeFunds(fsLodgeIDxx)
 
     fun ObserveTurnover(fsTransNox : String): LiveData<EFundTurnOver> = poFundTurnover.ObserveTurnover(fsTransNox)
 
@@ -387,6 +395,67 @@ class Funds(instance : Context) {
                                 poFundTurnover.SaveTurnover(loItem)
                             }
 
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadFundMasterList(fsLodgeIDxx : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    val loParams = JSONObject().apply {
+                        put("sLodgeIDx", fsLodgeIDxx)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_LODGE_FUNDS.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+                            val resultData = Json.Default.decodeFromString<DownloadLodgeFundList>(response.data.body())
+
+                            resultData.GetPayload().forEach { loItem -> poLodgeFundMaster.SaveFundMaster(loItem) }
                             true
                         }
 

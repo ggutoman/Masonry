@@ -1,4 +1,4 @@
-package com.gag.masonry.Adapter;
+package org.gag.appdriver.App.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,11 +10,10 @@ import android.widget.Filter;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.gag.masonry.R;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.Libraries.TextLibrary.TextFormatter;
+import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 
 import java.util.ArrayList;
@@ -177,10 +176,10 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
             super(itemView);
 
             view = itemView;
-            siv_status = itemView.findViewById(R.id.siv_status);
-            mtv_name = itemView.findViewById(R.id.mtv_name);
-            mtv_glipd = itemView.findViewById(R.id.mtv_glipd);
-            mtv_datemember = itemView.findViewById(R.id.mtv_datemember);
+            siv_status = itemView.findViewById(org.gag.appdriver.R.id.siv_status);
+            mtv_name = itemView.findViewById(org.gag.appdriver.R.id.mtv_name);
+            mtv_glipd = itemView.findViewById(org.gag.appdriver.R.id.mtv_glipd);
+            mtv_datemember = itemView.findViewById(org.gag.appdriver.R.id.mtv_datemember);
         }
     }
 }

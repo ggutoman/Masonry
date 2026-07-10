@@ -3,8 +3,8 @@ package org.gag.appdriver.Constants
 enum class API_CONSTANTS(val fsURL : String){
 
     /**ACCOUNTS**/
-//    URL_BASE_SERVER("http://192.165.29.220/Masonry/app/"),
-    URL_BASE_SERVER("http://192.168.0.55/Masonry/app/"),
+    URL_BASE_SERVER("http://192.165.29.36/Masonry/app/"),
+//    URL_BASE_SERVER("http://192.168.0.55/Masonry/app/"),
     URL_LOGIN_ACCOUNT("accounts/sign_in.php"),
     URL_CREATE_ACCOUNT("accounts/sign_up.php"),
     URL_DOWNLOAD_USER("accounts/user_info.php"),
@@ -39,6 +39,7 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_UPDATE_FUND_TURNOVER("accounting/funds/update_fund_turnover.php"),
     URL_APPROVE_FUND_TURNOVER("accounting/funds/approve_fund_turnover.php"),
     URL_DOWNLOAD_FUND_INFO("accounting/funds/lodge_fund_info.php"),
+    URL_DOWNLOAD_LODGE_FUNDS("accounting/funds/lodge_fund_list.php"),
     URL_CREATE_FUND_HISTORY("accounting/funds/fund_turnover_info.php"),
     URL_DOWNLOAD_ANNUAL_DUES("accounting/annual/annual_dues_info.php"),
     URL_SAVE_ANNUAL_DUES("accounting/annual/save_annual_dues.php"),
@@ -46,9 +47,17 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_DOWNLOAD_MEMBER_ANNUALS("accounting/annual/member_annual_due.php"),
     URL_SAVE_PROJECT("accounting/projects/save_project.php"),
     URL_DOWNLOAD_PROJECTS("accounting/projects/project_list.php"),
+    URL_DOWNLOAD_LODGE_PROJECTS("accounting/projects/project_lodge_list.php"),
     URL_DOWNLOAD_PROJECT_INFO("accounting/projects/project_info.php"),
     URL_DOWNLOAD_PROJECT_DETAILS("accounting/projects/project_pledges_info.php"),
     URL_DOWNLOAD_PROJECT_MEMBER("accounting/projects/member_pledges_info.php"),
     URL_UPDATE_PROJECT_STATUS("accounting/projects/project_status_update.php"),
-    URL_SAVE_RECEIPT("accounting/projects/save_receipt.php")
+    URL_DOWNLOAD_RECEIPT("accounting/receipts/receipt_info.php"),
+    URL_DOWNLOAD_RECEIPT_LIST("accounting/receipts/receipt_list_info.php"),
+    URL_SAVE_RECEIPT("accounting/receipts/save_receipt.php"),
+    URL_UPDATE_RECEIPT_STATUS("accounting/receipts/update_receipt_status.php"),
+    URL_SAVE_DISBURSEMENT("accounting/disbursement/save_disbursement.php"),
+    URL_DOWNLOAD_DISBURSEMENT_LIST("accounting/disbursement/disbursement_list_info.php"),
+    URL_DOWNLOAD_DISBURSEMENT_INFO("accounting/disbursement/disbursement_info.php"),
+    URL_UPDATE_DISBURSEMENT_STATUS("accounting/disbursement/update_disbursement_status.php")
 }

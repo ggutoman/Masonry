@@ -185,7 +185,7 @@ public class VM_Annual extends AndroidViewModel {
     public void DownloadAnnualMembers(OnTransaction foCallback){
 
         foCallback.OnLoad();
-        poAnnual.DownloadAnnualMember().thenAccept(new Consumer<Boolean>() {
+        poAnnual.DownloadAnnualMember("").thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
