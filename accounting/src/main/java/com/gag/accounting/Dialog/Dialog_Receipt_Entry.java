@@ -120,6 +120,8 @@ public class Dialog_Receipt_Entry {
                 switch (s){
 
                     case "DUES":
+
+                        //get all approved annual dues only
                         loViewModel.GetAnnualReceipts(lsMemberID).observe(loOwner, new Observer<List<AnnualMembers>>() {
                             @Override
                             public void onChanged(List<AnnualMembers> annualMembers) {
@@ -129,14 +131,15 @@ public class Dialog_Receipt_Entry {
                                 List<ReceiptDetail> laReceipts = new ArrayList<>();
                                 for (AnnualMembers loMember : annualMembers){
 
-                                    if (Double.parseDouble(loMember.getNAmtPaidx()) > 0){
+                                    double ldbl_bal = Double.parseDouble(loMember.getNAmtDuexx()) - Double.parseDouble(loMember.getNAmtPaidx());
+                                    if (ldbl_bal > 0){
 
                                         laReceipts.add(
                                                 new ReceiptDetail(
                                                         "",
                                                         s,
                                                         loMember.getSTransNox(),
-                                                        loMember.getNAmtPaidx() == null ? "0.00" : loMember.getNAmtPaidx()
+                                                        String.valueOf(ldbl_bal)
                                                 )
                                         );
 
@@ -154,6 +157,8 @@ public class Dialog_Receipt_Entry {
                         });
                         break;
                     case "PROJ":
+
+                        //get all approved projects only
                         loViewModel.GetProjects(lsMemberID).observe(loOwner, new Observer<List<MemberPledges>>() {
                             @Override
                             public void onChanged(List<MemberPledges> projmembers) {
@@ -163,14 +168,15 @@ public class Dialog_Receipt_Entry {
                                 List<ReceiptDetail> laReceipts = new ArrayList<>();
                                 for (MemberPledges loMember : projmembers){
 
-                                    if (Double.parseDouble(loMember.getNAmtPaidx()) > 0){
+                                    double ldbl_bal = Double.parseDouble(loMember.getNPledgexx()) - Double.parseDouble(loMember.getNAmtPaidx());
+                                    if (ldbl_bal > 0){
 
                                         laReceipts.add(
                                                 new ReceiptDetail(
                                                         "",
                                                         s,
                                                         loMember.getSProjctCd(),
-                                                        loMember.getNAmtPaidx() == null ? "0.00" : loMember.getNAmtPaidx()
+                                                        String.valueOf(ldbl_bal)
                                                 )
                                         );
 

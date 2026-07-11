@@ -106,9 +106,9 @@ interface DProjects {
                         "a.sProjctNm sProjctNm, " +
                         "a.cTranStat cTranStat, " +
                         "b.dPledgexx dPledgexx, " +
-                        "b.nPledgexx nPledgexx, " +
+                        "SUM(b.nPledgexx) nPledgexx, " +
                         "b.sORNoxxxx sORNoxxxx, " +
-                        "b.nAmtPaidx nAmtPaidx " +
+                        "SUM(b.nAmtPaidx) nAmtPaidx " +
                     "FROM " +
                         "Project_Master a " +
                     "JOIN " +
@@ -118,9 +118,11 @@ interface DProjects {
                     "WHERE " +
                         "b.sMemberID= :fsMemberIDxx " +
                     "AND " +
-                        "b.nAmtPaidx > 0 " +
+                        "b.nPledgexx > 0 " +
+                    "AND " +
+                        "a.cTranStat = '1' " +
                     "GROUP BY " +
-                        "a.sProjctCd, b.dPledgexx " +
+                        "a.sProjctCd " +
                     "ORDER BY " +
                         "b.dPledgexx " +
                     "DESC")

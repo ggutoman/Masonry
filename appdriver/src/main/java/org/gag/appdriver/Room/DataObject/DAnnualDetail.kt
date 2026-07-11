@@ -38,24 +38,32 @@ interface DAnnualDetail {
 
     @Query("SELECT " +
                         "a.sTransNox, " +
-                        "a.sMemberID, " +
-                        "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
-                        "a.cExemptID cExemptID," +
+                        "c.sMemberID, " +
+                        "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
+                        "b.cExemptID cExemptID," +
                         "a.sRemarksx sRemarksx," +
-                        "a.nAmtDuexx nAmtDuexx," +
-                        "a.nAmtPaidx nAmtPaidx " +
+                        "b.nAmtDuexx nAmtDuexx," +
+                        "b.nAmtPaidx nAmtPaidx " +
                     "FROM " +
-                        "Annual_Detail a " +
+                        "Annual_Master a " +
                     "JOIN " +
-                        "Member_Info b " +
+                        "Annual_Detail b " +
                     "ON " +
-                        "(a.sMemberID = b.sMemberID) " +
+                        "a.sTransNox = b.sTransNox " +
+                    "JOIN " +
+                        "Member_Info c " +
+                    "ON " +
+                        "(b.sMemberID = c.sMemberID) " +
                     "WHERE " +
-                        "a.sMemberID = :fsMemberIDxx " +
+                        "b.sMemberID = :fsMemberIDxx " +
                     "AND " +
-                        "a.nAmtPaidx > 0 " +
+                        "b.nAmtDuexx > 0 " +
+                    "AND " +
+                        "a.cTranStat = '1' " +
+                    "GROUP BY " +
+                        "a.sTransNox " +
                     "ORDER BY " +
-                        "a.nAmtDuexx " +
+                        "b.nAmtDuexx " +
                     "DESC")
     fun GetAnnualMemberDetail(fsMemberIDxx: String): LiveData<List<AnnualMembers>>
 

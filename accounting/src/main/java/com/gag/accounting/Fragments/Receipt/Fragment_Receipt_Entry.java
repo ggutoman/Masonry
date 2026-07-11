@@ -355,12 +355,8 @@ public class Fragment_Receipt_Entry extends Fragment {
                 auto_source_type.setText(mViewModel.GetSources().get(i).getFsDescript());
                 mViewModel.SelectType(lsSelectType);
 
-                //enable amount field, if open status and selected type if due or project, else, disable
-                if (loReceipt.getCTranStat().equalsIgnoreCase("0")){
-                    tie_paid_amount.setEnabled(!(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ")));
-                }else{
-                    tie_paid_amount.setEnabled(false);
-                }
+                //enable amount field, if open status
+                tie_paid_amount.setEnabled(loReceipt.getCTranStat().equalsIgnoreCase("0"));
                 btn_save_detail.setVisibility(View.GONE);
             }
         });

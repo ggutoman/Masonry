@@ -58,9 +58,11 @@ import java.util.List;
 public class Fragment_Receipt_Detail extends Fragment {
 
     private VM_Receipts mViewModel;
-    private EReceiptMaster loReceipt;
     private LoadDialog poLoad;
     private Message_Dialog poMessage;
+
+    private EReceiptMaster loReceipt;
+    private List<EReceiptDetail> loReceiptDetail;
 
     private String lsStackIDxx, lsMemberID, lsTransNox;
 
@@ -72,7 +74,6 @@ public class Fragment_Receipt_Detail extends Fragment {
     private MaterialTextView mtv_payment_total;
     private MaterialTextView mtv_payment;
     private MaterialTextView mtv_or;
-    private MaterialTextView mtv_no_record;
 
     private ConstraintLayout layout_no_record;
     private LinearLayout layout_buttons;
@@ -150,7 +151,6 @@ public class Fragment_Receipt_Detail extends Fragment {
         mtv_payment_total = view.findViewById(R.id.mtv_payment_total);
         mtv_payment = view.findViewById(R.id.mtv_payment);
         mtv_or = view.findViewById(R.id.mtv_or);
-        mtv_no_record = view.findViewById(R.id.mtv_no_record);
 
         layout_no_record = view.findViewById(R.id.layout_no_record);
         layout_buttons = view.findViewById(R.id.layout_buttons);
@@ -213,6 +213,8 @@ public class Fragment_Receipt_Detail extends Fragment {
                         }
                         layout_no_record.setVisibility(View.GONE);
                         rcv_list.setVisibility(View.VISIBLE);
+
+                        loReceiptDetail = eReceiptDetails;
 
                         double ldbl_totalpaid = 0.00;
                         for (EReceiptDetail loDetail : eReceiptDetails){

@@ -136,8 +136,6 @@ public class Fragment_Project extends Fragment {
         btn_add_detail.setEnabled(fisAllowed);
         tie_pledge_date.setEnabled(fisAllowed);
         tie_pledge_amount.setEnabled(fisAllowed);
-        tie_or_no.setEnabled(fisAllowed);
-        tie_paid_amount.setEnabled(fisAllowed);
     }
 
     private void InitDataReceiver(){
