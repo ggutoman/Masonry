@@ -435,7 +435,8 @@
                                 <com.google.android.material.textview.MaterialTextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="(Only if applicable)"
+                                    android:text="Payment Information"
+                                    android:layout_marginTop="10dp"
                                     android:layout_margin="5dp"
                                     android:alpha="0.7"/>
 
@@ -451,7 +452,8 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:inputType="numberDecimal"
-                                        android:maxLength="10"/>
+                                        android:maxLength="10"
+                                        android:enabled="false"/>
 
                                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -466,7 +468,8 @@
                                         android:id="@+id/tie_paid_amount"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-                                        android:text="0.00"/>
+                                        android:text="0.00"
+                                        android:enabled="false"/>
 
                                 </com.google.android.material.textfield.TextInputLayout>
 

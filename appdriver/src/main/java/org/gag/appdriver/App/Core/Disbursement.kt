@@ -296,7 +296,7 @@ class Disbursement(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun UpdateDisbursementStatus(fsTranStat : String, fsTransNox : String) : CompletableFuture<Boolean>{
+    fun UpdateDisbursementStatus(foDisb : EDisbursement) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
 
@@ -308,8 +308,8 @@ class Disbursement(instance : Context) {
                 } else {
 
                     val loParams = JSONObject().apply {
-                        put("sTransNox", fsTransNox)
-                        put("cTranStat", fsTranStat)
+                        put("sTransNox", foDisb.sTransNox)
+                        put("cTranStat", foDisb.cTranStat)
                     }
 
                     when (val response = httpInstance.makeRequest(

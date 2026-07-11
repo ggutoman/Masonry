@@ -49,7 +49,7 @@ public class Dialog_Project_Entry {
     private String lsLodgeIDxx;
 
     private MaterialAutoCompleteTextView auto_lodge_member;
-    private TextInputEditText tie_pledge_date, tie_pledge_amount, tie_or_no, tie_paid_amount;
+    private TextInputEditText tie_pledge_date, tie_pledge_amount;
     private MaterialButton btn_submit;
 
     public interface OnSubmitEntry{
@@ -88,8 +88,6 @@ public class Dialog_Project_Entry {
         auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
         tie_pledge_date = view.findViewById(R.id.tie_pledge_date);
         tie_pledge_amount = view.findViewById(R.id.tie_pledge_amount);
-        tie_or_no = view.findViewById(R.id.tie_or_no);
-        tie_paid_amount = view.findViewById(R.id.tie_paid_amount);
         btn_submit = view.findViewById(R.id.btn_submit);
 
     }
@@ -182,10 +180,10 @@ public class Dialog_Project_Entry {
                         "",
                         loSelectMember.getSMemberID(),
                         loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(),
-                        tie_or_no.getText() == null ? "" : tie_or_no.getText().toString(),
+                        "",
                         tie_pledge_date.getText().toString(),
                         tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString(),
-                        tie_paid_amount.getText() == null ? "0.00" : tie_paid_amount.getText().toString()
+                        "0.00"
                 );
                 loCallback.OnSubmit(loMembers);
 

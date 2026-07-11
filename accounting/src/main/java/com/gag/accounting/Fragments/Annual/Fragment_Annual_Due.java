@@ -208,7 +208,6 @@ public class Fragment_Annual_Due extends Fragment {
         tie_due.setEnabled(fsAllowed);
         tie_remarks.setEnabled(fsAllowed);
         tie_due_amount.setEnabled(fsAllowed);
-        tie_paid_amount.setEnabled(fsAllowed);
         tie_remarks_detail.setEnabled(fsAllowed);
         chk_exempt.setEnabled(fsAllowed);
 

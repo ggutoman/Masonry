@@ -41,9 +41,8 @@ public class Dialog_Annual_Entry {
     private final OnSubmitEntry loCallback;
 
     private String lsLodgeIDxx;
-    private int lnType = -1;
 
-    private MaterialAutoCompleteTextView auto_lodge_member, autoType;
+    private MaterialAutoCompleteTextView auto_lodge_member;
     private TextInputEditText tieTransactionAmount, tieRemarks;
     private CheckBox chk_exempt;
     private MaterialButton btnSubmit;
@@ -82,7 +81,6 @@ public class Dialog_Annual_Entry {
     private void InitViews(){
 
         auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
-        autoType = view.findViewById(R.id.auto_type);
         tieTransactionAmount = view.findViewById(R.id.tie_transaction_amount);
         tieRemarks = view.findViewById(R.id.tie_remarks);
         chk_exempt = view.findViewById(R.id.chk_exempt);
@@ -113,12 +111,6 @@ public class Dialog_Annual_Entry {
                 auto_lodge_member.setAdapter(loMemberAdapter);
             }
         });
-
-        autoType.setAdapter(new ArrayAdapter<>(
-                loInstance,
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                loViewModel.GetAmountTypes()
-        ));
     }
 
     private void InitListeners(){
@@ -134,24 +126,12 @@ public class Dialog_Annual_Entry {
             }
         });
 
-        autoType.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lnType = i;
-                autoType.setText(loViewModel.GetAmountTypes().get(i), false);
-            }
-        });
-
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if (loSelectMember == null){
                     Toast.makeText(loInstance, "Please select member", Toast.LENGTH_SHORT).show();
-                    return;
-                }else if (lnType < 0){
-                    Toast.makeText(loInstance, "Please select transaction type", Toast.LENGTH_SHORT).show();
                     return;
                 }else if (tieTransactionAmount.getText() == null || tieTransactionAmount.getText().toString().isEmpty()){
                     Toast.makeText(loInstance, "Please enter transaction amount", Toast.LENGTH_SHORT).show();
@@ -164,8 +144,8 @@ public class Dialog_Annual_Entry {
                         loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(),
                         chk_exempt.isChecked() ? "1" : "0",
                         tieRemarks.getText().toString(),
-                        lnType == 0 ? tieTransactionAmount.getText().toString() : "0.00",
-                        lnType == 1 ? tieTransactionAmount.getText().toString() : "0.00"
+                        tieTransactionAmount.getText() == null ? "0.00" : tieTransactionAmount.getText().toString(),
+                        "0.00"
                 );
                 loCallback.OnSubmit(loMembers);
 

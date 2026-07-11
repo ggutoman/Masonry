@@ -219,5 +219,13 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "DISB",
         1,
         1
+    ),
+
+    MENU_ITEM_DISBURSEMENT_STATUS(
+        "Confirm Disbursements",
+        "DISB003",
+        "DISB",
+        1,
+        1
     )
 }

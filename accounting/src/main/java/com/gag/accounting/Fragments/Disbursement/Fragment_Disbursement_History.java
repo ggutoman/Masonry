@@ -165,6 +165,18 @@ public class Fragment_Disbursement_History extends Fragment {
                                                 .addToBackStack("disbursement_list");
 
                                         break;
+
+                                    case "disbursement_confirm":
+
+                                        loFragment = new Fragment_Disbursement_Detail();
+
+                                        loBundle.putString("transaction_id", loItem.getSTransNox());
+                                        loFragment.setArguments(loBundle);
+
+                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_confirm", loFragment))
+                                                .addToBackStack("disbursement_confirm");
+
+                                        break;
                                 }
                                 loTransaction.commit();
 

@@ -222,4 +222,20 @@ public class VM_Disbursement extends AndroidViewModel {
         });
     }
 
+    public void UpdateStatus(EDisbursement foDisb, OnTransaction foCallback){
+
+        foCallback.OnLoad();
+        poDisbursement.UpdateDisbursementStatus(foDisb).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poDisbursement.getMessage());
+                    return;
+                }
+                foCallback.OnSuccess();
+            }
+        });
+    }
+
 }
