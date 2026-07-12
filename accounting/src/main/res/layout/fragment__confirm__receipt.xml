@@ -296,7 +296,7 @@
                 android:orientation="vertical"
                 android:padding="13dp"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toTopOf="@+id/btn_share">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_confirm"

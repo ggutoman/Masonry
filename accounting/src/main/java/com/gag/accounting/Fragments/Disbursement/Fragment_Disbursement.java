@@ -1,7 +1,12 @@
 package com.gag.accounting.Fragments.Disbursement;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -9,6 +14,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,13 +61,25 @@ public class Fragment_Disbursement extends Fragment {
     private DISBURSEMENT_CONSTANTS loSelectType;
     private DisbursementDetail loSelectTransaction;
 
-    private MaterialTextView mtv_status, btn_download, btn_download_sources;
+    private MaterialTextView mtv_status, btn_download, btn_download_sources, btn_view_attachments, btn_attachment;
     private TextInputLayout til_source_type, til_source_no, til_lodge;
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, tie_amount;
     private MaterialAutoCompleteTextView auto_source_type, auto_source_no, auto_lodge;
     private ConstraintLayout layout_tools;
-    private LinearLayout layout_buttons;
     private MaterialButton btn_save;
+
+    private ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),result -> {
+
+        if (result.getResultCode() == Activity.RESULT_OK) {
+
+            Intent data = result.getData();
+            if (data != null && data.getExtras() != null) {
+
+                Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+            }
+        }
+
+    });
 
 
     @Override
@@ -116,8 +134,9 @@ public class Fragment_Disbursement extends Fragment {
         auto_source_no = view.findViewById(R.id.auto_source_no);
 
         layout_tools = view.findViewById(R.id.layout_tools);
-        layout_buttons = view.findViewById(R.id.layout_buttons);
 
+        btn_view_attachments = view.findViewById(R.id.btn_view_attachments);
+        btn_attachment = view.findViewById(R.id.btn_attachment);
         btn_save = view.findViewById(R.id.btn_save);
     }
 
@@ -206,11 +225,11 @@ public class Fragment_Disbursement extends Fragment {
                             mViewModel.GetCurrentDate()
                     );
 
-                    btn_download.setVisibility(View.GONE);
+                    layout_tools.setVisibility(View.GONE);
                 }else {
                     loDisbursement = eDisbursement;
 
-                    btn_download.setVisibility(View.VISIBLE);
+                    layout_tools.setVisibility(View.VISIBLE);
                 }
 
                 ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, auto_source_no, tie_amount), true);
@@ -220,21 +239,7 @@ public class Fragment_Disbursement extends Fragment {
                 tie_payee.setText(loDisbursement.getSPayeeNme());
                 tie_particulars.setText(loDisbursement.getSParticlr());
                 tie_voucher.setText(loDisbursement.getSVouchrNo());
-                auto_source_no.setText(loDisbursement.getSSourceNo(), false);
                 tie_amount.setText(loDisbursement.getNAmountxx());
-
-                //load source type on selection
-                for (DISBURSEMENT_CONSTANTS loSrcTypes : mViewModel.GetSources()){
-
-                    if (loDisbursement.getSSourceCD().equalsIgnoreCase(loSrcTypes.getFsID())){
-                        auto_source_type.setText(loSrcTypes.getFsDescript());
-                        mViewModel.SelectType(loDisbursement.getSSourceCD());
-
-                        loSelectType = loSrcTypes;
-                        break;
-                    }
-
-                }
 
                 switch (loDisbursement.getCTranStat()){
 
@@ -262,6 +267,27 @@ public class Fragment_Disbursement extends Fragment {
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
                 AllowFields(List.of(tie_payee, tie_particulars, tie_voucher, til_source_type, til_source_no, tie_amount), loDisbursement.getCTranStat().equals("0"));
+
+                //load source type on selection
+                for (DISBURSEMENT_CONSTANTS loSrcTypes : mViewModel.GetSources()){
+
+                    if (loDisbursement.getSSourceCD().equalsIgnoreCase(loSrcTypes.getFsID())){
+                        loSelectType = loSrcTypes;
+                        auto_source_type.setText(loSrcTypes.getFsDescript());
+
+                        if (loSelectLodge == null || loSelectLodge.getSLodgeIDx().isEmpty()) break;
+
+                        if (loDisbursement.getSSourceCD().equalsIgnoreCase("FND")){
+                            DownloadLodgeFunds();
+                        }else if (loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ")){
+                            DownloadProjects();
+                        }
+
+                        mViewModel.SelectType(loDisbursement.getSSourceCD());
+                        break;
+                    }
+
+                }
             }
         });
 
@@ -277,7 +303,9 @@ public class Fragment_Disbursement extends Fragment {
                             @Override
                             public void onChanged(List<LodgeFundMasterList> lodgeFundMasterLists) {
 
-                                if (lodgeFundMasterLists == null) return;
+                                if (lodgeFundMasterLists == null){
+                                    return;
+                                }
 
                                 List<DisbursementDetail> laDetails = new ArrayList<>();
                                 for (LodgeFundMasterList loFund : lodgeFundMasterLists){
@@ -295,6 +323,8 @@ public class Fragment_Disbursement extends Fragment {
                                     //select transaction if matched the entry source no
                                     if (loFund.getSLodgeIDx().equalsIgnoreCase(loDisbursement.getSSourceNo())){
                                         loSelectTransaction = loDisb;
+
+                                        auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
                                     }
                                 }
 
@@ -314,7 +344,10 @@ public class Fragment_Disbursement extends Fragment {
                             @Override
                             public void onChanged(List<EProjectMaster> eProjectMasters) {
 
-                                if (eProjectMasters == null) return;
+                                if (eProjectMasters == null){
+                                    Toast.makeText(requireActivity(), "No project source", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
 
                                 List<DisbursementDetail> laDetails = new ArrayList<>();
                                 for (EProjectMaster loProject : eProjectMasters){
@@ -332,6 +365,8 @@ public class Fragment_Disbursement extends Fragment {
                                     //select transaction if matched the entry source no
                                     if (loProject.getSProjctCd().equalsIgnoreCase(loDisbursement.getSSourceNo())){
                                         loSelectTransaction = loDisb;
+
+                                        auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
                                     }
                                 }
 
@@ -355,7 +390,7 @@ public class Fragment_Disbursement extends Fragment {
         mViewModel.DownloadDisbursementInfo(lsTransNox, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                poLoad.ShowDialog("Downloading disbursement. Please wait . .");
+                Toast.makeText(requireActivity(), "Downloading disbursement. Please wait . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -371,7 +406,7 @@ public class Fragment_Disbursement extends Fragment {
         mViewModel.DownloadProjects(loSelectLodge == null ? "" : loSelectLodge.getSLodgeIDx(), new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                poLoad.ShowDialog("Downloading projects. Please wait . .");
+                Toast.makeText(requireActivity(), "Downloading projects. Please wait . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -557,6 +592,15 @@ public class Fragment_Disbursement extends Fragment {
                         });
                     }
                 });
+            }
+        });
+
+        btn_attachment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraLauncher.launch(cameraIntent);
             }
         });
     }

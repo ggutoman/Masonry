@@ -110,38 +110,53 @@
 
                             </com.google.android.material.textfield.TextInputLayout>
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/layout_tools"
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/mtv_status"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="10dp">
-
-                                <com.google.android.material.textview.MaterialTextView
-                                    style="@style/Text_Header"
-                                    android:id="@+id/btn_download"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="Download"
-                                    android:alpha="0.75"
-                                    android:textColor="?attr/colorPrimary"
-                                    android:gravity="start"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintWidth_percent="0.6"/>
-
-                                <com.google.android.material.textview.MaterialTextView
-                                    android:id="@+id/mtv_status"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="N/A"
-                                    android:gravity="end"
-                                    app:layout_constraintStart_toEndOf="@+id/btn_download"
-                                    app:layout_constraintEnd_toEndOf="parent"/>
-
-                            </androidx.constraintlayout.widget.ConstraintLayout>
+                                android:text="N/A"
+                                android:gravity="end"
+                                android:padding="10dp"
+                                app:layout_constraintStart_toEndOf="@+id/btn_download"
+                                app:layout_constraintEnd_toEndOf="parent"/>
 
                         </LinearLayout>
 
                     </com.google.android.material.card.MaterialCardView>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_tools"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:paddingHorizontal="15dp"
+                        android:visibility="gone">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/Text_Header"
+                            android:id="@+id/btn_download"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Download"
+                            android:alpha="0.75"
+                            android:textColor="?attr/colorPrimary"
+                            android:gravity="start"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintWidth_percent="0.5"/>
+
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/Text_Header"
+                            android:id="@+id/btn_view_attachments"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="View Attachments"
+                            android:alpha="0.75"
+                            android:textColor="?attr/colorPrimary"
+                            android:gravity="end"
+                            app:layout_constraintStart_toEndOf="@+id/btn_download"
+                            app:layout_constraintEnd_toEndOf="parent"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
@@ -269,14 +284,31 @@
 
                             </com.google.android.material.textfield.TextInputLayout>
 
-                            <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/btn_download_source"
+                            <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="end"
-                                android:text="Download Sources"
-                                android:textColor="?attr/colorPrimary"
-                                android:layout_margin="10dp"/>
+                                android:padding="10dp">
+
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:id="@+id/btn_attachment"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="end"
+                                    android:text="Add Attachmment"
+                                    android:textColor="?attr/colorPrimary"
+                                    app:layout_constraintStart_toStartOf="parent"/>
+
+                                <com.google.android.material.textview.MaterialTextView
+                                    android:id="@+id/btn_download_source"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="end"
+                                    android:text="Download Sources"
+                                    android:textColor="?attr/colorPrimary"
+                                    app:layout_constraintStart_toEndOf="@+id/btn_attachment"
+                                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
 
                         </LinearLayout>
 
