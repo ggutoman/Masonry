@@ -185,8 +185,12 @@ public class Fragment_Receipt_Detail extends Fragment {
                 mtv_or.setText(loReceipt.getSORNoxxxx());
 
                 //display buttons based on status
-                layout_buttons.setVisibility(lsStackIDxx.equalsIgnoreCase("receipt_confirm") && loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                layout_buttons.setVisibility(lsStackIDxx.equalsIgnoreCase("receipt_confirm")? View.VISIBLE : View.GONE);
                 btn_share.setVisibility(lsStackIDxx.equalsIgnoreCase("receipt_confirm") && loReceipt.getCTranStat().equalsIgnoreCase("1") && loReceipt.getCSendStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+
+                btn_confirm.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_void.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_cancel.setVisibility(loReceipt.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
 
                 switch (loReceipt.getCPaymForm()){
 

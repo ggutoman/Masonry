@@ -113,7 +113,12 @@ public class Fragment_Disbursement_Detail extends Fragment {
                     layout_buttons.setVisibility(View.GONE);
                     return;
                 }
-                layout_buttons.setVisibility(eDisbursement.getCTranStat().equals("0") ? View.VISIBLE : View.GONE);
+                layout_buttons.setVisibility(lsStackIDxx.equalsIgnoreCase("disbursement_confirm") ? View.VISIBLE : View.GONE);
+                btn_confirm.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_void.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
+                btn_cancel.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
+                btn_release.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
+                btn_complete.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
 
                 loDisb = eDisbursement;
 

@@ -140,7 +140,7 @@ public class VM_Disbursement extends AndroidViewModel {
                     foCallback.OnFinished(poProjects.getMessage());
                     return;
                 }
-                foCallback.OnFinished("Successfully downloaded projects");
+                foCallback.OnFinished("Successfully downloaded lodge funds");
             }
         });
 

@@ -320,10 +320,9 @@ class Disbursement(instance : Context) {
                         )
                     )) {
                         is KTORepository.OnRequest.onSuccess -> {
-                            val resultData = Json.Default.decodeFromString<DownloadDisbursement>(response.data.body())
 
                             //save disbursement status
-                            poDisbursement.SaveDisbursement(resultData.GetPayload())
+                            poDisbursement.SaveDisbursement(foDisb)
                             true
                         }
 
