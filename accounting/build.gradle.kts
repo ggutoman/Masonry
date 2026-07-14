@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.annotationProcessor
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -41,6 +44,15 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Glide core
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Glide annotation processor (for generated API)
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    // Material Components (for ShapeableImageView)
+    implementation("com.google.android.material:material:1.12.0")
 
     implementation(project(":appdriver"))
 }

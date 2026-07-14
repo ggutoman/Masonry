@@ -259,6 +259,7 @@ public class Fragment_Receipt_Detail extends Fragment {
 
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d("File Path", file.getAbsolutePath());
             Toast.makeText(requireActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -366,14 +367,16 @@ public class Fragment_Receipt_Detail extends Fragment {
                     public void OnLoad() {
                         poLoad.ShowDialog("Generating receipt. Please wait. .");
                         view.setVisibility(View.GONE);
+                        btn_cancel.setVisibility(View.GONE);
 
                     }
 
                     @Override
                     public void OnSuccess(File file) {
-
                         poLoad.DismissDialog();
+
                         view.setVisibility(View.VISIBLE);
+                        btn_cancel.setVisibility(View.VISIBLE);
 
                         ShareReceipt(file);
                     }
@@ -381,7 +384,9 @@ public class Fragment_Receipt_Detail extends Fragment {
                     @Override
                     public void OnFailed(String fsMessage) {
                         poLoad.DismissDialog();
+
                         view.setVisibility(View.VISIBLE);
+                        btn_cancel.setVisibility(View.VISIBLE);
 
                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
                     }

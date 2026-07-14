@@ -1,33 +1,23 @@
 package com.gag.accounting.ViewModel;
 
 import android.app.Application;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import org.gag.appdriver.App.Core.Annual;
 import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Core.Projects;
-import org.gag.appdriver.App.Core.Receipts;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.App.Models.LodgeInfo;
-import org.gag.appdriver.App.Models.MemberPledges;
-import org.gag.appdriver.App.Models.ReceiptDetail;
-import org.gag.appdriver.App.Models.ReceiptMasterList;
+import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
-import org.gag.appdriver.Constants.RECEIPT_CONSTANTS;
-import org.gag.appdriver.Libraries.File.FileHelper;
 import org.gag.appdriver.Room.Entities.EDisbursement;
-import org.gag.appdriver.Room.Entities.EFundMaster;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
-import org.gag.appdriver.Room.Entities.EReceiptDetail;
-import org.gag.appdriver.Room.Entities.EReceiptMaster;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +30,7 @@ public class VM_Disbursement extends AndroidViewModel {
     private final Funds poFunds;
     private final Projects poProjects;
     private final MutableLiveData<String> GetSelectedType = new MutableLiveData<>();
-    private final MutableLiveData<List<ReceiptDetail>> GetReceipttDetail = new MutableLiveData<>();
+    private final MutableLiveData<List<EDisbursementAttachment>> GetAttachedFile = new MutableLiveData<>();
 
     public interface OnTransaction{
         void OnLoad();
@@ -88,8 +78,60 @@ public class VM_Disbursement extends AndroidViewModel {
         GetSelectedType.setValue(fsType);
     }
 
+    public void AttachFile(String fsTransNox, String fsDocTitle, String fsRemarks, File foFile){
+
+        EDisbursementAttachment dvAttachment = new EDisbursementAttachment(
+                "",
+                fsTransNox,
+                GetCurrentDate(),
+                fsDocTitle,
+                fsRemarks,
+                foFile.getName(),
+                foFile.getAbsolutePath(),
+                "0",
+                GetUserID(),
+                GetCurrentDate()
+        );
+
+        List<EDisbursementAttachment> currentList = GetAttachedFile.getValue();
+
+        if (currentList == null) {
+            currentList = new ArrayList<>();
+        }
+        currentList.add(dvAttachment);
+
+        GetAttachedFile.setValue(currentList);
+    }
+
+    public void ReplaceAttachment(int fnIndex, String fsDocTitlex, String fsRemarksx){
+
+        List<EDisbursementAttachment> currentList = GetAttachedFile.getValue();
+
+        if (currentList == null) return;
+        EDisbursementAttachment loDetail = new EDisbursementAttachment(
+                currentList.get(fnIndex).getSTransNox(),
+                currentList.get(fnIndex).getSSourceNo(),
+                currentList.get(fnIndex).getDTransact(),
+                fsDocTitlex,
+                fsRemarksx,
+                currentList.get(fnIndex).getSFileName(),
+                currentList.get(fnIndex).getSFinFleNm(),
+                currentList.get(fnIndex).getCRecdStat(),
+                GetUserID(),
+                GetCurrentDate()
+        );
+
+        currentList.set(fnIndex, loDetail);
+        GetAttachedFile.setValue(currentList);
+
+    }
+
     public LiveData<String> ObserveSelectType(){
         return GetSelectedType;
+    }
+
+    public LiveData<List<EDisbursementAttachment>> ObserveAttachedFile(){
+        return GetAttachedFile;
     }
 
     public LiveData<List<LodgeInfo>> ObserveLodgeList(){
@@ -110,6 +152,21 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public LiveData<List<EDisbursement>> GetDisbursementList(String fsDfromxx, String fsDtoxx){
         return poDisbursement.GetDisbursementList(fsDfromxx, fsDtoxx);
+    }
+
+    public void GenerateFileImage(VM_Receipts.OnShareFile foCallback){
+
+        foCallback.OnLoad();
+        poDisbursement.GenerateFileOutput("DV" + poDisbursement.GetFormattedDateTime(poDisbursement.GetCurrentDateTime(), "yyyyMMddHmmss") + ".png").thenAccept(new Consumer<File>() {
+            @Override
+            public void accept(File file) {
+                if (file.getName().isEmpty()){
+                    foCallback.OnFailed("Failed to generate a file");
+                    return;
+                }
+                foCallback.OnSuccess(file);
+            }
+        });
     }
 
     public void DownloadProjects(String fsLodgeIDxx, VM_Receipts.OnDownload foCallback){

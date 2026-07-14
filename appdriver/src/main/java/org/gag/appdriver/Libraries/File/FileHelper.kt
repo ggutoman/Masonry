@@ -19,9 +19,9 @@ class FileHelper(foInstance : Context) {
 
     fun GetMessage() : String = message
 
-    fun CreateFileFromView(layoutView: View, fileNme : String) : FileResult{
+    fun CreateFileFromView(layoutView: View, fsParentFile : File, fileNme : String) : FileResult{
 
-        return FILE_CONSTANTS.EXTERNAL_STORAGE_DCIM_SCREENSHOT.fileDir.let {
+        return fsParentFile.let {
 
             if (!it.exists()) it.mkdirs()
             val file = File(it, fileNme)
@@ -33,19 +33,25 @@ class FileHelper(foInstance : Context) {
 
                 layoutView.draw(canvas)
 
-
                 val outputStream = FileOutputStream(file)
 
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                 outputStream.flush()
                 outputStream.close()
-
-                Log.d("Image Location", file.path);
 
             }catch (ex : Exception){
                 message = ex.message.toString()
             }
-            FileResult(true, file)
+            FileResult(file.exists(), file)
+        }
+    }
+
+    fun GenerateFile(fsParentFile : File, fsFileNme : String) : File{
+
+        return fsParentFile.let {
+
+            if (!it.exists()) it.mkdirs()
+            File(it, fsFileNme)
         }
     }
 

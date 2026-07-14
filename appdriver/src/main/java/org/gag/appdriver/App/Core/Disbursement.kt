@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.View
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
@@ -29,6 +30,7 @@ import org.gag.appdriver.App.Models.ReceiptInfo
 import org.gag.appdriver.App.Models.ReceiptList
 import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Constants.API_CONSTANTS
+import org.gag.appdriver.Constants.FILE_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.File.FileHelper
@@ -87,6 +89,8 @@ class Disbursement(instance : Context) {
 
     fun GetCurrentDateTime() : String = dateRepository.GetCurrentDateTime()
 
+    fun GetFormattedDateTime(fsInput : String, fsFormat : String) : String = dateRepository.FormatDateTime(fsInput, fsFormat)
+
     fun FormatDateString(fsDate : String, fsFormat : String) : String = dateRepository.FormatDate(fsDate, fsFormat)
 
     fun FormatLongDate(fsParam : Long) : String = dateRepository.FormatLongDate(fsParam)
@@ -96,6 +100,23 @@ class Disbursement(instance : Context) {
     fun GetDisbursement(fsTransNox : String) : LiveData<EDisbursement> = poDisbursement.GetDisbursement(fsTransNox)
 
     fun GetDisbursementList(fDfromxx : String, fDtoxx : String) : LiveData<List<EDisbursement>> = poDisbursement.GetDisbursementList(fDfromxx, fDtoxx)
+
+    fun GenerateFileOutput(fileNme : String) : CompletableFuture<File>{
+
+        val future = CompletableFuture<File>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            fileHelper.GenerateFile(FILE_CONSTANTS.EXTERNAL_STORAGE_DCIM_DOCUMENTS.fileDir, fileNme).let {
+
+                // Complete the future on the main thread
+                withContext(Dispatchers.Main) {
+                    future.complete(it)
+                }
+            }
+        }
+        return future
+    }
 
     @SuppressLint("MissingPermission")
     fun SaveDisbursement(foDisbursement: EDisbursement) : CompletableFuture<Boolean>{
