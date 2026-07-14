@@ -159,7 +159,6 @@ public class VM_Annual extends AndroidViewModel {
 
         currentList.set(fnIndex, loDetail);
         GetAnnualDetail.setValue(currentList);
-
     }
 
     public void ClearDetail(){

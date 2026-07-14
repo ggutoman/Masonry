@@ -8,12 +8,16 @@ import org.gag.appdriver.App.Models.AnnualMembers
 import org.gag.appdriver.App.Models.AnnualSummary
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EDisbursement
+import org.gag.appdriver.Room.Entities.EDisbursementAttachment
 
 @Dao
 interface DDisbursement {
 
     @Upsert
     fun SaveDisbursement(eDDisbursement: EDisbursement)
+
+    @Upsert
+    fun SaveAttachment(eAttachment : EDisbursementAttachment)
 
     @Query("DELETE FROM Disbursement")
     fun DeleteDisbursements()

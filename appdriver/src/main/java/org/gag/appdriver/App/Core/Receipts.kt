@@ -27,6 +27,7 @@ import org.gag.appdriver.App.Models.ReceiptInfo
 import org.gag.appdriver.App.Models.ReceiptList
 import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Constants.API_CONSTANTS
+import org.gag.appdriver.Constants.FILE_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.File.FileHelper
@@ -111,7 +112,7 @@ class Receipts(instance : Context) {
 
             val result = try {
 
-                fileHelper.CreateFileFromView(layoutView, fileNme).let {
+                fileHelper.CreateFileFromView(layoutView, FILE_CONSTANTS.EXTERNAL_STORAGE_DCIM_SCREENSHOT.fileDir, fileNme).let {
 
                     if (!it.isSuccess){
                         message = fileHelper.GetMessage()

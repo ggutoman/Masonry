@@ -20,8 +20,10 @@
             style="@style/Text_Header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Please fill up the information"
-            android:padding="10dp"/>
+            android:text="Voucher File Attachment"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="?attr/colorPrimary"/>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/TextInputStyle"
@@ -31,7 +33,7 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"
-                android:id="@+id/tie_doc_title"
+                android:id="@+id/tie_doctitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -39,7 +41,21 @@
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/TextInputStyle"
-            android:id="@+id/til_remarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Filename">
+
+            <com.google.android.material.textfield.TextInputEditText
+                style="@style/TextInputStyle.Edittext"
+                android:id="@+id/tie_filepath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Remarks">
@@ -53,11 +69,11 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add"
+            android:id="@+id/btn_attach"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add Detail"
-            android:padding="10dp"/>
+            android:text="Attach File"
+            android:layout_margin="5dp"/>
 
     </LinearLayout>
 

@@ -150,13 +150,32 @@ class DateRepository {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val date = LocalDate.parse(input)
             val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
+
             date.format(formatter)
         } else {
             // Use java.text.SimpleDateFormat for older Android versions
             val parser = SimpleDateFormat(fsFormat, Locale.getDefault())
             val date = parser.parse(input)
             val formatter = SimpleDateFormat(fsFormat, Locale.getDefault())
+
             formatter.format(date!!)
+        }
+    }
+
+    fun FormatDateTime(input: String, fsFormat: String): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Parse with the input pattern
+            val parser = DateTimeFormatter.ofPattern(DATE_CONSTANTS.DATETIME_FORMAT.fsDescript, Locale.getDefault())
+            val dateTime = LocalDateTime.parse(input, parser)
+            val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
+
+            dateTime.format(formatter)
+        } else {
+            val parser = SimpleDateFormat(DATE_CONSTANTS.DATETIME_FORMAT.fsDescript, Locale.getDefault())
+            val dateTime = parser.parse(input)
+            val formatter = SimpleDateFormat(fsFormat, Locale.getDefault())
+
+            formatter.format(dateTime!!)
         }
     }
 

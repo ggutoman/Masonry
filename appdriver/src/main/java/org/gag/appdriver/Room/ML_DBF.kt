@@ -29,6 +29,7 @@ import org.gag.appdriver.Room.DataObject.EProvinceInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
 import org.gag.appdriver.Room.Entities.EDisbursement
+import org.gag.appdriver.Room.Entities.EDisbursementAttachment
 import org.gag.appdriver.Room.Entities.EFundLedger
 import org.gag.appdriver.Room.Entities.EFundMaster
 import org.gag.appdriver.Room.Entities.EFundTurnOver
@@ -73,7 +74,8 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EProjectDetail::class,
         EReceiptMaster::class,
         EReceiptDetail::class,
-        EDisbursement::class
+        EDisbursement::class,
+        EDisbursementAttachment::class
     ],
     version = 1,
     exportSchema = false

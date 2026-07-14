@@ -14,4 +14,9 @@ class DateRepositoryTest {
     fun TestCurrentDateTime(){
         println(DateRepository().GetCurrentDateTime())
     }
+
+    @Test
+    fun TestFormatDateTime(){
+        println(DateRepository().FormatDateTime("2026-07-14 10:00:00", "yyyy-MM-dd HH:mm:ss"))
+    }
 }

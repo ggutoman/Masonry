@@ -2,8 +2,21 @@
 
     <paths>
         <cache-path name="shared_cache" path="." />
+
         <external-files-path name="shared_files" path="." />
-        <external-path name="screenshots" path="DCIM/Screenshots" />
+
+        <!-- DCIM root -->
+        <external-path name="root" path="DCIM/" />
+
+        <!-- Screenshots folder -->
+        <external-path name="screenshots" path="DCIM/Screenshots/" />
+
+        <!-- Masonry Screenshots child folder -->
+        <external-path name="masonry_screenshots" path="DCIM/Masonry/Screenshots/" />
+
+        <!-- Masonry Screenshots child folder -->
+        <external-path name="masonry_documents" path="DCIM/Masonry/Documents/" />
+
     </paths>
 
 </paths>
