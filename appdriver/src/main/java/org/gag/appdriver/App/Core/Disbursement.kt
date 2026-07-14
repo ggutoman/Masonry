@@ -2,8 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.view.View
+import android.util.Base64
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -11,55 +10,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import org.gag.appdriver.App.DataModels.DownloadAttachmentDV
 import org.gag.appdriver.App.DataModels.DownloadDisbursement
 import org.gag.appdriver.App.DataModels.DownloadDisbursementList
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
-import org.gag.appdriver.App.DataModels.DownloadMemberProjects
-import org.gag.appdriver.App.DataModels.DownloadProjectDetail
-import org.gag.appdriver.App.DataModels.DownloadProjectInfo
-import org.gag.appdriver.App.DataModels.DownloadProjects
-import org.gag.appdriver.App.DataModels.DownloadReceiptInfo
-import org.gag.appdriver.App.DataModels.DownloadReceiptList
-import org.gag.appdriver.App.Models.AnnualMembers
-import org.gag.appdriver.App.Models.LodgeCalendarList
-import org.gag.appdriver.App.Models.MemberPledges
-import org.gag.appdriver.App.Models.MemberProjects
-import org.gag.appdriver.App.Models.ProjectDetail
-import org.gag.appdriver.App.Models.ReceiptInfo
-import org.gag.appdriver.App.Models.ReceiptList
-import org.gag.appdriver.App.Models.ReceiptMasterList
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.FILE_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.File.FileHelper
-import org.gag.appdriver.Libraries.File.FileHelper.FileResult
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
-import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DDisbursement
-import org.gag.appdriver.Room.DataObject.DFundMaster
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar
-import org.gag.appdriver.Room.DataObject.DMemberInfo
-import org.gag.appdriver.Room.DataObject.DProjects
-import org.gag.appdriver.Room.DataObject.DReceipt
 import org.gag.appdriver.Room.DataObject.DUserInfo
-import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EDisbursement
-import org.gag.appdriver.Room.Entities.ELodgeCalendar
-import org.gag.appdriver.Room.Entities.EMemberInfo
-import org.gag.appdriver.Room.Entities.EProjectDetail
-import org.gag.appdriver.Room.Entities.EProjectMaster
-import org.gag.appdriver.Room.Entities.EReceiptDetail
-import org.gag.appdriver.Room.Entities.EReceiptMaster
+import org.gag.appdriver.Room.Entities.EDisbursementAttachment
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.util.Date
 import java.util.concurrent.CompletableFuture
 
 class Disbursement(instance : Context) {
@@ -376,5 +348,150 @@ class Disbursement(instance : Context) {
         }
 
         return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun SaveAttachment(foAttachment : EDisbursementAttachment) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    val loParams = JSONObject().apply {
+                        put("sSourceNo", foAttachment.sSourceNo)
+                        put("sDocTitle", foAttachment.sDocTitle)
+                        put("sRemarksx", foAttachment.sRemarksx)
+                        put("sFileName", foAttachment.sFileName)
+                        put("sFinFleNm", foAttachment.sFinFleNm)
+
+                        //encode file to byte array base64, php will decode it as file again
+                        val loImg = File(foAttachment.sFinFleNm)
+                        val encodedImage = Base64.encodeToString(loImg.readBytes(), Base64.NO_WRAP)
+                        put("file_meta", encodedImage)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPLOAD_DV_ATTACHMENT.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
+
+                            //save attachment with initialized transaction number
+                            foAttachment.sTransNox = resultData.GetPayload()
+                            foAttachment.cRecdStat = "1"
+
+                            poDisbursement.SaveAttachment(foAttachment)
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadAttachmentDV(fsTransNox : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    val loParams = JSONObject().apply {
+                        put("sTransNox", fsTransNox)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_DV_ATTACHMENT.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData = Json.Default.decodeFromString<DownloadAttachmentDV>(response.data.body())
+
+                            val attachment_info = resultData.GetPayload()
+                            poDisbursement.SaveAttachment(attachment_info.attachment_info)
+
+                            val fileResult : FileHelper.FileResult = fileHelper.CreateFileFromByteString(attachment_info.file_meta, attachment_info.attachment_info.sFinFleNm)
+
+                            fileResult.isSuccess
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+
     }
 }

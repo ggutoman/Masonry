@@ -295,4 +295,51 @@ public class VM_Disbursement extends AndroidViewModel {
         });
     }
 
+    public void SaveAttachment(EDisbursementAttachment foAttachment, VM_Disbursement.OnTransaction foCallback){
+
+        foCallback.OnLoad();
+
+        //double check if parameter is initialized
+        if (foAttachment.getSSourceNo().isEmpty()){
+            foCallback.OnFailed("Attachment source is not initialized");
+            return;
+        }else if (foAttachment.getSDocTitle().isEmpty()){
+            foCallback.OnFailed("Document title is not initialized");
+            return;
+        }else if (foAttachment.getSFileName().isEmpty()){
+            foCallback.OnFailed("Filename is not initialized");
+            return;
+        }else if (foAttachment.getSFinFleNm().isEmpty()){
+            foCallback.OnFailed("File path is not initialized");
+            return;
+        }
+
+        poDisbursement.SaveAttachment(foAttachment).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poDisbursement.getMessage());
+                    return;
+                }
+                foCallback.OnSuccess();
+            }
+        });
+    }
+
+    public void DownloadAttachment(String fsTransNox, OnTransaction foCallback){
+
+        foCallback.OnLoad();
+        poDisbursement.DownloadAttachmentDV(fsTransNox).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.OnFailed(poDisbursement.getMessage());
+                    return;
+                }
+                foCallback.OnSuccess();
+            }
+        });
+    }
 }
