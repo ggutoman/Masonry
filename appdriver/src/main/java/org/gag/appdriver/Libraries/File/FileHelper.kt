@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Environment
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import androidx.core.graphics.createBitmap
@@ -53,6 +54,18 @@ class FileHelper(foInstance : Context) {
             if (!it.exists()) it.mkdirs()
             File(it, fsFileNme)
         }
+    }
+
+    fun CreateFileFromByteString(bytes : String, fsFilePath : String) : FileResult{
+
+        val fileBytes = Base64.decode(bytes, Base64.NO_WRAP)
+        val outputFile = File(fsFilePath)
+
+        FileOutputStream(outputFile).use { fos ->
+            fos.write(fileBytes)
+            fos.flush()
+        }
+        return FileResult(outputFile.exists() && outputFile.isFile, outputFile)
     }
 
     class FileResult(

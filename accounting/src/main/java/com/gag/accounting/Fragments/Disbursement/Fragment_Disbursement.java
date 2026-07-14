@@ -3,7 +3,6 @@ package com.gag.accounting.Fragments.Disbursement;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -20,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,7 +27,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -49,6 +48,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.LodgeAdapter;
+import org.gag.appdriver.App.Core.GestureListener;
+import org.gag.appdriver.App.Interface.OnSwipeListener;
 import org.gag.appdriver.App.Models.DisbursementDetail;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.App.Models.LodgeInfo;
@@ -64,7 +65,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fragment_Disbursement extends Fragment {
+public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
     private VM_Disbursement mViewModel;
     private LoadDialog poLoad;
@@ -93,6 +94,8 @@ public class Fragment_Disbursement extends Fragment {
     private ConstraintLayout layout_tools;
     private MaterialButton btn_save;
     private ImageButton btn_attachment;
+
+    private GestureDetector gestureDetector;
 
     private final ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
 
@@ -130,6 +133,8 @@ public class Fragment_Disbursement extends Fragment {
         mViewModel = new ViewModelProvider(requireActivity()).get(VM_Disbursement.class);
         poLoad = new LoadDialog(requireActivity());
         poMessage = new Message_Dialog(requireActivity());
+
+        gestureDetector = new GestureDetector(requireContext(), new GestureListener(this));
 
         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (count > 0) {
@@ -264,7 +269,7 @@ public class Fragment_Disbursement extends Fragment {
                             "",
                             mViewModel.GetCurrentDate(),
                             "FND",
-                            "",
+                            loDisbursement.getSTransNox(),
                             "",
                             "",
                             "",
@@ -285,7 +290,7 @@ public class Fragment_Disbursement extends Fragment {
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
-                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, auto_source_no, tie_amount), true);
+                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment, mtv_fileloc), true);
 
                 tie_transaction_no.setText(loDisbursement.getSTransNox());
                 tie_dtransact.setText(loDisbursement.getDTransact());
@@ -319,7 +324,7 @@ public class Fragment_Disbursement extends Fragment {
                 btn_save.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
-                AllowFields(List.of(tie_payee, tie_particulars, tie_voucher, til_source_type, til_source_no, tie_amount), loDisbursement.getCTranStat().equals("0"));
+                AllowFields(List.of(tie_payee, tie_particulars, tie_voucher, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks), loDisbursement.getCTranStat().equals("0"));
 
                 //load source type on selection
                 for (DISBURSEMENT_CONSTANTS loSrcTypes : mViewModel.GetSources()){
@@ -445,7 +450,11 @@ public class Fragment_Disbursement extends Fragment {
 
                 //reset object that holds the attached file
                 loAttached = null;
+                loSelectAttachment = null;
 
+                ClearFields(List.of(tie_doctitle, tie_remarks, auto_attachment_transaction, mtv_fileloc, mtv_status_attachment), false);
+
+                //reload adapter
                 loAdapterAttachment = new Adapter_Disbursement_Attachments(
                         requireActivity(),
                         eDisbursementAttachments
@@ -534,6 +543,96 @@ public class Fragment_Disbursement extends Fragment {
         Animation slide = AnimationUtils.loadAnimation(requireActivity(), fIsshow ? org.gag.appdriver.R.anim.anim_slide_up : org.gag.appdriver.R.anim.anim_slide_down);
         view_image.startAnimation(slide);
         view_image.setVisibility(fIsshow ? View.VISIBLE : View.GONE);
+    }
+
+    private void ShowAttachmentinfo(){
+
+        //initialize image to file
+        File loImg = new File(loSelectAttachment.getSFinFleNm());
+
+        mtv_filenme.setText(loSelectAttachment.getSFileName());
+        mtv_filepth.setText(loSelectAttachment.getSFinFleNm());
+
+        //scale image if exist
+        img_file.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        //display button icons based on status
+        if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
+            btn_transaction.setImageResource(org.gag.appdriver.R.drawable.upload_cloud_svgrepo_com);
+        }else {
+            btn_transaction.setImageResource(!loImg.exists() ? R.drawable.baseline_download : org.gag.appdriver.R.drawable.baseline_confirm_receipt);
+        }
+
+        // Load from File
+        Glide.with(requireActivity())
+                .load(loImg)
+                .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
+                .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
+                .into(img_file);
+    }
+
+    private void UploadAttachment(){
+
+        mViewModel.SaveAttachment(loSelectAttachment, new VM_Disbursement.OnTransaction() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Uploading attachment. Please wait . .");
+            }
+
+            @Override
+            public void OnSuccess() {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), "File uploaded successfully", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
+    }
+
+    private void DownloadAttachment(){
+
+        mViewModel.DownloadAttachment(loSelectAttachment.getSTransNox(), new VM_Disbursement.OnTransaction() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Downloading attachment. Please wait . .");
+            }
+
+            @Override
+            public void OnSuccess() {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), "File downloaded successfully", Toast.LENGTH_SHORT).show();
+
+                ShowAttachmentinfo();
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
     }
 
     private void InitListener(){
@@ -662,43 +761,33 @@ public class Fragment_Disbursement extends Fragment {
                 }
 
                 ShowAttachment(true);
-
-                //initialize image to file
-                File loImg = new File(loSelectAttachment.getSFinFleNm());
-
-                mtv_filenme.setText(loSelectAttachment.getSFileName());
-                mtv_filepth.setText(loSelectAttachment.getSFinFleNm());
-
-                //scale image if exist
-                img_file.setScaleType(!loImg.exists() ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
-
-                //display button icons based on status
-                if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
-                    btn_transaction.setImageResource(org.gag.appdriver.R.drawable.upload_cloud_svgrepo_com);
-                }else {
-                    btn_transaction.setImageResource(!loImg.exists() ? R.drawable.baseline_download : org.gag.appdriver.R.drawable.baseline_confirm_receipt);
-                }
-
-                // Load from File
-                Glide.with(requireActivity())
-                        .load(loImg)
-                        .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                        .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                        .into(img_file);
+                ShowAttachmentinfo();
             }
         });
 
         view_image.setOnTouchListener(new View.OnTouchListener() {
+
             @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                return gestureDetector.onTouchEvent(motionEvent);
+            }
+        });
 
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    ShowAttachment(false);
-                    return true;
+        btn_transaction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (loSelectAttachment == null){
+                    Toast.makeText(requireActivity(), "Please select attachment", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                return false;
 
+                if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
+                    UploadAttachment();
+                }else {
+                    DownloadAttachment();
+                }
             }
         });
 
@@ -833,4 +922,17 @@ public class Fragment_Disbursement extends Fragment {
         });
     }
 
+    @Override
+    public void OnSwipeUp() {}
+
+    @Override
+    public void OnSwipeDown() {
+        ShowAttachment(false);
+    }
+
+    @Override
+    public void OnSwipeLeft() {}
+
+    @Override
+    public void OnSwipeRight() {}
 }
