@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -96,6 +97,8 @@ public class Fragment_Attachment_List extends Fragment {
 
     private void LoadDisbursements(){
 
+        mtv_title.setText("DV Attachments");
+
         if (lsSource.isEmpty()){
             Toast.makeText(requireActivity(), "No transaction number initialized", Toast.LENGTH_SHORT).show();
 
@@ -154,6 +157,8 @@ public class Fragment_Attachment_List extends Fragment {
 
                     }
                 }));
+
+                rcv_attachment_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
 
             }
         });
