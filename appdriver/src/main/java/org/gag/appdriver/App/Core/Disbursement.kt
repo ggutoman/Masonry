@@ -15,6 +15,7 @@ import org.gag.appdriver.App.DataModels.DownloadDisbursement
 import org.gag.appdriver.App.DataModels.DownloadDisbursementList
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
+import org.gag.appdriver.App.Models.DisbursementInfo
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.FILE_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
@@ -73,6 +74,8 @@ class Disbursement(instance : Context) {
 
     fun GetDisbursementList(fDfromxx : String, fDtoxx : String) : LiveData<List<EDisbursement>> = poDisbursement.GetDisbursementList(fDfromxx, fDtoxx)
 
+    fun GetAttachments(fsSourceNo : String) : LiveData<List<EDisbursementAttachment>> = poDisbursement.GetAttachments(fsSourceNo)
+
     fun GenerateFileOutput(fileNme : String) : CompletableFuture<File>{
 
         val future = CompletableFuture<File>()
@@ -91,9 +94,9 @@ class Disbursement(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveDisbursement(foDisbursement: EDisbursement) : CompletableFuture<Boolean>{
+    fun SaveDisbursement(foDisbursement: EDisbursement) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -129,7 +132,7 @@ class Disbursement(instance : Context) {
                             foDisbursement.sTransNox = resultData.GetPayload()
                             poDisbursement.SaveDisbursement(foDisbursement)
 
-                            true
+                            resultData.GetPayload()
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -252,8 +255,14 @@ class Disbursement(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
                             val resultData = Json.Default.decodeFromString<DownloadDisbursement>(response.data.body())
 
+                            val loDisb : DisbursementInfo = resultData.GetPayload()
+
                             //save disbursement info
-                            poDisbursement.SaveDisbursement(resultData.GetPayload())
+                            poDisbursement.SaveDisbursement(loDisb.master)
+
+                            //save attachments
+                            loDisb.attachments.forEach { loItem-> poDisbursement.SaveAttachment(loItem) }
+
                             true
                         }
 
@@ -370,9 +379,13 @@ class Disbursement(instance : Context) {
                         put("sFileName", foAttachment.sFileName)
                         put("sFinFleNm", foAttachment.sFinFleNm)
 
+                        //if attachment has already transaction number, add as parameter to update only
+                        if (foAttachment.sTransNox.isNotEmpty()) put("sTransNox", foAttachment.sTransNox)
+
                         //encode file to byte array base64, php will decode it as file again
                         val loImg = File(foAttachment.sFinFleNm)
                         val encodedImage = Base64.encodeToString(loImg.readBytes(), Base64.NO_WRAP)
+
                         put("file_meta", encodedImage)
                     }
 

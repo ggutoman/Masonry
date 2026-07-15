@@ -27,4 +27,8 @@ interface DDisbursement {
 
     @Query("SELECT * FROM Disbursement WHERE dTransact BETWEEN :fDfromxx AND :fDtoxx")
     fun GetDisbursementList(fDfromxx : String, fDtoxx : String) : LiveData<List<EDisbursement>>
+
+    @Query("SELECT * FROM DV_Attachment WHERE sSourceNo= :fsSourceNo")
+    fun GetAttachments(fsSourceNo : String) : LiveData<List<EDisbursementAttachment>>
+
 }

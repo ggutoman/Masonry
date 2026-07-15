@@ -47,8 +47,6 @@ dependencies {
 
     // Glide core
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
-    // Glide annotation processor (for generated API)
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // Material Components (for ShapeableImageView)

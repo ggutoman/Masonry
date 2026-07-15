@@ -28,8 +28,6 @@ import kotlinx.serialization.json.Json
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo
 import org.json.JSONObject
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class KTORepository(instance : Context) {
 

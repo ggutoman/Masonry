@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -33,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.gag.accounting.Adapter.Disbursement.Adapter_Disbursement_Attachments;
 import com.gag.accounting.Adapter.Disbursement.Adapter_Disbursement_Sources;
 import com.gag.accounting.Adapter.Disbursement.Adapter_Disbursement_Transactions;
@@ -57,6 +59,7 @@ import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Utilities.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +74,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private LoadDialog poLoad;
     private Message_Dialog poMessage;
     private EDisbursement loDisbursement;
+    private List<EDisbursementAttachment> laAttachments;
 
     private int lnSelectAttached = -1;
 
@@ -112,7 +116,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 @Override
                 public void OnSuccess(String fsDocTitle, String fsRemarks) {
 
-                    mViewModel.AttachFile(loDisbursement.getSTransNox(), fsDocTitle, fsRemarks, loAttached);
+                    mViewModel.AttachFile("", loDisbursement.getSTransNox(), fsDocTitle, fsRemarks, loAttached, "0");
                 }
 
                 @Override
@@ -269,7 +273,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                             "",
                             mViewModel.GetCurrentDate(),
                             "FND",
-                            loDisbursement.getSTransNox(),
+                            "",
                             "",
                             "",
                             "",
@@ -346,6 +350,26 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                     }
 
                 }
+
+                //load saved attachments
+                mViewModel.GetAttachments(loDisbursement.getSTransNox()).observe(getViewLifecycleOwner(), new Observer<List<EDisbursementAttachment>>() {
+                    @Override
+                    public void onChanged(List<EDisbursementAttachment> eDisbursementAttachments) {
+
+                        if (eDisbursementAttachments == null) return;
+
+                        //clear adapter
+                        ClearFields(List.of(auto_attachment_transaction, mtv_fileloc, mtv_status_attachment), true);
+
+                        //clear list of attachment first
+                        mViewModel.ClearAttachments();
+
+                        //reload attachments
+                        for (EDisbursementAttachment loAttachmennt : eDisbursementAttachments){
+                            mViewModel.AttachFile(loAttachmennt.getSTransNox(), loDisbursement.getSTransNox(), loAttachmennt.getSDocTitle(), loAttachmennt.getSRemarksx(), new File(loAttachmennt.getSFinFleNm()), loAttachmennt.getCRecdStat());
+                        }
+                    }
+                });
             }
         });
 
@@ -447,6 +471,9 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             public void onChanged(List<EDisbursementAttachment> eDisbursementAttachments) {
 
                 if (eDisbursementAttachments == null) return;
+
+                //initialize attachment
+                laAttachments = eDisbursementAttachments;
 
                 //reset object that holds the attached file
                 loAttached = null;
@@ -568,6 +595,8 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 .load(loImg)
                 .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
                 .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
+                .skipMemoryCache(true)   // disable memory cache
+                .diskCacheStrategy(DiskCacheStrategy.NONE) // disable disk cache
                 .into(img_file);
     }
 
@@ -615,7 +644,8 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 poLoad.DismissDialog();
                 Toast.makeText(requireActivity(), "File downloaded successfully", Toast.LENGTH_SHORT).show();
 
-                ShowAttachmentinfo();
+                //close attachment
+                ShowAttachment(false);
             }
 
             @Override
@@ -785,7 +815,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
                 if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
                     UploadAttachment();
-                }else {
+                }else if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("1")){
                     DownloadAttachment();
                 }
             }
@@ -833,7 +863,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         loDisbursement.setSSourceNo(loSelectTransaction.getSSourceNo());
                         loDisbursement.setNAmountxx(tie_amount.getText() == null ? "" : tie_amount.getText().toString());
 
-                        mViewModel.SaveDisbursement(loDisbursement, new VM_Disbursement.OnTransaction() {
+                        mViewModel.SaveDisbursement(loDisbursement, laAttachments, new VM_Disbursement.OnTransaction() {
                             @Override
                             public void OnLoad() {
                                 poLoad.ShowDialog("Saving disbursement. Please wait . .");
@@ -918,6 +948,23 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                     return;
                 }
                 mViewModel.ReplaceAttachment(lnSelectAttached, tie_doctitle.getText() == null ? "" : tie_doctitle.getText().toString(), tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
+            }
+        });
+
+        btn_view_details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                Fragment_Attachment_List loFragment = new Fragment_Attachment_List();
+                Bundle loBundle = new Bundle();
+
+                loBundle.putString("source", loDisbursement.getSTransNox());
+                loFragment.setArguments(loBundle);
+
+                loTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
+                loTransaction.addToBackStack("disbursement");
+                loTransaction.commit();
             }
         });
     }

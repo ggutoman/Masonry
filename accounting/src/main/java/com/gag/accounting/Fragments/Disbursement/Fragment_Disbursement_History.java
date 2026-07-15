@@ -26,20 +26,15 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.gag.accounting.Adapter.Disbursement.Adapter_Disbursement_List;
-import com.gag.accounting.Adapter.Receipt.Adapter_Issued_Receipts;
-import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
-import com.gag.accounting.Fragments.Receipt.Fragment_Receipt_Entry;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Disbursement;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
-import org.gag.appdriver.App.Models.ReceiptMasterList;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -196,7 +191,7 @@ public class Fragment_Disbursement_History extends Fragment {
         mViewModel.DownloadDisbursementList(lsDfrom, lsDto, laStatus, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                poLoad.ShowDialog("Downloading receipts. Please wait . . ");
+                poLoad.ShowDialog("Downloading disbursements. Please wait . . ");
             }
 
             @Override
