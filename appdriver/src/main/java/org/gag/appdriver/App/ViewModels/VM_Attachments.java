@@ -12,6 +12,7 @@ import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
 
+import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -38,6 +39,10 @@ public class VM_Attachments extends AndroidViewModel {
         poDate = new DateRepository();
         poDisb = new Disbursement(application);
         poReport = new AttachmentReport(application);
+    }
+
+    public String GetCurrentDate(){
+        return poDate.GetCurrentDate();
     }
 
     public LiveData<List<EDisbursementAttachment>> GetDisbursements(String fsTransNox){
@@ -68,20 +73,19 @@ public class VM_Attachments extends AndroidViewModel {
         });
     }
 
-    public void GenerateSoa(OnGenerate foCallback){
+    public void GenerateSoa(String fsFilter, OnGenerate foCallback){
 
         foCallback.OnLoad();
-        poReport.GenerateSOA().thenAccept(new Consumer<Object>() {
+        poReport.GenerateSOA(fsFilter).thenAccept(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
 
                 if (o instanceof Boolean){
                     foCallback.OnFailed(poReport.GetMessage());
-                    return;
                 } else if (o instanceof String) {
 
                     String lsURL = (String) o;
-                    if (lsURL == null || lsURL.isEmpty()){
+                    if (lsURL == null || lsURL.isEmpty() || !new File(lsURL).exists()){
                         foCallback.OnFailed("Failed to generate report");
                     }else {
                         foCallback.OnSuccess(lsURL);

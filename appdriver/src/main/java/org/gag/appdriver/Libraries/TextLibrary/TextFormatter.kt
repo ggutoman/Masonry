@@ -12,9 +12,4 @@ class TextFormatter {
             }
         }
     }
-
-    fun ReplaceText(fsWholeText : String, fsChar : String, fnPart : Int, newText : String) : String{
-
-        return fsWholeText.replace(fsWholeText.split(fsChar).get(fnPart), newText)
-    }
 }

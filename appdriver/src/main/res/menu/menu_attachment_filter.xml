@@ -1,12 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_item_filter"
+        android:id="@+id/action_item_filter_dv"
         android:title="Filter Date"/>
 
     <item
-        android:id="@+id/action_item_download"
+        android:id="@+id/action_item_download_dv"
         android:title="Download Attachments"/>
+
+    <item
+        android:id="@+id/action_by_generate"
+        android:orderInCategory="100"
+        android:title="Generate"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_item_all_soa"
+                android:title="All"/>
+
+            <item
+                android:id="@+id/action_item_fund_soa"
+                android:title="Funds"/>
+
+            <item
+                android:id="@+id/action_item_pledge_soa"
+                android:title="Pledges"/>
+
+        </menu>
+
+    </item>
 
 </menu>

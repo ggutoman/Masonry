@@ -170,42 +170,20 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
             case "disbursement_attachments":
             case "disbursement":
-                mViewModel.GenerateSoa(new VM_Attachments.OnGenerate() {
+                mViewModel.DownloadDVAttachment(lsSource, new VM_Attachments.OnDownload() {
                     @Override
                     public void OnLoad() {
                         poLoad.ShowDialog("Downloading Attachments. Please wait . .");
                     }
 
                     @Override
-                    public void OnSuccess(String lsURL) {
-                        Intent loIntent = new Intent(Intent.ACTION_VIEW);
-                        loIntent.setData(Uri.parse(lsURL));
-
-                        startActivity(loIntent);
-                    }
-
-                    @Override
-                    public void OnFailed(String fsMessage) {
+                    public void OnFinished(String fsMessage) {
                         poLoad.DismissDialog();
                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
 
-                        Log.d("Result", fsMessage);
+                        ShowAttachment(false);
                     }
                 });
-//                mViewModel.DownloadDVAttachment(lsSource, new VM_Attachments.OnDownload() {
-//                    @Override
-//                    public void OnLoad() {
-//                        poLoad.ShowDialog("Downloading Attachments. Please wait . .");
-//                    }
-//
-//                    @Override
-//                    public void OnFinished(String fsMessage) {
-//                        poLoad.DismissDialog();
-//                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-//
-//                        ShowAttachment(false);
-//                    }
-//                });
                 break;
         }
     }
@@ -226,8 +204,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
     }
 
     private void LoadDisbursements(){
-
-        mtv_title.setText("DV Attachments");
 
         if (lsSource.isEmpty()){
             Toast.makeText(requireActivity(), "No transaction number initialized", Toast.LENGTH_SHORT).show();
@@ -285,13 +261,46 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         });
     }
 
+    private void GenerateSOAReports(String fsIDxx){
+
+        if (fsIDxx.equalsIgnoreCase("all")) {
+
+            mViewModel.GenerateSoa(fsIDxx, new VM_Attachments.OnGenerate() {
+                @Override
+                public void OnLoad() {
+                    poLoad.ShowDialog("Generating SOA report. Please wait . .");
+                }
+
+                @Override
+                public void OnSuccess(String lsURL) {
+                    poLoad.DismissDialog();
+                    Toast.makeText(requireActivity(), "SOA Report successfully generated", Toast.LENGTH_SHORT).show();
+
+                    SetAdaoter(List.of(new Attachments("SOA Report", mViewModel.GetCurrentDate(),  lsURL, lsURL, "1")));
+                }
+
+                @Override
+                public void OnFailed(String fsMessage) {
+                    poLoad.DismissDialog();
+                    Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+    }
+
     private void InitDataReceiver(){
 
         switch (lsStackIDxx){
 
             case "disbursement_attachments":
             case "disbursement":
+                mtv_title.setText("DV Attachments");
                 LoadDisbursements();
+                break;
+            case "generate_soa":
+                mtv_title.setText("Statement of Accounts");
+                GenerateSOAReports("all");
                 break;
         }
     }
@@ -329,13 +338,28 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
                 loMenu.getMenuInflater().inflate(R.menu.menu_attachment_filter, loMenu.getMenu());
+
+                //show only menus for generating report and downloading attachments
+                loMenu.getMenu().findItem(R.id.action_item_download_dv).setVisible(
+                        lsStackIDxx.equalsIgnoreCase("disbursement") ||
+                                lsStackIDxx.equalsIgnoreCase("disbursement_attachments")
+                );
+
+                loMenu.getMenu().findItem(R.id.action_item_filter_dv).setVisible(
+                        lsStackIDxx.equalsIgnoreCase("disbursement") ||
+                                lsStackIDxx.equalsIgnoreCase("disbursement_attachments")
+                );
+
+                //show only menus for generating report and downloading attachments
+                loMenu.getMenu().findItem(R.id.action_by_generate).setVisible(lsStackIDxx.equalsIgnoreCase("generate_soa"));
+
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
 
-                        if (menuItem.getItemId() == R.id.action_item_filter){
+                        if (menuItem.getItemId() == R.id.action_item_filter_dv){
 
                             MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
                             loBuilder.setTitleText("Select Date Range");
@@ -357,7 +381,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
                             return true;
 
-                        }else if (menuItem.getItemId() == R.id.action_item_download){
+                        }else if (menuItem.getItemId() == R.id.action_item_download_dv){
 
                             MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
                             loBuilder.setTitleText("Select Date Range");
@@ -391,6 +415,22 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
                             return true;
 
+                        }else if (menuItem.getItemId() == R.id.action_item_all_soa){
+
+                            poMessage.ShowMessage(2,  "Do you want to generate soa report for the year?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+
+                                    //download data from server with date to get
+                                    GenerateSOAReports("all");
+                                }
+                            });
                         }
                         return false;
                     }

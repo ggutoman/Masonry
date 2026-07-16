@@ -6,7 +6,10 @@
         <external-files-path name="shared_files" path="." />
 
         <!-- DCIM root -->
-        <external-path name="root" path="DCIM/" />
+        <external-path name="root_dcim" path="DCIM/" />
+
+        <!-- Download root -->
+        <external-path name="root_downloads" path="Download/" />
 
         <!-- Screenshots folder -->
         <external-path name="screenshots" path="DCIM/Screenshots/" />
@@ -16,6 +19,9 @@
 
         <!-- Masonry Screenshots child folder -->
         <external-path name="masonry_documents" path="DCIM/Masonry/Documents/" />
+
+        <!-- Download Reports Folder -->
+        <external-path name="masonry_download_reports" path="Download/MasonryReports/" />
 
     </paths>
 

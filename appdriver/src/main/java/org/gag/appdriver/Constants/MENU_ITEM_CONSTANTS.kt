@@ -235,5 +235,13 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "DISB",
         1,
         1
+    ),
+
+    MENU_ITEM_REPORT_SOA(
+        "Statements of Accounts",
+        "RPRT001",
+        "RPRT",
+        1,
+        1
     )
 }
