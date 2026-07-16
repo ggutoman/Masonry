@@ -86,6 +86,10 @@ dependencies {
     implementation("androidx.room:room-paging:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
 
+    // Glide core
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     // PROTO DEPENDENCIES
     implementation("androidx.datastore:datastore:1.1.6")
     implementation("androidx.datastore:datastore-preferences:1.1.6")

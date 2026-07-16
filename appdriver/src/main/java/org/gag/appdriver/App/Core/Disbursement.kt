@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadAttachmentDV
+import org.gag.appdriver.App.DataModels.DownloadDVAttachmentList
 import org.gag.appdriver.App.DataModels.DownloadDisbursement
 import org.gag.appdriver.App.DataModels.DownloadDisbursementList
 import org.gag.appdriver.App.DataModels.DownloadError
@@ -73,6 +74,8 @@ class Disbursement(instance : Context) {
 
     fun GetDisbursementList(fDfromxx : String, fDtoxx : String) : LiveData<List<EDisbursement>> = poDisbursement.GetDisbursementList(fDfromxx, fDtoxx)
 
+    fun GetAttachments(fsSourceNo : String) : LiveData<List<EDisbursementAttachment>> = poDisbursement.GetAttachments(fsSourceNo)
+
     fun GenerateFileOutput(fileNme : String) : CompletableFuture<File>{
 
         val future = CompletableFuture<File>()
@@ -91,9 +94,9 @@ class Disbursement(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveDisbursement(foDisbursement: EDisbursement) : CompletableFuture<Boolean>{
+    fun SaveDisbursement(foDisbursement: EDisbursement) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -129,7 +132,7 @@ class Disbursement(instance : Context) {
                             foDisbursement.sTransNox = resultData.GetPayload()
                             poDisbursement.SaveDisbursement(foDisbursement)
 
-                            true
+                            resultData.GetPayload()
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -370,9 +373,13 @@ class Disbursement(instance : Context) {
                         put("sFileName", foAttachment.sFileName)
                         put("sFinFleNm", foAttachment.sFinFleNm)
 
+                        //if attachment has already transaction number, add as parameter to update only
+                        if (foAttachment.sTransNox.isNotEmpty()) put("sTransNox", foAttachment.sTransNox)
+
                         //encode file to byte array base64, php will decode it as file again
                         val loImg = File(foAttachment.sFinFleNm)
                         val encodedImage = Base64.encodeToString(loImg.readBytes(), Base64.NO_WRAP)
+
                         put("file_meta", encodedImage)
                     }
 
@@ -461,6 +468,78 @@ class Disbursement(instance : Context) {
                             val fileResult : FileHelper.FileResult = fileHelper.CreateFileFromByteString(attachment_info.file_meta, attachment_info.attachment_info.sFinFleNm)
 
                             fileResult.isSuccess
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
+                            message = errorData.GetPayload().message
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadAttachmentList(fsSourceNo : String) : CompletableFuture<Boolean>{
+
+        val future = CompletableFuture<Boolean>()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                } else {
+
+                    val loParams = JSONObject().apply {
+                        put("sSourceNo", fsSourceNo)
+                    }
+
+                    when (val response = httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_DV_ATTACHMENT_LIST.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    )) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData = Json.Default.decodeFromString<DownloadDVAttachmentList>(response.data.body())
+
+                            val attachment_info = resultData.GetPayload()
+
+                            //save each attachment info
+                            attachment_info.forEach { attachment_info -> poDisbursement.SaveAttachment(attachment_info.attachment_info) }
+
+                            //download each attachment files
+                            attachment_info.forEach { attachment_info ->
+                                fileHelper.CreateFileFromByteString(attachment_info.file_meta, attachment_info.attachment_info.sFinFleNm)
+                            }
+                            true
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

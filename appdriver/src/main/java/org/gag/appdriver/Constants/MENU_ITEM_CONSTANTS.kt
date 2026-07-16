@@ -226,6 +226,14 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "DISB003",
         "DISB",
         1,
+        2
+    ),
+
+    MENU_ITEM_DISBURSEMENT_ATTACHMENTS(
+        "View Attachments",
+        "DISB004",
+        "DISB",
+        1,
         1
     )
 }

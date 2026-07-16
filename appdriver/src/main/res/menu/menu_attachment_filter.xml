@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_item_filter"
+        android:title="Filter Date"/>
+
+    <item
+        android:id="@+id/action_item_download"
+        android:title="Download Attachments"/>
+
+</menu>

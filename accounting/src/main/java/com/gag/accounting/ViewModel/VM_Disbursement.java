@@ -17,11 +17,17 @@ import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Room.Entities.EMemberAddress;
+import org.gag.appdriver.Room.Entities.EMemberContactInfo;
+import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
+import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class VM_Disbursement extends AndroidViewModel {
@@ -74,21 +80,53 @@ public class VM_Disbursement extends AndroidViewModel {
         return List.of(DISBURSEMENT_CONSTANTS.DISBURSEMENT_FUNDS, DISBURSEMENT_CONSTANTS.DISBURSEMENT_PROJECT);
     }
 
+    public LiveData<String> ObserveSelectType(){
+        return GetSelectedType;
+    }
+
+    public LiveData<List<EDisbursementAttachment>> ObserveAttachedFile(){
+        return GetAttachedFile;
+    }
+
+    public LiveData<List<LodgeInfo>> ObserveLodgeList(){
+        return poFunds.ObserveLodgeList();
+    }
+
+    public LiveData<List<EProjectMaster>> GetLodgeProjects(String fsLodgeIDxx){
+        return poProjects.GetLodgeProjects(fsLodgeIDxx);
+    }
+
+    public LiveData<List<LodgeFundMasterList>> GetLodgeFunds(String fsLodgeIDxx){
+        return poFunds.ObserveLodgeFunds(fsLodgeIDxx);
+    }
+
+    public LiveData<EDisbursement> GetDisbursement(String fsTransNox){
+        return poDisbursement.GetDisbursement(fsTransNox);
+    }
+
+    public LiveData<List<EDisbursement>> GetDisbursementList(String fsDfromxx, String fsDtoxx){
+        return poDisbursement.GetDisbursementList(fsDfromxx, fsDtoxx);
+    }
+
+    public LiveData<List<EDisbursementAttachment>> GetAttachments(String fsTransNox){
+        return poDisbursement.GetAttachments(fsTransNox);
+    }
+
     public void SelectType(String fsType){
         GetSelectedType.setValue(fsType);
     }
 
-    public void AttachFile(String fsTransNox, String fsDocTitle, String fsRemarks, File foFile){
+    public void AttachFile(String fsTransNox, String fsSourceNo, String fsDocTitle, String fsRemarks, File foFile, String fcRecdStat){
 
         EDisbursementAttachment dvAttachment = new EDisbursementAttachment(
-                "",
                 fsTransNox,
+                fsSourceNo,
                 GetCurrentDate(),
                 fsDocTitle,
                 fsRemarks,
                 foFile.getName(),
                 foFile.getAbsolutePath(),
-                "0",
+                fcRecdStat,
                 GetUserID(),
                 GetCurrentDate()
         );
@@ -126,32 +164,8 @@ public class VM_Disbursement extends AndroidViewModel {
 
     }
 
-    public LiveData<String> ObserveSelectType(){
-        return GetSelectedType;
-    }
-
-    public LiveData<List<EDisbursementAttachment>> ObserveAttachedFile(){
-        return GetAttachedFile;
-    }
-
-    public LiveData<List<LodgeInfo>> ObserveLodgeList(){
-        return poFunds.ObserveLodgeList();
-    }
-
-    public LiveData<List<EProjectMaster>> GetLodgeProjects(String fsLodgeIDxx){
-        return poProjects.GetLodgeProjects(fsLodgeIDxx);
-    }
-
-    public LiveData<List<LodgeFundMasterList>> GetLodgeFunds(String fsLodgeIDxx){
-        return poFunds.ObserveLodgeFunds(fsLodgeIDxx);
-    }
-
-    public LiveData<EDisbursement> GetDisbursement(String fsTransNox){
-        return poDisbursement.GetDisbursement(fsTransNox);
-    }
-
-    public LiveData<List<EDisbursement>> GetDisbursementList(String fsDfromxx, String fsDtoxx){
-        return poDisbursement.GetDisbursementList(fsDfromxx, fsDtoxx);
+    public void ClearAttachments(){
+        GetAttachedFile.setValue(new ArrayList<>());
     }
 
     public void GenerateFileImage(VM_Receipts.OnShareFile foCallback){
@@ -203,7 +217,7 @@ public class VM_Disbursement extends AndroidViewModel {
 
     }
 
-    public void SaveDisbursement(EDisbursement loDisbursement, VM_Disbursement.OnTransaction foCallback){
+    public void SaveDisbursement(EDisbursement loDisbursement, List<EDisbursementAttachment> faAttachments, VM_Disbursement.OnTransaction foCallback){
 
         foCallback.OnLoad();
 
@@ -234,16 +248,50 @@ public class VM_Disbursement extends AndroidViewModel {
             return;
         }
 
-        poDisbursement.SaveDisbursement(loDisbursement).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        //run first background to get the result of transaction number
+        poDisbursement.SaveDisbursement(loDisbursement).thenCompose(result -> {
 
-                if (!aBoolean){
-                    foCallback.OnFailed(poDisbursement.getMessage());
-                    return;
-                }
-                foCallback.OnSuccess();
+            //if return is booleen
+            if (result instanceof Boolean && !(Boolean) result) {
+                foCallback.OnFailed(poDisbursement.getMessage());
+                return CompletableFuture.completedFuture(false);
             }
+
+            //if return is empty string
+            if (result instanceof String && (((String) result).isEmpty())) {
+                foCallback.OnFailed("Could not save attachments. Source number is empty");
+                return CompletableFuture.completedFuture(false);
+            }
+            String lsSourceno = (String) result;
+
+            //initialize result holder, return true as default
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+
+            // Save attachments one by one
+            for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
+
+                loAttachment.setSSourceNo(lsSourceno);
+
+                //bind the result after each thread runs
+                chain = chain.thenCompose(ok -> {
+
+                    if (!ok) return CompletableFuture.completedFuture(false);
+                    return poDisbursement.SaveAttachment(loAttachment);
+                });
+            }
+            return chain;
+
+        })
+        .thenAccept(allOk -> {
+            if (allOk) {
+                foCallback.OnSuccess();
+            } else {
+                foCallback.OnFailed(poDisbursement.getMessage());
+            }
+        })
+        .exceptionally(e -> {
+            foCallback.OnFailed("Could not make request at this moment:\n\n" + e.getMessage());
+            return null;
         });
     }
 
@@ -258,7 +306,7 @@ public class VM_Disbursement extends AndroidViewModel {
                     foCallback.OnFinished(poDisbursement.getMessage());
                     return;
                 }
-                foCallback.OnFinished("Successfully downloaded receipts");
+                foCallback.OnFinished("Successfully downloaded disbursement");
             }
         });
     }
@@ -266,7 +314,16 @@ public class VM_Disbursement extends AndroidViewModel {
     public void DownloadDisbursementInfo(String fsTransNox, VM_Receipts.OnDownload foCallback){
 
         foCallback.OnLoad();
-        poDisbursement.DownloadDisbursementInfo(fsTransNox).thenAccept(new Consumer<Boolean>() {
+        poDisbursement.DownloadDisbursementInfo(fsTransNox).thenCompose(aBoolean -> {
+
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
+            chain = chain.thenCompose(ok -> {
+                if (!ok) return CompletableFuture.completedFuture(false);
+                return poDisbursement.DownloadAttachmentList(fsTransNox);
+            });
+
+            return chain;
+        }).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -274,8 +331,12 @@ public class VM_Disbursement extends AndroidViewModel {
                     foCallback.OnFinished(poDisbursement.getMessage());
                     return;
                 }
-                foCallback.OnFinished("Successfully downloaded disbursements");
+                foCallback.OnFinished("Successfully downloaded disbursement");
             }
+        })
+        .exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
         });
     }
 
@@ -300,10 +361,7 @@ public class VM_Disbursement extends AndroidViewModel {
         foCallback.OnLoad();
 
         //double check if parameter is initialized
-        if (foAttachment.getSSourceNo().isEmpty()){
-            foCallback.OnFailed("Attachment source is not initialized");
-            return;
-        }else if (foAttachment.getSDocTitle().isEmpty()){
+        if (foAttachment.getSDocTitle().isEmpty()){
             foCallback.OnFailed("Document title is not initialized");
             return;
         }else if (foAttachment.getSFileName().isEmpty()){
