@@ -31,4 +31,7 @@ interface DDisbursement {
     @Query("SELECT * FROM DV_Attachment WHERE sSourceNo= :fsSourceNo")
     fun GetAttachments(fsSourceNo : String) : LiveData<List<EDisbursementAttachment>>
 
+    @Query("DELETE FROM DV_Attachment")
+    fun DeleteAttachments()
+
 }

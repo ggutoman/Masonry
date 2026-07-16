@@ -36,6 +36,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Room.Entities.EDisbursement;
+import org.gag.appdriver.Utilities.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -170,6 +171,18 @@ public class Fragment_Disbursement_History extends Fragment {
 
                                         loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_confirm", loFragment))
                                                 .addToBackStack("disbursement_confirm");
+
+                                        break;
+
+                                    case "disbursement_attachments":
+
+                                        loFragment = new Fragment_Attachment_List();
+
+                                        loBundle.putString("source", loItem.getSTransNox());
+                                        loFragment.setArguments(loBundle);
+
+                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_attachments", loFragment))
+                                                .addToBackStack("disbursement_attachments");
 
                                         break;
                                 }

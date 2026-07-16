@@ -314,7 +314,16 @@ public class VM_Disbursement extends AndroidViewModel {
     public void DownloadDisbursementInfo(String fsTransNox, VM_Receipts.OnDownload foCallback){
 
         foCallback.OnLoad();
-        poDisbursement.DownloadDisbursementInfo(fsTransNox).thenAccept(new Consumer<Boolean>() {
+        poDisbursement.DownloadDisbursementInfo(fsTransNox).thenCompose(aBoolean -> {
+
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
+            chain = chain.thenCompose(ok -> {
+                if (!ok) return CompletableFuture.completedFuture(false);
+                return poDisbursement.DownloadAttachmentList(fsTransNox);
+            });
+
+            return chain;
+        }).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -322,8 +331,12 @@ public class VM_Disbursement extends AndroidViewModel {
                     foCallback.OnFinished(poDisbursement.getMessage());
                     return;
                 }
-                foCallback.OnFinished("Successfully downloaded disbursements");
+                foCallback.OnFinished("Successfully downloaded disbursement");
             }
+        })
+        .exceptionally(throwable -> {
+            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
         });
     }
 

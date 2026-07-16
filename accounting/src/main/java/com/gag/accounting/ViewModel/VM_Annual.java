@@ -56,10 +56,6 @@ public class VM_Annual extends AndroidViewModel {
         return poAnnual.ConvertStringDate(fsDate, fsFormat);
     }
 
-    public EUserInfo GetUserInfo(){
-        return poAnnual.GetUserInfo();
-    }
-
     public String GetFormatDateString(Date fsDate, String fsFormat){
         return poAnnual.ConvertDateString(fsDate, fsFormat);
     }

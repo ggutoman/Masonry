@@ -295,6 +295,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "DISB003":
                     InitView("DISB003");
                     break;
+                case "DISB004":
+                    InitView("DISB004");
+                    break;
             }
 
             return true;
@@ -429,6 +432,10 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "DISB003": //view disbursements
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_confirm", new Fragment_Disbursement_History()));
                 fragmentTransaction.addToBackStack("disbursement_confirm");
+                break;
+            case "DISB004": //view dv attachments
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
+                fragmentTransaction.addToBackStack("disbursement_attachments");
                 break;
 
         }

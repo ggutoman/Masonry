@@ -2,16 +2,20 @@ package org.gag.appdriver.App.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
@@ -19,11 +23,12 @@ import org.gag.appdriver.App.Models.Attachments;
 import org.gag.appdriver.R;
 
 import java.io.File;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Adapter_DV_Attachment_List extends RecyclerView.Adapter<Adapter_DV_Attachment_List.VH_DV_Attachments> {
+public class Adapter_Attachment_List extends RecyclerView.Adapter<Adapter_Attachment_List.VH_DV_Attachments> {
 
     private final Context loInstance;
     private final List<Attachments> laAttachments;
@@ -40,7 +45,7 @@ public class Adapter_DV_Attachment_List extends RecyclerView.Adapter<Adapter_DV_
         void OnSelec(Attachments loItem);
     }
 
-    public Adapter_DV_Attachment_List(Context foInstance, List<Attachments> faReceipts, OnSelectItem foCallback){
+    public Adapter_Attachment_List(Context foInstance, List<Attachments> faReceipts, OnSelectItem foCallback){
 
         loInstance = foInstance;
         laAttachments = faReceipts;
@@ -72,29 +77,49 @@ public class Adapter_DV_Attachment_List extends RecyclerView.Adapter<Adapter_DV_
         switch (laAttachmentsFiltered.get(position).getCRecdStat()){
 
             case "0":
-                holder.mtv_status.setText("Pending for Upload");
+                holder.mtv_status.setText("File not Found");
                 break;
             case "1":
-                holder.mtv_status.setText("Uploaded");
+                holder.mtv_status.setText("Downloaded");
                 break;
         }
 
-        // Load from file path
-        Glide.with(loInstance)
-                .load(new File(laAttachmentsFiltered.get(position).getSFilePth()))
-                .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                .skipMemoryCache(true)   // disable memory cache
-                .diskCacheStrategy(DiskCacheStrategy.NONE) // disable disk cache
-                .into(holder.siv_img);
+        File loImg = new File(laAttachments.get(position).getSFilePth());
 
-        holder.view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        if (loImg == null) return;
 
-                loCallback.OnSelec(laAttachmentsFiltered.get(position));
+        // Defensive checks: file exists, is not empty
+        if (loImg.exists() && loImg.isFile() && loImg.length() > 0) {
+
+            try {
+                // Use FileProvider to get a safe content URI
+                Uri uri = FileProvider.getUriForFile(
+                        holder.itemView.getContext(),
+                        holder.itemView.getContext().getPackageName() + ".provider",
+                        loImg
+                );
+
+                Glide.with(holder.itemView.getContext())
+                        .asBitmap() // force bitmap decoding
+                        .load(uri)  // use safe URI instead of raw path
+                        .apply(new RequestOptions()
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE))
+                        .error(R.drawable.no_image_avaialbel)
+                        .into(holder.siv_img);
+
+                holder.view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        loCallback.OnSelec(laAttachments.get(position));
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
+        }
     }
 
     @Override
@@ -104,13 +129,13 @@ public class Adapter_DV_Attachment_List extends RecyclerView.Adapter<Adapter_DV_
 
     public class Adapter_DV_Attachment_Filter extends Filter {
 
-        private final Adapter_DV_Attachment_List loAdapter;
+        private final Adapter_Attachment_List loAdapter;
         private List<String> laStatus = new ArrayList<>(List.of("0", "1", "3", "4"));
         public void InitStatus(List<String> faStatus){
             laStatus = faStatus;
         }
 
-        public Adapter_DV_Attachment_Filter(Adapter_DV_Attachment_List foAdapter){
+        public Adapter_DV_Attachment_Filter(Adapter_Attachment_List foAdapter){
             loAdapter = foAdapter;
         }
 

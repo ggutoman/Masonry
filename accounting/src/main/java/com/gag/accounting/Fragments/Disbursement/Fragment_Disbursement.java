@@ -86,6 +86,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private EDisbursementAttachment loSelectAttachment;
     private File loAttached;
 
+    private View parent_view;
     private View view_image;
     private ShapeableImageView img_file;
     private MaterialTextView mtv_filenme, mtv_filepth;
@@ -164,10 +165,10 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private void InitViews(View view){
 
         view_image = view.findViewById(R.id.view_image);
-        img_file = view_image.findViewById(R.id.img_file);
-        mtv_filenme = view_image.findViewById(R.id.mtv_filenme);
-        mtv_filepth = view_image.findViewById(R.id.mtv_filepth);
-        btn_transaction = view_image.findViewById(R.id.btn_transaction);
+        img_file = view_image.findViewById(org.gag.appdriver.R.id.img_file);
+        mtv_filenme = view_image.findViewById(org.gag.appdriver.R.id.mtv_filenme);
+        mtv_filepth = view_image.findViewById(org.gag.appdriver.R.id.mtv_filepth);
+        btn_transaction = view_image.findViewById(org.gag.appdriver.R.id.btn_transaction);
 
         mtv_status = view.findViewById(R.id.mtv_status);
         mtv_status_attachment = view.findViewById(R.id.mtv_status_attachment);
@@ -496,7 +497,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         mViewModel.DownloadDisbursementInfo(lsTransNox, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                Toast.makeText(requireActivity(), "Downloading disbursement. Please wait . .", Toast.LENGTH_SHORT).show();
+                poLoad.ShowDialog("Downloading disbursement. Please wait . .");
             }
 
             @Override
@@ -565,39 +566,41 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         }
     }
 
-    private void ShowAttachment(boolean fIsshow){
+    private void ShowAttachment(boolean fIsshow) {
 
         Animation slide = AnimationUtils.loadAnimation(requireActivity(), fIsshow ? org.gag.appdriver.R.anim.anim_slide_up : org.gag.appdriver.R.anim.anim_slide_down);
         view_image.startAnimation(slide);
         view_image.setVisibility(fIsshow ? View.VISIBLE : View.GONE);
-    }
 
-    private void ShowAttachmentinfo(){
+        //show attachment info, if layout is showed
+        if (view_image.getVisibility() == View.VISIBLE){
 
-        //initialize image to file
-        File loImg = new File(loSelectAttachment.getSFinFleNm());
+            //initialize image to file
+            File loImg = new File(loSelectAttachment.getSFinFleNm());
 
-        mtv_filenme.setText(loSelectAttachment.getSFileName());
-        mtv_filepth.setText(loSelectAttachment.getSFinFleNm());
+            mtv_filenme.setText(loSelectAttachment.getSFileName());
+            mtv_filepth.setText(loSelectAttachment.getSFinFleNm());
 
-        //scale image if exist
-        img_file.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            //scale image if exist
+            img_file.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        //display button icons based on status
-        if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
-            btn_transaction.setImageResource(org.gag.appdriver.R.drawable.upload_cloud_svgrepo_com);
-        }else {
-            btn_transaction.setImageResource(!loImg.exists() ? R.drawable.baseline_download : org.gag.appdriver.R.drawable.baseline_confirm_receipt);
+            //display button icons based on status
+            if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
+                btn_transaction.setImageResource(org.gag.appdriver.R.drawable.upload_cloud_svgrepo_com);
+            }else {
+                btn_transaction.setImageResource(!loImg.exists() ? org.gag.appdriver.R.drawable.baseline_download : org.gag.appdriver.R.drawable.baseline_confirm_receipt);
+            }
+
+            // Load from File
+            Glide.with(requireActivity())
+                    .load(loImg)
+                    .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
+                    .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
+                    .skipMemoryCache(true)   // disable memory cache
+                    .diskCacheStrategy(DiskCacheStrategy.NONE) // disable disk cache
+                    .into(img_file);
+
         }
-
-        // Load from File
-        Glide.with(requireActivity())
-                .load(loImg)
-                .placeholder(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                .error(org.gag.appdriver.R.drawable.no_image_avaialbel)
-                .skipMemoryCache(true)   // disable memory cache
-                .diskCacheStrategy(DiskCacheStrategy.NONE) // disable disk cache
-                .into(img_file);
     }
 
     private void UploadAttachment(){
@@ -791,7 +794,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 }
 
                 ShowAttachment(true);
-                ShowAttachmentinfo();
             }
         });
 
@@ -815,7 +817,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
                 if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
                     UploadAttachment();
-                }else if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("1")){
+                }else if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("1") && !(new File(loSelectAttachment.getSFinFleNm()).exists()) ){
                     DownloadAttachment();
                 }
             }

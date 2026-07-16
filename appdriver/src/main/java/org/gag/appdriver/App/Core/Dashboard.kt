@@ -34,6 +34,7 @@ import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
+import org.gag.appdriver.Room.DataObject.DDisbursement
 import org.gag.appdriver.Room.DataObject.DFundLedger
 import org.gag.appdriver.Room.DataObject.DFundTurnover
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
@@ -88,6 +89,7 @@ class Dashboard(loInstance : Context) {
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(loInstance)?.GetAnnualDetail() as DAnnualDetail
     val poProjects: DProjects = ML_DBF.getDatabase(loInstance)?.GetProject() as DProjects
     val poReceipts: DReceipt = ML_DBF.getDatabase(loInstance)?.GetReceipt() as DReceipt
+    val poDisbursement: DDisbursement = ML_DBF.getDatabase(loInstance)?.GetDisbursement() as DDisbursement
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -161,6 +163,9 @@ class Dashboard(loInstance : Context) {
 
         poReceipts.DeleteReceiptMaster()
         poReceipts.DeleteReceiptDetails()
+
+        poDisbursement.DeleteDisbursements()
+        poDisbursement.DeleteAttachments()
 
         poDBMember.DeleteMember()
         poDBMemberAddress.DeletMemberAddress()

@@ -41,10 +41,10 @@ class KTORepository(instance : Context) {
             level = LogLevel.ALL
         }
 
-        install(HttpTimeout){
-            connectTimeoutMillis = 5000L
-            requestTimeoutMillis = 5000L
-            socketTimeoutMillis = 5000L
+        install(HttpTimeout) {
+            connectTimeoutMillis = 30_000L      // 30 seconds
+            requestTimeoutMillis = 1_800_000L   // 30 minutes
+            socketTimeoutMillis = 300_000L      // 5 minutes
         }
 
         //http response property

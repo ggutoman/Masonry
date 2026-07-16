@@ -186,7 +186,6 @@ class DateRepository {
             val formatter = DateTimeFormatter.ofPattern(fsFormat, Locale.getDefault())
             val localDate = LocalDate.parse(input, formatter)
 
-
             val instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
             Date.from(instant)
         } else {
