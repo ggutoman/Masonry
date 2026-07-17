@@ -37,7 +37,7 @@ import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
-import org.gag.appdriver.Utilities.Fragment_Attachment_List;
+import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -359,7 +359,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.addToBackStack("view_officer_history");
                 break;
             case "ACC002": //reports
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_soa", new Fragment_Attachment_List()));
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
                 fragmentTransaction.addToBackStack("generate_report");
                 break;
             case "ACC003": //account info

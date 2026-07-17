@@ -1,4 +1,4 @@
-package org.gag.appdriver.Utilities;
+package org.gag.appdriver.App.Fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -29,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -48,10 +48,13 @@ import org.gag.appdriver.App.Models.Attachments;
 import org.gag.appdriver.App.ViewModels.VM_Attachments;
 import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Utilities.LoadDialog;
+import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Fragment_Attachment_List extends Fragment implements OnSwipeListener {
@@ -79,6 +82,10 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
     private interface OnDateRange{
         void OnDateRangeSelected(String fsDfrom, String fsDto);
+    }
+
+    private interface OnYear{
+        void OnYearSelected(String fsYear);
     }
 
 
@@ -334,12 +341,12 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
                         //if date is not filtered, then load all list
                         if ((lsDfrom == null || lsDfrom.isEmpty()) || (lsDto == null || lsDto.isEmpty())){
-                            laFiles.add(new Attachments("SOA Report as of " + mViewModel.GetCurrentDate(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
+                            laFiles.add(new Attachments(loFile.getName().toUpperCase(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
 
                         }else if (!mViewModel.IsDateCompared(lsDfrom, mViewModel.FormatLongDate(loFile.lastModified())) || lsDfrom.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified())) ||
                                     !mViewModel.IsDateCompared(lsDto, mViewModel.FormatLongDate(loFile.lastModified())) || lsDto.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified()))){
 
-                            laFiles.add(new Attachments("SOA Report as of " + mViewModel.GetCurrentDate(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
+                            laFiles.add(new Attachments(loFile.getName().toUpperCase(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
                         }
                     }
                 }
@@ -366,30 +373,50 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
     private void GenerateSOAReports(String fsIDxx, String fsDromxx, String fsDtoxx){
 
-        if (fsIDxx.equalsIgnoreCase("all")) {
+        mViewModel.GenerateSoa(fsIDxx, fsDromxx, fsDtoxx, new VM_Attachments.OnGenerate() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Generating SOA report. Please wait . .");
+            }
 
-            mViewModel.GenerateSoa(fsIDxx, fsDromxx, fsDtoxx, new VM_Attachments.OnGenerate() {
-                @Override
-                public void OnLoad() {
-                    poLoad.ShowDialog("Generating SOA report. Please wait . .");
-                }
+            @Override
+            public void OnSuccess(String lsURL) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), "SOA Report successfully generated", Toast.LENGTH_SHORT).show();
 
-                @Override
-                public void OnSuccess(String lsURL) {
-                    poLoad.DismissDialog();
-                    Toast.makeText(requireActivity(), "SOA Report successfully generated", Toast.LENGTH_SHORT).show();
+                LoadReports();
+            }
 
-                    LoadReports();
-                }
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
-                @Override
-                public void OnFailed(String fsMessage) {
-                    poLoad.DismissDialog();
-                    Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-                }
-            });
+    private void GenerateProjectBalance(String fsCritera, String fsSearch){
 
-        }
+        mViewModel.GenerateProjectBalance(fsCritera, fsSearch, new VM_Attachments.OnGenerate() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Generating project balance report. Please wait . .");
+            }
+
+            @Override
+            public void OnSuccess(String lsURL) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), "Balance Report successfully generated", Toast.LENGTH_SHORT).show();
+
+                LoadReports();
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void InitDataReceiver(){
@@ -402,7 +429,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                 LoadDisbursements();
                 break;
             case "generate_report":
-                mtv_title.setText("Statement of Accounts");
+                mtv_title.setText("Lodge Attachments");
                 LoadReports();
                 break;
         }
@@ -427,6 +454,28 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         });
         loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
 
+    }
+
+    private void SelectYear(OnYear foCallback){
+
+        Calendar loCalendar = Calendar.getInstance();
+
+        NumberPicker yearPicker = new NumberPicker(requireContext());
+        int currentYear = loCalendar.get(Calendar.YEAR);
+
+        yearPicker.setMinValue(currentYear);
+        yearPicker.setMaxValue(currentYear + 20);
+        yearPicker.setValue(currentYear);
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Select Year")
+                .setView(yearPicker)
+                .setPositiveButton("OK", (dialog, which) -> {
+
+                    foCallback.OnYearSelected(String.valueOf(yearPicker.getValue()));
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void InitListener(){
@@ -583,6 +632,15 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                         }
                                     });
 
+                                }
+                            });
+                        }else if (menuItem.getItemId() == R.id.action_item_bal_year){
+
+                            SelectYear(new OnYear() {
+                                @Override
+                                public void OnYearSelected(String fsYear) {
+
+                                    GenerateProjectBalance("by_year", fsYear);
                                 }
                             });
                         }

@@ -61,6 +61,10 @@ public class VM_Attachments extends AndroidViewModel {
         return poDate.IsDateCompared(fsDfrom, fsDto);
     }
 
+    public List<String> GetProjects(){
+        return List.of("Projects");
+    }
+
     public String FormatLongDate(Long fLongDte){
         return poDate.FormatLongDate(fLongDte);
     }
@@ -85,6 +89,28 @@ public class VM_Attachments extends AndroidViewModel {
 
         foCallback.OnLoad();
         poReport.GenerateSOA(fsFilter, fsDfromxx, fsDtoxx).thenAccept(new Consumer<Object>() {
+            @Override
+            public void accept(Object o) {
+
+                if (o instanceof Boolean){
+                    foCallback.OnFailed(poReport.GetMessage());
+                } else if (o instanceof String) {
+
+                    String lsURL = (String) o;
+                    if (lsURL == null || lsURL.isEmpty() || !new File(lsURL).exists()){
+                        foCallback.OnFailed("Failed to generate report");
+                    }else {
+                        foCallback.OnSuccess(lsURL);
+                    }
+                }
+            }
+        });
+    }
+
+    public void GenerateProjectBalance(String fsCriteria, String fsSearch, OnGenerate foCallback){
+
+        foCallback.OnLoad();
+        poReport.GenerateProjBalance(fsCriteria, fsSearch).thenAccept(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
 

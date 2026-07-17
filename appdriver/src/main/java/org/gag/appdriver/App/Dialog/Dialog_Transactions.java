@@ -1,0 +1,193 @@
+//package com.gag.accounting.Dialog;
+//
+//import android.app.AlertDialog;
+//import android.app.DatePickerDialog;
+//import android.content.Context;
+//import android.graphics.Color;
+//import android.graphics.drawable.ColorDrawable;
+//import android.view.LayoutInflater;
+//import android.view.View;
+//import android.widget.AdapterView;
+//import android.widget.DatePicker;
+//import android.widget.Toast;
+//
+//import androidx.lifecycle.LifecycleOwner;
+//import androidx.lifecycle.Observer;
+//import com.google.android.material.button.MaterialButton;
+//import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+//import com.google.android.material.textfield.TextInputEditText;
+//import com.google.android.material.textview.MaterialTextView;
+//
+//import org.gag.appdriver.App.Adapters.MemberAdapter;
+//import org.gag.appdriver.App.Models.ProjectDetail;
+//import org.gag.appdriver.App.ViewModels.VM_Attachments;
+//import org.gag.appdriver.R;
+//import org.gag.appdriver.Room.Entities.EMemberInfo;
+//
+//import java.util.ArrayList;
+//import java.util.Calendar;
+//import java.util.List;
+//
+//public class Dialog_Project_Entry {
+//
+//    private final Context loInstance;
+//    private final View view;
+//    private final AlertDialog poDialog;
+//
+//    private final VM_Attachments loViewModel;
+//
+//    private final LifecycleOwner loOwner;
+//    private final OnSubmitEntry loCallback;
+//
+//    private MaterialTextView mtv_download;
+//    private MaterialAutoCompleteTextView auto_transaction_type, auto_transaction;
+//    private MaterialButton btn_submit;
+//
+//    public interface OnSubmitEntry{
+//        void OnSubmit(ProjectDetail loEntry);
+//    }
+//
+//    public Dialog_Project_Entry(Context context, VM_Attachments foViewModel, LifecycleOwner foOwner, OnSubmitEntry foCallback) {
+//
+//        loInstance = context;
+//        view = LayoutInflater.from(context).inflate(R.layout.layout_transaction_dialog, null);
+//        loCallback = foCallback;
+//
+//        // Build and show dialog
+//        poDialog = new AlertDialog.Builder(context)
+//                .setView(view)
+//                .setCancelable(true)
+//                .create();
+//
+//        poDialog.setCancelable(true);
+//        if (poDialog.getWindow() != null) {
+//            poDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        }
+//
+//
+//        loViewModel = foViewModel;
+//        loOwner = foOwner;
+//
+//        InitViews(view);
+//        InitDataReceiver();
+//        InitListeners();
+//    }
+//
+//    private void InitViews(View view){
+//
+//        mtv_download = view.findViewById(R.id.mtv_download);
+//        auto_transaction_type = view.findViewById(R.id.auto_transaction_type);
+//        auto_transaction = view.findViewById(R.id.auto_transaction);
+//        btn_submit = view.findViewById(R.id.btn_submit);
+//
+//    }
+//
+//    private void InitDataReceiver(){
+//
+//        loViewModel.GetMemberList().observe(loOwner, new Observer<List<EMemberInfo>>() {
+//            @Override
+//            public void onChanged(List<EMemberInfo> eMemberInfos) {
+//
+//                if (eMemberInfos == null) return;
+//
+//                //only show members of selected lodge
+//                List<EMemberInfo> lodgeMembers = new ArrayList<>();
+//                for (EMemberInfo loMember : eMemberInfos){
+//
+//                    if (loMember.getSLodgeIDx().equalsIgnoreCase(lsLodgeIDxx)){
+//                        lodgeMembers.add(loMember);
+//                    }
+//                }
+//
+//                loMemberAdapter = new MemberAdapter(loInstance,
+//                        androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+//                        lodgeMembers);
+//
+//                auto_lodge_member.setAdapter(loMemberAdapter);
+//            }
+//        });
+//    }
+//
+//    private void InitListeners(){
+//
+//        auto_lodge_member.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//
+//                if (loMemberAdapter == null) return;
+//
+//                loSelectMember = loMemberAdapter.getItem(i);
+//                auto_lodge_member.setText(loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(), false);
+//            }
+//        });
+//
+//        tie_pledge_date.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                Calendar loCalendar = Calendar.getInstance();
+//                DatePickerDialog loValidPicker = new DatePickerDialog(loInstance, new DatePickerDialog.OnDateSetListener() {
+//                    @Override
+//                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+//
+//                        String formatted = String.format("%04d-%02d-%02d", i, i1 + 1, i2);
+//                        tie_pledge_date.setText(formatted);
+//                    }
+//                }, loCalendar.get(Calendar.YEAR),
+//                        loCalendar.get(Calendar.MONTH),
+//                        loCalendar.get(Calendar.DAY_OF_MONTH)
+//                );
+//
+//                //Restrict minimum selection after the current day
+//                Calendar minDate = Calendar.getInstance();
+//                minDate.set(Integer.parseInt(loViewModel.GetFormattedDate(loViewModel.GetCurrentDate(), "yyyy")),
+//                        Integer.parseInt(loViewModel.GetFormattedDate(loViewModel.GetCurrentDate(), "MM")),
+//                        Integer.parseInt(loViewModel.GetFormattedDate(loViewModel.GetCurrentDate(), "dd") + 1
+//                        )
+//                );
+//
+//                loValidPicker.show();
+//
+//            }
+//        });
+//
+//        btn_submit.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                if (loSelectMember == null){
+//                    Toast.makeText(loInstance, "Please select member", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }else if (tie_pledge_date.getText() == null || tie_pledge_date.getText().toString().isEmpty()){
+//                    Toast.makeText(loInstance, "Please select promised date", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }else if (tie_pledge_amount.getText() == null || tie_pledge_amount.getText().toString().isEmpty()){
+//                    Toast.makeText(loInstance, "Please enter promised amount", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+//
+//                ProjectDetail loMembers = new ProjectDetail(
+//                        "",
+//                        loSelectMember.getSMemberID(),
+//                        loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(),
+//                        "",
+//                        tie_pledge_date.getText().toString(),
+//                        tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString(),
+//                        "0.00"
+//                );
+//                loCallback.OnSubmit(loMembers);
+//
+//                if (poDialog.isShowing()){
+//                    poDialog.dismiss();
+//                }
+//            }
+//        });
+//    }
+//
+//    public void Show(){
+//        if (!poDialog.isShowing()){
+//            poDialog.show();
+//        }
+//    }
+//
+//}
