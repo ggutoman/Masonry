@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:text="N/A"
-            android:textSize="18sp"
+            android:textSize="15sp"
             android:alpha="0.7"
             android:gravity="center_vertical"
             app:layout_constraintStart_toEndOf="@+id/siv_img"
@@ -57,8 +57,7 @@
                 android:text="N/A"
                 android:textSize="13sp"
                 android:alpha="0.7"
-                android:gravity="end"
-                android:textStyle="italic"/>
+                android:gravity="end"/>
 
         </LinearLayout>
 

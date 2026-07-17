@@ -81,7 +81,7 @@ class Projects(instance : Context) {
 
     fun GetPledgeSummary(fsProjectCd : String, fsDfrom : String, fsDto : String) : LiveData<List<ProjectDetail>> = poProjects.GetPledgeSummary(fsProjectCd, fsDfrom, fsDto)
 
-    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
+    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 
     fun GetProjectList(fsYearIDxx: String, fsDfrom : String, fsDto : String) : LiveData<List<EProjectMaster>> = poProjects.GetProjectMasterList(fsYearIDxx, fsDfrom, fsDto)
 

@@ -11,9 +11,17 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         2
     ),
 
+    MENU_ITEM_REPORT(
+        "Generate Reports",
+        "ACC002",
+        "ACC",
+        1,
+        1
+    ),
+
     MENU_ITEM_ACCOUNT_DETAILS(
         "Account Info",
-        "ACC002",
+        "ACC003",
         "ACC",
         1,
         0
@@ -21,7 +29,7 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
 
     MENU_ITEM_LOD_ACCOUNT(
         "Logout",
-        "ACC003",
+        "ACC004",
         "ACC",
         1,
         0
@@ -233,14 +241,6 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "View Attachments",
         "DISB004",
         "DISB",
-        1,
-        1
-    ),
-
-    MENU_ITEM_REPORT_SOA(
-        "Statements of Accounts",
-        "RPRT001",
-        "RPRT",
         1,
         1
     )

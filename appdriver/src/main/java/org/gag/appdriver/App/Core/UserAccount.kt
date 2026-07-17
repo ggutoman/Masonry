@@ -120,7 +120,7 @@ class UserAccount(instance : Context) {
                                                                                                 .getOrNull(0) ?: ""
                                                                                         )
 
-    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
+    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 
     fun ObserverPositionList() : LiveData<List<EPosition>> = poPosition.ObserverPositionList()
 

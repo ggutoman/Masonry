@@ -3,10 +3,12 @@ package org.gag.appdriver.App.Adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
@@ -23,6 +25,7 @@ import org.gag.appdriver.App.Models.Attachments;
 import org.gag.appdriver.R;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,24 +87,23 @@ public class Adapter_Attachment_List extends RecyclerView.Adapter<Adapter_Attach
                 break;
         }
 
-        File loImg = new File(laAttachments.get(position).getSFilePth());
-
-        if (loImg == null) return;
+        File loFile = new File(laAttachments.get(position).getSFilePth());
 
         // Defensive checks: file exists, is not empty
-        if (loImg.exists() && loImg.isFile() && loImg.length() > 0) {
+        if (loFile.exists() && loFile.isFile() && loFile.canRead() && loFile.length() > 0) {
 
             try {
                 // Use FileProvider to get a safe content URI
                 Uri uri = FileProvider.getUriForFile(
                         holder.itemView.getContext(),
                         holder.itemView.getContext().getPackageName() + ".provider",
-                        loImg
+                        loFile
                 );
 
+                //display image
                 Glide.with(holder.itemView.getContext())
                         .asBitmap() // force bitmap decoding
-                        .load(uri)  // use safe URI instead of raw path
+                        .load(!(loFile.getName().contains(".png") || loFile.getName().contains(".jpg")) ? R.drawable.baseline_csv : uri)  // use safe URI instead of raw path
                         .apply(new RequestOptions()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
@@ -111,7 +113,6 @@ public class Adapter_Attachment_List extends RecyclerView.Adapter<Adapter_Attach
                 holder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
                         loCallback.OnSelec(laAttachments.get(position));
                     }
                 });

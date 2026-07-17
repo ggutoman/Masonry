@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_item_filter_dv"
+        android:id="@+id/action_item_filter"
         android:title="Filter Date"/>
 
     <item

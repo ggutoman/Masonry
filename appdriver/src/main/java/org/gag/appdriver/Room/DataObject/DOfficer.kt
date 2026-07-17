@@ -29,6 +29,8 @@ interface DOfficer {
             "WHERE (a.sMemberID != :fsMemberIDx) " +
             "AND (b.dFromDate >= :fsDateFrom " +
             "AND b.dThruDate <= :fsDateTo) " +
+            "GROUP BY " +
+            "a.sMemberID " +
             "ORDER BY " +
             "a.dModified DESC, " +
             "a.nEntryNox ASC ")

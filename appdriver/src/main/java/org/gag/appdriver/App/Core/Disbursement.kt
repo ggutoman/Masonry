@@ -537,7 +537,11 @@ class Disbursement(instance : Context) {
 
                             //download each attachment files
                             attachment_info.forEach { attachment_info ->
-                                fileHelper.CreateFileFromByteString(attachment_info.file_meta, attachment_info.attachment_info.sFinFleNm)
+                                File(attachment_info.attachment_info.sFinFleNm).let {
+
+                                    //save to devie if file is not existing or not readable
+                                    if (!it.exists() || !it.isFile || !it.canRead()) fileHelper.CreateFileFromByteString(attachment_info.file_meta, attachment_info.attachment_info.sFinFleNm)
+                                }
                             }
                             true
                         }
