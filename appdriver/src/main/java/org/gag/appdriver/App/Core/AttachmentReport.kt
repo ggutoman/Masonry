@@ -32,6 +32,8 @@ import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
+import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
 
 class AttachmentReport(loInstance : Context) {
@@ -48,7 +50,7 @@ class AttachmentReport(loInstance : Context) {
     fun GetMessage() : String = message
 
     @SuppressLint("MissingPermission")
-    fun GenerateSOA(fsFilter : String) : CompletableFuture<Any> {
+    fun GenerateSOA(fsFilter : String, fsDfromxx : String, fsDtoxx : String) : CompletableFuture<Any> {
 
         val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -62,6 +64,8 @@ class AttachmentReport(loInstance : Context) {
 
                 val loParams = JSONObject().apply {
                     put("transaction", fsFilter)
+                    put("dFromxx", fsDfromxx)
+                    put("dToxx", fsDtoxx)
                 }
 
                 httpInstance.makeRequest(
@@ -120,6 +124,28 @@ class AttachmentReport(loInstance : Context) {
         }
         return future
 
+    }
+
+    fun GetReportList(): CompletableFuture<List<File>> {
+
+        val future = CompletableFuture<List<File>>()
+
+        val loDir : File = FILE_CONSTANTS.EXTERNAL_STORAGE_DCIM_REPORTS.fileDir
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result: List<File> = if (loDir.exists() && loDir.isDirectory) {
+                loDir.listFiles()?.toList() ?: emptyList()
+            } else {
+                emptyList()
+            }
+
+            // Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
     }
 
 }

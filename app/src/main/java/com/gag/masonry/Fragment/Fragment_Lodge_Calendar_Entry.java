@@ -178,7 +178,7 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                ELodgeInfo poSelectedLodge = (ELodgeInfo) adapterView.getItemAtPosition(i);
+                LodgeInfo poSelectedLodge = (LodgeInfo) adapterView.getItemAtPosition(i);
 
                 auto_lodge.setText(poSelectedLodge.getSLodgeNme(), false);
                 lodgeCalendar.setSLodgeIDx(poSelectedLodge.getSLodgeIDx());
@@ -193,6 +193,7 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                 int currentYear = loCalendar.get(Calendar.YEAR);
 
                 yearPicker.setMinValue(currentYear);
+                yearPicker.setMaxValue(currentYear + 20);
                 yearPicker.setValue(currentYear);
 
                 new AlertDialog.Builder(requireContext())
@@ -207,7 +208,6 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
-
             }
         });
 

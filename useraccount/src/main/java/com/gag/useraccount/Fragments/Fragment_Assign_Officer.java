@@ -59,8 +59,6 @@ public class Fragment_Assign_Officer extends Fragment {
     private String lsSelectMember, lsSelectCalendar;
     private int lnSelectLevel = -1, lnSelectStatus = -1;
 
-    private MaterialTextView mtv_remarks;
-    private TextInputLayout til_remarks;
     private TextInputEditText tie_remarks;
     private MaterialAutoCompleteTextView  tie_yearid, auto_member, auto_position, auto_type, auto_status;
     private MaterialButton btn_create;
@@ -92,9 +90,6 @@ public class Fragment_Assign_Officer extends Fragment {
         auto_position = view.findViewById(R.id.auto_position);
         auto_type = view.findViewById(R.id.auto_type);
         auto_status = view.findViewById(R.id.auto_status);
-
-        mtv_remarks = view.findViewById(R.id.mtv_remarks);
-        til_remarks = view.findViewById(R.id.til_remarks);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
         btn_create = view.findViewById(R.id.btn_create);
@@ -161,19 +156,9 @@ public class Fragment_Assign_Officer extends Fragment {
                         });
                         return;
                     }
-
-                    //hide remarks field
-                    mtv_remarks.setVisibility(View.GONE);
-                    til_remarks.setVisibility(View.GONE);
-                    tie_remarks.setVisibility(View.GONE);
                 }else {
 
                     loOfficer = eOfficer;
-
-                    //display remarks field
-                    mtv_remarks.setVisibility(View.VISIBLE);
-                    til_remarks.setVisibility(View.VISIBLE);
-                    tie_remarks.setVisibility(View.VISIBLE);
                 }
 
                 mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
@@ -203,7 +188,6 @@ public class Fragment_Assign_Officer extends Fragment {
                                     loSelectCalendar = loCalendar;
 
                                 });
-
                     }
                 });
 

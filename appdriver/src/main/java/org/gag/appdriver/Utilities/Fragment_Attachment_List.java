@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.FileProvider;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -75,6 +77,10 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
     private GestureDetector gestureDetector;
 
+    private interface OnDateRange{
+        void OnDateRangeSelected(String fsDfrom, String fsDto);
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -103,7 +109,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         InitViews(view);
         InitDataReceiver();
         InitListener();
-        DownloadAttachments();
 
         return view;
     }
@@ -122,46 +127,82 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         btn_transaction = layout_image_viewer.findViewById(R.id.btn_transaction);
     }
 
-    private void ShowAttachment(boolean fIsshow){
+    @SuppressLint("CheckResult")
+    private void ShowAttachment( boolean fIsshow){
 
-        if (loSelectAttachment == null){
-            Toast.makeText(requireActivity(), "No attachment selected", Toast.LENGTH_SHORT).show();
+        try {
+
+            if (loSelectAttachment == null){
+                Toast.makeText(requireActivity(), "No attachment selected", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            File loFile = new File(loSelectAttachment.getSFilePth());
+
+            Animation slide = AnimationUtils.loadAnimation(requireActivity(), fIsshow ? org.gag.appdriver.R.anim.anim_slide_up : org.gag.appdriver.R.anim.anim_slide_down);
+            layout_image_viewer.startAnimation(slide);
+            layout_image_viewer.setVisibility(fIsshow ? View.VISIBLE : View.GONE);
+
+            //show attachment info, if layout is showed
+            if (layout_image_viewer.getVisibility() == View.VISIBLE){
+
+                //display information
+                mtv_filenme.setText(loFile.getName());
+                mtv_filepth.setText(loFile.getAbsolutePath());
+
+                //scale image if exist
+                img_file.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                //display button icons based on status
+                if (!loFile.exists() || !loFile.isFile() || !loFile.canRead()){
+                    btn_transaction.setImageResource(R.drawable.baseline_download);
+                }else {
+                    btn_transaction.setImageResource(R.drawable.baseline_confirm_receipt);
+                }
+
+                // Use FileProvider to get a safe content URI
+                Uri uri = FileProvider.getUriForFile(
+                        requireActivity(),
+                        requireActivity().getPackageName() + ".provider",
+                        loFile
+                );
+
+                //display image
+                Glide.with(requireActivity())
+                        .asBitmap() // force bitmap decoding
+                        .load(uri)  // use safe URI instead of raw path
+                        .apply(new RequestOptions()
+                                .skipMemoryCache(true)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE))
+                        .error(R.drawable.no_image_avaialbel)
+                        .into(img_file);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void ShowReport(File loFile){
+
+        if (!loFile.exists()){
+            Toast.makeText(requireActivity(), "File not found", Toast.LENGTH_SHORT).show();
+            return;
+        }else if (!loFile.isFile()){
+            Toast.makeText(requireActivity(), "File is invalid", Toast.LENGTH_SHORT).show();
+            return;
+        }else if(!loFile.canRead()){
+            Toast.makeText(requireActivity(), "File is not readable", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Animation slide = AnimationUtils.loadAnimation(requireActivity(), fIsshow ? org.gag.appdriver.R.anim.anim_slide_up : org.gag.appdriver.R.anim.anim_slide_down);
-        layout_image_viewer.startAnimation(slide);
-        layout_image_viewer.setVisibility(fIsshow ? View.VISIBLE : View.GONE);
+        Uri uri = FileProvider.getUriForFile(requireActivity(), requireActivity().getPackageName() + ".provider", loFile);
 
-        //show attachment info, if layout is showed
-        if (layout_image_viewer.getVisibility() == View.VISIBLE){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "text/csv");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            //initialize image to file
-            File loImg = new File(loSelectAttachment.getSFilePth());
+        startActivity(Intent.createChooser(intent, "Open CSV"));
 
-            mtv_filenme.setText(loSelectAttachment.getSFileNme());
-            mtv_filepth.setText(loSelectAttachment.getSFilePth());
-
-            //scale image if exist
-            img_file.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-            //display button icons based on status
-            if (loSelectAttachment.getCRecdStat().equalsIgnoreCase("0")){
-                btn_transaction.setImageResource(R.drawable.baseline_download);
-            }else {
-                btn_transaction.setImageResource(R.drawable.baseline_confirm_receipt);
-            }
-
-            // Load from File
-            Glide.with(requireActivity())
-                    .load(loImg)
-                    .placeholder(R.drawable.no_image_avaialbel)
-                    .error(R.drawable.no_image_avaialbel)
-                    .skipMemoryCache(true)   // disable memory cache
-                    .diskCacheStrategy(DiskCacheStrategy.NONE) // disable disk cache
-                    .into(img_file);
-
-        }
     }
 
     private void DownloadAttachments(){
@@ -181,7 +222,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                         poLoad.DismissDialog();
                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
 
-                        ShowAttachment(false);
+                        LoadDisbursements();
                     }
                 });
                 break;
@@ -195,7 +236,13 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
             public void OnSelec(Attachments loItem) {
 
                 loSelectAttachment = loItem;
-                ShowAttachment(true);
+                File loAttachment = new File(loItem.getSFilePth());
+
+                if (loAttachment.getName().contains(".jpg") || loAttachment.getName().contains(".png")){
+                    ShowAttachment(true);
+                }else {
+                    ShowReport(loAttachment);
+                }
             }
         });
 
@@ -228,30 +275,36 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                 List<Attachments> laAttachments = new ArrayList<>();
                 for (EDisbursementAttachment loDV : eDisbursementAttachments){
 
-                    //if date is not filtered, then load all list
-                    if ((lsDfrom == null || lsDfrom.isEmpty()) || (lsDto == null || lsDto.isEmpty())){
+                    //check first if the file path is existing and is a file readabke
+                    File loFile = new File(loDV.getSFinFleNm());
+                    if (loFile.exists() && loFile.isFile() && loFile.canRead()){
 
-                        laAttachments.add(new Attachments(
-                                loDV.getSDocTitle(),
-                                loDV.getDTransact(),
-                                loDV.getSFileName(),
-                                loDV.getSFinFleNm(),
-                                new File(loDV.getSFinFleNm()).exists() ? "1" : "0"
-                        ));
-
-                    }else {
-
-                        //add list if file date is in range from filtered date
-                        if (!mViewModel.IsDateCompared(lsDfrom, loDV.getDTransact()) || lsDfrom.equalsIgnoreCase(loDV.getDTransact()) ||
-                                !mViewModel.IsDateCompared(lsDto, loDV.getDTransact()) || lsDto.equalsIgnoreCase(loDV.getDTransact())){
+                        //if date is not filtered, then load all list
+                        if ((lsDfrom == null || lsDfrom.isEmpty()) || (lsDto == null || lsDto.isEmpty())){
 
                             laAttachments.add(new Attachments(
                                     loDV.getSDocTitle(),
-                                    loDV.getDTransact(),
+                                    mViewModel.FormatLongDate(loFile.lastModified()),
                                     loDV.getSFileName(),
                                     loDV.getSFinFleNm(),
-                                    loDV.getCRecdStat()
+                                    new File(loDV.getSFinFleNm()).exists() ? "1" : "0"
                             ));
+
+                        }else {
+
+                            //add list if file date is in range from filtered date
+                            if (!mViewModel.IsDateCompared(lsDfrom, mViewModel.FormatLongDate(loFile.lastModified())) || lsDfrom.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified())) ||
+                                    !mViewModel.IsDateCompared(lsDto, mViewModel.FormatLongDate(loFile.lastModified())) || lsDto.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified()))){
+
+                                laAttachments.add(new Attachments(
+                                        loDV.getSDocTitle(),
+                                        mViewModel.FormatLongDate(loFile.lastModified()),
+                                        loDV.getSFileName(),
+                                        loDV.getSFinFleNm(),
+                                        loDV.getCRecdStat()
+                                ));
+                            }
+
                         }
 
                     }
@@ -261,11 +314,61 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         });
     }
 
-    private void GenerateSOAReports(String fsIDxx){
+    private void LoadReports(){
+
+        mViewModel.GetReportList(new VM_Attachments.OnGetReports() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Loading reports. Please wait . .");
+            }
+
+            @Override
+            public void OnSuccess(List<File> faFiles) {
+                poLoad.DismissDialog();
+
+                List<Attachments> laFiles = new ArrayList<>();
+                for (File loFile : faFiles){
+
+                    //if file exist and file is readable, add to list
+                    if (loFile.exists() && loFile.isFile() && loFile.canRead()){
+
+                        //if date is not filtered, then load all list
+                        if ((lsDfrom == null || lsDfrom.isEmpty()) || (lsDto == null || lsDto.isEmpty())){
+                            laFiles.add(new Attachments("SOA Report as of " + mViewModel.GetCurrentDate(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
+
+                        }else if (!mViewModel.IsDateCompared(lsDfrom, mViewModel.FormatLongDate(loFile.lastModified())) || lsDfrom.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified())) ||
+                                    !mViewModel.IsDateCompared(lsDto, mViewModel.FormatLongDate(loFile.lastModified())) || lsDto.equalsIgnoreCase(mViewModel.FormatLongDate(loFile.lastModified()))){
+
+                            laFiles.add(new Attachments("SOA Report as of " + mViewModel.GetCurrentDate(), mViewModel.FormatLongDate(loFile.lastModified()),  loFile.getName(), loFile.getAbsolutePath(), loFile.exists() ? "1" : "0"));
+                        }
+                    }
+                }
+
+                //show list if not empty
+                if (laFiles.size() < 1){
+                    rcv_attachment_list.setVisibility(View.GONE);
+                    layout_no_record.setVisibility(View.VISIBLE);
+                    return;
+                }
+                rcv_attachment_list.setVisibility(View.VISIBLE);
+                layout_no_record.setVisibility(View.GONE);
+
+                SetAdaoter(laFiles);
+            }
+
+            @Override
+            public void OnFailed(String fsMessage) {
+                poLoad.DismissDialog();
+                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void GenerateSOAReports(String fsIDxx, String fsDromxx, String fsDtoxx){
 
         if (fsIDxx.equalsIgnoreCase("all")) {
 
-            mViewModel.GenerateSoa(fsIDxx, new VM_Attachments.OnGenerate() {
+            mViewModel.GenerateSoa(fsIDxx, fsDromxx, fsDtoxx, new VM_Attachments.OnGenerate() {
                 @Override
                 public void OnLoad() {
                     poLoad.ShowDialog("Generating SOA report. Please wait . .");
@@ -276,7 +379,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                     poLoad.DismissDialog();
                     Toast.makeText(requireActivity(), "SOA Report successfully generated", Toast.LENGTH_SHORT).show();
 
-                    SetAdaoter(List.of(new Attachments("SOA Report", mViewModel.GetCurrentDate(),  lsURL, lsURL, "1")));
+                    LoadReports();
                 }
 
                 @Override
@@ -298,11 +401,32 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                 mtv_title.setText("DV Attachments");
                 LoadDisbursements();
                 break;
-            case "generate_soa":
+            case "generate_report":
                 mtv_title.setText("Statement of Accounts");
-                GenerateSOAReports("all");
+                LoadReports();
                 break;
         }
+    }
+
+    private void SelectDateRange(OnDateRange foCallback){
+
+        MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
+        loBuilder.setTitleText("Select Date Range");
+
+        MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
+        loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
+            @Override
+            public void onPositiveButtonClick(Pair<Long, Long> selection) {
+
+                //set date range parameters for downloading history
+                lsDfrom = mViewModel.FormatLongDate(selection.first);
+                lsDto = mViewModel.FormatLongDate(selection.second);
+
+                foCallback.OnDateRangeSelected(lsDfrom, lsDto);
+            }
+        });
+        loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+
     }
 
     private void InitListener(){
@@ -345,13 +469,8 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                 lsStackIDxx.equalsIgnoreCase("disbursement_attachments")
                 );
 
-                loMenu.getMenu().findItem(R.id.action_item_filter_dv).setVisible(
-                        lsStackIDxx.equalsIgnoreCase("disbursement") ||
-                                lsStackIDxx.equalsIgnoreCase("disbursement_attachments")
-                );
-
                 //show only menus for generating report and downloading attachments
-                loMenu.getMenu().findItem(R.id.action_by_generate).setVisible(lsStackIDxx.equalsIgnoreCase("generate_soa"));
+                loMenu.getMenu().findItem(R.id.action_by_generate).setVisible(lsStackIDxx.equalsIgnoreCase("generate_report"));
 
                 loMenu.show();
 
@@ -359,43 +478,25 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
 
-                        if (menuItem.getItemId() == R.id.action_item_filter_dv){
+                        if (menuItem.getItemId() == R.id.action_item_filter){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
-
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
+                            SelectDateRange(new OnDateRange() {
                                 @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
-
-                                    //set date range parameters for downloading history
-                                    lsDfrom = mViewModel.FormatLongDate(selection.first);
-                                    lsDto = mViewModel.FormatLongDate(selection.second);
+                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
                                     //filter list by date
                                     InitDataReceiver();
                                 }
                             });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_download_dv){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
-
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
+                            SelectDateRange(new OnDateRange() {
                                 @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
+                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
-                                    //set date range parameters for downloading history
-                                    lsDfrom = mViewModel.FormatLongDate(selection.first);
-                                    lsDto = mViewModel.FormatLongDate(selection.second);
-
-                                    poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                    poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                         @Override
                                         public void OnPositive(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
@@ -409,26 +510,79 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                             DownloadAttachments();
                                         }
                                     });
+
                                 }
                             });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
 
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_all_soa){
 
-                            poMessage.ShowMessage(2,  "Do you want to generate soa report for the year?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                            SelectDateRange(new OnDateRange() {
                                 @Override
-                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                    poDialog.dismiss();
+                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+
+                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                        @Override
+                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void OnNegative(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+
+                                            //download data from server with date to get
+                                            GenerateSOAReports("ALL", fsDfrom, fsDto);
+                                        }
+                                    });
+
                                 }
+                            });
+                        }else if (menuItem.getItemId() == R.id.action_item_fund_soa){
 
+                            SelectDateRange(new OnDateRange() {
                                 @Override
-                                public void OnNegative(@NotNull AlertDialog poDialog) {
-                                    poDialog.dismiss();
+                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
-                                    //download data from server with date to get
-                                    GenerateSOAReports("all");
+                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                        @Override
+                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void OnNegative(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+
+                                            //download data from server with date to get
+                                            GenerateSOAReports("FND", fsDfrom, fsDto);
+                                        }
+                                    });
+
+                                }
+                            });
+                        }else if (menuItem.getItemId() == R.id.action_item_pledge_soa){
+
+                            SelectDateRange(new OnDateRange() {
+                                @Override
+                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+
+                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                        @Override
+                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void OnNegative(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+
+                                            //download data from server with date to get
+                                            GenerateSOAReports("PROJ", fsDfrom, fsDto);
+                                        }
+                                    });
+
                                 }
                             });
                         }

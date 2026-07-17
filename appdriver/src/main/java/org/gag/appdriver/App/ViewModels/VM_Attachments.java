@@ -11,8 +11,10 @@ import org.gag.appdriver.App.Core.AttachmentReport;
 import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -25,6 +27,12 @@ public class VM_Attachments extends AndroidViewModel {
     public interface OnDownload{
         void OnLoad();
         void OnFinished(String fsMessage);
+    }
+
+    public interface OnGetReports{
+        void OnLoad();
+        void OnSuccess(List<File> faFiles);
+        void OnFailed(String fsMessage);
     }
 
     public interface OnGenerate{
@@ -73,10 +81,10 @@ public class VM_Attachments extends AndroidViewModel {
         });
     }
 
-    public void GenerateSoa(String fsFilter, OnGenerate foCallback){
+    public void GenerateSoa(String fsFilter, String fsDfromxx, String fsDtoxx, OnGenerate foCallback){
 
         foCallback.OnLoad();
-        poReport.GenerateSOA(fsFilter).thenAccept(new Consumer<Object>() {
+        poReport.GenerateSOA(fsFilter, fsDfromxx, fsDtoxx).thenAccept(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
 
@@ -91,6 +99,23 @@ public class VM_Attachments extends AndroidViewModel {
                         foCallback.OnSuccess(lsURL);
                     }
                 }
+            }
+        });
+    }
+
+    public void GetReportList(OnGetReports foCallback){
+
+        foCallback.OnLoad();
+
+       poReport.GetReportList().thenAccept(new Consumer<List<File>>() {
+            @Override
+            public void accept(List<File> files) {
+
+                if (files == null || files.size() < 1){
+                    foCallback.OnFailed("Failed to retrieve reports");
+                    return;
+                }
+                foCallback.OnSuccess(files);
             }
         });
     }

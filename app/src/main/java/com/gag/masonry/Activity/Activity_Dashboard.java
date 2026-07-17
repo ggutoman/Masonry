@@ -187,11 +187,13 @@ public class Activity_Dashboard extends AppCompatActivity {
                         }
                     });
                     break;
-                case "ACC002": //update view account
+                case "ACC002": //generate reports
                     InitView("ACC002");
                     break;
-                case "ACC003": //logout account
-
+                case "ACC003": //view or update account
+                    InitView("ACC003");
+                    break;
+                case "ACC004": //logout"
                     poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                         @Override
                         public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -299,9 +301,6 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "DISB004":
                     InitView("DISB004");
                     break;
-                case "RPRT001":
-                    InitView("RPRT001");
-                    break;
             }
 
             return true;
@@ -359,7 +358,11 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
                 fragmentTransaction.addToBackStack("view_officer_history");
                 break;
-            case "ACC002":
+            case "ACC002": //reports
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_soa", new Fragment_Attachment_List()));
+                fragmentTransaction.addToBackStack("generate_report");
+                break;
+            case "ACC003": //account info
                 Fragment_UserInfo loFragUser = new Fragment_UserInfo();
 
                 fragmentTransaction.replace(R.id.layout_container, loFragUser);
@@ -440,10 +443,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "DISB004": //view dv attachments
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
                 fragmentTransaction.addToBackStack("disbursement_attachments");
-                break;
-            case "RPRT001": //generate reports for soa
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_soa", new Fragment_Attachment_List()));
-                fragmentTransaction.addToBackStack("generate_soa");
                 break;
 
         }

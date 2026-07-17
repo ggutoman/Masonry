@@ -68,14 +68,6 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         1
     ),
 
-    MENU_REPORTS(
-        R.drawable.baseline_receipts,
-        "Generate Reports",
-        "RPRT",
-        1,
-        1
-    ),
-
     MENU_ACCOUNTS(
         R.drawable.baseline_settings,
         "Settings",

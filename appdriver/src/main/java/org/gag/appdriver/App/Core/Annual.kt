@@ -74,7 +74,7 @@ class Annual(instance : Context) {
 
     fun GetLodgeCalendars(fsLodgeIDxx : String) : LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(fsLodgeIDxx)
 
-    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList()
+    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 
     fun GetAnnualMaster(fsYearIDxx : String) : LiveData<EAnnualMaster> = poAnnualMaster.GetAnnualMaster(fsYearIDxx)
 

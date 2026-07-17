@@ -50,6 +50,7 @@ import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class Fragment_Home extends Fragment {
@@ -96,9 +97,16 @@ public class Fragment_Home extends Fragment {
 
         String lsCurrentYear = mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy");
 
+        //get max date for december
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(lsCurrentYear));
+        calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+
+        int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
         //initialize default range of date to display for the whole year
         lsDfrom = mviewModel.GetFormattedDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
-        lsDto =  mviewModel.GetFormattedDate(lsCurrentYear + "-12-30", "yyyy-MM-dd");
+        lsDto =  mviewModel.GetFormattedDate(lsCurrentYear + "-12-" + String.valueOf(maxDay), "yyyy-MM-dd");
 
         InitViews(view);
         InitData();
