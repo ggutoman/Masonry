@@ -17,6 +17,6 @@ enum class FILE_CONSTANTS(val fileDir : File){
     ),
 
     EXTERNAL_STORAGE_DCIM_REPORTS(
-        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Download/MasonryReports/")
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "MasonryReports/")
     )
 }

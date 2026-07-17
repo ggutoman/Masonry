@@ -41,13 +41,14 @@ class AttachmentReport(loInstance : Context) {
     val loContext : Context = loInstance
     val session : AppConfig = AppConfig(loInstance)
     val httpInstance : KTORepository = KTORepository(loInstance)
+    val poTextFormatter : TextFormatter = TextFormatter()
 
     val poFile : FileHelper = FileHelper(loInstance)
 
     fun GetMessage() : String = message
 
     @SuppressLint("MissingPermission")
-    fun GenerateSOA() : CompletableFuture<Any> {
+    fun GenerateSOA(fsFilter : String) : CompletableFuture<Any> {
 
         val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -60,6 +61,7 @@ class AttachmentReport(loInstance : Context) {
                 }
 
                 val loParams = JSONObject().apply {
+                    put("transaction", fsFilter)
                 }
 
                 httpInstance.makeRequest(
@@ -76,9 +78,16 @@ class AttachmentReport(loInstance : Context) {
                             val resultData =
                                 Json.Default.decodeFromString<DownloadKey>(result.data.body())
 
-                            Log.d("RESULT GENERATE", "${API_CONSTANTS.URL_BASE_SERVER.fsURL}${resultData.GetPayload()}")
-                            "${API_CONSTANTS.URL_BASE_SERVER.fsURL}${resultData.GetPayload()}"
-                            true
+                            //download file
+                            val download_link = "${API_CONSTANTS.URL_BASE_SERVER.fsURL}${resultData.GetPayload()}"
+                            val file_name = poTextFormatter.ExtractFromCharacter(resultData.GetPayload(), "/").let {
+
+                                it.get(it.size - 1)
+                            }
+
+                            poFile.CreateFileFromUrl(FILE_CONSTANTS.EXTERNAL_STORAGE_DCIM_REPORTS.fileDir,file_name, download_link).let {
+                                it.absolutePath
+                            }
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

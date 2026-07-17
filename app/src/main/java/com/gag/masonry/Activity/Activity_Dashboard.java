@@ -37,6 +37,7 @@ import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Utilities.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -298,6 +299,9 @@ public class Activity_Dashboard extends AppCompatActivity {
                 case "DISB004":
                     InitView("DISB004");
                     break;
+                case "RPRT001":
+                    InitView("RPRT001");
+                    break;
             }
 
             return true;
@@ -436,6 +440,10 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "DISB004": //view dv attachments
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
                 fragmentTransaction.addToBackStack("disbursement_attachments");
+                break;
+            case "RPRT001": //generate reports for soa
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_soa", new Fragment_Attachment_List()));
+                fragmentTransaction.addToBackStack("generate_soa");
                 break;
 
         }

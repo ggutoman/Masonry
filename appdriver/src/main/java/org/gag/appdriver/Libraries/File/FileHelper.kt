@@ -1,14 +1,22 @@
 package org.gag.appdriver.Libraries.File
 
+import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
+import android.os.Environment
 import android.util.Base64
 import android.view.View
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.createBitmap
 import io.ktor.utils.io.printStack
+import org.gag.appdriver.Constants.FILE_CONSTANTS
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 class FileHelper(foInstance : Context) {
 
@@ -77,4 +85,23 @@ class FileHelper(foInstance : Context) {
         val isSuccess : Boolean,
         val file : File
     )
+
+    @SuppressLint("UseKtx")
+    fun CreateFileFromUrl(fsFilePth : File, fsFileNme : String, fsURL : String) : File{
+
+        if (!fsFilePth.exists()) fsFilePth.mkdirs()
+
+        val url = URL(fsURL)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.connect()
+
+        val file = File(fsFilePth, fsFileNme)
+        connection.inputStream.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+        connection.disconnect()
+        return file
+    }
 }
