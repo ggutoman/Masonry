@@ -169,7 +169,7 @@ public class Fragment_UserInfo extends Fragment {
 
                 if (memberDashboardInfo == null) return;
 
-                List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_INACTIVE, MEMBER_CONSTANTS.STATUS_ACTIVE, MEMBER_CONSTANTS.STATUS_SUSPENDED);
+                List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_LIFE_MEMBER, MEMBER_CONSTANTS.STATUS_DECEASED);
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
                 String lsSponsors = (memberDashboardInfo.getSSponsor1() == null ? "" : memberDashboardInfo.getSSponsor1()) +

@@ -20,8 +20,7 @@ enum class MEMBER_CONSTANTS(val fsIDx : String, val fsDescr : String){
     STATUS_OFFICER_RESIGNED("4", "Resigned"),
     STATUS_OFFICER_DECEASE("5", "Deceased"),
 
-    /**ACCOUNT STATUS**/
-    STATUS_INACTIVE("0", "Inactive"),
-    STATUS_ACTIVE("1", "Active"),
-    STATUS_SUSPENDED("2", "Suspended")
+    /**MEMBER STATUS**/
+    STATUS_LIFE_MEMBER("0", "Life Member"),
+    STATUS_DECEASED("1", "Deceased")
 }

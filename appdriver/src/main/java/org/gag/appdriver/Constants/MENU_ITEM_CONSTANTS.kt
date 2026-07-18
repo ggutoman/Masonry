@@ -35,39 +35,6 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         0
     ),
 
-    /**LODGE INFO**/
-    MENU_ITEM_CREATE_LODGE(
-        "Create Lodge",
-        "LDGE0001",
-        "LDGE",
-        1,
-        4
-    ),
-
-    MENU_ITEM_CREATE_LODGE_YEAR(
-        "Create Lodge Calendar",
-        "LDGE0002",
-        "LDGE",
-        1,
-        2
-    ),
-
-    MENU_ITEM_VIEW_LODGE(
-        "View Lodges",
-        "LDGE0003",
-        "LDGE",
-        1,
-        4
-    ),
-
-    MENU_ITEM_LODGE_CALENDARS(
-        "View Lodge Calendars",
-        "LDGE0004",
-        "LDGE",
-        1,
-        2
-    ),
-
     /**MEMBER INFO**/
     MENU_ITEM_CREATE_MEMBER(
     "Add Member",
@@ -121,38 +88,6 @@ enum class MENU_ITEM_CONSTANTS(val fsTitlex : String, val fsIDxx : String, val f
         "Fund Approval",
         "FND004",
         "FND",
-        1,
-        2
-    ),
-
-    MENU_ITEM_CREATE_ANNUAL(
-        "Create Annual Billing",
-        "ANNL001",
-        "ANNL",
-        1,
-        1
-    ),
-
-    MENU_ITEM_LODGE_ANNUAL_HISTORY(
-        "Annual Billing History",
-        "ANNL002",
-        "ANNL",
-        1,
-        1
-    ),
-
-    MENU_ITEM_LODGE_ANNUAL_SUMMARY(
-        "Annual Summary",
-        "ANNL003",
-        "ANNL",
-        1,
-        1
-    ),
-
-    MENU_ITEM_LODGE_ANNUAL_APPROVAL(
-        "Annual Approval",
-        "ANNL004",
-        "ANNL",
         1,
         2
     ),

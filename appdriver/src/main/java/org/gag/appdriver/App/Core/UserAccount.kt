@@ -14,6 +14,7 @@ import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadMemberAddresses
 import org.gag.appdriver.App.DataModels.DownloadMemberContact
 import org.gag.appdriver.App.DataModels.DownloadMemberEmail
+import org.gag.appdriver.App.DataModels.DownloadMemberID
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.LodgeInfo
@@ -75,6 +76,10 @@ class UserAccount(instance : Context) {
 
     fun GetMessage() : String = message
 
+    fun GetLodgeID() : String = TextFormatter()
+        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+        .getOrNull(0) ?: ""
+
     fun GetUserID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
         .getOrNull(1) ?: ""
@@ -104,13 +109,6 @@ class UserAccount(instance : Context) {
     fun GetMemberEmail(fsMemberID : String) : LiveData<List<EMemberEmailInfo>> = poMemberEmail.GetMemberEmail(fsMemberID)
 
     fun GetEncryption() : HashRepository = encryptObj
-
-    fun GenerateGLPID() : String {
-
-        return (1..6)
-            .map { Random.Default.nextInt(0, 10) } // digits 0–9
-            .joinToString("")
-    }
 
     fun ObserveTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
 
@@ -679,9 +677,6 @@ class UserAccount(instance : Context) {
                     put("dInitiatn", memberInfo.dInitiatn)
                     put("dPassedxx", memberInfo.dPassedxx)
                     put("dRaisingX", memberInfo.dRaisingX)
-                    put("sSponsor1", memberInfo.sSponsor1)
-                    put("sSponsor2", memberInfo.sSponsor2)
-                    put("sSponsor3", memberInfo.sSponsor3)
                     put("cRecdStat", memberInfo.cRecdStat)
                 }
 
@@ -697,15 +692,19 @@ class UserAccount(instance : Context) {
                     when (result) {
                         is KTORepository.OnRequest.onSuccess -> {
 
-                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                            val loResult = Json.Default.decodeFromString<DownloadMemberID>(result.data.body())
 
                             //initialize new member id, if not initialized
                             if (memberInfo.sMemberID.isNullOrEmpty()){
-                                memberInfo.sMemberID = loResult.GetPayload()
+                                memberInfo.sMemberID = loResult.GetPayload().member_id
+                            }
+
+                            if (memberInfo.sGLPIDNoX.isNullOrEmpty()){
+                                memberInfo.sGLPIDNoX = loResult.GetPayload().alsm_id
                             }
 
                             poMemberInfo.SaveMemberInfo(memberInfo)
-                            loResult.GetPayload()
+                            loResult.GetPayload().member_id
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

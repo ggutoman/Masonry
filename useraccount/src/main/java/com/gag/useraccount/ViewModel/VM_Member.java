@@ -9,12 +9,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
-import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
-import org.gag.appdriver.Libraries.DateUtil.DateRepository;
-import org.gag.appdriver.Room.Entities.ELodgeCalendar;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
@@ -38,7 +34,6 @@ public class VM_Member extends AndroidViewModel {
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
     private final UserAccount poAccount;
-    private final DateRepository poDate;
 
 
     public interface OnSubmit{
@@ -61,31 +56,6 @@ public class VM_Member extends AndroidViewModel {
         laEmail = new MutableLiveData<>();
 
         poAccount = new UserAccount(application);
-        poDate = new DateRepository();
-    }
-
-    public boolean AddSponsor(String fsSponsor){
-        List<String> currentList = laSponsors.getValue();
-
-        if (currentList == null) {
-            currentList = new ArrayList<>();
-        }
-        if (currentList.size() >= 3){
-            return false;
-        }
-        currentList.add(fsSponsor);
-        laSponsors.setValue(currentList);
-        return true;
-    }
-
-    public void ReplaceSponsor(int index, String fsSponsor){
-
-        List<String> currentList = laSponsors.getValue();
-
-        if (currentList == null) return;
-
-        currentList.set(index, fsSponsor);
-        laSponsors.setValue(currentList);
     }
 
     public void ClearSponsor(){
@@ -217,16 +187,12 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetUserID();
     }
 
+    public String GetLodgeID(){
+        return poAccount.GetLodgeID();
+    }
+
     public LiveData<List<EMemberInfo>> ObserverMemberList(){
         return poAccount.ObserveMemberList();
-    }
-
-    public LiveData<List<String>> GetSponsorList(){
-        return laSponsors;
-    }
-
-    public LiveData<List<LodgeInfo>> GetLodgeList() {
-        return poAccount.GetLodges();
     }
 
     public LiveData<List<ETitle>> GetTitleList(){
@@ -293,9 +259,8 @@ public class VM_Member extends AndroidViewModel {
 
         List<String> laAccount = new ArrayList<>();
         Collections.addAll(laAccount,
-                MEMBER_CONSTANTS.STATUS_INACTIVE.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_ACTIVE.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_SUSPENDED.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_LIFE_MEMBER.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_DECEASED.getFsDescr()
         );
         return laAccount;
     }
@@ -323,10 +288,6 @@ public class VM_Member extends AndroidViewModel {
 
         );
         return laType;
-    }
-
-    public String GenerateGLPID(){
-        return poAccount.GenerateGLPID();
     }
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){

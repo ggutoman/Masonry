@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Masonry Application</string>
-    <string name="version_name">Masonry v1.0</string>
+    <string name="app_name">ALSM Portal</string>
+    <string name="version_name">ALSM v1.0</string>
     <string name="company_name">Pangasinan Chapter</string>
     <string name="signup_help">No account yet? Click to SignUp</string>
     <string name="open_drawer">Open Menu</string>

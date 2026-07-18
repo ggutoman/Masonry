@@ -67,19 +67,17 @@ public class Fragment_Member extends Fragment {
     private MaterialAutoCompleteTextView
             auto_status,
             auto_title,
-            auto_sponosr,
             auto_town,
             auto_contact,
             auto_email,
-            auto_civil,
-            auto_lodge;
+            auto_civil;
 
     private ImageButton
             btn_add_address,
             btn_add_contact,
             btn_add_email;
 
-    private MaterialButton btn_add_sponsor, btn_save_sponsor, btn_create, btn_save_address, btn_save_contact, btn_save_email;
+    private MaterialButton btn_create, btn_save_address, btn_save_contact, btn_save_email;
 
     private TextInputEditText tie_lastname,
             tie_firstname,
@@ -93,20 +91,14 @@ public class Fragment_Member extends Fragment {
     private CheckBox chkbx_homeaddr, chkbx_active, chkbx_activecontact, chkbx_activeemail;
 
     private Dialog_Add_Member_Info poDialogAddMember;
-
-    private LodgeAdapter LodgeAdapter;
     private TitleAdapter TitleAdapter;
     private MemberAddressAdapter MemberAddressAdapter;
     private MemberContactAdapter MemberContactAdapter;
     private MemberEmailAdapter MemberEmailAdapter;
 
-    private List<String> paramSponsors = new ArrayList<>();
     private List<TownProvince> paramTownProvince= new ArrayList<>();
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
-
-    private String lsSelectSponsor;
-    private String lsSelectLodge;
     private String lsSelectTitle;
 
     private EMemberInfo loMemberInfo;
@@ -114,7 +106,7 @@ public class Fragment_Member extends Fragment {
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
 
-    private int lnSelectSponsor = -1, lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
+    private int lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
 
     @Nullable
     @Override
@@ -141,16 +133,9 @@ public class Fragment_Member extends Fragment {
 
     private boolean isMemberDataValid(){
 
-        if (tie_glpid.getText() == null || TextUtils.isEmpty(tie_glpid.getText().toString())){
-            Toast.makeText(requireActivity(), "GLPID is missing.", Toast.LENGTH_SHORT).show();
-            return false;
-        }else if (lsSelectLodge == null || lsSelectLodge.isEmpty()){
-            Toast.makeText(requireActivity(), "Please select a lodge", Toast.LENGTH_SHORT).show();
-            auto_lodge.requestFocus();
-            return false;
-        }else if (lnSelectStatus < 0){
+        if (lnSelectStatus < 0){
             Toast.makeText(requireActivity(), "Please select account status", Toast.LENGTH_SHORT).show();
-            auto_lodge.requestFocus();
+            auto_status.requestFocus();
             return false;
         }else if (lsSelectTitle == null || lsSelectTitle.isEmpty()){
             Toast.makeText(requireActivity(), "Please select a title", Toast.LENGTH_SHORT).show();
@@ -186,12 +171,9 @@ public class Fragment_Member extends Fragment {
 
     private void initViews(View view) {
 
-        auto_lodge = view.findViewById(R.id.auto_lodge);
         tie_glpid = view.findViewById(R.id.tie_glpid);
         auto_status = view.findViewById(R.id.auto_status);
         auto_title = view.findViewById(R.id.auto_title);
-        auto_sponosr = view.findViewById(R.id.auto_sponosr);
-        btn_save_sponsor = view.findViewById(R.id.btn_save_sponsor);
         auto_town = view.findViewById(R.id.auto_town);
         auto_contact = view.findViewById(R.id.auto_contact);
         auto_email = view.findViewById(R.id.auto_email);
@@ -201,7 +183,6 @@ public class Fragment_Member extends Fragment {
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
-        btn_add_sponsor = view.findViewById(R.id.btn_add_sponsor);
         btn_add_address = view.findViewById(R.id.btn_add_address);
         btn_add_contact = view.findViewById(R.id.btn_add_contact);
         btn_add_email = view.findViewById(R.id.btn_add_email);
@@ -227,7 +208,6 @@ public class Fragment_Member extends Fragment {
 
         if (getArguments() == null){
             btn_create.setText("Create Member");
-            tie_glpid.setText(mviewModel.GenerateGLPID());
         }else {
 
             if (getArguments().getString("fsGLPIDxx") == null || getArguments().getString("fsGLPIDxx").isEmpty()){
@@ -251,11 +231,6 @@ public class Fragment_Member extends Fragment {
             }
             btn_create.setText("Update Member");
             tie_glpid.setText(getArguments().getString("fsGLPIDxx"));
-        }
-
-        if (tie_glpid.getText() == null || tie_glpid.getText().toString().isEmpty()){
-            Toast.makeText(requireActivity(), "GLP ID is not initialized properly.", Toast.LENGTH_SHORT).show();
-            return;
         }
 
         auto_status.setAdapter(
@@ -388,69 +363,11 @@ public class Fragment_Member extends Fragment {
                 tie_suffix.setText(loMemberInfo.getSSuffixNm());
                 tie_birthdate.setText(loMemberInfo.getDBirthDte());
 
-                //initialze sponsors, if not empty
-                if (!(loMemberInfo.getSSponsor1() == null ? "" : loMemberInfo.getSSponsor1()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor1());
-                if (!(loMemberInfo.getSSponsor2() == null ? "" : loMemberInfo.getSSponsor2()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor2());
-                if (!(loMemberInfo.getSSponsor3() == null ? "" : loMemberInfo.getSSponsor3()).isEmpty()) mviewModel.AddSponsor(loMemberInfo.getSSponsor3());
-
                 auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
                 lnSelectStatus = Integer.parseInt(loMemberInfo.getCMmbrStat());
 
                 auto_civil.setText(mviewModel.GetCivilStatus().get(Integer.parseInt(loMemberInfo.getCCvilStat() == null ? "0" : loMemberInfo.getCCvilStat())), false);
                 lnSelectCivil = Integer.parseInt(loMemberInfo.getCCvilStat());
-            }
-        });
-
-        mviewModel.GetSponsorList().observe(getViewLifecycleOwner(), new Observer<List<String>>() {
-            @Override
-            public void onChanged(List<String> strings) {
-
-                paramSponsors = strings;
-
-                auto_sponosr.setAdapter(new ArrayAdapter<>(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        strings
-                ));
-                auto_sponosr.postDelayed(() -> auto_sponosr.showDropDown(), 200);
-            }
-        });
-
-        mviewModel.GetLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
-            @Override
-            public void onChanged(List<LodgeInfo> eLodgeInfos) {
-
-                if (eLodgeInfos.size() < 1) return;
-
-                LodgeAdapter = new LodgeAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        eLodgeInfos);
-
-                auto_lodge.setAdapter(LodgeAdapter);
-
-                //enable selection if more than 1 item
-                if (eLodgeInfos.size() > 1){
-                    auto_lodge.setEnabled(true);
-                }else {
-                    auto_lodge.setEnabled(false);
-
-                    //select first item
-                    auto_lodge.setText(LodgeAdapter.getItem(0).getSLodgeNme(), false);
-                    lsSelectLodge = LodgeAdapter.getItem(0).getSLodgeIDx();
-                }
-
-                if (loMemberInfo == null) return;
-
-                //display the lodge information if member information is set
-                for (int index = 0; index <  LodgeAdapter.lodges.size(); index++){
-
-                    if (loMemberInfo.getSLodgeIDx().equalsIgnoreCase( LodgeAdapter.lodges.get(index).getSLodgeIDx())){
-
-                        auto_lodge.setText( LodgeAdapter.lodges.get(index).getSLodgeNme(), false);
-                        lsSelectLodge = LodgeAdapter.lodges.get(index).getSLodgeIDx();
-                    }
-                }
             }
         });
 
@@ -549,15 +466,6 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        auto_lodge.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lsSelectLodge = ((ELodgeInfo) adapterView.getItemAtPosition(i)).getSLodgeIDx();
-                auto_lodge.setText(((ELodgeInfo) adapterView.getItemAtPosition(i)).getSLodgeNme(), false);
-            }
-        });
-
         auto_civil.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -581,97 +489,7 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        /*MEMBER SPONSOR LISTENER*/
-        auto_sponosr.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lnSelectSponsor = i;
-                lsSelectSponsor = adapterView.getItemAtPosition(i).toString();
-
-
-                auto_sponosr.setText(adapterView.getItemAtPosition(lnSelectSponsor).toString());
-                btn_save_sponsor.setVisibility(View.VISIBLE);
-            }
-        });
-
-        auto_sponosr.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable editable) {}
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                if (lnSelectSponsor < 0) {
-                    if (btn_save_sponsor.getVisibility() == View.VISIBLE) btn_save_sponsor.setVisibility(View.GONE);
-                }else {
-                    if (btn_save_sponsor.getVisibility() == View.GONE) btn_save_sponsor.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        btn_add_sponsor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                poDialogAddMember.ShowSponsor(true, auto_sponosr.getText() == null ? "" : auto_sponosr.getText().toString(), new Dialog_Add_Member_Info.OnSponsor() {
-                    @Override
-                    public void OnSubmit(String fsSponsor) {
-
-                        if (!mviewModel.AddSponsor(fsSponsor)){
-
-                            poMessage.ShowMessage(1, "Sponsor has reached maximum limit of entries", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                @Override
-                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                    poDialog.dismiss();
-                                }
-
-                                @Override
-                                public void OnNegative(@NotNull AlertDialog poDialog) {
-                                }
-                            });
-                            return;
-                        }
-
-                        //reset selection
-                        lnSelectSponsor = -1;
-                        ClearFields(new ArrayList<>(List.of(auto_sponosr, btn_save_sponsor)), false);
-                    }
-                });
-            }
-        });
-
-        btn_save_sponsor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (lnSelectSponsor < 0){
-                    Toast.makeText(requireActivity(), "Please select a sponsor", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                poDialogAddMember.ShowSponsor(false, lsSelectSponsor, new Dialog_Add_Member_Info.OnSponsor() {
-                    @Override
-                    public void OnSubmit(String fsSponsor) {
-
-                        mviewModel.ReplaceSponsor(
-                                lnSelectSponsor,
-                                fsSponsor
-                        );
-
-                        //reset selection
-                        lnSelectSponsor = -1;
-                        ClearFields(new ArrayList<>(List.of(auto_sponosr, btn_save_sponsor)), false);
-                    }
-                });
-            }
-        });
-
         /*MEMBER ADDRESS LISTENER*/
-
         auto_town.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -1039,7 +857,7 @@ public class Fragment_Member extends Fragment {
 
                             loMemberInfo = new EMemberInfo(
                                     "",
-                                    lsSelectLodge,
+                                    mviewModel.GetLodgeID(),
                                     tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
                                     lsLastNme,
                                     lsFrstNme,
@@ -1075,7 +893,7 @@ public class Fragment_Member extends Fragment {
                                 }
                             }
 
-                            loMemberInfo.setSLodgeIDx(lsSelectLodge);
+                            loMemberInfo.setSLodgeIDx(mviewModel.GetLodgeID());
                             loMemberInfo.setSLastName(lsLastNme);
                             loMemberInfo.setSFrstName(lsFrstNme);
                             loMemberInfo.setSMiddName(lsMiddNme);
@@ -1120,24 +938,6 @@ public class Fragment_Member extends Fragment {
 
                             //check if home address
                             if (townProvince.isHomeAddr().equals("1")) hasHomeAddr += 1;
-                        }
-
-                        //add or update sponsors
-                        for (int index = 0; index < paramSponsors.size(); index++){
-                            Log.d("Sponsors added ", paramSponsors.get(index));
-
-                            switch (index){
-
-                                case 0:
-                                    loMemberInfo.setSSponsor1(paramSponsors.get(index));
-                                    break;
-                                case 1:
-                                    loMemberInfo.setSSponsor2(paramSponsors.get(index));
-                                    break;
-                                case 2:
-                                    loMemberInfo.setSSponsor3(paramSponsors.get(index));
-                                    break;
-                            }
                         }
 
                         if (hasHomeAddr < 1){
@@ -1259,10 +1059,10 @@ public class Fragment_Member extends Fragment {
 
 
                                         //reset only text from selection
-                                        ClearFields(new ArrayList<>(List.of(auto_lodge, auto_title, auto_status, auto_civil)), false);
+                                        ClearFields(new ArrayList<>(List.of(auto_title, auto_status, auto_civil)), false);
 
                                         //clear all fields and adapters
-                                        ClearFields(new ArrayList<>(List.of(tie_glpid, auto_sponosr, btn_save_sponsor, tie_lastname,
+                                        ClearFields(new ArrayList<>(List.of(tie_glpid, tie_lastname,
                                                         tie_firstname, tie_middlename, tie_suffix, tie_birthdate, tie_address,
                                                         auto_town, chkbx_homeaddr, chkbx_homeaddr, auto_contact, tie_remarks, chkbx_activecontact,
                                                         auto_email, chkbx_activeemail, btn_save_address, btn_save_contact, btn_save_email
@@ -1273,7 +1073,6 @@ public class Fragment_Member extends Fragment {
                                         //reset parameters or data
                                         loMemberInfo = null;
                                         paramTownProvince = null;
-                                        paramSponsors = null;
                                         paramContact = null;
                                         paramEmail = null;
 

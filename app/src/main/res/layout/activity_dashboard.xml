@@ -67,10 +67,14 @@
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <com.google.android.material.textview.MaterialTextView
-                    style="@style/Text_Title"
+                    style="@style/Text_Header"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:text="Masonry Application"
+                    android:text="ALSM Portal"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    android:textSize="18sp"
+                    android:alpha="0.5"
                     app:layout_constraintStart_toEndOf="@+id/siv_logo"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
