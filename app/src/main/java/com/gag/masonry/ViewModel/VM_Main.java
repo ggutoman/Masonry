@@ -25,7 +25,6 @@ import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Room.Entities.EOfficerHistory;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
