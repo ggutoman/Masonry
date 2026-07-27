@@ -12,14 +12,6 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         0
     ),
 
-    MENU_LODGE(
-        R.drawable.baseline_lodge_icon,
-        "Lodge",
-        "LDGE",
-        1,
-        2
-    ),
-
     MENU_MEMBER(
         R.drawable.baseline_member,
         "Members",
@@ -32,14 +24,6 @@ enum class MENU_PARENT_CONSTANTS(val fnIconx : Int, val fsTitlex : String, val f
         R.drawable.baseline_funds,
         "Funds",
         "FND",
-        1,
-        1
-    ),
-
-    MENU_ANNUAL(
-        R.drawable.baseline_due,
-        "Annual",
-        "ANNL",
         1,
         1
     ),

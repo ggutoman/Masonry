@@ -1,7 +1,9 @@
 package com.gag.masonry.Activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -36,6 +38,27 @@ public class Activity_Main extends AppCompatActivity {
     private VM_Main mviewModel;
     private Message_Dialog poMessage;
     private LoadDialog poLoad;
+
+    // Initialize the launcher
+    private final ActivityResultLauncher<String[]> poPermissions = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+
+            boolean isAllGranted = true;
+            for (Map.Entry<String, Boolean> entry : result.entrySet()) {
+
+                Boolean isGranted = entry.getValue();
+                if (!isGranted) {
+                    isAllGranted = false;
+                    break;
+                }
+            }
+
+            if (!isAllGranted){
+                System.exit(0);
+            }else {
+                InitData();
+            }
+        }
+    );
 
     private final ActivityResultLauncher<Intent> poLogin = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -74,13 +97,48 @@ public class Activity_Main extends AppCompatActivity {
         poMessage.InitDialog();
         poLoad.InitDialog();
 
-        InitData();
+        poMessage.ShowMessage(2, "This application requires permissions for internet usage, access camera and would read and write to device storage." +
+                        "\nGranting these permissions ensures the app functions properly and provides the intended experience.",
+                "Decline", "Accept",
+                new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                        System.exit(0);
+                    }
 
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                        InitPermissions();
+                    }
+                }
+        );
+    }
+
+    private void InitPermissions(){
+
+        List<String> laPermissions = new ArrayList<>();
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
+        }else if (checkSelfPermission(Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.CHANGE_NETWORK_STATE);
+        }else if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.INTERNET);
+        }else if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.CAMERA);
+        }else if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }else if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+
+        poPermissions.launch(laPermissions.toArray(new String[0]));
     }
 
     private void InitData(){
 
-        //initialze transaction
         mviewModel.InitData(new VM_Main.InitData() {
             @Override
             public void isLoading() { poLoad.ShowDialog("Initializing data. Please wait . . ."); }

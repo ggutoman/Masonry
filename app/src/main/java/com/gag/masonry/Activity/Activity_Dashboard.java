@@ -3,6 +3,7 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -170,18 +171,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                                 @Override
                                 public void OnFinished(String fsMessage) {
                                     poLoading.DismissDialog();
-
-                                    poMessage.ShowMessage(0, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
+                                    Toast.makeText(Activity_Dashboard.this, fsMessage, Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
@@ -219,18 +209,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                         }
                     });
-                    break;
-                case "LDGE0001":
-                    InitView("LDGE0001");
-                    break;
-                case "LDGE0002":
-                    InitView("LDGE0002");
-                    break;
-                case "LDGE0003":
-                    InitView("LDGE0003");
-                    break;
-                case "LDGE0004":
-                    InitView("LDGE0004");
                     break;
                 case "FND001":
                     InitView("FND001");
@@ -329,22 +307,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                 fragmentTransaction.replace(R.id.layout_container, loHome);
                 fragmentTransaction.addToBackStack("home");
-                break;
-            case "LDGE0001":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge());
-                fragmentTransaction.addToBackStack("lodge_entry");
-                break;
-            case "LDGE0002":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_Calendar_Entry());
-                fragmentTransaction.addToBackStack("lodge_calendar_entry");
-                break;
-            case "LDGE0003": //lodge calendars
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_list");
-                break;
-            case "LDGE0004": //lodge list
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_calendar_list");
                 break;
             case "MEM002":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
