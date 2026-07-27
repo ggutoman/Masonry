@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.gag.useraccount.ViewModel.VM_Member;
 
 import org.gag.appdriver.App.Core.Dashboard;
+import org.gag.appdriver.App.Core.Lodge;
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerHistory;
@@ -41,6 +42,7 @@ public class VM_Main extends AndroidViewModel {
     private final DateRepository poDate;
     private final Dashboard poDashboard;
     private final UserAccount poAccount;
+    private final Lodge poLodge;
 
     private final MutableLiveData<String> lsFilter = new MutableLiveData<>();
     private final MutableLiveData<HashMap<String, ArrayList<String>>> laMemberInfoOthers = new MutableLiveData<>();
@@ -65,6 +67,7 @@ public class VM_Main extends AndroidViewModel {
         poDate = new DateRepository();
         poDashboard = new Dashboard(application);
         poAccount = new UserAccount(application);
+        poLodge = new Lodge(application);
     }
 
     public void AddInfoList(HashMap<String, ArrayList<String>> faMemberInfoOthers){
@@ -176,15 +179,11 @@ public class VM_Main extends AndroidViewModel {
             //store all threads into hash set, to execute one by one and avoid memory leakage
             HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
                     List.of(
-                            poDashboard.DownloadUserInfo(),
-                            poDashboard.DownloadLodgeInfo(),
+                            poAccount.DownloadUserInfo(),
                             poDashboard.DownloadPositionInfo(),
                             poDashboard.DownloadTitleInfo(),
                             poDashboard.DownloadProvinceInfo(),
-                            poDashboard.DownloadTownInfo(),
-                            poDashboard.DownloadLodgeCalendar(),
-                            poDashboard.DownloadMemberList(GetFirstQuarter(), GetCurrentDate()),
-                            poDashboard.DownloadOfficerList(GetFirstQuarter(), GetCurrentDate())
+                            poDashboard.DownloadTownInfo()
                     )
             );
 
@@ -255,13 +254,13 @@ public class VM_Main extends AndroidViewModel {
         //store all threads into hash set, to execute one by one and avoid memory leakage
         HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
                 List.of(
-                        poDashboard.DownloadUserInfo(),
-                        poDashboard.DownloadLodgeInfo(),
+                        poAccount.DownloadUserInfo(),
+                        poLodge.DownloadLodgeInfo(),
                         poDashboard.DownloadPositionInfo(),
                         poDashboard.DownloadTitleInfo(),
                         poDashboard.DownloadProvinceInfo(),
                         poDashboard.DownloadTownInfo(),
-                        poDashboard.DownloadLodgeCalendar()
+                        poLodge.DownloadLodgeCalendarInfo()
                 )
         );
 
@@ -290,7 +289,7 @@ public class VM_Main extends AndroidViewModel {
     public void DownloadMembers(String fdFrom, String fDto, OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poDashboard.DownloadMemberList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadMemberList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -309,7 +308,7 @@ public class VM_Main extends AndroidViewModel {
     public void DownloadOfficers(String fdFrom, String fDto, OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poDashboard.DownloadOfficerList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -328,7 +327,7 @@ public class VM_Main extends AndroidViewModel {
     public void DownloadOfficerHistory(String fsMemberID, String fdFrom, String fDto, OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poDashboard.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 

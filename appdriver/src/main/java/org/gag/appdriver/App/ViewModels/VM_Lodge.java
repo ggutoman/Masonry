@@ -109,7 +109,7 @@ public class VM_Lodge extends AndroidViewModel {
 
         foCallback.OnLoad();
 
-        poLodge.CreateLodgeCalendar(foLodgeCalendar).thenAccept(new Consumer<Boolean>() {
+        poLodge.SaveLodgeCalendar().thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 

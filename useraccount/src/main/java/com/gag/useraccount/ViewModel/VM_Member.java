@@ -259,8 +259,11 @@ public class VM_Member extends AndroidViewModel {
 
         List<String> laAccount = new ArrayList<>();
         Collections.addAll(laAccount,
+                MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER.getFsDescr(),
                 MEMBER_CONSTANTS.STATUS_LIFE_MEMBER.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_DECEASED.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_DUAL_MEMBER.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr(),
+                MEMBER_CONSTANTS.STATUS_DEMIT_MEMBER.getFsDescr()
         );
         return laAccount;
     }
