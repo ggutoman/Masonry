@@ -156,9 +156,13 @@ public class Activity_Main extends AppCompatActivity {
                             Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                             loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             poLogin.launch(loIntent);
-
                             return;
                         }
+
+                        //start syncing user information
+                        Intent loIntent = new Intent("LOGIN_ACTION");
+                        loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
+                        sendBroadcast(loIntent);
 
                         //verify member information, it would be the basis of displaying menus
                         mviewModel.ObserveMemberInfo().observe(Activity_Main.this, new Observer<MemberDashboardInfo>() {
