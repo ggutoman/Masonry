@@ -159,7 +159,7 @@ public class Activity_Main extends AppCompatActivity {
                             return;
                         }
 
-                        //start syncing user information
+                        //start syncing user data
                         Intent loIntent = new Intent("LOGIN_ACTION");
                         loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
                         sendBroadcast(loIntent);
