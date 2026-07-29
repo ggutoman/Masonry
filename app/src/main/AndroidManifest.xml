@@ -37,6 +37,15 @@
             android:name=".Activity.Activity_Dashboard"
             android:exported="false" />
 
+        <!-- Declare your BroadcastReceiver for custom login broadcasts -->
+        <receiver
+            android:name="org.gag.appdriver.App.Core.AppReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.gag.appdriver.LOGIN_ACTION" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
