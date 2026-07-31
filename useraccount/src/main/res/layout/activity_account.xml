@@ -80,7 +80,7 @@
                 style="@style/TextInputStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="GLP ID">
+                android:hint="ALSM ID">
 
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/TextInputStyle.Edittext"

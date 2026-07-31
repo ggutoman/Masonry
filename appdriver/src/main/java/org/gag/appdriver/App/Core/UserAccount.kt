@@ -425,7 +425,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberList(fdFromxx : String, fsDto : String): CompletableFuture<Boolean> {
+    fun DownloadMemberList(): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -437,14 +437,9 @@ class UserAccount(instance : Context) {
                     false
                 }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("dFromxx", fdFromxx)
-                    it.put("dToxx", fsDto)
-                }
-
                 httpInstance.makeRequest(
                     API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
-                    params,
+                    JSONObject(),
                     mapOf(
                         "access-token" to session.getokenID()
                     )
@@ -495,7 +490,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadOfficerList(fdFromxx : String, fsDto : String) : CompletableFuture<Boolean> {
+    fun DownloadOfficerList() : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -507,14 +502,9 @@ class UserAccount(instance : Context) {
                     false
                 }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("dFromxx", fdFromxx)
-                    it.put("dToxx", fsDto)
-                }
-
                 httpInstance.makeRequest(
                     API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICERS.fsURL,
-                    params,
+                    JSONObject(),
                     mapOf(
                         "access-token" to session.getokenID()
                     )

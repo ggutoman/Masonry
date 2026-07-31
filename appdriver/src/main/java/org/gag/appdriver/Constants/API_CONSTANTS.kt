@@ -3,12 +3,13 @@ package org.gag.appdriver.Constants
 enum class API_CONSTANTS(val fsURL : String){
 
     /**ACCOUNTS**/
-    URL_BASE_SERVER("http://192.165.29.135/Masonry/app/"),
+    URL_BASE_SERVER("http://192.165.29.39/Masonry/app/"),
 //    URL_BASE_SERVER("http://192.168.0.49/Masonry/app/"),
     URL_LOGIN_ACCOUNT("accounts/sign_in.php"),
     URL_CREATE_ACCOUNT("accounts/sign_up.php"),
     URL_DOWNLOAD_USER("accounts/user_info.php"),
     URL_UPDATE_USER("accounts/user_credential_update.php"),
+    URL_ANDROID_OBJECTS("accounts/android_objects.php"),
 
     /**MEMBER**/
     URL_CREATE_MEMBER("member/save_member_info.php"),
@@ -30,11 +31,10 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_GET_TITLE("parameters/title_info.php"),
     URL_GET_PROVINCE("parameters/province_info.php"),
     URL_GET_TOWN("parameters/town_city_info.php"),
-    URL_CREATE_LODGE("parameters/save_lodge_info.php"),
     URL_CREATE_LODGE_CALENDAR("parameters/save_calendar_year.php"),
-    URL_GET_LODGE_CALENDAR("parameters/calendar_year.php"),
 
     /**ACCOUNTING**/
+    URL_CREATE_FUND_MASTER("accounting/funds/save_fund_master.php"),
     URL_CREATE_FUND_TURNOVER("accounting/funds/new_fund_turnover.php"),
     URL_UPDATE_FUND_TURNOVER("accounting/funds/update_fund_turnover.php"),
     URL_APPROVE_FUND_TURNOVER("accounting/funds/approve_fund_turnover.php"),

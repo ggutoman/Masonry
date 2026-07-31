@@ -3,12 +3,16 @@ package org.gag.appdriver.App.Core
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
+
+    val poDate : DateRepository = DateRepository()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -23,32 +27,64 @@ class DataSyncService : Service(){
                         Lodge(applicationContext).apply {
 
                             val poAccount = UserAccount(applicationContext)
-                            DownloadLodgeInfo().thenAccept { lodgeSuccess ->
+                            DownloadLodgeInfo().thenCompose { lodgeSuccess ->
 
                                 //continue syncing data if lodge information is successfully downloaded
                                 if (lodgeSuccess) {
 
                                     //collect other tasks after success download of lodge
                                     val laSyncData: HashSet<CompletableFuture<Boolean>> = hashSetOf(
-                                        SaveLodgeCalendar(),
-                                        poAccount.DownloadMemberList("2026-01-01", "2026-12-01"),
-                                        poAccount.DownloadOfficerList("2026-01-01", "2026-12-01")
+                                        poAccount.DownloadMemberList(),
+                                        poAccount.DownloadOfficerList()
                                     )
 
                                     //execute per task, and print per message if error occured
+                                    var chainResult = CompletableFuture.completedFuture(true);
                                     for (loTask in laSyncData) {
-                                        loTask.thenAccept { chainTask ->
-                                            if (!chainTask) {
 
-                                                val error = if (poAccount.message.isNullOrEmpty()) message else message
-                                                println(error)
+                                        chainResult = chainResult.thenCompose { aBoolean ->
+                                            if (!aBoolean){
+                                                println(poAccount.message)
+                                                return@thenCompose CompletableFuture.completedFuture(false)
                                             }
+                                            return@thenCompose loTask
                                         }
+                                    }
+                                    return@thenCompose chainResult
+                                }
+                                CompletableFuture.completedFuture(false)
 
+                            }.thenAccept { syncSuccess ->
+
+                                if (syncSuccess){
+
+                                    //save lodge calendar
+                                    SaveLodgeCalendar().thenAccept { calendarSuccess ->
+
+                                        if (calendarSuccess is Boolean){
+
+                                            if (!calendarSuccess){
+                                                println(message)
+                                                return@thenAccept
+                                            }
+                                        }else if (calendarSuccess is String){
+
+                                            if (calendarSuccess.isEmpty()){
+                                                println(message)
+                                                return@thenAccept
+                                            }
+
+                                        }else{
+                                            println("Failed to save calendar")
+                                            return@thenAccept
+                                        }
                                     }
 
                                 }
 
+                            }.exceptionally { throwable ->
+                                println(throwable.message)
+                                return@exceptionally null
                             }
                         }
                     }

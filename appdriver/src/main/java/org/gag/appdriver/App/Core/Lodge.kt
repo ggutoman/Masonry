@@ -67,84 +67,9 @@ class Lodge(loInstance : Context) {
     fun IsDateCompared( fsDate1 : String, fsDate2 : String) : Boolean = dateRepository.IsDateCompared( fsDate1, fsDate2)
 
     @SuppressLint("MissingPermission")
-    fun CreateLodge(loLodge : ELodgeInfo) : CompletableFuture<Boolean> {
+    fun SaveLodgeCalendar() : CompletableFuture<Any> {
 
-        val future = CompletableFuture<Boolean>()
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val result = try {
-
-                if (!httpInstance.checkDeviceConnection(loContext)) {
-                    message = "No internet connection"
-                    false
-                }
-
-                val loParams = JSONObject().apply {
-                    put("sLodgeNme", loLodge.sLodgeNme)
-                    put("sAddressx", loLodge.sAddressx)
-                    put("sTownName", loLodge.sTownName)
-                    put("sZippCode", loLodge.sZippCode)
-                    put("sProvName", loLodge.sProvName)
-
-                    //set year id for update of record, if exists
-                    if (!loLodge.sLodgeIDx.isNullOrEmpty()) put("sLodgeIDx", loLodge.sLodgeIDx)
-                }
-
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_LODGE.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            //initialize new year id from result
-                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
-
-                            loLodge.sLodgeIDx = loResult.GetPayload()
-                            poLodgeInfo.SaveLodge(loLodge)
-                            true
-                        }
-
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                message =  "Could not make request at this moment:\n\n ${ex.message}"
-                false
-            }
-
-            //Complete the future on the main thread
-            withContext(Dispatchers.Main) {
-                future.complete(result)
-            }
-        }
-        return future
-
-    }
-
-    @SuppressLint("MissingPermission")
-    fun SaveLodgeCalendar() : CompletableFuture<Boolean> {
-
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
         CoroutineScope(Dispatchers.IO).launch {
 
             val result = try {
@@ -168,11 +93,9 @@ class Lodge(loInstance : Context) {
                             val resultData =
                                 Json.Default.decodeFromString<DownloadLodgeCalendar>(result.data.body())
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poLodgeCalendar.SaveLodgeCalendar(loItem)
-                            }
-                            true
-                        }
+                            poLodgeCalendar.SaveLodgeCalendar(resultData.GetPayload())
+                            resultData.GetPayload().sYearIDxx
+                       }
 
                         is KTORepository.OnRequest.onFailed -> {
                             val errorData =
@@ -233,139 +156,6 @@ class Lodge(loInstance : Context) {
 
                             resultData.GetPayload().forEach { loItem ->
                                 poLodgeInfo.SaveLodge(loItem)
-                            }
-
-                            true
-                        }
-
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                message =  "Could not make request at this moment:\n\n ${ex.message}"
-                false
-            }
-
-            //Complete the future on the main thread
-            withContext(Dispatchers.Main) {
-                future.complete(result)
-            }
-        }
-        return future
-    }
-
-    @SuppressLint("MissingPermission")
-    fun DownloadLodgeCalendarInfo(): CompletableFuture<Boolean> {
-        val future = CompletableFuture<Boolean>()
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val  result = try {
-
-                if (!httpInstance.checkDeviceConnection(loContext)) {
-                    message = "No internet connection"
-                    false
-                }
-
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_LODGE_CALENDAR.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadLodgeCalendar>(result.data.body())
-
-                            resultData.GetPayload().forEach { loItem ->
-                                poLodgeCalendar.SaveLodgeCalendar(loItem)
-                            }
-
-                            true
-                        }
-
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                message =  "Could not make request at this moment:\n\n ${ex.message}"
-                false
-            }
-
-            //Complete the future on the main thread
-            withContext(Dispatchers.Main) {
-                future.complete(result)
-            }
-        }
-        return future
-    }
-
-    @SuppressLint("MissingPermission")
-    fun DownloadLodgeCalendars(dFromxx : String, dToxx : String): CompletableFuture<Boolean> {
-        val future = CompletableFuture<Boolean>()
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val  result = try {
-
-                if (!httpInstance.checkDeviceConnection(loContext)) {
-                    message = "No internet connection"
-                    false
-                }
-
-                val params : JSONObject = JSONObject().also {
-                    it.put("dFromxx", dFromxx)
-                    it.put("dToxx", dToxx)
-                }
-
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_LODGE_CALENDAR.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadLodgeCalendar>(result.data.body())
-
-                            resultData.GetPayload().forEach { loItem ->
-                                poLodgeCalendar.SaveLodgeCalendar(loItem)
                             }
 
                             true

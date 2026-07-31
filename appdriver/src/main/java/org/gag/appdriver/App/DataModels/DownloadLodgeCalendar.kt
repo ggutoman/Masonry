@@ -7,14 +7,14 @@ import org.gag.appdriver.Room.Entities.ELodgeCalendar
 @Serializable
 data class DownloadLodgeCalendar(
     private val result: String,
-    private val payload: List<ELodgeCalendar>
+    private val payload: ELodgeCalendar
 ) {
 
     fun GetResult(): String{
         return result
     }
 
-    fun GetPayload(): List<ELodgeCalendar>{
+    fun GetPayload(): ELodgeCalendar{
         return payload
     }
 }

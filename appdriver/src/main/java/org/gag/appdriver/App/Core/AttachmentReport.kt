@@ -2,8 +2,6 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
-import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,28 +10,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadKey
-import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
-import org.gag.appdriver.App.DataModels.DownloadUserInfo
-import org.gag.appdriver.App.Models.LodgeCalendarList
-import org.gag.appdriver.App.Models.LodgeInfo
-import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.FILE_CONSTANTS
-import org.gag.appdriver.Libraries.DateUtil.DateRepository
-import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.File.FileHelper
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar
-import org.gag.appdriver.Room.DataObject.DLodgeInfo
-import org.gag.appdriver.Room.DataObject.DTownInfo
-import org.gag.appdriver.Room.Entities.ELodgeCalendar
-import org.gag.appdriver.Room.Entities.ELodgeInfo
-import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.io.File
-import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
 
 class AttachmentReport(loInstance : Context) {
