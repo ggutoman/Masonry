@@ -285,7 +285,7 @@ public class Fragment_Home extends Fragment {
 
         if (tab_layout.getSelectedTabPosition() == 0){
 
-            mviewModel.DownloadMembers(lsDfrom, lsDto, new VM_Main.OnDownloadData() {
+            mviewModel.DownloadMembers(new VM_Main.OnDownloadData() {
                 @Override
                 public void OnDownload() { Toast.makeText(requireActivity(), "Downloading members . . .", Toast.LENGTH_SHORT).show(); }
 
@@ -297,7 +297,7 @@ public class Fragment_Home extends Fragment {
             });
         }else {
 
-            mviewModel.DownloadOfficers(lsDfrom, lsDto, new VM_Main.OnDownloadData() {
+            mviewModel.DownloadOfficers(new VM_Main.OnDownloadData() {
                 @Override
                 public void OnDownload() { Toast.makeText(requireActivity(), "Downloading officers . . .", Toast.LENGTH_SHORT).show(); }
 

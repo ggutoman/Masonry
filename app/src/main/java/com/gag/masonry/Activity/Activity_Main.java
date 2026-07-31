@@ -24,6 +24,7 @@ import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,7 @@ import java.util.Map;
 public class Activity_Main extends AppCompatActivity {
 
     private VM_Main mviewModel;
+    private Disclosure_Dialog poDisclousre;
     private Message_Dialog poMessage;
     private LoadDialog poLoad;
 
@@ -93,14 +95,16 @@ public class Activity_Main extends AppCompatActivity {
         mviewModel = new ViewModelProvider(this).get(VM_Main.class);
         poMessage = new Message_Dialog(Activity_Main.this);
         poLoad = new LoadDialog(Activity_Main.this);
+        poDisclousre = new Disclosure_Dialog(Activity_Main.this);
 
         poMessage.InitDialog();
         poLoad.InitDialog();
+        poDisclousre.InitDialog();
 
-        poMessage.ShowMessage(2, "This application requires permissions for internet usage, access camera and would read and write to device storage." +
-                        "\nGranting these permissions ensures the app functions properly and provides the intended experience.",
+        poDisclousre.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo, "This application requires permissions for internet usage, access camera and would read and write to device storage." +
+                        "\n\nGranting these permissions ensures the app functions properly and provides the intended experience.",
                 "Decline", "Accept",
-                new Message_Dialog.OnDialogClick() {
+                new Disclosure_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
@@ -159,7 +163,7 @@ public class Activity_Main extends AppCompatActivity {
                             return;
                         }
 
-                        //start syncing user information
+                        //start syncing user data
                         Intent loIntent = new Intent("LOGIN_ACTION");
                         loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
                         sendBroadcast(loIntent);

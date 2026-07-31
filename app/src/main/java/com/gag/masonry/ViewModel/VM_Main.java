@@ -286,10 +286,10 @@ public class VM_Main extends AndroidViewModel {
         });
     }
 
-    public void DownloadMembers(String fdFrom, String fDto, OnDownloadData foCallback){
+    public void DownloadMembers( OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poAccount.DownloadMemberList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -305,10 +305,10 @@ public class VM_Main extends AndroidViewModel {
         });
     }
 
-    public void DownloadOfficers(String fdFrom, String fDto, OnDownloadData foCallback){
+    public void DownloadOfficers(OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poAccount.DownloadOfficerList(fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerList().thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 

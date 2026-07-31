@@ -37,6 +37,11 @@
             android:name=".Activity.Activity_Dashboard"
             android:exported="false" />
 
+        <!-- Your Service -->
+        <service
+            android:name="org.gag.appdriver.App.Core.DataSyncService"
+            android:exported="false" />
+
         <!-- Declare your BroadcastReceiver for custom login broadcasts -->
         <receiver
             android:name="org.gag.appdriver.App.Core.AppReceiver"
