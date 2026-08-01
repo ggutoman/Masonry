@@ -19,6 +19,7 @@ import org.gag.appdriver.App.DataModels.DownloadMemberList
 import org.gag.appdriver.App.DataModels.DownloadOfficerHistory
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
+import org.gag.appdriver.App.DataModels.DownloadUserObjects
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
@@ -40,6 +41,7 @@ import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.Entities.EMemberAddress
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
@@ -63,8 +65,8 @@ class UserAccount(instance : Context) {
     val dateObj : DateRepository = DateRepository()
 
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
+    val poUserIObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
-    val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(instance).GetLodge()
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
@@ -387,6 +389,70 @@ class UserAccount(instance : Context) {
                             poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
                             poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
 
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+
+
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadUserObjects(): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_ANDROID_OBJECTS.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem -> poUserIObjects.SaveObjects(loItem)}
                             true
                         }
 
@@ -941,10 +1007,6 @@ class UserAccount(instance : Context) {
                     put("dMembrshp", memberInfo.dMembrshp)
                     put("dSuspendx", memberInfo.dSuspendx)
                     put("sTitleIDx", memberInfo.sTitleIDx)
-                    put("dPetition", memberInfo.dPetition)
-                    put("dInitiatn", memberInfo.dInitiatn)
-                    put("dPassedxx", memberInfo.dPassedxx)
-                    put("dRaisingX", memberInfo.dRaisingX)
                     put("cRecdStat", memberInfo.cRecdStat)
                 }
 

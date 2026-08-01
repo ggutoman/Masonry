@@ -277,49 +277,6 @@ public class Fragment_Lodge_Calendar_Entry extends Fragment {
                     @Override
                     public void OnNegative(androidx.appcompat.app.@NotNull AlertDialog poMessage1) {
                         poMessage1.dismiss();
-
-                        mviewModel.CreateLodgeCalendar(lodgeCalendar, new VM_Lodge.OnDownload() {
-
-                            @Override
-                            public void OnLoad() {
-                                poLoading.ShowDialog("Creating lodge calendar. Please wait . .");
-                            }
-
-                            @Override
-                            public void OnSuccess() {
-                                poLoading.DismissDialog();
-
-                                poMessage.InitDialog();
-                                poMessage.ShowMessage(0, "Lodge calendar saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(androidx.appcompat.app.@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-
-                                        requireActivity()
-                                                .getSupportFragmentManager()
-                                                .popBackStack("lodge_calendar_list", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                    }
-
-                                    @Override
-                                    public void OnNegative(androidx.appcompat.app.@NotNull AlertDialog poDialog) {}
-                                });
-                            }
-
-                            @Override
-                            public void OnError(String fsError) {
-                                poLoading.DismissDialog();
-
-                                poMessage.ShowMessage(0, fsError, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(androidx.appcompat.app.@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-
-                                    @Override
-                                    public void OnNegative(androidx.appcompat.app.@NotNull AlertDialog poDialog) {}
-                                });
-                            }
-                        });
                     }
                 });
             }

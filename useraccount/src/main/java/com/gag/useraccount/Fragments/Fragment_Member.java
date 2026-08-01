@@ -870,15 +870,6 @@ public class Fragment_Member extends Fragment {
                                     lnSelectStatus > 1 ? mviewModel.GetCurrentDateTime() : null,
                                     lsSelectTitle,
                                     null,
-                                    null,
-                                    null,
-                                    null,
-                                    "",
-                                    "",
-                                    "",
-                                    0.00,
-                                    0.00,
-                                    null,
                                     lnSelectStatus != 1 ? "0" : "1"
                             );
                         }else {

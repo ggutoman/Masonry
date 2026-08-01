@@ -192,7 +192,10 @@ public class VM_Main extends AndroidViewModel {
             for (CompletableFuture<Boolean> task : laTasks){
 
                 poResult = poResult.thenCompose(aBoolean -> {
-                    if (!aBoolean) return CompletableFuture.completedFuture(false);
+                    if (!aBoolean){
+                        Log.d("Download Parameters: ", poAccount.getMessage());
+                        return CompletableFuture.completedFuture(false);
+                    }
                     return task;
                 });
             }
@@ -201,10 +204,7 @@ public class VM_Main extends AndroidViewModel {
             poResult.thenAccept(new Consumer<Boolean>() {
                 @Override
                 public void accept(Boolean aBoolean) {
-                    if (!aBoolean){
-                        Log.d("Download Data: ", poDashboard.getMessage());
-                    }
-                    foCallback.hasLoggedIn();
+                    if (aBoolean) foCallback.hasLoggedIn();
                 }
             });
         }
@@ -259,8 +259,7 @@ public class VM_Main extends AndroidViewModel {
                         poDashboard.DownloadPositionInfo(),
                         poDashboard.DownloadTitleInfo(),
                         poDashboard.DownloadProvinceInfo(),
-                        poDashboard.DownloadTownInfo(),
-                        poLodge.DownloadLodgeCalendarInfo()
+                        poDashboard.DownloadTownInfo()
                 )
         );
 

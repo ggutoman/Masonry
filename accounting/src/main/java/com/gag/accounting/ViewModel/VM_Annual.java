@@ -193,57 +193,6 @@ public class VM_Annual extends AndroidViewModel {
         });
     }
 
-    public void SaveAnnualDue(EAnnualMaster foMaster, List<AnnualMembers> foDetail, OnTransaction foCallback){
-
-        try {
-
-            foCallback.OnLoad();
-
-            double ldbl_trantotal = 0.00;
-            double ldbl_collectotal = 0.00;
-
-            List<EAnnualDetail> loDetail = new ArrayList<>();
-            for (int i = 0; i < foDetail.size(); i++){
-
-                loDetail.add(
-                        new EAnnualDetail(
-                                foDetail.get(i).getSTransNox(),
-                                String.valueOf(i),
-                                foDetail.get(i).getSMemberID(),
-                                foDetail.get(i).getNAmtDuexx(),
-                                foDetail.get(i).getNAmtPaidx(),
-                                foDetail.get(i).getCExemptID(),
-                                foDetail.get(i).getSRemarksx(),
-                                poAnnual.GetCurrentDate(),
-                                poAnnual.GetCurrentDateTime()
-                        )
-                );
-
-                ldbl_trantotal += Double.parseDouble(loDetail.get(i).getNAmtDuexx());
-                ldbl_collectotal += Double.parseDouble(loDetail.get(i).getNAmtPaidx());
-            }
-
-            //initialize master total from collected details
-            foMaster.setNTranTotl(String.valueOf(ldbl_trantotal));
-            foMaster.setNCollTotl(String.valueOf(ldbl_collectotal));
-
-            poAnnual.SaveAnnualDue(foMaster, loDetail).thenAccept(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean aBoolean) {
-
-                    if (!aBoolean){
-                        foCallback.OnFailed(poAnnual.getMessage());
-                        return;
-                    }
-                    foCallback.OnSuccess();
-                }
-            });
-
-        }catch (Exception e){
-            foCallback.OnFailed(e.getMessage());
-        }
-    }
-
     public void ApproveAnnualDue(EAnnualMaster foMaster, OnTransaction foCallback){
 
         try {

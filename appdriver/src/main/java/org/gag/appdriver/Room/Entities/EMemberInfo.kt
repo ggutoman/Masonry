@@ -19,15 +19,6 @@ data class EMemberInfo(
     var dMembrshp: String?,
     var dSuspendx: String?,
     var sTitleIDx: String?,
-    var dPetition: String?,
-    var dInitiatn: String?,
-    var dPassedxx: String?,
-    var dRaisingX: String?,
-    var sSponsor1: String?,
-    var sSponsor2: String?,
-    var sSponsor3: String?,
-    var nDueBalxx: Double,
-    var nPrjBalxx: Double,
     var sPositnCd: String?,
     var cRecdStat: String?
 )

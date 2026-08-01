@@ -24,7 +24,6 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
 import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
 import com.gag.accounting.Fragments.Project.Fragment_Project_History;
 import com.gag.accounting.Fragments.Project.Fragment_Project_Summary;
@@ -170,36 +169,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                 fragmentTransaction.addToBackStack("lodge_fund_approval");
                                 break;
 
-                            //open lodge calendar annual dues
-                            case "lodge_annual_dues_info":
-
-                                Fragment_Annual_Due loAnnual = new Fragment_Annual_Due();
-
-                                loBundle = new Bundle();
-                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loAnnual.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_info", loAnnual));
-                                fragmentTransaction.addToBackStack("annual_due_info");
-                                break;
-                            //open lodge calendar annual dues approval
-                            case "lodge_annual_approval":
-
-                                Fragment_Annual_Due loAnnualApproval = new Fragment_Annual_Due();
-
-                                loBundle = new Bundle();
-                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loAnnualApproval.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_approval", loAnnualApproval));
-                                fragmentTransaction.addToBackStack("lodge_annual_approval");
-                                break;
                             //open project history
                             case "project_information":
 
@@ -254,39 +223,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                 rcv_fund_list.setAdapter(loAdapter);
                 rcv_fund_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-            }
-        });
-    }
-
-    private void DownloadList(){
-
-        mviewModel.DownloadLodgeCalendars(lsdFrom, lsdTo, new VM_Lodge.OnDownload() {
-            @Override
-            public void OnLoad() {
-                poLoad.ShowDialog("Downloading lodge calendars. Please wait . .");
-            }
-
-            @Override
-            public void OnSuccess() {
-                poLoad.DismissDialog();
-
-                InitDataReceiver();
-                Toast.makeText(requireActivity(), "Lodge calendars downloaded successfully", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void OnError(String fsMessage) {
-                poLoad.DismissDialog();
-
-                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                    @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-                    }
-
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                });
             }
         });
     }
@@ -350,9 +286,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
-
-                                            //download data from server with date to get
-                                            DownloadList();
                                         }
                                     });
                                 }

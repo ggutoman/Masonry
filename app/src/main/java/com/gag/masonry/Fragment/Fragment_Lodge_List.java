@@ -17,9 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.gag.accounting.Fragments.Annual.Fragment_Annual_Due;
-import com.gag.accounting.Fragments.Annual.Fragment_Annual_Summary;
-import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.masonry.R;
@@ -157,20 +154,6 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_approval", loFundApproval));
                                     fragmentTransaction.addToBackStack("lodge_fund_approval");
-
-                                    break;
-
-                                //create lodge annual due entry
-                                case "annual_due_entry":
-                                    Fragment_Annual_Due loAnnualEntry = new Fragment_Annual_Due();
-
-                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-                                    loAnnualEntry.setArguments(loBundle);
-
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_due_entry", loAnnualEntry));
-                                    fragmentTransaction.addToBackStack("annual_due_entry");
-
                                     break;
 
                                 //view lodge year annual due info
@@ -201,19 +184,6 @@ public class Fragment_Lodge_List extends Fragment {
                                     //add to child container, as bridge to initiate another fragment after call
                                     fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_annual_approval", loAnnualapproval));
                                     fragmentTransaction.addToBackStack("lodge_annual_approval");
-                                    break;
-
-                                //view annual summary
-                                case "lodge_annual_information":
-
-                                    Fragment_Annual_Summary loAnnSummary = new Fragment_Annual_Summary();
-
-                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-                                    loAnnSummary.setArguments(loBundle);
-
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("annual_info", loAnnSummary));
-                                    fragmentTransaction.addToBackStack("annual_info");
                                     break;
 
                                 //project entry

@@ -3,6 +3,7 @@ package org.gag.appdriver.App.Core
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,14 +13,20 @@ import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
 
-    val poDate : DateRepository = DateRepository()
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         CoroutineScope(Dispatchers.IO).launch {
             intent?.let { loIntent ->
-                if (loIntent.action == "LOGIN_ACTION" && loIntent.hasExtra("user_id")) {
+
+                if (loIntent.action == "LOGIN_ACTION") {
+
+                    if (!(loIntent.hasExtra("user_id") && loIntent.hasExtra("member_id"))){
+                        Toast.makeText(applicationContext, "User information not found", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+
                     val userId = loIntent.getStringExtra("user_id")
+                    val memberId = loIntent.getStringExtra("member_id")
 
                     if (!userId.isNullOrEmpty()) {
 
@@ -34,8 +41,10 @@ class DataSyncService : Service(){
 
                                     //collect other tasks after success download of lodge
                                     val laSyncData: HashSet<CompletableFuture<Boolean>> = hashSetOf(
+                                        SaveLodgeFund(),
                                         poAccount.DownloadMemberList(),
-                                        poAccount.DownloadOfficerList()
+                                        poAccount.DownloadOfficerList(),
+                                        poAccount.DownloadUserObjects()
                                     )
 
                                     //execute per task, and print per message if error occured
@@ -44,7 +53,8 @@ class DataSyncService : Service(){
 
                                         chainResult = chainResult.thenCompose { aBoolean ->
                                             if (!aBoolean){
-                                                println(poAccount.message)
+                                                Log.d("Sync Account", poAccount.message)
+                                                Log.d("Sync Data", message)
                                                 return@thenCompose CompletableFuture.completedFuture(false)
                                             }
                                             return@thenCompose loTask
@@ -64,14 +74,23 @@ class DataSyncService : Service(){
                                         if (calendarSuccess is Boolean){
 
                                             if (!calendarSuccess){
-                                                println(message)
+                                                Log.d("Sync Calendar Data", message)
                                                 return@thenAccept
                                             }
                                         }else if (calendarSuccess is String){
 
                                             if (calendarSuccess.isEmpty()){
-                                                println(message)
+                                                Log.d("Save Calendar Data", message)
                                                 return@thenAccept
+                                            }
+
+                                            //create annual due for the year id
+                                            val poAnnual = Annual(applicationContext)
+                                            poAnnual.SaveAnnualDue(calendarSuccess, memberId.toString()).thenAccept { annualSuccess ->
+                                                if (!annualSuccess){
+                                                    Log.d("Save Annual", message)
+                                                    return@thenAccept
+                                                }
                                             }
 
                                         }else{
