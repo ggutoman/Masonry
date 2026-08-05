@@ -26,6 +26,7 @@ import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -175,50 +176,63 @@ public class Activity_Main extends AppCompatActivity {
 
                                     if (memberDashboardInfo == null) return;
 
+                                    //execute if sync data is not started
+                                    if (!DataSyncService.Companion.isRunning()){
+
+                                        //start syncing user data
+                                        Intent loService = new Intent(Activity_Main.this, DataSyncService.class);
+                                        loService.setAction("LOGIN_ACTION");
+                                        loService.putExtra("user_id", eUserInfo.getSUserIDxx());
+                                        loService.putExtra("member_id", memberDashboardInfo.getSMemberID());
+
+                                        startService(loService);
+                                    }
+
+
                                     //initialize user level based on matching credentials, if mismatch then hide menus
                                     int fnUserLevel;
                                     if (!eUserInfo.getSGLPIDNoX().equalsIgnoreCase(memberDashboardInfo.getSGLPIDNoX()) ||
                                             !eUserInfo.getSLastName().equalsIgnoreCase(memberDashboardInfo.getSLastName()) ||
                                             !eUserInfo.getDBirthDte().equalsIgnoreCase(memberDashboardInfo.getDBirthDte()) ){
 
-                                        //shows only update account and logout
                                         fnUserLevel = 0;
 
                                     }else {
                                         fnUserLevel = eUserInfo.getNUserLevl();
                                     }
 
-                                    //initialze drawer menus
-                                    List<MENU_PARENT_CONSTANTS> faParentMenu = mviewModel.GetParentMenu(fnUserLevel);
+                                    mviewModel.GetUserObjects(fnUserLevel).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
+                                        @Override
+                                        public void onChanged(List<EUserObjects> eUserObjects) {
 
-                                    HashMap<String, List<MENU_ITEM_CONSTANTS>> faParentItems = new HashMap<>();
-                                    for (MENU_PARENT_CONSTANTS entries : faParentMenu){
+                                            if (eUserObjects == null) return;
 
-                                        faParentItems.put(entries.getFsIDxx(), mviewModel.GetMenuItem(fnUserLevel, entries.getFsIDxx()));
-                                    }
+                                            List<EUserObjects> laParent = new ArrayList<>();
+                                            HashMap<String, List<EUserObjects>> laChild = new HashMap<>();
 
-                                    // Ensure data is passed as ArrayList to match expected types in Activity_Dashboard/Adapter_Drawer
-                                    ArrayList<MENU_PARENT_CONSTANTS> laParentList = new ArrayList<>(faParentMenu);
+                                            for (EUserObjects loMenus : eUserObjects){
 
-                                    HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
-                                    for (Map.Entry<String, List<MENU_ITEM_CONSTANTS>> entry : faParentItems.entrySet()) {
-                                        loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-                                    }
+                                                if (loMenus.getHasParentxx().equalsIgnoreCase("0")){
+                                                    laParent.add(loMenus);
+                                                }else {
 
-                                    //start syncing user data
-                                    Intent loBroadcast = new Intent(Activity_Main.this, DataSyncService.class);
-                                    loBroadcast.setAction("LOGIN_ACTION");
-                                    loBroadcast.putExtra("user_id", eUserInfo.getSUserIDxx());
-                                    loBroadcast.putExtra("member_id", memberDashboardInfo.getSMemberID());
-                                    startService(loBroadcast);
+                                                    List<EUserObjects> laParentItems = new ArrayList<>();
+                                                    if (laChild.containsKey(loMenus.getSParentIDxx())) laParentItems = laChild.get(loMenus.getSParentIDxx());
 
-                                    //proceed to account dashboard
-//                                    Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-//                                    loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //clear existing activities
-//                                    loIntent.putExtra("parent_key", laParentList); //parent menus
-//                                    loIntent.putExtra("child_items", loChildMap); //parent items
+                                                    laParentItems.add(loMenus);
+                                                    laChild.put(loMenus.getSParentIDxx(), laParentItems);
+                                                }
+                                            }
 
-//                                    poLogout.launch(loIntent);
+                                            //proceed to account dashboard
+                                            Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //clear existing activities
+                                            loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(laParent)); //parent menus
+                                            loIntent.putExtra("child_items", laChild); //parent items
+
+                                            poLogout.launch(loIntent);
+                                        }
+                                    });
 
                                 }catch (Exception ex){
                                     Log.d("Sync Data", ex.getMessage().toString());

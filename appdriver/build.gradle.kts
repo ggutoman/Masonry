@@ -9,6 +9,9 @@ plugins {
 
     // ✅ Replace kapt with ksp
     id("com.google.devtools.ksp") version "1.9.22-1.0.16"
+
+    //kotlin parcelize
+    id("kotlin-parcelize")
 }
 
 android {

@@ -339,7 +339,7 @@ public class VM_Member extends AndroidViewModel {
 
                     //if return is booleen
                     if (result instanceof Boolean && !(Boolean) result) {
-                        foCallback.OnFailed(poAccount.GetMessage());
+                        foCallback.OnFailed(poAccount.getMessage());
                         return CompletableFuture.completedFuture(false);
                     }
 
@@ -394,7 +394,7 @@ public class VM_Member extends AndroidViewModel {
                     if (allOk) {
                         foCallback.OnSuccess();
                     } else {
-                        foCallback.OnFailed(poAccount.GetMessage());
+                        foCallback.OnFailed(poAccount.getMessage());
                     }
                 })
                 .exceptionally(e -> {
@@ -413,7 +413,7 @@ public class VM_Member extends AndroidViewModel {
             public void accept(Boolean aBoolean) {
 
                 if (!aBoolean){
-                    foCallback.onError(poAccount.GetMessage());
+                    foCallback.onError(poAccount.getMessage());
                     return;
                 }
                 foCallback.onSuccess();

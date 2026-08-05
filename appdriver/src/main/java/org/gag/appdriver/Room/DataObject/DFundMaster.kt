@@ -6,7 +6,6 @@ import androidx.room.Query
 import androidx.room.Upsert
 import org.gag.appdriver.App.Models.LodgeFundMasterList
 import org.gag.appdriver.Room.Entities.EFundMaster
-import org.gag.appdriver.Room.Entities.EFundTurnOver
 
 @Dao
 interface DFundMaster {

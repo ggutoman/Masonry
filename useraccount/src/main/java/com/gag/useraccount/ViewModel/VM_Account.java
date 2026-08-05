@@ -56,7 +56,7 @@ public class VM_Account extends AndroidViewModel {
                     if (aBoolean){
                         foCallback.onSuccess();
                     }else{
-                        foCallback.onError(poAccount.GetMessage());
+                        foCallback.onError(poAccount.getMessage());
                     }
 
                 })
@@ -93,7 +93,7 @@ public class VM_Account extends AndroidViewModel {
                     if (aBoolean){
                         foCallback.onSuccess();
                     }else{
-                        foCallback.onError(poAccount.GetMessage());
+                        foCallback.onError(poAccount.getMessage());
                     }
 
                 })
@@ -130,7 +130,7 @@ public class VM_Account extends AndroidViewModel {
                     if (aBoolean){
                         foCallback.onSuccess();
                     }else{
-                        foCallback.onError(poAccount.GetMessage());
+                        foCallback.onError(poAccount.getMessage());
                     }
 
                 })

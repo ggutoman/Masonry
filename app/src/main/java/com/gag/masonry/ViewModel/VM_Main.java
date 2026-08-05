@@ -27,6 +27,7 @@ import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,16 +127,8 @@ public class VM_Main extends AndroidViewModel {
         return poAccount.ObserveCurrentRole(fsMemberID);
     }
 
-    public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
-        return poDashboard.GetParentMenus(fnUserLvl);
-    }
-
-    public List<MENU_ITEM_CONSTANTS> GetMenuItem(int fnUserLvl, String fsParentIDx){
-        return poDashboard.GetParentItems(fnUserLvl, fsParentIDx);
-    }
-
-    public ELodgeInfo GetLodgeInfo(){
-        return poDashboard.GetLodgeInfo();
+    public LiveData<List<EUserObjects>> GetUserObjects(Integer fnUsrLevel){
+        return poDashboard.GetUserObjects(fnUsrLevel);
     }
 
     public String GetCurrentDate(){

@@ -39,6 +39,7 @@ import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
 import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -82,14 +83,14 @@ public class Activity_Dashboard extends AppCompatActivity {
 
     public void InitAdapter(){
 
-        ArrayList<MENU_PARENT_CONSTANTS> parentMenu =
-                (ArrayList<MENU_PARENT_CONSTANTS>) getIntent().getSerializableExtra("parent_key");
+        ArrayList<EUserObjects> parentMenu =
+                getIntent().getParcelableArrayListExtra("parent_key");
 
-        HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> parentItem =
-                (HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>>) getIntent().getSerializableExtra("child_items");
+        HashMap<String, ArrayList<EUserObjects>> parentItem =
+                (HashMap<String, ArrayList<EUserObjects>>) getIntent().getSerializableExtra("child_items");
 
-        HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
-        for (Map.Entry<String, ArrayList<MENU_ITEM_CONSTANTS>> entry : parentItem.entrySet()) {
+        HashMap<String, ArrayList<EUserObjects>> loChildMap = new HashMap<>();
+        for (Map.Entry<String, ArrayList<EUserObjects>> entry : parentItem.entrySet()) {
             loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
 

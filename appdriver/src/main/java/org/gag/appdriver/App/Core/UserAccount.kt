@@ -30,7 +30,6 @@ import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
-import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
@@ -50,6 +49,7 @@ import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -65,7 +65,7 @@ class UserAccount(instance : Context) {
     val dateObj : DateRepository = DateRepository()
 
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
-    val poUserIObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
+    val poUserObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
@@ -76,8 +76,6 @@ class UserAccount(instance : Context) {
     val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
-
-    fun GetMessage() : String = message
 
     fun GetLodgeID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -452,7 +450,7 @@ class UserAccount(instance : Context) {
                             val resultData =
                                 Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
 
-                            resultData.GetPayload().forEach { loItem -> poUserIObjects.SaveObjects(loItem)}
+                            resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
                             true
                         }
 

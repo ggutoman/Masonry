@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +41,7 @@ import java.util.concurrent.CompletableFuture
 
 class Annual(instance : Context) {
 
-    lateinit var message : String
+    var message : String = "No message found"
 
     val loInstance : Context = instance
     val session : AppConfig = AppConfig(instance)

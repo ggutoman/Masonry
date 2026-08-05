@@ -52,11 +52,13 @@ import org.gag.appdriver.Room.DataObject.DReceipt
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EOfficerHistory
+import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -90,6 +92,7 @@ class Dashboard(loInstance : Context) {
     val poProjects: DProjects = ML_DBF.getDatabase(loInstance)?.GetProject() as DProjects
     val poReceipts: DReceipt = ML_DBF.getDatabase(loInstance)?.GetReceipt() as DReceipt
     val poDisbursement: DDisbursement = ML_DBF.getDatabase(loInstance)?.GetDisbursement() as DDisbursement
+    val poMenus : DUserObjects = ML_DBF.getDatabase(loInstance)?.GetUserObjects() as DUserObjects
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -138,14 +141,7 @@ class Dashboard(loInstance : Context) {
         return poDBMemberEmail.GetMemberEmail(fsMemberID)
     }
 
-    fun GetLodgeInfo() : ELodgeInfo {
-
-        return poLodgeInfo.GetLodgeInfo(
-            TextFormatter()
-                .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
-                .getOrNull(0) ?: ""
-        )
-    }
+    fun GetUserObjects(fnUserLvl : Int) : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(fnUserLvl)
 
     fun ClearMemberData(){
 
