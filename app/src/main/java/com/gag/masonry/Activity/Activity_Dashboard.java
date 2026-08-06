@@ -3,7 +3,6 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -19,24 +18,19 @@ import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
-import com.gag.masonry.Adapter.Adapter_Drawer;
+import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
-import com.gag.masonry.Fragment.Fragment_Lodge;
 import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
-
-import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_Entry;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import com.gag.masonry.Fragment.Fragment_Lodge_List;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Room.Entities.EUserObjects;
@@ -45,8 +39,6 @@ import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Activity_Dashboard extends AppCompatActivity {
 
@@ -76,214 +68,88 @@ public class Activity_Dashboard extends AppCompatActivity {
         list_menus = findViewById(R.id.list_menus);
 
         InitAdapter();
-        InitListener();
-        InitView("HME"); //default to home
+        InitView("000"); //default to home
 
     }
 
     public void InitAdapter(){
 
+        //initialize drawer action bar
+        ActionBarDrawerToggle toggleDrawer = new ActionBarDrawerToggle(
+                this, main_drawer, toolbar,
+                org.gag.appdriver.R.string.open_drawer, org.gag.appdriver.R.string.close_drawer);
+
+        main_drawer.addDrawerListener(toggleDrawer);
+        toggleDrawer.syncState();
+
         ArrayList<EUserObjects> parentMenu =
                 getIntent().getParcelableArrayListExtra("parent_key");
 
-        HashMap<String, ArrayList<EUserObjects>> parentItem =
-                (HashMap<String, ArrayList<EUserObjects>>) getIntent().getSerializableExtra("child_items");
+        Adapter_Drawer_Expandable loAdapter =  new Adapter_Drawer_Expandable(Activity_Dashboard.this, parentMenu, new Adapter_Drawer_Expandable.SelectMenu() {
+            @Override
+            public void OnSelectItem(EUserObjects foObject, int fnPosition) {
 
-        HashMap<String, ArrayList<EUserObjects>> loChildMap = new HashMap<>();
-        for (Map.Entry<String, ArrayList<EUserObjects>> entry : parentItem.entrySet()) {
-            loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-        }
+                switch (foObject.getIdxx()){
 
+                    case "000":
+                        main_drawer.closeDrawer(GravityCompat.START);
+                        InitView("000");
+                        break;
+                    case "003", "004":
+                        CollapseGroup(fnPosition);
+                        break;
+                    case "031":
+                        poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
 
-        Adapter_Drawer loAdapter =  new Adapter_Drawer(
-                Activity_Dashboard.this,
-                parentMenu,
-                loChildMap);
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
+                                if (current != null) {
+                                    getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .remove(current)
+                                            .commitNow(); // ensures fragment is destroyed immediately
+                                }
+
+                                Intent loFinish = new Intent();
+                                loFinish.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                setResult(Activity_Dashboard.RESULT_OK, loFinish);
+                                finish();
+                            }
+                        });
+                        break;
+                    default:
+                        poMessage.ShowMessage(1, "Feature under maintenance. Thankyou for understanding.", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                }
+            }
+        });
 
         list_menus.setAdapter(loAdapter);
         main_drawer.openDrawer(GravityCompat.START);
 
     }
 
-    public void InitListener(){
+    private void CollapseGroup(int fnPosition){
 
-        ActionBarDrawerToggle toggleDrawer = new ActionBarDrawerToggle(
-                this, main_drawer, toolbar,
-                org.gag.appdriver.R.string.open_drawer, org.gag.appdriver.R.string.close_drawer);
-        main_drawer.addDrawerListener(toggleDrawer);
-        toggleDrawer.syncState();
-
-        list_menus.setOnGroupClickListener((parent, v, groupPosition, id) -> {
-
-            MENU_PARENT_CONSTANTS groupMenu = (MENU_PARENT_CONSTANTS) list_menus.getExpandableListAdapter()
-                                                .getGroup(groupPosition);
-
-            String lsParentId = groupMenu.getFsIDxx();
-            if (lsParentId.equalsIgnoreCase("HME")){
-                main_drawer.closeDrawer(GravityCompat.START);
-
-                InitView(lsParentId);
-                return false;
-            }else if (lsParentId.equalsIgnoreCase("LGT")) {
-
-
-                return false;
-            }
-
-            if (list_menus.isGroupExpanded(groupPosition)) {
-                list_menus.collapseGroup(groupPosition);
-            } else {
-                list_menus.expandGroup(groupPosition);
-            }
-
-            // return true so the default expand/collapse doesn’t also fire
-            return true;
-        });
-
-        list_menus.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-
-            MENU_ITEM_CONSTANTS childItem = (MENU_ITEM_CONSTANTS) list_menus.getExpandableListAdapter()
-                    .getChild(groupPosition, childPosition);
-
-            main_drawer.closeDrawer(GravityCompat.START);
-
-            String itemID = childItem.getFsIDxx();
-            switch (itemID){
-
-                case "ACC001": //download data initialized upon login
-
-                    poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-
-                            //re download parameters
-                            mViewmodel.DownloadParameters(new VM_Main.OnDownloadData() {
-                                @Override
-                                public void OnDownload() {
-                                    poLoading.ShowDialog("Downloading data. Please wait . . .");
-                                }
-
-                                @Override
-                                public void OnFinished(String fsMessage) {
-                                    poLoading.DismissDialog();
-                                    Toast.makeText(Activity_Dashboard.this, fsMessage, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    });
-                    break;
-                case "ACC002": //generate reports
-                    InitView("ACC002");
-                    break;
-                case "ACC003": //view or update account
-                    InitView("ACC003");
-                    break;
-                case "ACC004": //logout"
-                    poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
-
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-
-                            Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
-                            if (current != null) {
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .remove(current)
-                                        .commitNow(); // ensures fragment is destroyed immediately
-                            }
-
-                            Intent loFinish = new Intent();
-                            loFinish.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            setResult(Activity_Dashboard.RESULT_OK, loFinish);
-                            finish();
-
-                        }
-                    });
-                    break;
-                case "FND001":
-                    InitView("FND001");
-                    break;
-                case "FND002":
-                    InitView("FND002");
-                    break;
-                case "FND003":
-                    InitView("FND003");
-                    break;
-                case "FND004":
-                    InitView("FND004");
-                    break;
-                case "MEM001":
-                    InitView("MEM001");
-                    break;
-                case "MEM002":
-                    InitView("MEM002");
-                    break;
-                case "MEM003":
-                    InitView("MEM003");
-                    break;
-                case "MEM004":
-                    InitView("MEM004");
-                    break;
-                case "ANNL001":
-                    InitView("ANNL001");
-                    break;
-                case "ANNL002":
-                    InitView("ANNL002");
-                    break;
-                case "ANNL003":
-                    InitView("ANNL003");
-                    break;
-                case "ANNL004":
-                    InitView("ANNL004");
-                    break;
-                case "PROJ001":
-                    InitView("PROJ001");
-                    break;
-                case "PROJ002":
-                    InitView("PROJ002");
-                    break;
-                case "PROJ003":
-                    InitView("PROJ003");
-                    break;
-                case "PROJ004":
-                    InitView("PROJ004");
-                    break;
-                case "RCPT001":
-                    InitView("RCPT001");
-                    break;
-                case "RCPT002":
-                    InitView("RCPT002");
-                    break;
-                case "RCPT003":
-                    InitView("RCPT003");
-                    break;
-                case "DISB001":
-                    InitView("DISB001");
-                    break;
-                case "DISB002":
-                    InitView("DISB002");
-                    break;
-                case "DISB003":
-                    InitView("DISB003");
-                    break;
-                case "DISB004":
-                    InitView("DISB004");
-                    break;
-            }
-
-            return true;
-        });
+        if (list_menus.isGroupExpanded(fnPosition)) {
+            list_menus.collapseGroup(fnPosition);
+        } else {
+            list_menus.expandGroup(fnPosition);
+        }
 
     }
 
@@ -299,7 +165,7 @@ public class Activity_Dashboard extends AppCompatActivity {
         Bundle loArgs;
         switch (fsItemID){
 
-            case "HME":
+            case "000":
                 Fragment_Home loHome = new Fragment_Home();
 
                 loArgs = new Bundle();

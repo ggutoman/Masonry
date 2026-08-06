@@ -1,109 +1,74 @@
 package com.gag.masonry.Adapter;
 
-import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.gag.masonry.R;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.Constants.MENU_ICONS;
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EUserObjects;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
-public class Adapter_Drawer extends BaseExpandableListAdapter {
+public class Adapter_Drawer extends RecyclerView.Adapter<Adapter_Drawer.VH_Drawer>{
 
-    private final Context loInstance;
-    private final ArrayList<EUserObjects> paParentList;
-    private final HashMap<String, ArrayList<EUserObjects>> paChildList;
+    private final List<EUserObjects> laMenus;
+    private final SelectMenu loCallback;
 
-    public Adapter_Drawer(Context foinstance, ArrayList<EUserObjects> faParentList, HashMap<String, ArrayList<EUserObjects>> faChildList){
-        this.loInstance = foinstance;
-        this.paParentList = faParentList;
-        this.paChildList = faChildList;
+    public interface SelectMenu{
+        void OnSelectItem(EUserObjects loObject);
+    }
+
+    public Adapter_Drawer(List<EUserObjects> faMenus, SelectMenu foCallback){
+        this.laMenus = faMenus;
+        this.loCallback = foCallback;
+    }
+
+    @NonNull
+    @Override
+    public VH_Drawer onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new VH_Drawer(
+                LayoutInflater.from(parent.getContext()).inflate(R.layout.list_menu_parent, parent, false)
+        );
     }
 
     @Override
-    public EUserObjects getGroup(int i) {
-        return paParentList.get(i);
+    public void onBindViewHolder(@NonNull VH_Drawer holder, int position) {
+
+        holder.img_icon.setVisibility(View.GONE);
+        holder.mtv_title.setText(laMenus.get(position).getSDescriptxx());
+        holder.mtv_title.setTextSize(12);
+
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loCallback.OnSelectItem(laMenus.get(position));
+            }
+        });
     }
 
     @Override
-    public int getGroupCount() {
-        return paParentList.size();
+    public int getItemCount() {
+        return laMenus.size();
     }
 
-    @Override
-    public long getGroupId(int i) {
-        return i;
-    }
+    public static class VH_Drawer extends RecyclerView.ViewHolder {
 
-    @Override
-    public EUserObjects getChild(int groupPosition, int childPosition) {
-        return Objects.requireNonNull(paChildList.get(paParentList.get(groupPosition).getIdxx())).get(childPosition);
-    }
+        private final View view;
+        private final ShapeableImageView img_icon;
+        private final MaterialTextView mtv_title;
 
-    @Override
-    public int getChildrenCount(int groupPosition) {
-       return Objects.requireNonNull(paChildList.get(paParentList.get(groupPosition).getIdxx())).size();
-    }
+        public VH_Drawer(@NonNull View itemView) {
+            super(itemView);
 
-    @Override
-    public long getChildId(int i, int i1) {
-        return i1;
-    }
-
-    @Override
-    public boolean isChildSelectable(int i, int i1) {
-        return true;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return false;
-    }
-
-    @Override
-    public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
-
-        if (view == null){
-
-            view = LayoutInflater.from(loInstance).inflate(R.layout.list_menu_parent, viewGroup, false);
+            view = itemView;
+            img_icon = itemView.findViewById(R.id.img_icon);
+            mtv_title = itemView.findViewById(R.id.mtv_title);
         }
-
-        MaterialTextView mtv_title = view.findViewById(R.id.mtv_title);
-        ShapeableImageView img_icon = view.findViewById(R.id.img_icon);
-
-        mtv_title.setText(paParentList.get(i).getSDescriptxx());
-
-        img_icon.setImageResource(MENU_ICONS.Companion.fromId(paParentList.get(i).getIdxx()) == null ? org.gag.appdriver.R.drawable.baseline_error_24 : MENU_ICONS.Companion.fromId(paParentList.get(i).getIdxx()).getFnIconxx());
-
-        return view;
     }
 
-    @Override
-    public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
-
-        if (view == null){
-
-            view = LayoutInflater.from(loInstance).inflate(R.layout.layout_child_menus, viewGroup, false);
-        }
-        ExpandableListView exp_child = view.findViewById(R.id.exp_child_menus);
-
-        return view;
-    }
 }
