@@ -17,16 +17,14 @@ import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerHistory;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,16 +124,8 @@ public class VM_Main extends AndroidViewModel {
         return poAccount.ObserveCurrentRole(fsMemberID);
     }
 
-    public List<MENU_PARENT_CONSTANTS> GetParentMenu(int fnUserLvl){
-        return poDashboard.GetParentMenus(fnUserLvl);
-    }
-
-    public List<MENU_ITEM_CONSTANTS> GetMenuItem(int fnUserLvl, String fsParentIDx){
-        return poDashboard.GetParentItems(fnUserLvl, fsParentIDx);
-    }
-
-    public ELodgeInfo GetLodgeInfo(){
-        return poDashboard.GetLodgeInfo();
+    public LiveData<List<EUserObjects>> GetUserObjects(Integer fnUsrLevel){
+        return poDashboard.GetUserObjects(fnUsrLevel);
     }
 
     public String GetCurrentDate(){
@@ -192,7 +182,10 @@ public class VM_Main extends AndroidViewModel {
             for (CompletableFuture<Boolean> task : laTasks){
 
                 poResult = poResult.thenCompose(aBoolean -> {
-                    if (!aBoolean) return CompletableFuture.completedFuture(false);
+                    if (!aBoolean){
+                        Log.d("Download Parameters: ", poAccount.getMessage());
+                        return CompletableFuture.completedFuture(false);
+                    }
                     return task;
                 });
             }
@@ -201,10 +194,7 @@ public class VM_Main extends AndroidViewModel {
             poResult.thenAccept(new Consumer<Boolean>() {
                 @Override
                 public void accept(Boolean aBoolean) {
-                    if (!aBoolean){
-                        Log.d("Download Data: ", poDashboard.getMessage());
-                    }
-                    foCallback.hasLoggedIn();
+                    if (aBoolean) foCallback.hasLoggedIn();
                 }
             });
         }
@@ -259,8 +249,7 @@ public class VM_Main extends AndroidViewModel {
                         poDashboard.DownloadPositionInfo(),
                         poDashboard.DownloadTitleInfo(),
                         poDashboard.DownloadProvinceInfo(),
-                        poDashboard.DownloadTownInfo(),
-                        poLodge.DownloadLodgeCalendarInfo()
+                        poDashboard.DownloadTownInfo()
                 )
         );
 

@@ -88,56 +88,6 @@ public class VM_Lodge extends AndroidViewModel {
         return poLodge.IsDateCompared(fsDate1, fsDate2);
     }
 
-    public void CreateLodge(ELodgeInfo foLodge, VM_Lodge.OnDownload foCallback){
-
-        foCallback.OnLoad();
-
-        poLodge.CreateLodge(foLodge).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.OnError(poLodge.GetMessage());
-                    return;
-                }
-                foCallback.OnSuccess();
-            }
-        });
-    }
-
-    public void CreateLodgeCalendar(ELodgeCalendar foLodgeCalendar, VM_Lodge.OnDownload foCallback){
-
-        foCallback.OnLoad();
-
-        poLodge.SaveLodgeCalendar().thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.OnError(poLodge.GetMessage());
-                    return;
-                }
-                foCallback.OnSuccess();
-            }
-        });
-    }
-
-    public void DownloadLodgeCalendars(String fsDateFrom, String fsDateTo, OnDownload loCallback){
-
-        loCallback.OnLoad();
-        poLodge.DownloadLodgeCalendars(fsDateFrom, fsDateTo).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    loCallback.OnError(poLodge.GetMessage());
-                    return;
-                }
-                loCallback.OnSuccess();
-            }
-        });
-    }
-
     public void DownloadLodgeFunds(String fsDfrom, String fsDto, OnDownload foCallback){
 
         foCallback.OnLoad();

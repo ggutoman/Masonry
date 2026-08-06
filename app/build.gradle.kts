@@ -14,6 +14,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        vectorDrawables.useSupportLibrary = true
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -57,6 +59,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Glide core
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation("org.xerial:sqlite-jdbc:3.45.1.0") {
         exclude(group = "com.intellij", module = "annotations")

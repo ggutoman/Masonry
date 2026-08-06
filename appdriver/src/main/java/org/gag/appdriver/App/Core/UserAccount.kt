@@ -19,6 +19,7 @@ import org.gag.appdriver.App.DataModels.DownloadMemberList
 import org.gag.appdriver.App.DataModels.DownloadOfficerHistory
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
+import org.gag.appdriver.App.DataModels.DownloadUserObjects
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
@@ -29,7 +30,6 @@ import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
-import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
@@ -40,6 +40,7 @@ import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.Entities.EMemberAddress
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
@@ -48,6 +49,7 @@ import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -63,8 +65,8 @@ class UserAccount(instance : Context) {
     val dateObj : DateRepository = DateRepository()
 
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
+    val poUserObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
-    val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(instance).GetLodge()
     val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
@@ -74,8 +76,6 @@ class UserAccount(instance : Context) {
     val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
-
-    fun GetMessage() : String = message
 
     fun GetLodgeID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -387,6 +387,70 @@ class UserAccount(instance : Context) {
                             poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
                             poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
 
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+
+
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadUserObjects(): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_ANDROID_OBJECTS.fsURL,
+                    JSONObject(),
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
                             true
                         }
 
@@ -941,10 +1005,6 @@ class UserAccount(instance : Context) {
                     put("dMembrshp", memberInfo.dMembrshp)
                     put("dSuspendx", memberInfo.dSuspendx)
                     put("sTitleIDx", memberInfo.sTitleIDx)
-                    put("dPetition", memberInfo.dPetition)
-                    put("dInitiatn", memberInfo.dInitiatn)
-                    put("dPassedxx", memberInfo.dPassedxx)
-                    put("dRaisingX", memberInfo.dRaisingX)
                     put("cRecdStat", memberInfo.cRecdStat)
                 }
 

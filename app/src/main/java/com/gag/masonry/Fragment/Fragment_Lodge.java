@@ -220,64 +220,6 @@ public class Fragment_Lodge extends Fragment {
                     public void OnNegative(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
 
-                        mViewmodel.CreateLodge(poLodge, new VM_Lodge.OnDownload() {
-                            @Override
-                            public void OnLoad() {
-                                poLoad.ShowDialog("Saving Lodge. Please wait . . .");
-                            }
-
-                            @Override
-                            public void OnSuccess() {
-                                poLoad.DismissDialog();
-
-                                poMessage.ShowMessage(0, "Lodge has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-
-                                        tieLodgeName.setText("");
-                                        tieAddress.setText("");
-                                        tie_zip.setText("");
-                                        autoProv.setText("");
-
-                                        poLodge = new ELodgeInfo(
-                                                "",
-                                                "",
-                                                "",
-                                                "",
-                                                "",
-                                                "",
-                                                ""
-                                        );
-
-                                        requireActivity().getSupportFragmentManager()
-                                                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                    }
-
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void OnError(String fsMessage) {
-                                poLoad.DismissDialog();
-
-                                poMessage.ShowMessage(0, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                    @Override
-                                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-
-                                    @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-                                    }
-                                });
-                            }
-                        });
                     }
                 });
             }

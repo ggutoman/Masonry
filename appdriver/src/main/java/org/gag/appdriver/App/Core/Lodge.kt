@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
-import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
 import org.gag.appdriver.App.Models.LodgeCalendarList
@@ -18,14 +17,12 @@ import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
-import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.Entities.ELodgeCalendar
-import org.gag.appdriver.Room.Entities.ELodgeInfo
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -41,8 +38,6 @@ class Lodge(loInstance : Context) {
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val dateRepository : DateRepository = DateRepository()
-
-    fun GetMessage() : String = message
 
     fun GetLodgeCalendarInfo( sYearIDx : String) : LiveData<ELodgeCalendar> = poLodgeCalendar.ObserveLodgeCalendarInfo(sYearIDx)
 

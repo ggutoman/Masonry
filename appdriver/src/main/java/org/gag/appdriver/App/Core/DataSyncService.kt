@@ -3,96 +3,132 @@ package org.gag.appdriver.App.Core
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
 
-    val poDate : DateRepository = DateRepository()
+    companion object {
+        var isRunning = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        isRunning = false
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        CoroutineScope(Dispatchers.IO).launch {
-            intent?.let { loIntent ->
-                if (loIntent.action == "LOGIN_ACTION" && loIntent.hasExtra("user_id")) {
-                    val userId = loIntent.getStringExtra("user_id")
+        if (!isRunning){
 
-                    if (!userId.isNullOrEmpty()) {
+            isRunning = true
 
-                        // Step 1: Lodge tasks
-                        Lodge(applicationContext).apply {
+            CoroutineScope(Dispatchers.IO).launch {
+                intent?.let { loIntent ->
 
-                            val poAccount = UserAccount(applicationContext)
-                            DownloadLodgeInfo().thenCompose { lodgeSuccess ->
+                    if (loIntent.action == "LOGIN_ACTION") {
 
-                                //continue syncing data if lodge information is successfully downloaded
-                                if (lodgeSuccess) {
+                        if (!(loIntent.hasExtra("user_id") && loIntent.hasExtra("member_id"))){
+                            Toast.makeText(applicationContext, "User information not found", Toast.LENGTH_SHORT).show()
+                            return@launch
+                        }
 
-                                    //collect other tasks after success download of lodge
-                                    val laSyncData: HashSet<CompletableFuture<Boolean>> = hashSetOf(
-                                        poAccount.DownloadMemberList(),
-                                        poAccount.DownloadOfficerList()
-                                    )
+                        val userId = loIntent.getStringExtra("user_id")
+                        val memberId = loIntent.getStringExtra("member_id")
 
-                                    //execute per task, and print per message if error occured
-                                    var chainResult = CompletableFuture.completedFuture(true);
-                                    for (loTask in laSyncData) {
+                        if (!userId.isNullOrEmpty()) {
 
-                                        chainResult = chainResult.thenCompose { aBoolean ->
-                                            if (!aBoolean){
-                                                println(poAccount.message)
-                                                return@thenCompose CompletableFuture.completedFuture(false)
-                                            }
-                                            return@thenCompose loTask
-                                        }
-                                    }
-                                    return@thenCompose chainResult
-                                }
-                                CompletableFuture.completedFuture(false)
+                            // Step 1: Lodge tasks
+                            Lodge(applicationContext).apply {
 
-                            }.thenAccept { syncSuccess ->
+                                //initalize other core classes for syncing data
+                                val poAccount = UserAccount(applicationContext)
+                                val poAnnual = Annual(applicationContext)
+                                val poFunds = Funds(applicationContext)
 
-                                if (syncSuccess){
+                                DownloadLodgeInfo().thenAccept { lodgeSuccess ->
 
-                                    //save lodge calendar
-                                    SaveLodgeCalendar().thenAccept { calendarSuccess ->
+                                    //continue syncing data if lodge information is successfully downloaded
+                                    if (lodgeSuccess) {
 
-                                        if (calendarSuccess is Boolean){
+                                        //save lodge calendar
+                                        SaveLodgeCalendar().thenAccept { loCalendar->
 
-                                            if (!calendarSuccess){
-                                                println(message)
+                                            if (loCalendar is Boolean){
+
+                                                if (!loCalendar){
+                                                    println("Save Calendar Error $message")
+                                                    return@thenAccept
+                                                }
+                                            }else if (loCalendar is String){
+
+                                                if (loCalendar.isEmpty()){
+                                                    println("Save Calendar Error $message")
+                                                    return@thenAccept
+                                                }
+
+                                                val laSyncData = hashSetOf(
+                                                    poFunds.SaveLodgeFund(),
+                                                    poAnnual.SaveAnnualDue(loCalendar, memberId.toString()),
+                                                    poAccount.DownloadUserObjects(),
+                                                    poAccount.DownloadMemberList(),
+                                                    poAccount.DownloadOfficerList()
+                                                )
+
+                                                CompletableFuture.allOf(*laSyncData.toTypedArray())
+                                                    .thenAccept {
+                                                        laSyncData.forEachIndexed { idx, future ->
+
+                                                            val result = future.get()
+                                                            if (!result) {
+                                                                val errorMsg = when (idx) {
+                                                                    0 -> poFunds.message
+                                                                    1 -> poAnnual.message
+                                                                    else -> poAccount.message
+                                                                }.takeIf { it.isNotEmpty() } ?: "No message returned"
+
+                                                                println("Sync Error $errorMsg")
+                                                            } else {
+                                                                println("Sync Data: Task $idx success")
+                                                            }
+                                                        }
+                                                        // Stop service only after all tasks complete
+                                                        stopSelf(startId)
+                                                    }
+                                                    .exceptionally { throwable ->
+                                                        throwable.printStackTrace()
+                                                        stopSelf(startId)
+                                                        null
+                                                    }
+
+                                                // Stop service only after all tasks are done
+                                                stopSelf(startId)
+
+
+                                            }else{
+                                                println("Failed to save calendar")
                                                 return@thenAccept
                                             }
-                                        }else if (calendarSuccess is String){
 
-                                            if (calendarSuccess.isEmpty()){
-                                                println(message)
-                                                return@thenAccept
-                                            }
-
-                                        }else{
-                                            println("Failed to save calendar")
-                                            return@thenAccept
                                         }
                                     }
 
+                                }.exceptionally { throwable ->
+                                    throwable.printStackTrace()
+                                    return@exceptionally null
                                 }
-
-                            }.exceptionally { throwable ->
-                                println(throwable.message)
-                                return@exceptionally null
                             }
                         }
                     }
                 }
             }
-
-            // Stop service once tasks are done
-            stopSelf(startId)
+        }else{
+            println("Service has already started")
         }
         return START_NOT_STICKY
     }

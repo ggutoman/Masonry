@@ -25,6 +25,7 @@ import org.gag.appdriver.Room.DataObject.DReceipt
 import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
+import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.DataObject.EProvinceInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
@@ -49,6 +50,7 @@ import org.gag.appdriver.Room.Entities.EReceiptMaster
 import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.Entities.EUserObjects
 
 @Database(
     entities = [
@@ -75,7 +77,8 @@ import org.gag.appdriver.Room.Entities.EUserInfo
         EReceiptMaster::class,
         EReceiptDetail::class,
         EDisbursement::class,
-        EDisbursementAttachment::class
+        EDisbursementAttachment::class,
+        EUserObjects::class
     ],
     version = 1,
     exportSchema = false
@@ -103,6 +106,7 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetProject() : DProjects
     abstract fun GetReceipt() : DReceipt
     abstract fun GetDisbursement() : DDisbursement
+    abstract fun GetUserObjects() : DUserObjects
 
     companion object {
 

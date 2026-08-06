@@ -172,15 +172,10 @@ public class Fragment_UserInfo extends Fragment {
                 List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER, MEMBER_CONSTANTS.STATUS_LIFE_MEMBER, MEMBER_CONSTANTS.STATUS_DUAL_MEMBER, MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER, MEMBER_CONSTANTS.STATUS_DEMIT_MEMBER);
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
-                String lsSponsors = (memberDashboardInfo.getSSponsor1() == null ? "" : memberDashboardInfo.getSSponsor1()) +
-                                        (memberDashboardInfo.getSSponsor2() == null ? "" : "\n" + memberDashboardInfo.getSSponsor2()) +
-                                        (memberDashboardInfo.getSSponsor3() == null ? "" : "\n" + memberDashboardInfo.getSSponsor3());
-
                 mtv_lodge.setText(memberDashboardInfo.getSLodgeNme());
                 mtv_title.setText(memberDashboardInfo.getSTitleDsc());
                 mtv_status.setText(GetMemberStatus.get(Integer.parseInt(memberDashboardInfo.getCMmbrStat())).getFsDescr());
                 mtv_membership.setText(mViewModel.GetFormattedDate(memberDashboardInfo.getDMembrshp(), "MMMM d, yyyy"));
-                mtv_sponsors.setText(lsSponsors);
 
                 mtv_firstname.setText(memberDashboardInfo.getSFrstName());
                 mtv_lastname.setText(memberDashboardInfo.getSLastName());

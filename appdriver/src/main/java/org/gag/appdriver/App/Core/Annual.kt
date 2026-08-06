@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +41,7 @@ import java.util.concurrent.CompletableFuture
 
 class Annual(instance : Context) {
 
-    lateinit var message : String
+    var message : String = "No message found"
 
     val loInstance : Context = instance
     val session : AppConfig = AppConfig(instance)
@@ -239,7 +240,7 @@ class Annual(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveAnnualDue(loMaster : EAnnualMaster, loDetail : List<EAnnualDetail>) : CompletableFuture<Boolean>{
+    fun SaveAnnualDue(lsYearIDxx : String, lsMemberID : String) : CompletableFuture<Boolean>{
 
         val future = CompletableFuture<Boolean>()
 
@@ -250,37 +251,11 @@ class Annual(instance : Context) {
                     false
                 } else {
 
-                    //initialize array of parameters for details
-                    val loDetailParams = JSONArray()
-
-                    loDetail.forEach { loItem ->
-                        val obj = JSONObject().apply {
-
-                            //add transaction no to parameters, if not empty
-                            if (loItem.sTransNox.isNotEmpty()) put("sTransNox", loItem.sTransNox)
-
-                            put("sMemberID", loItem.sMemberID)
-                            put("nAmtDuexx", loItem.nAmtDuexx)
-                            put("nAmtPaidx", loItem.nAmtPaidx)
-                            put("cExemptID", loItem.cExemptID)
-                            put("sRemarksx", loItem.sRemarksx)
-                        }
-                        loDetailParams.put(obj)
-                    }
-
                     //initialize master parameters
                     val loParams = JSONObject().apply {
 
-                        //add transaction no to parameters, if not empty
-                        if (loMaster.sTransNox.isNotEmpty()) put("sTransNox", loMaster.sTransNox)
-
-                        put("sYearIDxx", loMaster.sYearIDxx)
-                        put("dDueDatex", loMaster.dDueDatex)
-                        put("nTranTotl", loMaster.nTranTotl)
-                        put("nCollTotl", loMaster.nCollTotl)
-                        put("cTranStat", loMaster.cTranStat)
-                        put("sRemarksx", loMaster.sRemarksx)
-                        put("detail", loDetailParams)
+                        put("sYearID", lsYearIDxx)
+                        put("sMemberID", lsMemberID)
                     }
 
                     when (val response = httpInstance.makeRequest(
@@ -291,18 +266,6 @@ class Annual(instance : Context) {
                         )
                     )) {
                         is KTORepository.OnRequest.onSuccess -> {
-                            val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
-
-                            //save master with generated key
-                            loMaster.sTransNox = resultData.GetPayload()
-                            poAnnualMaster.SaveAnnualMaster(loMaster)
-
-                            //save detail
-                            loDetail.forEach { loItem ->
-                                loItem.sTransNox = loMaster.sTransNox
-                                poAnnualDetail.SaveAnnualDetail(loItem)
-                            }
-
                             true
                         }
 

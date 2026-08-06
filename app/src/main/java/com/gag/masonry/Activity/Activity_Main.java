@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -19,18 +20,16 @@ import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Login;
 
+import org.gag.appdriver.App.Core.DataSyncService;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
-import org.gag.appdriver.Constants.MENU_ITEM_CONSTANTS;
-import org.gag.appdriver.Constants.MENU_PARENT_CONSTANTS;
-import org.gag.appdriver.Room.DataObject.DMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -156,63 +155,51 @@ public class Activity_Main extends AppCompatActivity {
 
                         poLoad.DismissDialog();
 
-                        if (mviewModel.ObserveUserInfo() == null || mviewModel.GetLodgeInfo() == null){
+                        if (eUserInfo == null){
                             Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                             loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                             poLogin.launch(loIntent);
                             return;
                         }
-
-                        //start syncing user data
-                        Intent loIntent = new Intent("LOGIN_ACTION");
-                        loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
-                        sendBroadcast(loIntent);
 
                         //verify member information, it would be the basis of displaying menus
                         mviewModel.ObserveMemberInfo().observe(Activity_Main.this, new Observer<MemberDashboardInfo>() {
                             @Override
                             public void onChanged(MemberDashboardInfo memberDashboardInfo) {
 
-                                if (memberDashboardInfo == null) return;
+                                try {
 
-                                if (eUserInfo == null) return;
+                                    if (memberDashboardInfo == null) return;
 
-                                /**DOUBLE CHECK CREDENTIALS. ALTHOUGH IT IS ALREADY VALIDATED ON SERVER SIDE**/
+                                    //execute if sync data is not started
+                                    if (!DataSyncService.Companion.isRunning()){
 
-                                //initialize user level based on matching credentials, if mismatch then hide menus
-                                int fnUserLevel;
-                                if (!eUserInfo.getSGLPIDNoX().equalsIgnoreCase(memberDashboardInfo.getSGLPIDNoX()) ||
-                                        !eUserInfo.getSLastName().equalsIgnoreCase(memberDashboardInfo.getSLastName()) ||
-                                        !eUserInfo.getDBirthDte().equalsIgnoreCase(memberDashboardInfo.getDBirthDte()) ){
+                                        //start syncing user data
+                                        Intent loService = new Intent(Activity_Main.this, DataSyncService.class);
+                                        loService.setAction("LOGIN_ACTION");
+                                        loService.putExtra("user_id", eUserInfo.getSUserIDxx());
+                                        loService.putExtra("member_id", memberDashboardInfo.getSMemberID());
 
-                                    //shows only update account and logout
-                                    fnUserLevel = 0;
+                                        startService(loService);
+                                    }
 
-                                }else {
-                                    fnUserLevel = eUserInfo.getNUserLevl();
+                                }catch (Exception ex){
+                                    Log.d("Sync Data", ex.getMessage().toString());
                                 }
+                            }
+                        });
 
-                                //initialze drawer menus
-                                List<MENU_PARENT_CONSTANTS> faParentMenu = mviewModel.GetParentMenu(fnUserLevel);
+                        mviewModel.GetUserObjects(eUserInfo.getNUserLevl()).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
+                            @Override
+                            public void onChanged(List<EUserObjects> eUserObjects) {
 
-                                HashMap<String, List<MENU_ITEM_CONSTANTS>> faParentItems = new HashMap<>();
-                                for (MENU_PARENT_CONSTANTS entries : faParentMenu){
+                                if (eUserObjects == null) return;
 
-                                    faParentItems.put(entries.getFsIDxx(), mviewModel.GetMenuItem(fnUserLevel, entries.getFsIDxx()));
-                                }
-
-                                // Ensure data is passed as ArrayList to match expected types in Activity_Dashboard/Adapter_Drawer
-                                ArrayList<MENU_PARENT_CONSTANTS> laParentList = new ArrayList<>(faParentMenu);
-
-                                HashMap<String, ArrayList<MENU_ITEM_CONSTANTS>> loChildMap = new HashMap<>();
-                                for (Map.Entry<String, List<MENU_ITEM_CONSTANTS>> entry : faParentItems.entrySet()) {
-                                    loChildMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-                                }
-
+                                //proceed to account dashboard
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //clear existing activities
-                                loIntent.putExtra("parent_key", laParentList); //parent menus
-                                loIntent.putExtra("child_items", loChildMap); //parent items
+                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
 
                                 poLogout.launch(loIntent);
                             }
