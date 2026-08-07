@@ -171,7 +171,6 @@ public class VM_Main extends AndroidViewModel {
                     List.of(
                             poAccount.DownloadUserInfo(),
                             poDashboard.DownloadPositionInfo(),
-                            poDashboard.DownloadTitleInfo(),
                             poDashboard.DownloadProvinceInfo(),
                             poDashboard.DownloadTownInfo()
                     )
@@ -247,7 +246,6 @@ public class VM_Main extends AndroidViewModel {
                         poAccount.DownloadUserInfo(),
                         poLodge.DownloadLodgeInfo(),
                         poDashboard.DownloadPositionInfo(),
-                        poDashboard.DownloadTitleInfo(),
                         poDashboard.DownloadProvinceInfo(),
                         poDashboard.DownloadTownInfo()
                 )

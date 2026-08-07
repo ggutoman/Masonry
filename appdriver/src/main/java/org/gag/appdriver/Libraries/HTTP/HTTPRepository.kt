@@ -102,7 +102,7 @@ class KTORepository(instance : Context) {
     }
 
     @SuppressLint("NewApi")
-    suspend fun TestConnection(ipServer: String): OnRequest<HttpResponse>{
+    suspend fun CheckServerConnection(ipServer: String): OnRequest<HttpResponse>{
 
         val httpObj = GetInstance()
 

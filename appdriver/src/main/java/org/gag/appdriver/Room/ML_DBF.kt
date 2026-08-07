@@ -22,7 +22,6 @@ import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProjects
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
 import org.gag.appdriver.Room.DataObject.DReceipt
-import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.DUserObjects
@@ -47,7 +46,6 @@ import org.gag.appdriver.Room.Entities.EProjectDetail
 import org.gag.appdriver.Room.Entities.EProjectMaster
 import org.gag.appdriver.Room.Entities.EReceiptDetail
 import org.gag.appdriver.Room.Entities.EReceiptMaster
-import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.Entities.EUserObjects
@@ -58,7 +56,6 @@ import org.gag.appdriver.Room.Entities.EUserObjects
         EMemberInfo::class,
         ELodgeInfo::class,
         EPosition::class,
-        ETitle::class,
         ETownCity::class,
         EProvinceInfo::class,
         EMemberAddress::class,
@@ -89,7 +86,6 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetMemberDao(): DMemberInfo
     abstract fun GetLodge(): DLodgeInfo
     abstract fun GetPosition(): DPositionInfo
-    abstract fun GetTitle() : DTitleInfo
     abstract fun GetTownCity() : DTownInfo
     abstract fun GetProvince() : DProvinceInfo
     abstract fun GetMemberAddress() : DMemberAddress

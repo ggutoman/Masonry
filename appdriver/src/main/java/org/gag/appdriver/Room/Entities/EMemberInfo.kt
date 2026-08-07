@@ -18,7 +18,6 @@ data class EMemberInfo(
     var cMmbrStat: String?,
     var dMembrshp: String?,
     var dSuspendx: String?,
-    var sTitleIDx: String?,
     var sPositnCd: String?,
     var cRecdStat: String?
 )

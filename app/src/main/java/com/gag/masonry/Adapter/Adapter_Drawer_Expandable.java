@@ -1,10 +1,7 @@
 package com.gag.masonry.Adapter;
 
-import static com.google.android.material.internal.ViewUtils.dpToPx;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +32,7 @@ public class Adapter_Drawer_Expandable extends BaseExpandableListAdapter {
     private final SelectMenu poCallback;
 
     public interface SelectMenu{
-        void OnSelectItem(EUserObjects foObject, int fnPosition);
+        void OnSelect(EUserObjects foObject, int fnPosition);
     }
 
     public Adapter_Drawer_Expandable(Context foinstance, ArrayList<EUserObjects> faMenus, SelectMenu foCallback){
@@ -127,7 +124,7 @@ public class Adapter_Drawer_Expandable extends BaseExpandableListAdapter {
         img_icon.setImageResource(MENU_ICONS.Companion.fromId(paParentList.get(i).getIdxx()) == null ? org.gag.appdriver.R.drawable.baseline_error_24 : MENU_ICONS.Companion.fromId(paParentList.get(i).getIdxx()).getFnIconxx());
 
         //capture selection
-        view.setOnClickListener(view1 -> poCallback.OnSelectItem(paParentList.get(i), i));
+        view.setOnClickListener(view1 -> poCallback.OnSelect(paParentList.get(i), i));
 
         return view;
     }
@@ -138,38 +135,43 @@ public class Adapter_Drawer_Expandable extends BaseExpandableListAdapter {
         if (view == null) view = LayoutInflater.from(loInstance).inflate(R.layout.list_menu_item, viewGroup, false);
 
         MaterialTextView mtv_item = view.findViewById(R.id.mtv_item);
-        RecyclerView rcv_child_items = view.findViewById(R.id.rcv_child_items);
+        RecyclerView rcv_items = view.findViewById(R.id.rcv_child_items);
 
         mtv_item.setText(getChild(i, i1).getSDescriptxx());
 
-        mtv_item.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("RestrictedApi")
+        //intialize items on parent list
+        List<EUserObjects> childItems = new ArrayList<>();
+        for (EUserObjects loMenus : paMenus){
+            if (loMenus.getSParentIDxx().equalsIgnoreCase(getChild(i, i1).getIdxx())) childItems.add(loMenus);
+        }
+
+        if (childItems.size() <= 0) {
+            rcv_items.setVisibility(View.GONE);
+        }else {
+
+            //select adapter items
+            Adapter_Drawer loAdapter = new Adapter_Drawer(childItems, new Adapter_Drawer.SelectMenu() {
+                @Override
+                public void OnSelectItem(EUserObjects loObject) {
+                    poCallback.OnSelect(loObject, i);
+                }
+            });
+
+            rcv_items.setAdapter(loAdapter);
+            rcv_items.setLayoutManager(new LinearLayoutManager(loInstance));
+        }
+
+        //initialize listener for child view
+        view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (rcv_child_items.getVisibility() == View.GONE){
-
-                    List<EUserObjects> childItems = new ArrayList<>();
-                    for (EUserObjects loMenus : paMenus){
-                        if (loMenus.getSParentIDxx().equalsIgnoreCase(getChild(i, i1).getIdxx())) childItems.add(loMenus);
-                    }
-
-                    Adapter_Drawer loAdapter = new Adapter_Drawer(childItems, new Adapter_Drawer.SelectMenu() {
-                        @Override
-                        public void OnSelectItem(EUserObjects loObject) {
-                            //capture selection of child
-                            poCallback.OnSelectItem(loObject, childItems.indexOf(loObject));
-                        }
-                    });
-
-                    rcv_child_items.setAdapter(loAdapter);
-                    rcv_child_items.setLayoutManager(new LinearLayoutManager(loInstance, LinearLayoutManager.VERTICAL, false));
-                    rcv_child_items.setVisibility(View.VISIBLE);
-
-                    return;
+                //show adapter when clicked, only if not empty else callback
+                if (childItems.size() > 0){
+                    rcv_items.setVisibility(rcv_items.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+                }else {
+                    poCallback.OnSelect(getChild(i, i1), i);
                 }
-                rcv_child_items.setVisibility(View.GONE);
-
             }
         });
 

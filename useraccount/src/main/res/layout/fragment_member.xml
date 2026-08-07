@@ -88,20 +88,6 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/CustomDropDownTilStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Select Title  (Required)">
-
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        style="@style/DropdownStyleTheme"
-                        android:id="@+id/auto_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
 
             <com.google.android.material.textview.MaterialTextView

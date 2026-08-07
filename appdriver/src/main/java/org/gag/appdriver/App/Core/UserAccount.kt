@@ -37,7 +37,6 @@ import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
-import org.gag.appdriver.Room.DataObject.DTitleInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.DUserObjects
@@ -47,9 +46,7 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EPosition
-import org.gag.appdriver.Room.Entities.ETitle
 import org.gag.appdriver.Room.Entities.EUserInfo
-import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -67,7 +64,6 @@ class UserAccount(instance : Context) {
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
     val poUserObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
-    val poTitleInfo : DTitleInfo = ML_DBF.getDatabase(instance).GetTitle()
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
     val poMemberContact : DMemberContact = ML_DBF.getDatabase(loInstance)?.GetMemberContact() as DMemberContact
@@ -108,8 +104,6 @@ class UserAccount(instance : Context) {
     fun GetMemberEmail(fsMemberID : String) : LiveData<List<EMemberEmailInfo>> = poMemberEmail.GetMemberEmail(fsMemberID)
 
     fun GetEncryption() : HashRepository = encryptObj
-
-    fun ObserveTitleList() : LiveData<List<ETitle>> = poTitleInfo.ObserveTitleList()
 
     fun ObserveLodgeCalendarList(): LiveData<List<LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList(
                                                                                             TextFormatter()
@@ -205,52 +199,55 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
-                if (lsEncrPass.isEmpty()) {
-                    message = "Could not generate passkey"
-                    false
-                }
-                poUser.sPassword = lsEncrPass
+                }else{
 
-                val loParams = JSONObject().apply {
-                    put("sUserName", poUser.sUserName)
-                    put("sPassword", poUser.sPassword)
-                    put("sGLPIDNoX", poUser.sGLPIDNoX)
-                    put("sLastName", poUser.sLastName)
-                    put("dBirthDte", poUser.dBirthDte)
-                }
+                    val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
+                    if (lsEncrPass.isEmpty()) {
+                        message = "Could not generate passkey"
+                        false
+                    }
+                    poUser.sPassword = lsEncrPass
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ACCOUNT.fsURL,
-                    loParams,
-                    mapOf()
-                ).let { result ->
+                    val loParams = JSONObject().apply {
+                        put("sUserName", poUser.sUserName)
+                        put("sPassword", poUser.sPassword)
+                        put("sGLPIDNoX", poUser.sGLPIDNoX)
+                        put("sLastName", poUser.sLastName)
+                        put("dBirthDte", poUser.dBirthDte)
+                    }
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-                            true
-                        }
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ACCOUNT.fsURL,
+                        loParams,
+                        mapOf()
+                    ).let { result ->
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -277,74 +274,77 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
-                if (lsEncrPass.isEmpty()) {
-                    message = "Could not generate passkey"
-                    false
-                }
-                poUser.sPassword = lsEncrPass
+                }else{
 
-                val loParams = JSONObject().apply {
-                    put("sPassword", poUser.sPassword)
-                    put("sGLPIDNoX", poUser.sGLPIDNoX)
-                    put("sLastName", poUser.sLastName)
-                    put("dBirthDte", poUser.dBirthDte)
-                }
+                    val lsEncrPass: String = encryptObj.EncryptHex(poUser.sPassword)
+                    if (lsEncrPass.isEmpty()) {
+                        message = "Could not generate passkey"
+                        false
+                    }
+                    poUser.sPassword = lsEncrPass
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_USER.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                    val loParams = JSONObject().apply {
+                        put("sPassword", poUser.sPassword)
+                        put("sGLPIDNoX", poUser.sGLPIDNoX)
+                        put("sLastName", poUser.sLastName)
+                        put("dBirthDte", poUser.dBirthDte)
+                    }
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_USER.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                            poMemberInfo.GetMemberInfoByUserID(
-                                TextFormatter()
-                                    .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
-                                    .getOrNull(1) ?: ""
-                            ).let {
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                                if (it == null){
+                                poMemberInfo.GetMemberInfoByUserID(
+                                    TextFormatter()
+                                        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":") //extract token and get user id placed after colon
+                                        .getOrNull(1) ?: ""
+                                ).let {
 
-                                    message = "Could not update. Membership information not found"
-                                    false
+                                    if (it == null){
+
+                                        message = "Could not update. Membership information not found"
+                                        false
+                                    }
+
+                                    //update glp id, and lastname from member name
+                                    it.sGLPIDNoX = poUser.sGLPIDNoX
+                                    it.sLastName = poUser.sLastName
+                                    it.dBirthDte = poUser.dBirthDte
+
+                                    //update user info and member info on local data
+                                    poMemberInfo.SaveMemberInfo(it)
+                                    poUserInfo.SaveUserInfo(poUser)
                                 }
-
-                                //update glp id, and lastname from member name
-                                it.sGLPIDNoX = poUser.sGLPIDNoX
-                                it.sLastName = poUser.sLastName
-                                it.dBirthDte = poUser.dBirthDte
-
-                                //update user info and member info on local data
-                                poMemberInfo.SaveMemberInfo(it)
-                                poUserInfo.SaveUserInfo(poUser)
+                                true
                             }
-                            true
-                        }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -369,45 +369,48 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_USER.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                }else{
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadUserInfo>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_USER.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
-                            poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadUserInfo>(result.data.body())
 
-                            true
-                        }
+                                poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
+                                poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                true
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -435,41 +438,42 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_ANDROID_OBJECTS.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                }else{
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_ANDROID_OBJECTS.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
 
-                            resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
-                            true
-                        }
+                                resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
+                                true
+                            }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                            false
-                        }
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
                 }
@@ -499,44 +503,46 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                }else{
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadMemberList>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poMemberInfo.SaveMemberInfo(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadMemberList>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poMemberInfo.SaveMemberInfo(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
                 }
@@ -564,46 +570,49 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICERS.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                }else{
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICERS.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poOfficer.SaveOfficer(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poOfficer.SaveOfficer(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -630,53 +639,56 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("dFromxx", fdFromxx)
-                    it.put("dToxx", fsDto)
+                }else{
 
-                    if (fsMemberIDx.isNotEmpty()) it.put("sGLPIDNoX", fsMemberIDx)
-                }
+                    val params : JSONObject = JSONObject().also {
+                        it.put("dFromxx", fdFromxx)
+                        it.put("dToxx", fsDto)
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICER_HISTORY.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                        if (fsMemberIDx.isNotEmpty()) it.put("sGLPIDNoX", fsMemberIDx)
+                    }
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadOfficerHistory>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICER_HISTORY.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poOfficerHistory.SaveOfficerHistory(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadOfficerHistory>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poOfficerHistory.SaveOfficerHistory(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -703,50 +715,53 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("sMemberID", fsMemberIDxx)
-                }
+                }else{
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_ADDRESS.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    val params : JSONObject = JSONObject().also {
+                        it.put("sMemberID", fsMemberIDxx)
+                    }
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadMemberAddresses>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_ADDRESS.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poMemberAddress.SaveMemberAddress(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadMemberAddresses>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poMemberAddress.SaveMemberAddress(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -772,50 +787,53 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("sMemberID", fsMemberIDxx)
-                }
+                }else{
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_CONTACT.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    val params : JSONObject = JSONObject().also {
+                        it.put("sMemberID", fsMemberIDxx)
+                    }
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadMemberContact>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_CONTACT.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poMemberContact.SaveMemberContact(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadMemberContact>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poMemberContact.SaveMemberContact(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -841,50 +859,53 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("sMemberID", fsMemberIDxx)
-                }
+                }else{
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_EMAIL.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    val params : JSONObject = JSONObject().also {
+                        it.put("sMemberID", fsMemberIDxx)
+                    }
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadMemberEmail>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBER_EMAIL.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poMemberEmail.SaveMemberEmail(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadMemberEmail>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poMemberEmail.SaveMemberEmail(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -910,50 +931,53 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val params : JSONObject = JSONObject().also {
-                    it.put("sMemberID", fsMemberID)
-                }
+                }else{
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICER_INFO.fsURL,
-                    params,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    val params : JSONObject = JSONObject().also {
+                        it.put("sMemberID", fsMemberID)
+                    }
 
-                            val resultData =
-                                Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICER_INFO.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            resultData.GetPayload().forEach { loItem ->
-                                poOfficer.SaveOfficer(loItem)
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poOfficer.SaveOfficer(loItem)
+                                }
+
+                                true
                             }
 
-                            true
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
+                                false
+                            }
 
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -978,80 +1002,83 @@ class UserAccount(instance : Context) {
             val result : Any = try {
 
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
+
                     message = "No internet connection"
                     false
-                }
 
-                val sLodgeIDx : String = TextFormatter()
-                    .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
-                    .getOrNull(0) ?: ""
+                }else{
 
-                val loParams = JSONObject().apply {
+                    val sLodgeIDx : String = TextFormatter()
+                        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+                        .getOrNull(0) ?: ""
 
-                    //this is identifier for new member or update member
-                    if (memberInfo.sMemberID.isNotEmpty()){
-                        put("sMemberID", memberInfo.sMemberID)
+                    val loParams = JSONObject().apply {
+
+                        //this is identifier for new member or update member
+                        if (memberInfo.sMemberID.isNotEmpty()){
+                            put("sMemberID", memberInfo.sMemberID)
+                        }
+
+                        put("sGLPIDNoX", memberInfo.sGLPIDNoX)
+                        put("sLodgeIDx", sLodgeIDx)
+                        put("sLastName", memberInfo.sLastName)
+                        put("sFrstName", memberInfo.sFrstName)
+                        put("sSuffixNm", memberInfo.sSuffixNm)
+                        put("sMiddName", memberInfo.sMiddName)
+                        put("cCvilStat", memberInfo.cCvilStat)
+                        put("dBirthDte", memberInfo.dBirthDte)
+                        put("cMmbrStat", memberInfo.cMmbrStat)
+                        put("dMembrshp", memberInfo.dMembrshp)
+                        put("dSuspendx", memberInfo.dSuspendx)
+                        put("cRecdStat", memberInfo.cRecdStat)
                     }
 
-                    put("sGLPIDNoX", memberInfo.sGLPIDNoX)
-                    put("sLodgeIDx", sLodgeIDx)
-                    put("sLastName", memberInfo.sLastName)
-                    put("sFrstName", memberInfo.sFrstName)
-                    put("sSuffixNm", memberInfo.sSuffixNm)
-                    put("sMiddName", memberInfo.sMiddName)
-                    put("cCvilStat", memberInfo.cCvilStat)
-                    put("dBirthDte", memberInfo.dBirthDte)
-                    put("cMmbrStat", memberInfo.cMmbrStat)
-                    put("dMembrshp", memberInfo.dMembrshp)
-                    put("dSuspendx", memberInfo.dSuspendx)
-                    put("sTitleIDx", memberInfo.sTitleIDx)
-                    put("cRecdStat", memberInfo.cRecdStat)
-                }
 
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_MEMBER.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_MEMBER.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                                val loResult = Json.Default.decodeFromString<DownloadMemberID>(result.data.body())
 
-                            val loResult = Json.Default.decodeFromString<DownloadMemberID>(result.data.body())
+                                //initialize new member id, if not initialized
+                                if (memberInfo.sMemberID.isNullOrEmpty()){
+                                    memberInfo.sMemberID = loResult.GetPayload().member_id
+                                }
 
-                            //initialize new member id, if not initialized
-                            if (memberInfo.sMemberID.isNullOrEmpty()){
-                                memberInfo.sMemberID = loResult.GetPayload().member_id
+                                if (memberInfo.sGLPIDNoX.isNullOrEmpty()){
+                                    memberInfo.sGLPIDNoX = loResult.GetPayload().alsm_id
+                                }
+
+                                poMemberInfo.SaveMemberInfo(memberInfo)
+                                loResult.GetPayload().member_id
                             }
 
-                            if (memberInfo.sGLPIDNoX.isNullOrEmpty()){
-                                memberInfo.sGLPIDNoX = loResult.GetPayload().alsm_id
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
                             }
 
-                            poMemberInfo.SaveMemberInfo(memberInfo)
-                            loResult.GetPayload().member_id
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -1077,59 +1104,62 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val loParams = JSONObject().apply {
+                }else{
 
-                    //this is identifier for new member or update member
-                    if (loAddress.sAddrsIDx.isNotEmpty()){
-                        put("sAddrsIDx", loAddress.sAddrsIDx)
+                    val loParams = JSONObject().apply {
+
+                        //this is identifier for new member or update member
+                        if (loAddress.sAddrsIDx.isNotEmpty()){
+                            put("sAddrsIDx", loAddress.sAddrsIDx)
+                        }
+
+                        put("sMemberID", loAddress.sMemberID.toString())
+                        put("sAddressx", loAddress.sAddressx.toString())
+                        put("sTownIDxx", loAddress.sTownIDxx.toString())
+                        put("cIsHomeAd", loAddress.cIsHomeAd.toString())
+                        put("cRecdStat", loAddress.cRecdStat.toString())
                     }
 
-                    put("sMemberID", loAddress.sMemberID.toString())
-                    put("sAddressx", loAddress.sAddressx.toString())
-                    put("sTownIDxx", loAddress.sTownIDxx.toString())
-                    put("cIsHomeAd", loAddress.cIsHomeAd.toString())
-                    put("cRecdStat", loAddress.cRecdStat.toString())
-                }
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ADDRESS.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_ADDRESS.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            //initialize new address id, if not initialized
-                            if (loAddress.sAddrsIDx.isNullOrEmpty()){
-                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body())
-                                loAddress.sAddrsIDx = loResult.GetPayload()
+                                //initialize new address id, if not initialized
+                                if (loAddress.sAddrsIDx.isNullOrEmpty()){
+                                    val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                                    loAddress.sAddrsIDx = loResult.GetPayload()
+                                }
+                                poMemberAddress.SaveMemberAddress(loAddress)
+                                true
                             }
-                            poMemberAddress.SaveMemberAddress(loAddress)
-                            true
-                        }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -1155,57 +1185,60 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val loParams = JSONObject().apply {
-                    // identifier for new member or update member
-                    if (laContact.sContctID.isNotEmpty()) {
-                        put("sContctID", laContact.sContctID)
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        // identifier for new member or update member
+                        if (laContact.sContctID.isNotEmpty()) {
+                            put("sContctID", laContact.sContctID)
+                        }
+
+                        put("sMemberID", laContact.sMemberID)
+                        put("sContctNo", laContact.sContctNo)
+                        put("sRemarksx", laContact.sRemarksx ?: "")
+                        put("cRecdStat", laContact.cRecdStat ?: "")
                     }
 
-                    put("sMemberID", laContact.sMemberID)
-                    put("sContctNo", laContact.sContctNo)
-                    put("sRemarksx", laContact.sRemarksx ?: "")
-                    put("cRecdStat", laContact.cRecdStat ?: "")
-                }
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_CONTACT.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_CONTACT.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            //initialize new contact id if not initialized
-                            if (laContact.sContctID.isNullOrEmpty()){
-                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
-                                laContact.sContctID = loResult.GetPayload()
+                                //initialize new contact id if not initialized
+                                if (laContact.sContctID.isNullOrEmpty()){
+                                    val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
+                                    laContact.sContctID = loResult.GetPayload()
+                                }
+                                poMemberContact.SaveMemberContact(laContact)
+                                true
                             }
-                            poMemberContact.SaveMemberContact(laContact)
-                            true
-                        }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -1231,56 +1264,59 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val loParams = JSONObject().apply {
-                    // identifier for new or update
-                    if (laEmail.sMailIDxx.isNotEmpty()) {
-                        put("sMailIDxx", laEmail.sMailIDxx)
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        // identifier for new or update
+                        if (laEmail.sMailIDxx.isNotEmpty()) {
+                            put("sMailIDxx", laEmail.sMailIDxx)
+                        }
+
+                        put("sMemberID", laEmail.sMemberID)
+                        put("sEmailAdd", laEmail.sEmailAdd)
+                        put("cRecdStat", laEmail.cRecdStat ?: "")
                     }
 
-                    put("sMemberID", laEmail.sMemberID)
-                    put("sEmailAdd", laEmail.sEmailAdd)
-                    put("cRecdStat", laEmail.cRecdStat ?: "")
-                }
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_EMAIL.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_EMAIL.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            //initialize new email id if not initialized
-                            if (laEmail.sMailIDxx.isNullOrEmpty()){
-                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
-                                laEmail.sMailIDxx = loResult.GetPayload()
+                                //initialize new email id if not initialized
+                                if (laEmail.sMailIDxx.isNullOrEmpty()){
+                                    val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
+                                    laEmail.sMailIDxx = loResult.GetPayload()
+                                }
+                                poMemberEmail.SaveMemberEmail(laEmail)
+                                true
                             }
-                            poMemberEmail.SaveMemberEmail(laEmail)
-                            true
-                        }
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -1307,53 +1343,56 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                val loParams = JSONObject().apply {
-                    put("sYearIDxx", fOfficer.sYearIDxx)
-                    put("sMemberID", fOfficer.sMemberID)
-                    put("sPositnCd", fOfficer.sPositnCd)
-                    put("cNewStatx", fOfficer.cStatusxx)
-                    put("cAppointx", fOfficer.cAppointx)
-                    put("sRemarksx", fsRemarks)
-                }
+                }else{
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_OFFICER.fsURL,
-                    loParams,
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                    val loParams = JSONObject().apply {
+                        put("sYearIDxx", fOfficer.sYearIDxx)
+                        put("sMemberID", fOfficer.sMemberID)
+                        put("sPositnCd", fOfficer.sPositnCd)
+                        put("cNewStatx", fOfficer.cStatusxx)
+                        put("cAppointx", fOfficer.cAppointx)
+                        put("sRemarksx", fsRemarks)
+                    }
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_UPDATE_OFFICER.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                            //initialize new year id from result
-                            val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
 
-                            fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
-                            poOfficer.SaveOfficer(fOfficer)
-                            true
-                        }
+                                //initialize new year id from result
+                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                                fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
+                                poOfficer.SaveOfficer(fOfficer)
+                                true
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
