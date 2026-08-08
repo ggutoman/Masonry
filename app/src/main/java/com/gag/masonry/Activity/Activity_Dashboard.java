@@ -3,6 +3,7 @@ package com.gag.masonry.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -87,18 +88,41 @@ public class Activity_Dashboard extends AppCompatActivity {
 
         Adapter_Drawer_Expandable loAdapter =  new Adapter_Drawer_Expandable(Activity_Dashboard.this, parentMenu, new Adapter_Drawer_Expandable.SelectMenu() {
             @Override
-            public void OnSelectItem(EUserObjects foObject, int fnPosition) {
+            public void OnSelect(EUserObjects foObject, int fnPosition) {
 
                 switch (foObject.getIdxx()){
 
-                    case "000":
-                        main_drawer.closeDrawer(GravityCompat.START);
-                        InitView("000");
-                        break;
-                    case "003", "004":
+                    case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "031":
+                    case "030": //Sync Data
+                        poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                //re download parameters
+                                mViewmodel.DownloadParameters(new VM_Main.OnDownloadData() {
+                                    @Override
+                                    public void OnDownload() {
+                                        poLoading.ShowDialog("Downloading data. Please wait . . .");
+                                    }
+
+                                    @Override
+                                    public void OnFinished(String fsMessage) {
+                                        poLoading.DismissDialog();
+                                        Toast.makeText(Activity_Dashboard.this, fsMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        });
+                        break;
+                    case "031": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -125,15 +149,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         });
                         break;
                     default:
-                        poMessage.ShowMessage(1, "Feature under maintenance. Thankyou for understanding.", "Okay", "", new Message_Dialog.OnDialogClick() {
-                            @Override
-                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
-                            }
-
-                            @Override
-                            public void OnNegative(@NotNull AlertDialog poDialog) {}
-                        });
+                        InitView(foObject.getIdxx());
                 }
             }
         });
@@ -161,6 +177,9 @@ public class Activity_Dashboard extends AppCompatActivity {
         //get changes from user account, to get the accurate details passed for updating account
         EUserInfo loUser = mViewmodel.GetUserInfo();
 
+        //close drawer
+        main_drawer.closeDrawer(GravityCompat.START);
+
         //paramter object for arguments
         Bundle loArgs;
         switch (fsItemID){
@@ -175,11 +194,17 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loHome);
                 fragmentTransaction.addToBackStack("home");
                 break;
-            case "MEM002":
+            case "029": //account info
+                Fragment_UserInfo loFragUser = new Fragment_UserInfo();
+
+                fragmentTransaction.replace(R.id.layout_container, loFragUser);
+                fragmentTransaction.addToBackStack("view_account");
+                break;
+            case "005":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
                 fragmentTransaction.addToBackStack("create_member");
                 break;
-            case "MEM003":
+            case "006":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
                 fragmentTransaction.addToBackStack("assign_officer");
                 break;
@@ -190,12 +215,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "ACC002": //reports
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
                 fragmentTransaction.addToBackStack("generate_report");
-                break;
-            case "ACC003": //account info
-                Fragment_UserInfo loFragUser = new Fragment_UserInfo();
-
-                fragmentTransaction.replace(R.id.layout_container, loFragUser);
-                fragmentTransaction.addToBackStack("view_account");
                 break;
             case "FND001":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
@@ -273,6 +292,16 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
                 fragmentTransaction.addToBackStack("disbursement_attachments");
                 break;
+            default:
+                poMessage.ShowMessage(1, "Feature under maintenance. Thankyou for understanding.", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
 
         }
         fragmentTransaction.commit();

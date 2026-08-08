@@ -95,38 +95,41 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-                }
 
-                httpInstance.makeRequest(
-                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_FUND_MASTER.fsURL,
-                    JSONObject(),
-                    mapOf(
-                        "access-token" to session.getokenID()
-                    )
-                ).let { result ->
+                }else{
 
-                    when (result) {
-                        is KTORepository.OnRequest.onSuccess -> {
-                            true
-                        }
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_FUND_MASTER.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
 
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData =
-                                Json.Default.decodeFromString<DownloadError>(result.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
 
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
-                            false
-                        }
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
 
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
                         }
                     }
+
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
@@ -152,6 +155,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -222,6 +226,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -294,6 +299,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -358,6 +364,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -424,6 +431,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -497,6 +505,7 @@ class Funds(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {

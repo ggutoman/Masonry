@@ -1,11 +1,12 @@
 package com.gag.useraccount.Fragments;
 
-import android.annotation.SuppressLint;
+import android.Manifest;
 import android.app.DatePickerDialog;
-import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,9 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.Filter;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,29 +35,25 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 
-import org.gag.appdriver.App.Adapters.LodgeAdapter;
 import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
-import org.gag.appdriver.App.Adapters.TitleAdapter;
-import org.gag.appdriver.App.Models.LodgeInfo;
+import org.gag.appdriver.App.Core.SMSApp;
+import org.gag.appdriver.App.Interface.OnSMSStatus;
 import org.gag.appdriver.App.Models.TownProvince;
-import org.gag.appdriver.Room.DataObject.DTownInfo;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Room.Entities.ETitle;
+import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Fragment_Member extends Fragment {
+public class Fragment_Member extends Fragment{
 
     private Message_Dialog poMessage;
     private LoadDialog poDialog;
@@ -66,7 +61,6 @@ public class Fragment_Member extends Fragment {
 
     private MaterialAutoCompleteTextView
             auto_status,
-            auto_title,
             auto_town,
             auto_contact,
             auto_email,
@@ -91,7 +85,6 @@ public class Fragment_Member extends Fragment {
     private CheckBox chkbx_homeaddr, chkbx_active, chkbx_activecontact, chkbx_activeemail;
 
     private Dialog_Add_Member_Info poDialogAddMember;
-    private TitleAdapter TitleAdapter;
     private MemberAddressAdapter MemberAddressAdapter;
     private MemberContactAdapter MemberContactAdapter;
     private MemberEmailAdapter MemberEmailAdapter;
@@ -99,7 +92,6 @@ public class Fragment_Member extends Fragment {
     private List<TownProvince> paramTownProvince= new ArrayList<>();
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
-    private String lsSelectTitle;
 
     private EMemberInfo loMemberInfo;
     private TownProvince loSelectAddress;
@@ -137,10 +129,6 @@ public class Fragment_Member extends Fragment {
             Toast.makeText(requireActivity(), "Please select account status", Toast.LENGTH_SHORT).show();
             auto_status.requestFocus();
             return false;
-        }else if (lsSelectTitle == null || lsSelectTitle.isEmpty()){
-            Toast.makeText(requireActivity(), "Please select a title", Toast.LENGTH_SHORT).show();
-            auto_title.requestFocus();
-            return false;
         }else if (tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty()){
             Toast.makeText(requireActivity(), "Please enter lastname", Toast.LENGTH_SHORT).show();
             tie_lastname.requestFocus();
@@ -173,7 +161,6 @@ public class Fragment_Member extends Fragment {
 
         tie_glpid = view.findViewById(R.id.tie_glpid);
         auto_status = view.findViewById(R.id.auto_status);
-        auto_title = view.findViewById(R.id.auto_title);
         auto_town = view.findViewById(R.id.auto_town);
         auto_contact = view.findViewById(R.id.auto_contact);
         auto_email = view.findViewById(R.id.auto_email);
@@ -371,31 +358,6 @@ public class Fragment_Member extends Fragment {
             }
         });
 
-        mviewModel.GetTitleList().observe(getViewLifecycleOwner(), new Observer<List<ETitle>>() {
-            @Override
-            public void onChanged(List<ETitle> eTitles) {
-
-                TitleAdapter = new TitleAdapter(
-                        requireActivity(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        eTitles
-                );
-                auto_title.setAdapter(TitleAdapter);
-
-                if (loMemberInfo == null) return;
-
-                //display the title information if member information is set
-                for (int index = 0; index < TitleAdapter.titles.size(); index++){
-
-                    if (loMemberInfo.getSTitleIDx().equalsIgnoreCase(TitleAdapter.titles.get(index).getSTitleIDx())){
-
-                        auto_title.setText(TitleAdapter.titles.get(index).getSTitleDsc(), false);
-                        lsSelectTitle = TitleAdapter.titles.get(index).getSTitleIDx();
-                    }
-                }
-            }
-        });
-
         mviewModel.HasNewAddress().observe(getViewLifecycleOwner(), new Observer<List<TownProvince>>() {
             @Override
             public void onChanged(List<TownProvince> memberAddresses) {
@@ -477,15 +439,6 @@ public class Fragment_Member extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 lnSelectStatus = i;
-            }
-        });
-
-        auto_title.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                lsSelectTitle = ((ETitle) adapterView.getItemAtPosition(i)).getSTitleIDx();
-                auto_title.setText(((ETitle) adapterView.getItemAtPosition(i)).getSTitleDsc(), false);
             }
         });
 
@@ -836,6 +789,32 @@ public class Fragment_Member extends Fragment {
                 //validate member data information
                 if (!isMemberDataValid()) return;
 
+                //if permission is not granted, redirect user to app settings and manually allow the permission before submitting
+                if (requireActivity().checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
+
+                    Disclosure_Dialog poDisclosure = new Disclosure_Dialog(requireActivity());
+                    poDisclosure.InitDialog();
+
+                    poDisclosure.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo,
+                            "SMS permission is required. Please allow before saving your entry", "Deny", "Accept", new Disclosure_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
+                                    startActivity(intent);
+
+                                }
+                            });
+                    return;
+                }
+
                 poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poConfirmDialog) {
@@ -868,7 +847,6 @@ public class Fragment_Member extends Fragment {
                                     String.valueOf(lnSelectStatus),
                                     mviewModel.GetCurrentDate(),
                                     lnSelectStatus > 1 ? mviewModel.GetCurrentDateTime() : null,
-                                    lsSelectTitle,
                                     null,
                                     lnSelectStatus != 1 ? "0" : "1"
                             );
@@ -892,7 +870,6 @@ public class Fragment_Member extends Fragment {
                             loMemberInfo.setCCvilStat(String.valueOf(lnSelectCivil));
                             loMemberInfo.setDBirthDte(tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString());
                             loMemberInfo.setCMmbrStat(String.valueOf(lnSelectStatus));
-                            loMemberInfo.setSTitleIDx(lsSelectTitle);
                             loMemberInfo.setCRecdStat(String.valueOf(lnSelectStatus));
                         }
 
@@ -1043,42 +1020,42 @@ public class Fragment_Member extends Fragment {
                             public void OnSuccess() {
                                 poDialog.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Member information has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                poMessage.ShowMessage(2, "Member information has been saved successfully. Do you want to send ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
 
-
-                                        //reset only text from selection
-                                        ClearFields(new ArrayList<>(List.of(auto_title, auto_status, auto_civil)), false);
-
-                                        //clear all fields and adapters
-                                        ClearFields(new ArrayList<>(List.of(tie_glpid, tie_lastname,
-                                                        tie_firstname, tie_middlename, tie_suffix, tie_birthdate, tie_address,
-                                                        auto_town, chkbx_homeaddr, chkbx_homeaddr, auto_contact, tie_remarks, chkbx_activecontact,
-                                                        auto_email, chkbx_activeemail, btn_save_address, btn_save_contact, btn_save_email
-                                                    )
-                                                ),
-                                                true);
-
-                                        //reset parameters or data
-                                        loMemberInfo = null;
-                                        paramTownProvince = null;
-                                        paramContact = null;
-                                        paramEmail = null;
-
-                                        mviewModel.ClearSponsor();
-                                        mviewModel.ClearAddress();
-                                        mviewModel.ClearContacts();
-                                        mviewModel.ClearEmails();
-
-                                        requireActivity()
-                                                .getSupportFragmentManager()
-                                                .popBackStack("create_member", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                        FinishTask();
                                     }
 
                                     @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+
+                                        //find the primary and active contact number of the member
+                                        laContactParams
+                                                .stream()
+                                                .filter(eMemberContactInfo -> eMemberContactInfo.getCRecdStat().equalsIgnoreCase("1"))
+                                                .findAny()
+                                                .ifPresent(eMemberContactInfo -> {
+
+                                                    if (loMemberInfo == null) return;
+
+                                                    //compose message for the member's ALSM ID
+                                                    String lsMessage = "KGA " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                                            "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
+                                                            "Please do not share your registration ID for Masonry Application";
+
+                                                    new SMSApp(requireActivity(), new OnSMSStatus() {
+                                                        @Override
+                                                        public void OnResult(String fsResult) {
+                                                            Toast.makeText(requireActivity(), fsResult, Toast.LENGTH_SHORT).show();
+                                                            FinishTask();
+                                                        }
+                                                    }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
+                                                });
+
+                                    }
                                 });
                             }
 
@@ -1125,4 +1102,34 @@ public class Fragment_Member extends Fragment {
         }
     }
 
+    private void FinishTask(){
+
+        //reset only text from selection
+        ClearFields(new ArrayList<>(List.of(auto_status, auto_civil)), false);
+
+        //clear all fields and adapters
+        ClearFields(new ArrayList<>(List.of(tie_glpid, tie_lastname,
+                        tie_firstname, tie_middlename, tie_suffix, tie_birthdate, tie_address,
+                        auto_town, chkbx_homeaddr, chkbx_homeaddr, auto_contact, tie_remarks, chkbx_activecontact,
+                        auto_email, chkbx_activeemail, btn_save_address, btn_save_contact, btn_save_email
+                )
+                ),
+                true);
+
+        //reset parameters or data
+        loMemberInfo = null;
+        paramTownProvince = null;
+        paramContact = null;
+        paramEmail = null;
+
+        mviewModel.ClearSponsor();
+        mviewModel.ClearAddress();
+        mviewModel.ClearContacts();
+        mviewModel.ClearEmails();
+
+        requireActivity()
+                .getSupportFragmentManager()
+                .popBackStack("create_member", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+    }
 }

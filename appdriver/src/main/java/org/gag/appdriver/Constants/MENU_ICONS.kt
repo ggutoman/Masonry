@@ -10,6 +10,16 @@ enum class MENU_ICONS(val fsIDxx : String, val fnIconxx : Int){
         R.drawable.ic_baseline_home
     ),
 
+    MENU_MEMBER(
+        "001",
+        R.drawable.baseline_member
+    ),
+
+    MENU_PROJECTS(
+        "002",
+        R.drawable.baseline_project
+    ),
+
     MENU_ACCOUNTING(
         "003",
         R.drawable.baseline_funds

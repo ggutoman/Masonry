@@ -32,8 +32,7 @@ interface DOfficer {
             "GROUP BY " +
             "a.sMemberID " +
             "ORDER BY " +
-            "a.dModified DESC, " +
-            "a.nEntryNox ASC ")
+            "a.dModified DESC")
     fun ObserveOfficerList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>>
 
     @Query("SELECT * FROM Officer_Info WHERE sMemberID= :fsMemberIDx AND sYearIDxx= :fsYearIDx")

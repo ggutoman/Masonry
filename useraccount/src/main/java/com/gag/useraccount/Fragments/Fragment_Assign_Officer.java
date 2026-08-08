@@ -47,12 +47,10 @@ public class Fragment_Assign_Officer extends Fragment {
     private LoadDialog poLoading;
     private Message_Dialog poMessage;
 
-    private LodgeCalendarAdapter loLodgeCalAdapter;
     private MemberAdapter loMemberAdapter;
     private PositionAdapter loPositionAdapter;
 
     private EOfficer loOfficer;
-    private LodgeCalendarList loSelectCalendar;
     private EMemberInfo loSelectMember;
     private EPosition loSelectPosition;
 
@@ -60,7 +58,7 @@ public class Fragment_Assign_Officer extends Fragment {
     private int lnSelectLevel = -1, lnSelectStatus = -1;
 
     private TextInputEditText tie_remarks;
-    private MaterialAutoCompleteTextView  tie_yearid, auto_member, auto_position, auto_type, auto_status;
+    private MaterialAutoCompleteTextView auto_member, auto_position, auto_type, auto_status;
     private MaterialButton btn_create;
 
     @Nullable
@@ -84,8 +82,6 @@ public class Fragment_Assign_Officer extends Fragment {
     }
 
     private void InitViews(View view){
-
-        tie_yearid = view.findViewById(R.id.tie_yearid);
         auto_member = view.findViewById(R.id.auto_member);
         auto_position = view.findViewById(R.id.auto_position);
         auto_type = view.findViewById(R.id.auto_type);
@@ -97,38 +93,11 @@ public class Fragment_Assign_Officer extends Fragment {
 
     private void InitDataReceiver(){
 
-        if (getArguments() == null){
-            btn_create.setText("Assign Officer");
-            lsSelectMember = "";
-            lsSelectCalendar = "";
-        }else {
+        //initialize defualt values
+        lsSelectMember = getArguments() == null || !getArguments().containsKey("fsMemberID") ? "" : getArguments().getString("fsMemberID");
+        lsSelectCalendar = getArguments() == null || !getArguments().containsKey("fsYearID") ? "" : getArguments().getString("fsYearID");
 
-            if ((getArguments().getString("fsMemberID") == null || getArguments().getString("fsMemberID").isEmpty()) ||
-                    getArguments().getString("fsYearID") == null || getArguments().getString("fsYearID").isEmpty()){
-
-                poMessage.ShowMessage(1, "Could not verify officer data", "Okay", "", new Message_Dialog.OnDialogClick() {
-                    @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-
-                        requireActivity()
-                                .getSupportFragmentManager()
-                                .beginTransaction()
-                                .remove(Fragment_Assign_Officer.this)
-                                .commit();
-                    }
-
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                });
-                return;
-            }
-            btn_create.setText("Update Officer");
-
-            lsSelectMember = getArguments().getString("fsMemberID");
-            lsSelectCalendar = getArguments().getString("fsYearID");
-        }
-
+        /** 1.GET OFFICER INFORMATION **/
         mViewmodel.ObserveOfficerInfo(lsSelectMember, lsSelectCalendar).observe(getViewLifecycleOwner(), new Observer<EOfficer>() {
             @Override
             public void onChanged(EOfficer eOfficer) {
@@ -156,41 +125,29 @@ public class Fragment_Assign_Officer extends Fragment {
                         });
                         return;
                     }
-                }else {
 
+                }else {
                     loOfficer = eOfficer;
                 }
 
+                /** 2.GET MASONIC CALENDAR INFORMATION **/
                 mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
-                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
 
                         if (lodgeCalendarLists == null) return;
 
-                        loLodgeCalAdapter = new LodgeCalendarAdapter(
-                                requireActivity(),
-                                org.gag.appdriver.R.layout.adapter_list_lodge_calendar,
-                                lodgeCalendarLists
-                        );
+                        for (LodgeCalendarList loCalendar : lodgeCalendarLists){
 
-                        tie_yearid.setAdapter(loLodgeCalAdapter);
-
-                        if (loOfficer == null) return;
-
-                        lodgeCalendarLists.stream()
-                                .filter(loCalendar -> loCalendar.getSYearIDxx()
-                                        .equalsIgnoreCase(loOfficer.getSYearIDxx()))
-                                .findFirst()
-                                .ifPresent(loCalendar ->{
-
-                                    tie_yearid.setText(loCalendar.getSLodgeNme() + " (" + loCalendar.getNYearxxxx() + ")", false);
-                                    loSelectCalendar = loCalendar;
-
-                                });
+                            //get masonic calendar for the year, only if no arguments is passed
+                            if (loCalendar.getNYearxxxx().equalsIgnoreCase(mViewmodel.GetFormattedDate(mViewmodel.GetCurrentDate(), "yyyy"))){
+                                if(getArguments() == null) lsSelectCalendar = loCalendar.getSYearIDxx();
+                            }
+                        }
                     }
                 });
 
+                /** 3.GET MEMBER/S INFORMATION **/
                 mViewmodel.ObserverMemberList().observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
                     @SuppressLint("SetTextI18n")
                     @Override
@@ -205,6 +162,7 @@ public class Fragment_Assign_Officer extends Fragment {
                         auto_member.setAdapter(loMemberAdapter);
 
                         if (loOfficer == null) return;
+
                         eMemberInfos.stream()
                                 .filter(loMember -> loMember.getSMemberID()
                                         .equalsIgnoreCase(loOfficer.getSMemberID()))
@@ -213,10 +171,14 @@ public class Fragment_Assign_Officer extends Fragment {
 
                                     auto_member.setText(loMember.getSFrstName() + " " + loMember.getSLastName(), false);
                                     loSelectMember = loMember;
+
+                                    //if member information is found the do not to change selection of member
+                                    auto_member.setEnabled(false);
                                 });
                     }
                 });
 
+                /** 4.GET POSITION LIST INFORMATION **/
                 mViewmodel.ObserverPositionList().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
                     @Override
                     public void onChanged(List<EPosition> ePositions) {
@@ -265,18 +227,6 @@ public class Fragment_Assign_Officer extends Fragment {
 
     private void InitListener(){
 
-        tie_yearid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                loSelectCalendar= (LodgeCalendarList) adapterView.getItemAtPosition(i);
-                tie_yearid.setText(loSelectCalendar.getSLodgeNme() + " (" + loSelectCalendar.getNYearxxxx() + ")");
-
-                lsSelectCalendar = loSelectCalendar.getSYearIDxx();
-            }
-        });
-
         auto_member.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -301,45 +251,6 @@ public class Fragment_Assign_Officer extends Fragment {
             }
         });
 
-        auto_position.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                loSelectPosition = (EPosition) adapterView.getItemAtPosition(i);
-                auto_position.setText(loSelectPosition.getSPositnDs());
-            }
-        });
-
-        auto_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                lnSelectLevel = i;
-            }
-        });
-
-        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                lnSelectStatus = i;
-            }
-        });
-
-        tie_yearid.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable editable) {}
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                if (loLodgeCalAdapter == null) return;
-                loLodgeCalAdapter.getFilter().filter(charSequence.toString());
-            }
-        });
-
         auto_member.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable editable) {}
@@ -352,6 +263,16 @@ public class Fragment_Assign_Officer extends Fragment {
 
                 if (loMemberAdapter == null) return;
                 loMemberAdapter.getFilter().filter(charSequence.toString());
+            }
+        });
+
+        auto_position.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                loSelectPosition = (EPosition) adapterView.getItemAtPosition(i);
+                auto_position.setText(loSelectPosition.getSPositnDs());
             }
         });
 
@@ -370,13 +291,27 @@ public class Fragment_Assign_Officer extends Fragment {
             }
         });
 
+        auto_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                lnSelectLevel = i;
+            }
+        });
+
+        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                lnSelectStatus = i;
+            }
+        });
+
         btn_create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 if (!IsEntryOkay()) return;
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Assigning this member will remove the current officer from the role. Do you want to continue?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
@@ -387,8 +322,7 @@ public class Fragment_Assign_Officer extends Fragment {
                         poDialog.dismiss();
 
                         EOfficer loParam = new EOfficer(
-                                loSelectCalendar.getSYearIDxx(),
-                                0,
+                                lsSelectCalendar,
                                 loSelectPosition.getSPositnCd(),
                                 loSelectMember.getSMemberID(),
                                 String.valueOf(lnSelectLevel),
@@ -450,8 +384,8 @@ public class Fragment_Assign_Officer extends Fragment {
 
     private boolean IsEntryOkay(){
 
-        if (loSelectCalendar == null){
-            Toast.makeText(requireActivity(), "Please select a calendar lodge", Toast.LENGTH_SHORT).show();
+        if (lsSelectCalendar == null){
+            Toast.makeText(requireActivity(), "Masonic calendar not set, Download parameters to refresh your data", Toast.LENGTH_SHORT).show();
             return false;
         }else if (loSelectMember == null){
             Toast.makeText(requireActivity(), "Please select a member", Toast.LENGTH_SHORT).show();

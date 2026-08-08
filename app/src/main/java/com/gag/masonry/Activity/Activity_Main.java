@@ -20,7 +20,7 @@ import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Activity.Activity_Login;
 
-import org.gag.appdriver.App.Core.DataSyncService;
+import org.gag.appdriver.App.Service.DataSyncService;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Room.Entities.EUserObjects;
@@ -135,6 +135,8 @@ public class Activity_Main extends AppCompatActivity {
             laPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }else if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }else if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            laPermissions.add(Manifest.permission.SEND_SMS);
         }
 
         poPermissions.launch(laPermissions.toArray(new String[0]));

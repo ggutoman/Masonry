@@ -17,7 +17,6 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EPosition;
-import org.gag.appdriver.Room.Entities.ETitle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -183,6 +182,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetCurrentDateTime();
     }
 
+    public String GetFormattedDate(String fsInput, String fsFormat){
+        return poAccount.GetFormattedDate(fsInput, fsFormat);
+    }
+
     public String GetUserID(){
         return poAccount.GetUserID();
     }
@@ -193,10 +196,6 @@ public class VM_Member extends AndroidViewModel {
 
     public LiveData<List<EMemberInfo>> ObserverMemberList(){
         return poAccount.ObserveMemberList();
-    }
-
-    public LiveData<List<ETitle>> GetTitleList(){
-        return poAccount.ObserveTitleList();
     }
 
     public LiveData<List<TownProvince>> SearchTown(String fsSearch){

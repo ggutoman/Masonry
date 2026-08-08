@@ -1,13 +1,16 @@
-package org.gag.appdriver.App.Core
+package org.gag.appdriver.App.Service
 
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.gag.appdriver.App.Core.Annual
+import org.gag.appdriver.App.Core.Funds
+import org.gag.appdriver.App.Core.Lodge
+import org.gag.appdriver.App.Core.UserAccount
 import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
@@ -72,7 +75,7 @@ class DataSyncService : Service(){
                                                     return@thenAccept
                                                 }
 
-                                                val laSyncData = hashSetOf(
+                                                val laSyncData = listOf(
                                                     poFunds.SaveLodgeFund(),
                                                     poAnnual.SaveAnnualDue(loCalendar, memberId.toString()),
                                                     poAccount.DownloadUserObjects(),
@@ -92,7 +95,7 @@ class DataSyncService : Service(){
                                                                     else -> poAccount.message
                                                                 }.takeIf { it.isNotEmpty() } ?: "No message returned"
 
-                                                                println("Sync Error $errorMsg")
+                                                                println("Sync $idx Error $errorMsg")
                                                             } else {
                                                                 println("Sync Data: Task $idx success")
                                                             }

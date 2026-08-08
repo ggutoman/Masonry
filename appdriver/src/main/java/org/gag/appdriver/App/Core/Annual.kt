@@ -97,6 +97,7 @@ class Annual(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     val loParams = JSONObject().apply {
@@ -174,6 +175,7 @@ class Annual(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     //set member id parameter, if not empty
@@ -249,6 +251,7 @@ class Annual(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     //initialize master parameters
@@ -287,6 +290,7 @@ class Annual(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
+                ex.printStackTrace()
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
@@ -310,6 +314,7 @@ class Annual(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
+
                 } else {
 
                     //initialize master parameters
