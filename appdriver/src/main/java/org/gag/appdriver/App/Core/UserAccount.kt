@@ -85,6 +85,8 @@ class UserAccount(instance : Context) {
 
     fun GetCurrentDateTime() : String = dateObj.GetCurrentDateTime()
 
+    fun GetFormattedDate(fsInput : String, fsFormat : String) : String = dateObj.FormatDate(fsInput, fsFormat)
+
     fun GetSession() : AppConfig = session
 
     fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo> = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
@@ -1347,7 +1349,6 @@ class UserAccount(instance : Context) {
                 }else{
 
                     val loParams = JSONObject().apply {
-                        put("sYearIDxx", fOfficer.sYearIDxx)
                         put("sMemberID", fOfficer.sMemberID)
                         put("sPositnCd", fOfficer.sPositnCd)
                         put("cNewStatx", fOfficer.cStatusxx)
@@ -1366,10 +1367,6 @@ class UserAccount(instance : Context) {
                         when (result) {
                             is KTORepository.OnRequest.onSuccess -> {
 
-                                //initialize new year id from result
-                                val loResult = Json.Default.decodeFromString<DownloadKey>(result.data.body());
-
-                                fOfficer.nEntryNox = Integer.valueOf(loResult.GetPayload())
                                 poOfficer.SaveOfficer(fOfficer)
                                 true
                             }

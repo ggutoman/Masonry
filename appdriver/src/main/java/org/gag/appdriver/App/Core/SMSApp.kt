@@ -8,11 +8,11 @@ import android.os.Build
 import android.telephony.SmsManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import org.gag.appdriver.App.Interface.OnSMSStatus
 import org.gag.appdriver.App.Service.DataReceiver
 
-class SMSApp(loInstance : Context) {
+class SMSApp(val loInstance : Context, val foCallback : OnSMSStatus){
 
-    val loContext : Context = loInstance
     val FLAG_SENT : String = "SMS_SENT"
     val FLAG_DELIVERED : String = "SMS_DELIVERED"
 
@@ -41,25 +41,25 @@ class SMSApp(loInstance : Context) {
 
             // Create PendingIntents
             val sentPI = PendingIntent.getBroadcast(
-                loContext, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE
+                loInstance, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE
             )
             val deliveredPI = PendingIntent.getBroadcast(
-                loContext, 0, deliveredIntent, PendingIntent.FLAG_IMMUTABLE
+                loInstance, 0, deliveredIntent, PendingIntent.FLAG_IMMUTABLE
             )
 
             // Register your DataReceiver for both actions
-            val sentReceiver = DataReceiver()
-            val deliveredReceiver = DataReceiver()
+            val sentReceiver = DataReceiver(foCallback)
+            val deliveredReceiver = DataReceiver(foCallback)
 
             ContextCompat.registerReceiver(
-                loContext,
+                loInstance,
                 sentReceiver,
                 IntentFilter(FLAG_SENT),
                 ContextCompat.RECEIVER_NOT_EXPORTED
             )
 
             ContextCompat.registerReceiver(
-                loContext,
+                loInstance,
                 deliveredReceiver,
                 IntentFilter(FLAG_DELIVERED),
                 ContextCompat.RECEIVER_NOT_EXPORTED
@@ -69,7 +69,7 @@ class SMSApp(loInstance : Context) {
             smsManager.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI)
 
         }catch (ex : Exception){
-            Toast.makeText(loContext, ex.message.toString(), Toast.LENGTH_SHORT).show()
+            foCallback.OnResult(ex.message.toString())
         }
     }
 

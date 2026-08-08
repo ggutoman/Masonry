@@ -182,6 +182,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetCurrentDateTime();
     }
 
+    public String GetFormattedDate(String fsInput, String fsFormat){
+        return poAccount.GetFormattedDate(fsInput, fsFormat);
+    }
+
     public String GetUserID(){
         return poAccount.GetUserID();
     }

@@ -7,8 +7,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.widget.Toast
+import org.gag.appdriver.App.Interface.OnSMSStatus
 
-class DataReceiver : BroadcastReceiver() {
+class DataReceiver(val poResult: OnSMSStatus) : BroadcastReceiver() {
 
     override fun onReceive(p0: Context?, p1: Intent?) {
 
@@ -25,19 +26,19 @@ class DataReceiver : BroadcastReceiver() {
 
                         when(resultCode){
 
-                            Activity.RESULT_OK-> Toast.makeText(p0, "SMS sent successfully",Toast.LENGTH_SHORT).show()
-                            Activity.RESULT_CANCELED-> Toast.makeText(p0, "SMS cancelled",Toast.LENGTH_SHORT).show()
-                            SmsManager.RESULT_ERROR_GENERIC_FAILURE -> Toast.makeText(p0, "Generic Failure",Toast.LENGTH_SHORT).show()
-                            SmsManager.RESULT_ERROR_NO_SERVICE  -> Toast.makeText(p0, "No Service",Toast.LENGTH_SHORT).show()
-                            SmsManager.RESULT_ERROR_NULL_PDU  -> Toast.makeText(p0, "Null PDU",Toast.LENGTH_SHORT).show()
-                            SmsManager.RESULT_ERROR_RADIO_OFF  -> Toast.makeText(p0, "Radio Off",Toast.LENGTH_SHORT).show()
+                            Activity.RESULT_OK-> poResult.OnResult("SMS sent successfully")
+                            Activity.RESULT_CANCELED-> poResult.OnResult("SMS was cancelled")
+                            SmsManager.RESULT_ERROR_GENERIC_FAILURE -> poResult.OnResult("Generic failure")
+                            SmsManager.RESULT_ERROR_NO_SERVICE  -> poResult.OnResult("No service")
+                            SmsManager.RESULT_ERROR_NULL_PDU  -> poResult.OnResult("Null PDU")
+                            SmsManager.RESULT_ERROR_RADIO_OFF  -> poResult.OnResult("Radio Off")
                         }
                     }else if (sms_status.equals("SMS_DELIVERED")) {
 
                         when(resultCode){
 
-                            Activity.RESULT_OK-> Toast.makeText(p0, "SMS sent successfully",Toast.LENGTH_SHORT).show()
-                            Activity.RESULT_CANCELED-> Toast.makeText(p0, "SMS cancelled",Toast.LENGTH_SHORT).show()
+                            Activity.RESULT_OK-> poResult.OnResult("SMS sent successfully")
+                            Activity.RESULT_CANCELED-> poResult.OnResult("SMS cancelled")
                         }
 
                     }

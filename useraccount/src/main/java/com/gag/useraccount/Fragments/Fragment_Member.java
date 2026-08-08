@@ -1,14 +1,11 @@
 package com.gag.useraccount.Fragments;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.SmsManager;
-import android.telephony.SubscriptionManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -42,6 +39,7 @@ import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
 import org.gag.appdriver.App.Core.SMSApp;
+import org.gag.appdriver.App.Interface.OnSMSStatus;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
@@ -51,14 +49,11 @@ import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
-
-import java.security.Permission;
-import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class Fragment_Member extends Fragment {
+public class Fragment_Member extends Fragment{
 
     private Message_Dialog poMessage;
     private LoadDialog poDialog;
@@ -794,6 +789,32 @@ public class Fragment_Member extends Fragment {
                 //validate member data information
                 if (!isMemberDataValid()) return;
 
+                //if permission is not granted, redirect user to app settings and manually allow the permission before submitting
+                if (requireActivity().checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
+
+                    Disclosure_Dialog poDisclosure = new Disclosure_Dialog(requireActivity());
+                    poDisclosure.InitDialog();
+
+                    poDisclosure.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo,
+                            "SMS permission is required. Please allow before saving your entry", "Deny", "Accept", new Disclosure_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
+                                    startActivity(intent);
+
+                                }
+                            });
+                    return;
+                }
+
                 poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poConfirmDialog) {
@@ -999,70 +1020,42 @@ public class Fragment_Member extends Fragment {
                             public void OnSuccess() {
                                 poDialog.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Member information has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                poMessage.ShowMessage(2, "Member information has been saved successfully. Do you want to send ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
 
-                                        poMessage.ShowMessage(2, "Send ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                            @Override
-                                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                poDialog.dismiss();
-
-                                                FinishTask();
-                                            }
-
-                                            @SuppressLint("UnlocalizedSms")
-                                            @Override
-                                            public void OnNegative(@NotNull AlertDialog poDialog) {
-
-                                                poDialog.dismiss();
-
-                                                //if permission is not granted, redirect user to app settings and manually allow the permission
-                                                if (requireActivity().checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-
-                                                    Disclosure_Dialog poDisclosure = new Disclosure_Dialog(requireActivity());
-                                                    poDisclosure.InitDialog();
-
-                                                    poDisclosure.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo,
-                                                            "SMS permission is not yet granted. Please allow to proceed", "Deny", "Accept", new Disclosure_Dialog.OnDialogClick() {
-                                                        @Override
-                                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                            poDialog.dismiss();
-                                                        }
-
-                                                        @Override
-                                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-
-                                                        }
-                                                    });
-
-                                                    return;
-                                                }
-
-                                                //find the primary and active contact number of the member
-                                                laContactParams
-                                                        .stream()
-                                                        .filter(eMemberContactInfo -> eMemberContactInfo.getCRecdStat().equalsIgnoreCase("1"))
-                                                        .findAny()
-                                                        .ifPresent(eMemberContactInfo -> {
-
-                                                            if (loMemberInfo == null) return;
-
-                                                            //compose message for the member's ALSM ID
-                                                            String lsMessage = "KGA " + loMemberInfo.getSFrstName() + "!\n\n" +
-                                                                                    "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
-                                                                                    "Please do not share your registration ID for Masonry Application";
-
-                                                            new SMSApp(requireActivity()).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
-                                                            FinishTask();
-                                                        });
-                                            }
-                                        });
+                                        FinishTask();
                                     }
 
                                     @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+
+                                        //find the primary and active contact number of the member
+                                        laContactParams
+                                                .stream()
+                                                .filter(eMemberContactInfo -> eMemberContactInfo.getCRecdStat().equalsIgnoreCase("1"))
+                                                .findAny()
+                                                .ifPresent(eMemberContactInfo -> {
+
+                                                    if (loMemberInfo == null) return;
+
+                                                    //compose message for the member's ALSM ID
+                                                    String lsMessage = "KGA " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                                            "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
+                                                            "Please do not share your registration ID for Masonry Application";
+
+                                                    new SMSApp(requireActivity(), new OnSMSStatus() {
+                                                        @Override
+                                                        public void OnResult(String fsResult) {
+                                                            Toast.makeText(requireActivity(), fsResult, Toast.LENGTH_SHORT).show();
+                                                            FinishTask();
+                                                        }
+                                                    }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
+                                                });
+
+                                    }
                                 });
                             }
 
@@ -1139,5 +1132,4 @@ public class Fragment_Member extends Fragment {
                 .popBackStack("create_member", FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
     }
-
 }
