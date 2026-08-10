@@ -72,15 +72,11 @@ public class VM_Projects extends AndroidViewModel {
     }
 
     public List<String> GetProjectTypes(){
-        return new ArrayList<>(List.of("Brick Project", "Stone Project", "Concrete Project", "Glass Block Project", "Adobe Project", "Reinforced Project"));
+        return new ArrayList<>(List.of("Educational Programs", "Health Program", "Outreach Program", "Environmental Program"));
     }
 
     public List<String> GetProjectStatus(){
-        return new ArrayList<>(List.of("Planned", "On Going", "On Hold", "Completed", "Cancelled"));
-    }
-
-    public LiveData<List<LodgeCalendarList>> GetLodgeCalendars(String fsLodgeIDxx){
-        return poProjects.GetLodgeCalendars(fsLodgeIDxx);
+        return new ArrayList<>(List.of("Planning", "On Going", "Completed", "Cancelled"));
     }
 
     public LiveData<LodgeCalendarList> GetLodgeCalendarInfo(String fsYearIDxx){
@@ -115,16 +111,16 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto);
     }
 
-    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
+    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fdPledge, String fnPledge){
 
         ProjectDetail loProject = new ProjectDetail(
                 fsTransNox,
                 fsMemberID,
                 fsMemberNme,
-                fsORNox,
                 fdPledge,
                 fnPledge,
-                fnAmtPaid
+                "",
+                "0.00"
         );
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
@@ -152,7 +148,7 @@ public class VM_Projects extends AndroidViewModel {
         return true;
     }
 
-    public boolean ReplaceProjectDetail(int fnIndex, String fsMemberID, String fsORNox, String fdPledge, String fnPledge, String fnAmtPaid){
+    public boolean ReplaceProjectDetail(int fnIndex, String fsMemberID, String fdPledge, String fnPledge){
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
         if (currentList == null) return false;
@@ -178,10 +174,10 @@ public class VM_Projects extends AndroidViewModel {
                 currentList.get(fnIndex).getSProjectCd(),
                 currentList.get(fnIndex).getSMemberID(),
                 currentList.get(fnIndex).getSMemberNme(),
-                fsORNox,
                 fdPledge,
                 fnPledge,
-                fnAmtPaid
+                "",
+                "0.00"
         );
         currentList.set(fnIndex, loItem);
 
@@ -244,17 +240,16 @@ public class VM_Projects extends AndroidViewModel {
                     foDetail.get(i).getSProjectCd(),
                     String.valueOf(i),
                     foDetail.get(i).getSMemberID(),
-                    foDetail.get(i).getSORNoxxxx(),
+                    "",
                     foDetail.get(i).getDPledgexx(),
                     foDetail.get(i).getNPledgexx(),
-                    foDetail.get(i).getNAmtPaidx(),
+                    "0.00",
                     GetCurrentDate(),
                     GetCurrentDateTime()
             );
             laDetails.add(loParam);
 
             ldbl_pledge += Double.parseDouble(foDetail.get(i).getNPledgexx());
-            ldbl_paid += Double.parseDouble(foDetail.get(i).getNAmtPaidx());
         }
 
         //do not proceed if details not initialized properly
@@ -265,16 +260,33 @@ public class VM_Projects extends AndroidViewModel {
         foMaster.setNTranTotl(String.valueOf(ldbl_pledge));
         foMaster.setNCollTotl(String.valueOf(ldbl_paid));
 
-        poProjects.SaveProject(foMaster, laDetails).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poProjects.SaveProject(foMaster, laDetails).thenCompose(aBoolean -> {
 
-                if (!aBoolean){
-                    foCallback.OnFailed(poProjects.getMessage());
-                }else{
-                    foCallback.OnSuccess();
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
+            if (aBoolean){
+
+                List<CompletableFuture<Boolean>> laTasks = List.of(
+                        poProjects.DownloadProjectInfo(foMaster.getSProjctCd()),
+                        poProjects.DownloadProjectDetails(foMaster.getSProjctCd())
+                );
+
+                for (CompletableFuture<Boolean> tasks : laTasks) {
+                    chain = tasks.thenCompose(CompletableFuture::completedFuture);
                 }
+
             }
+            return chain;
+
+        }).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFailed(poProjects.message);
+            }else {
+                foCallback.OnSuccess();;
+            }
+        }).exceptionally(throwable -> {
+            foCallback.OnFailed(throwable.getMessage());
+            return null;
         });
     }
 

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class VM_Member extends AndroidViewModel {
 
@@ -407,15 +408,26 @@ public class VM_Member extends AndroidViewModel {
 
         foCallback.onLoad();
 
-        poAccount.SaveOfficer(foOfficer, fsRemarksx).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poAccount.SaveOfficer(foOfficer, fsRemarksx).thenCompose(aBoolean -> {
 
-                if (!aBoolean){
-                    foCallback.onError(poAccount.getMessage());
-                    return;
-                }
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
+            if (aBoolean){
+                chain = poAccount.DownloadOfficerList();
+            }
+            return chain;
+
+        }).thenAccept(o -> {
+
+            if (!o){
+                foCallback.onError(poAccount.getMessage());
+            }else {
                 foCallback.onSuccess();
+            }
+        }).exceptionally(new Function<Throwable, Void>() {
+            @Override
+            public Void apply(Throwable throwable) {
+                foCallback.onError(throwable.getMessage());
+                return null;
             }
         });
     }

@@ -17,8 +17,10 @@ import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
+import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
+import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
@@ -34,10 +36,16 @@ class Lodge(loInstance : Context) {
     val loContext : Context = loInstance
     val session : AppConfig = AppConfig(loInstance)
     val httpInstance : KTORepository = KTORepository(loInstance)
+    val encryptObj : HashRepository = HashRepository()
+
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance).GetLodge()
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val dateRepository : DateRepository = DateRepository()
+
+    fun GetLodgeID() : String = TextFormatter()
+        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+        .getOrNull(0) ?: ""
 
     fun GetLodgeCalendarInfo( sYearIDx : String) : LiveData<ELodgeCalendar> = poLodgeCalendar.ObserveLodgeCalendarInfo(sYearIDx)
 

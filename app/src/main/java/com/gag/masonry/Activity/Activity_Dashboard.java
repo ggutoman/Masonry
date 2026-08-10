@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
 import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
+import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
@@ -181,13 +182,11 @@ public class Activity_Dashboard extends AppCompatActivity {
         main_drawer.closeDrawer(GravityCompat.START);
 
         //paramter object for arguments
-        Bundle loArgs;
+        Bundle loArgs = new Bundle();;
         switch (fsItemID){
 
             case "000":
                 Fragment_Home loHome = new Fragment_Home();
-
-                loArgs = new Bundle();
                 loArgs.putInt("user_level", loUser.getNUserLevl());
                 loHome.setArguments(loArgs);
 
@@ -207,6 +206,14 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "006":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
                 fragmentTransaction.addToBackStack("assign_officer");
+                break;
+            case "007": //project information
+                Fragment_Project loProject = new Fragment_Project();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loProject.setArguments(loArgs);
+
+                fragmentTransaction.replace(R.id.layout_container, loProject);
+                fragmentTransaction.addToBackStack("project_entry");
                 break;
             case "MEM004":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
@@ -247,10 +254,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "ANNL004": //lodge annual approval
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_approval");
-                break;
-            case "PROJ001": //project information
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("project_entry");
                 break;
             case "PROJ002": //project history
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());

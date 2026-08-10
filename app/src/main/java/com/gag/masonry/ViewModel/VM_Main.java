@@ -76,6 +76,10 @@ public class VM_Main extends AndroidViewModel {
         lsFilter.setValue(fsCondition);
     }
 
+    public String GetLodgeId(){
+        return poLodge.GetLodgeID();
+    }
+
     public EUserInfo GetUserInfo(){
         return poDashboard.getPoDBUser().GetUserInfo();
     }

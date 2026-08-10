@@ -326,7 +326,7 @@ public class Fragment_Project_Summary extends Fragment {
                             double ldbl_trans_total = 0.00, ldbl_collect_total = 0.00;
                             for (ProjectDetail loItem : projectDetails){
                                 ldbl_trans_total += Double.parseDouble(loItem.getNPledgexx());
-                                ldbl_collect_total += Double.parseDouble(loItem.getNAmtPaidx());
+                                ldbl_collect_total += Double.parseDouble(loItem.getNAmtPaidxx());
                             }
 
                             mtv_trans_total.setText(String.valueOf(ldbl_trans_total));

@@ -74,17 +74,15 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
         holder.mtv_datemember.setText(loMember.getDMembrshp());
 
         switch (loMember.getCMmbrStat()){
-            case "0":
+
+            case "0": //regular
                 holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
                 break;
-            case "1":
+            case "1": //life
                 holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
                 break;
-            case "2":
-                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
-                break;
-            default:
-
+            case "2": //dual
+                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
                 break;
         }
 

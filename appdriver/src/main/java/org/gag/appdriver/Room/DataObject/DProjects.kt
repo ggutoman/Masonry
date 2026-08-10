@@ -34,10 +34,10 @@ interface DProjects {
                             "a.sProjctCd sProjectCd, " +
                             "a.sMemberID sMemberID, " +
                             "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
-                            "a.sORNoxxxx sORNoxxxx, " +
                             "a.dPledgexx dPledgexx, " +
                             "a.nPledgexx nPledgexx, " +
-                            "a.nAmtPaidx nAmtPaidx " +
+                            "a.sORNoxxxx sORNoxx, " +
+                            "a.nAmtPaidx nAmtPaidxx " +
                     "FROM " +
                             "Project_Detail a " +
                     "JOIN " +
@@ -52,10 +52,10 @@ interface DProjects {
             "a.sProjctCd sProjectCd, " +
             "a.sMemberID sMemberID, " +
             "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
-            "a.sORNoxxxx sORNoxxxx, " +
             "a.dPledgexx dPledgexx, " +
             "a.nPledgexx nPledgexx, " +
-            "a.nAmtPaidx nAmtPaidx " +
+            "a.sORNoxxxx sORNoxx, " +
+            "a.nAmtPaidx nAmtPaidxx " +
             "FROM " +
             "Project_Detail a " +
             "JOIN " +

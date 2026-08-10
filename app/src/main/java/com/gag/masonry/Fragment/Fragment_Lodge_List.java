@@ -186,19 +186,6 @@ public class Fragment_Lodge_List extends Fragment {
                                     fragmentTransaction.addToBackStack("lodge_annual_approval");
                                     break;
 
-                                //project entry
-                                case "project_entry":
-
-                                    Fragment_Project loProject = new Fragment_Project();
-
-                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-                                    loProject.setArguments(loBundle);
-
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_entry", loProject));
-                                    fragmentTransaction.addToBackStack("project_entry");
-                                    break;
-
                                 //project history
                                 case "project_information":
 

@@ -127,7 +127,6 @@ class Projects(instance : Context) {
 
                         put("sProjctNm", loMaster.sProjctNm)
                         put("cProjctTp", loMaster.cProjctTp)
-                        put("sYearIDxx", loMaster.sYearIDxx)
                         put("dTransact", loMaster.dTransact)
                         put("dDueDatex", loMaster.dDueDatex)
                         put("sRemarksx", loMaster.sRemarksx)
@@ -480,8 +479,10 @@ class Projects(instance : Context) {
                         is KTORepository.OnRequest.onSuccess -> {
                             val resultData = Json.Default.decodeFromString<DownloadProjectDetail>(response.data.body())
 
-                            //save detail
+                            ///clear and save detail
+                            if(fsProjectCd.isNotEmpty()) { poProjects.DeleteDetail(fsProjectCd) }
                             resultData.GetPayload().forEach { loItem -> poProjects.SaveDetail(loItem) }
+
                             true
                         }
 
