@@ -22,6 +22,7 @@ import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
+import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
 import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
@@ -175,8 +176,11 @@ public class Activity_Dashboard extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        //get changes from user account, to get the accurate details passed for updating account
-        EUserInfo loUser = mViewmodel.GetUserInfo();
+        //do not proceed if user level is not initialized
+        if (!getIntent().hasExtra("user_level")){
+            Toast.makeText(Activity_Dashboard.this, "User level is not initialzed", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         //close drawer
         main_drawer.closeDrawer(GravityCompat.START);
@@ -187,7 +191,7 @@ public class Activity_Dashboard extends AppCompatActivity {
 
             case "000":
                 Fragment_Home loHome = new Fragment_Home();
-                loArgs.putInt("user_level", loUser.getNUserLevl());
+                loArgs.putInt("user_level", getIntent().getIntExtra("user_level", 0));
                 loHome.setArguments(loArgs);
 
                 fragmentTransaction.replace(R.id.layout_container, loHome);
@@ -214,6 +218,15 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                 fragmentTransaction.replace(R.id.layout_container, loProject);
                 fragmentTransaction.addToBackStack("project_entry");
+                break;
+            case "008": //project status change
+                Fragment_Lodge_Calendar_List loProjStatus = new Fragment_Lodge_Calendar_List();
+
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loProjStatus.setArguments(loArgs);
+
+                fragmentTransaction.replace(R.id.layout_container, loProjStatus);
+                fragmentTransaction.addToBackStack("project_status");
                 break;
             case "MEM004":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
@@ -262,10 +275,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "PROJ003": //project history
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("project_summary");
-                break;
-            case "PROJ004": //project status change
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("project_status");
                 break;
             case "RCPT001": //receipt entry
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());

@@ -80,10 +80,6 @@ public class VM_Main extends AndroidViewModel {
         return poLodge.GetLodgeID();
     }
 
-    public EUserInfo GetUserInfo(){
-        return poDashboard.getPoDBUser().GetUserInfo();
-    }
-
     public LiveData<EUserInfo> ObserveUserInfo(){
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
@@ -165,39 +161,19 @@ public class VM_Main extends AndroidViewModel {
             foCallback.isLoginNeeded();
         } else {
 
+            //session expired
             if (!poDate.GetCurrentDate().equalsIgnoreCase(poConfig.getLogDate())) {
                 foCallback.isSessionEnded();
                 return;
             }
 
-            //store all threads into hash set, to execute one by one and avoid memory leakage
-            HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
-                    List.of(
-                            poAccount.DownloadUserInfo(),
-                            poDashboard.DownloadPositionInfo(),
-                            poDashboard.DownloadProvinceInfo(),
-                            poDashboard.DownloadTownInfo()
-                    )
-            );
+            //download user info
+            poAccount.DownloadUserInfo().thenAccept(aBoolean -> {
 
-            //initialize task result holder
-            CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
-            for (CompletableFuture<Boolean> task : laTasks){
-
-                poResult = poResult.thenCompose(aBoolean -> {
-                    if (!aBoolean){
-                        Log.d("Download Parameters: ", poAccount.getMessage());
-                        return CompletableFuture.completedFuture(false);
-                    }
-                    return task;
-                });
-            }
-
-            //get the result
-            poResult.thenAccept(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean aBoolean) {
-                    if (aBoolean) foCallback.hasLoggedIn();
+                if (aBoolean){
+                    foCallback.hasLoggedIn();
+                }else {
+                    foCallback.isLoginNeeded();
                 }
             });
         }
@@ -337,6 +313,5 @@ public class VM_Main extends AndroidViewModel {
     public void EndSession(){
         poDashboard.ClearMemberData();
         poConfig.ClearAccountSession();
-        poDashboard.getPoDBUser().DeleteUser();
     }
 }

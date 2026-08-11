@@ -60,10 +60,11 @@ public class Fragment_Project_History extends Fragment {
         poMessage = new Message_Dialog(requireActivity());
         poLoading = new LoadDialog(requireActivity());
 
-        lsDfrom = mViewModel.GetCurrentDate();
+        String lsCurrentYear = mViewModel.GetFormattedDate(mViewModel.GetCurrentDate(), "yyyy");
 
-        int currentMnth = Integer.parseInt(mViewModel.GetFormattedDate(lsDfrom, "MM"));
-        lsDto = mViewModel.GetCountedDate( (12 - currentMnth) + currentMnth, 0, true);
+        //initialize default range of date to display for the whole year
+        lsDfrom = mViewModel.GetFormattedDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
+        lsDto =  mViewModel.GetFormattedDate(lsCurrentYear + "-12-31", "yyyy-MM-dd");
 
         poMessage.InitDialog();
         poLoading.InitDialog();

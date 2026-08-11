@@ -132,6 +132,9 @@ class Dashboard(loInstance : Context) {
 
     fun ClearMemberData(){
 
+        poDBUser.DeleteUser()
+        poMenus.ClearObjects()
+
         poLodgeInfo.DeleteLodge()
         poLodgeCalendar.DeleteLodgeCalendar()
 

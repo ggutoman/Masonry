@@ -69,7 +69,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
                 holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
                 break;
             case "1":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_member_regular);
                 break;
             case "2":
                 holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_reassign);
@@ -81,7 +81,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
                 holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_exit);
                 break;
             case "5":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
+                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_member_life);
                 break;
         }
 

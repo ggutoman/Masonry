@@ -61,7 +61,7 @@ class KTORepository(instance : Context) {
 
         install(ResponseObserver){
             onResponse {
-                Log.i("KTORHttpRepository", it.body<String>().toString())
+                Log.i("KTORHttpRepository Installed", it.body<String>().toString())
             }
         }
 
@@ -133,8 +133,6 @@ class KTORepository(instance : Context) {
                     }
                 }
             }
-
-            Log.i("KTORHttpRepository", result.bodyAsText())
 
             val jsonResult = JSONObject(result.bodyAsText())
             val status = jsonResult.get("result")

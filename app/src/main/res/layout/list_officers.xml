@@ -14,7 +14,6 @@
             android:id="@+id/btn_icon"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:src="@drawable/baseline_inactive"
             android:scaleType="fitCenter"
             android:alpha="0.75"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_name"

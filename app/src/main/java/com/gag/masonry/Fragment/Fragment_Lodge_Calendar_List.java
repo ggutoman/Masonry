@@ -82,7 +82,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
         //initialize default range of date to display for the whole year
         lsdFrom = mviewModel.GetFormatDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
-        lsdTo =  mviewModel.GetFormatDate(lsCurrentYear + "-12-30", "yyyy-MM-dd");
+        lsdTo =  mviewModel.GetFormatDate(lsCurrentYear + "-12-31", "yyyy-MM-dd");
 
         InitViews(view);
         InitDataReceiver();
@@ -227,6 +227,39 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
         });
     }
 
+    private void DownloadList(){
+
+        mviewModel.DownloadLodgeCalendars(lsdFrom, lsdTo, new VM_Lodge.OnDownload() {
+            @Override
+            public void OnLoad() {
+                poLoad.ShowDialog("Downloading lodge calendars. Please wait . .");
+            }
+
+            @Override
+            public void OnSuccess() {
+                poLoad.DismissDialog();
+
+                InitDataReceiver();
+                Toast.makeText(requireActivity(), "Lodge calendars downloaded successfully", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void OnError(String fsMessage) {
+                poLoad.DismissDialog();
+
+                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
+    }
+
     private void InitListener(){
 
         btn_filter.setOnClickListener(new View.OnClickListener() {
@@ -286,6 +319,8 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
+
+                                            DownloadList();
                                         }
                                     });
                                 }

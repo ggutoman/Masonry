@@ -205,7 +205,6 @@ class Projects(instance : Context) {
                     val loParams = JSONObject().apply {
 
                         put("sProjctCd", loMaster.sProjctCd)
-                        put("nDisbTotl", loMaster.nDisbTotl)
                         put("cTranStat", loMaster.cTranStat)
                     }
 

@@ -103,4 +103,20 @@ public class VM_Lodge extends AndroidViewModel {
             }
         });
     }
+
+    public void DownloadLodgeCalendars(String fsDateFrom, String fsDateTo, OnDownload loCallback){
+
+        loCallback.OnLoad();
+        poLodge.DownloadLodgeCalendars(fsDateFrom, fsDateTo).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    loCallback.OnError(poLodge.getMessage());
+                    return;
+                }
+                loCallback.OnSuccess();
+            }
+        });
+    }
 }

@@ -116,15 +116,6 @@
                                 android:padding="10dp">
 
                                 <com.google.android.material.textview.MaterialTextView
-                                    style="@style/Text_Header"
-                                    android:id="@+id/btn_change_status"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:text="Change Status"
-                                    android:alpha="0.5"
-                                    android:visibility="gone"/>
-
-                                <com.google.android.material.textview.MaterialTextView
                                     android:id="@+id/mtv_status"
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"

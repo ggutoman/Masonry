@@ -32,6 +32,7 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_GET_PROVINCE("parameters/province_info.php"),
     URL_GET_TOWN("parameters/town_city_info.php"),
     URL_CREATE_LODGE_CALENDAR("parameters/save_calendar_year.php"),
+    URL_GET_LODGE_CALENDAR("parameters/calendar_year.php"),
 
     /**ACCOUNTING**/
     URL_CREATE_FUND_MASTER("accounting/funds/save_fund_master.php"),
