@@ -46,8 +46,8 @@ public class Adapter_Pledge_Summary_Details extends RecyclerView.Adapter<Adapter
 
         holder.mtv_date_pledge.setText(loDate.FormatDate(laProjects.get(position).getDPledgexx(), "MMMM d, yyyy"));
         holder.mtv_amt_pledge.setText(laProjects.get(position).getNPledgexx());
-        holder.mtv_or.setText(laProjects.get(position).getSORNoxxxx());
-        holder.mtv_paid.setText(laProjects.get(position).getNAmtPaidx());
+        holder.mtv_or.setText(laProjects.get(position).getSORNoxx());
+        holder.mtv_paid.setText(laProjects.get(position).getNAmtPaidxx());
     }
 
     @Override

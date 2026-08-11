@@ -180,9 +180,9 @@ public class Dialog_Project_Entry {
                         "",
                         loSelectMember.getSMemberID(),
                         loSelectMember.getSFrstName() + " " + loSelectMember.getSLastName(),
-                        "",
                         tie_pledge_date.getText().toString(),
                         tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString(),
+                        "",
                         "0.00"
                 );
                 loCallback.OnSubmit(loMembers);

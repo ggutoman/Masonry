@@ -134,10 +134,10 @@ public class Fragment_UserInfo extends Fragment {
                 switch (eUserInfo.getCRecdStat()){
 
                     case "0":
-                        siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
+                        siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_member_life);
                         break;
                     case "1":
-                        siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
+                        siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_member_regular);
                         break;
                     case "2":
                         siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);

@@ -2,12 +2,17 @@ package org.gag.appdriver.App.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
@@ -74,17 +79,21 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
         holder.mtv_datemember.setText(loMember.getDMembrshp());
 
         switch (loMember.getCMmbrStat()){
-            case "0":
-                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_inactive);
-                break;
-            case "1":
-                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_active);
-                break;
-            case "2":
-                holder.siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
-                break;
-            default:
 
+            case "0": //regular
+                holder.siv_status.setImageResource(R.drawable.baseline_member_regular);
+                break;
+            case "1": //life
+                holder.siv_status.setImageResource(R.drawable.baseline_member_life);
+                break;
+            case "2": //dual
+                holder.siv_status.setImageResource(R.drawable.baseline_member_dual);
+                break;
+            case "3": //deceased
+                holder.siv_status.setImageResource(R.drawable.baseline_member_deceased);
+                break;
+            case "4": //demit
+                holder.siv_status.setImageResource(R.drawable.baseline_member_demit);
                 break;
         }
 

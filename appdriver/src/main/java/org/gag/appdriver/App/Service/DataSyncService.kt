@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.gag.appdriver.App.Core.Annual
+import org.gag.appdriver.App.Core.Dashboard
 import org.gag.appdriver.App.Core.Funds
 import org.gag.appdriver.App.Core.Lodge
 import org.gag.appdriver.App.Core.UserAccount
@@ -21,7 +22,6 @@ class DataSyncService : Service(){
 
     override fun onDestroy() {
         super.onDestroy()
-
         isRunning = false
     }
 
@@ -50,6 +50,7 @@ class DataSyncService : Service(){
                             Lodge(applicationContext).apply {
 
                                 //initalize other core classes for syncing data
+                                val poDashboard = Dashboard(applicationContext)
                                 val poAccount = UserAccount(applicationContext)
                                 val poAnnual = Annual(applicationContext)
                                 val poFunds = Funds(applicationContext)
@@ -66,25 +67,31 @@ class DataSyncService : Service(){
 
                                                 if (!loCalendar){
                                                     println("Save Calendar Error $message")
+                                                    stopSelf(startId)
                                                     return@thenAccept
                                                 }
                                             }else if (loCalendar is String){
 
                                                 if (loCalendar.isEmpty()){
                                                     println("Save Calendar Error $message")
+                                                    stopSelf(startId)
                                                     return@thenAccept
                                                 }
 
                                                 val laSyncData = listOf(
                                                     poFunds.SaveLodgeFund(),
                                                     poAnnual.SaveAnnualDue(loCalendar, memberId.toString()),
+                                                    poDashboard.DownloadPositionInfo(),
+                                                    poDashboard.DownloadProvinceInfo(),
+                                                    poDashboard.DownloadTownInfo(),
                                                     poAccount.DownloadUserObjects(),
                                                     poAccount.DownloadMemberList(),
-                                                    poAccount.DownloadOfficerList()
+                                                    poAccount.DownloadOfficerList(),
                                                 )
 
                                                 CompletableFuture.allOf(*laSyncData.toTypedArray())
                                                     .thenAccept {
+
                                                         laSyncData.forEachIndexed { idx, future ->
 
                                                             val result = future.get()
@@ -92,6 +99,7 @@ class DataSyncService : Service(){
                                                                 val errorMsg = when (idx) {
                                                                     0 -> poFunds.message
                                                                     1 -> poAnnual.message
+                                                                    2 -> poDashboard.message
                                                                     else -> poAccount.message
                                                                 }.takeIf { it.isNotEmpty() } ?: "No message returned"
 
@@ -100,7 +108,6 @@ class DataSyncService : Service(){
                                                                 println("Sync Data: Task $idx success")
                                                             }
                                                         }
-                                                        // Stop service only after all tasks complete
                                                         stopSelf(startId)
                                                     }
                                                     .exceptionally { throwable ->
@@ -108,21 +115,20 @@ class DataSyncService : Service(){
                                                         stopSelf(startId)
                                                         null
                                                     }
-
-                                                // Stop service only after all tasks are done
-                                                stopSelf(startId)
-
-
                                             }else{
+                                                stopSelf(startId)
                                                 println("Failed to save calendar")
                                                 return@thenAccept
                                             }
 
                                         }
+                                    }else{
+                                        stopSelf(startId)
                                     }
 
                                 }.exceptionally { throwable ->
                                     throwable.printStackTrace()
+                                    stopSelf(startId)
                                     return@exceptionally null
                                 }
                             }

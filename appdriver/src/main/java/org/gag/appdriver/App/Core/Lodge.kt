@@ -11,14 +11,17 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.gag.appdriver.App.DataModels.DownloadError
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
+import org.gag.appdriver.App.DataModels.DownloadLodgeCalendarList
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
 import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.App.Models.LodgeInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
+import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
+import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
@@ -34,10 +37,16 @@ class Lodge(loInstance : Context) {
     val loContext : Context = loInstance
     val session : AppConfig = AppConfig(loInstance)
     val httpInstance : KTORepository = KTORepository(loInstance)
+    val encryptObj : HashRepository = HashRepository()
+
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance).GetLodge()
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val dateRepository : DateRepository = DateRepository()
+
+    fun GetLodgeID() : String = TextFormatter()
+        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+        .getOrNull(0) ?: ""
 
     fun GetLodgeCalendarInfo( sYearIDx : String) : LiveData<ELodgeCalendar> = poLodgeCalendar.ObserveLodgeCalendarInfo(sYearIDx)
 
@@ -151,6 +160,75 @@ class Lodge(loInstance : Context) {
 
                             resultData.GetPayload().forEach { loItem ->
                                 poLodgeInfo.SaveLodge(loItem)
+                            }
+
+                            true
+                        }
+
+                        is KTORepository.OnRequest.onFailed -> {
+                            val errorData =
+                                Json.Default.decodeFromString<DownloadError>(result.data.body())
+                            message = errorData.GetPayload().message
+
+                            false
+                        }
+
+                        is KTORepository.OnRequest.onError<*> -> {
+                            message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                            false
+                        }
+
+                        else -> {
+                            message = "Invalid transaction. Could not proceed"
+                            false
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadLodgeCalendars(dFromxx : String, dToxx : String): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loContext)) {
+                    message = "No internet connection"
+                    false
+                }
+
+                val params : JSONObject = JSONObject().also {
+                    it.put("dFromxx", dFromxx)
+                    it.put("dToxx", dToxx)
+                }
+
+                httpInstance.makeRequest(
+                    API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_LODGE_CALENDAR.fsURL,
+                    params,
+                    mapOf(
+                        "access-token" to session.getokenID()
+                    )
+                ).let { result ->
+                    when (result) {
+                        is KTORepository.OnRequest.onSuccess -> {
+
+                            val resultData =
+                                Json.Default.decodeFromString<DownloadLodgeCalendarList>(result.data.body())
+
+                            resultData.GetPayload().forEach { loItem ->
+                                poLodgeCalendar.SaveLodgeCalendar(loItem)
                             }
 
                             true

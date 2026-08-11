@@ -31,40 +31,42 @@
             android:background="@android:color/darker_gray"
             android:layout_marginBottom="10dp"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/CustomDropDownTilStyle"
+        <RadioGroup
+            android:id="@+id/radiogroup"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Select Status">
+            android:layout_height="wrap_content">
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/auto_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/TextInputStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Disbursement">
-
-            <com.google.android.material.textfield.TextInputEditText
-                style="@style/TextInputStyle.Edittext"
-                android:id="@+id/tie_disb_amount"
+            <RadioButton
+                android:id="@+id/radio_planned"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="0.00"
-                android:inputType="numberDecimal"/>
+                android:text="Planned"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <RadioButton
+                android:id="@+id/radio_ongoing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="On Going"/>
+
+            <RadioButton
+                android:id="@+id/radio_completed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Completed"/>
+
+            <RadioButton
+                android:id="@+id/radio_cancelled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancelled"/>
+
+        </RadioGroup>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_submit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Status"
+            android:text="SELECT"
             android:layout_marginTop="10dp"
             android:padding="10dp"/>
 

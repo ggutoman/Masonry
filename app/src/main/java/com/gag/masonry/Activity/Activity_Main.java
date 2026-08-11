@@ -39,6 +39,7 @@ public class Activity_Main extends AppCompatActivity {
     private Disclosure_Dialog poDisclousre;
     private Message_Dialog poMessage;
     private LoadDialog poLoad;
+    private Intent loService;
 
     // Initialize the launcher
     private final ActivityResultLauncher<String[]> poPermissions = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -80,6 +81,10 @@ public class Activity_Main extends AppCompatActivity {
 
                     //this is logout receiver from dashboard
                     if (loIntent.getResultCode() == Activity.RESULT_OK) {
+
+                        if (loService != null){
+                            stopService(loService);
+                        }
                         mviewModel.EndSession();
                     }
                 }
@@ -174,11 +179,13 @@ public class Activity_Main extends AppCompatActivity {
 
                                     if (memberDashboardInfo == null) return;
 
+                                    Log.d("Member Info", "Start of service: " + String.valueOf(DataSyncService.Companion.isRunning()));
+
                                     //execute if sync data is not started
                                     if (!DataSyncService.Companion.isRunning()){
 
                                         //start syncing user data
-                                        Intent loService = new Intent(Activity_Main.this, DataSyncService.class);
+                                        loService = new Intent(Activity_Main.this, DataSyncService.class);
                                         loService.setAction("LOGIN_ACTION");
                                         loService.putExtra("user_id", eUserInfo.getSUserIDxx());
                                         loService.putExtra("member_id", memberDashboardInfo.getSMemberID());
@@ -196,12 +203,13 @@ public class Activity_Main extends AppCompatActivity {
                             @Override
                             public void onChanged(List<EUserObjects> eUserObjects) {
 
-                                if (eUserObjects == null) return;
+                                if (eUserObjects == null || eUserObjects.size() < 1) return;
 
                                 //proceed to account dashboard
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
                                 loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
+                                loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
 
                                 poLogout.launch(loIntent);
                             }

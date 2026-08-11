@@ -12,6 +12,9 @@ interface DUserObjects {
     @Upsert(EUserObjects::class)
     fun SaveObjects(eUserObjects: EUserObjects)
 
+    @Query("DELETE FROM User_Objects")
+    fun ClearObjects()
+
     @Query("SELECT * FROM User_Objects WHERE (:fnUsrLevel & nRights) > 0 ORDER BY idxx ASC, sParentIDxx ASC")
     fun GetUserObjects(fnUsrLevel : Int) : LiveData<List<EUserObjects>>
 

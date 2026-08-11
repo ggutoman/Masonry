@@ -588,6 +588,8 @@ class UserAccount(instance : Context) {
                                 val resultData =
                                     Json.Default.decodeFromString<DownloadOfficerList>(result.data.body())
 
+                                //clear and re import officers
+                                poOfficer.DeleteOfficers()
                                 resultData.GetPayload().forEach { loItem ->
                                     poOfficer.SaveOfficer(loItem)
                                 }
