@@ -34,28 +34,20 @@
                 android:title="All"/>
 
             <item
-                android:id="@+id/action_item_brick"
-                android:title="Brick"/>
+                android:id="@+id/action_item_education"
+                android:title="Educational Program"/>
 
             <item
-                android:id="@+id/action_item_stone"
-                android:title="Stone"/>
+                android:id="@+id/action_item_health"
+                android:title="Health Program"/>
 
             <item
-                android:id="@+id/action_item_concrete"
-                android:title="Concrete"/>
+                android:id="@+id/action_item_outreach"
+                android:title="Outreach Program"/>
 
             <item
-                android:id="@+id/action_item_glass"
-                android:title="Glass Block"/>
-
-            <item
-                android:id="@+id/action_item_adobe"
-                android:title="Adobe"/>
-
-            <item
-                android:id="@+id/action_item_reinforce"
-                android:title="Reinforced"/>
+                android:id="@+id/action_item_environmental"
+                android:title="Environmental Program"/>
 
         </menu>
 
@@ -79,10 +71,6 @@
             <item
                 android:id="@+id/action_item_on_going"
                 android:title="On Going"/>
-
-            <item
-                android:id="@+id/action_item_on_hold"
-                android:title="On Hold"/>
 
             <item
                 android:id="@+id/action_item_complete"

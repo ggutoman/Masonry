@@ -1,8 +1,6 @@
 package com.gag.accounting.ViewModel;
 
 import android.app.Application;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -12,14 +10,12 @@ import org.gag.appdriver.App.Core.Projects;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ProjectDetail;
-import org.gag.appdriver.Room.Entities.ELodgeCalendar;
+import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectDetail;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
-import org.gag.appdriver.Room.Entities.EUserInfo;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -67,16 +63,12 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetCurrentDateTime();
     }
 
-    public String GetCountedDate(int fnCount, int fnDateIndex, boolean fbIsAdd){
-        return poProjects.GetCountedDate(fnCount, fnDateIndex, fbIsAdd);
+    public List<PROJECT_CONSTANTS> GetProjectTypes(){
+        return new ArrayList<>(List.of(PROJECT_CONSTANTS.EDUCATION, PROJECT_CONSTANTS.HEALTH, PROJECT_CONSTANTS.OUTREACH, PROJECT_CONSTANTS.ENVIRONMENTAL));
     }
 
-    public List<String> GetProjectTypes(){
-        return new ArrayList<>(List.of("Educational Programs", "Health Program", "Outreach Program", "Environmental Program"));
-    }
-
-    public List<String> GetProjectStatus(){
-        return new ArrayList<>(List.of("Planning", "On Going", "Completed", "Cancelled"));
+    public List<PROJECT_CONSTANTS> GetProjectStatus(){
+        return new ArrayList<>(List.of(PROJECT_CONSTANTS.PLANNING, PROJECT_CONSTANTS.ON_GOING, PROJECT_CONSTANTS.COMPLETED, PROJECT_CONSTANTS.CANCELLED));
     }
 
     public LiveData<LodgeCalendarList> GetLodgeCalendarInfo(String fsYearIDxx){
@@ -189,7 +181,7 @@ public class VM_Projects extends AndroidViewModel {
         GetProjectDetail.setValue(new ArrayList<>());
     }
 
-    public void SaveProject(EProjectMaster foMaster, List<ProjectDetail> foDetail, OnTransaction foCallback){
+    public void SaveProject(EProjectMaster foMaster, List<ProjectDetail> foDetail, String fcStatus, OnTransaction foCallback){
 
         foCallback.OnLoad();
 
@@ -240,10 +232,10 @@ public class VM_Projects extends AndroidViewModel {
                     foDetail.get(i).getSProjectCd(),
                     String.valueOf(i),
                     foDetail.get(i).getSMemberID(),
-                    "",
+                    foDetail.get(i).getSORNoxx(),
                     foDetail.get(i).getDPledgexx(),
                     foDetail.get(i).getNPledgexx(),
-                    "0.00",
+                    foDetail.get(i).getNAmtPaidxx(),
                     GetCurrentDate(),
                     GetCurrentDateTime()
             );
@@ -265,45 +257,23 @@ public class VM_Projects extends AndroidViewModel {
             CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
             if (aBoolean){
 
-                List<CompletableFuture<Boolean>> laTasks = List.of(
-                        poProjects.DownloadProjectInfo(foMaster.getSProjctCd()),
-                        poProjects.DownloadProjectDetails(foMaster.getSProjctCd())
-                );
-
-                for (CompletableFuture<Boolean> tasks : laTasks) {
-                    chain = tasks.thenCompose(CompletableFuture::completedFuture);
-                }
-
+                //if success saving, re initialze status from selection then update status
+                foMaster.setCTranStat(fcStatus);
+                chain = poProjects.UpdateProjectStatus(foMaster);
             }
             return chain;
 
-        }).thenAccept(aBoolean -> {
+        }).thenAccept(o -> {
 
-            if (!aBoolean){
+            if (!o){
                 foCallback.OnFailed(poProjects.message);
-            }else {
-                foCallback.OnSuccess();;
+                return;
             }
+            foCallback.OnSuccess();
+
         }).exceptionally(throwable -> {
             foCallback.OnFailed(throwable.getMessage());
             return null;
-        });
-    }
-
-    public void UpdateProjectStatus(EProjectMaster foMaster, OnTransaction foCallback){
-
-        foCallback.OnLoad();
-
-        poProjects.UpdateProjectStatus(foMaster).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.OnFailed(poProjects.getMessage());
-                }else{
-                    foCallback.OnSuccess();
-                }
-            }
         });
     }
 

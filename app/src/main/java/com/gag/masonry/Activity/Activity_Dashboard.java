@@ -211,7 +211,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
                 fragmentTransaction.addToBackStack("assign_officer");
                 break;
-            case "007": //project information
+            case "007": //project entry
                 Fragment_Project loProject = new Fragment_Project();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loProject.setArguments(loArgs);
@@ -219,14 +219,23 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loProject);
                 fragmentTransaction.addToBackStack("project_entry");
                 break;
-            case "008": //project status change
-                Fragment_Lodge_Calendar_List loProjStatus = new Fragment_Lodge_Calendar_List();
+            case "008": //project history
+                Fragment_Lodge_Calendar_List loProjHistory = new Fragment_Lodge_Calendar_List();
 
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loProjStatus.setArguments(loArgs);
+                loProjHistory.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loProjStatus);
-                fragmentTransaction.addToBackStack("project_status");
+                fragmentTransaction.replace(R.id.layout_container, loProjHistory);
+                fragmentTransaction.addToBackStack("project_information");
+                break;
+            case "009": //project summary
+                Fragment_Lodge_Calendar_List loProjSummary = new Fragment_Lodge_Calendar_List();
+
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loProjSummary.setArguments(loArgs);
+
+                fragmentTransaction.replace(R.id.layout_container, loProjSummary);
+                fragmentTransaction.addToBackStack("project_summary");
                 break;
             case "MEM004":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
@@ -267,14 +276,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "ANNL004": //lodge annual approval
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
                 fragmentTransaction.addToBackStack("lodge_annual_approval");
-                break;
-            case "PROJ002": //project history
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("project_information");
-                break;
-            case "PROJ003": //project history
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("project_summary");
                 break;
             case "RCPT001": //receipt entry
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());

@@ -110,20 +110,21 @@
 
                             </com.google.android.material.textfield.TextInputLayout>
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/CustomDropDownTilStyle"
+                                android:id="@+id/til_proj_status"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="10dp">
+                                android:hint="Select Status">
 
-                                <com.google.android.material.textview.MaterialTextView
-                                    android:id="@+id/mtv_status"
-                                    android:layout_width="0dp"
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                    android:id="@+id/auto_proj_status"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="N/A"
-                                    android:gravity="end"
-                                    app:layout_constraintEnd_toEndOf="parent"/>
+                                    android:focusable="false"
+                                    android:clickable="true"/>
 
-                            </androidx.constraintlayout.widget.ConstraintLayout>
+                            </com.google.android.material.textfield.TextInputLayout>
 
                         </LinearLayout>
 
@@ -441,7 +442,8 @@
                     android:id="@+id/btn_save"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Save Project"/>
+                    android:text="Save Project"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 

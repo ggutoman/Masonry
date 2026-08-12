@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +46,7 @@ public class Fragment_Project_History extends Fragment {
     private Adapter_Project_List loAdapter;
 
     private String lsDfrom, lsDto, lsStackIDxx;
+    private List<String> laType, laStatus;
 
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -65,6 +68,10 @@ public class Fragment_Project_History extends Fragment {
         //initialize default range of date to display for the whole year
         lsDfrom = mViewModel.GetFormattedDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
         lsDto =  mViewModel.GetFormattedDate(lsCurrentYear + "-12-31", "yyyy-MM-dd");
+
+        //list of filters
+        laType = List.of("0", "1", "2", "3");
+        laStatus = List.of("0", "1", "2", "3");
 
         poMessage.InitDialog();
         poLoading.InitDialog();
@@ -159,12 +166,11 @@ public class Fragment_Project_History extends Fragment {
 
                         loBundle.putString("lodge_id", getArguments().getString("lodge_id"));
                         loBundle.putString("project_cd", loProj.getSProjctCd());
-                        loBundle.putString("stack_id", lsStackIDxx);
                         loProject.setArguments(loBundle);
 
                         //add to child container, as bridge to initiate another fragment after call
-                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("project_entry", loProject));
-                        fragmentTransaction.addToBackStack("project_entry");
+                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loProject));
+                        fragmentTransaction.addToBackStack(lsStackIDxx);
 
                         fragmentTransaction.commit();
 
@@ -197,6 +203,23 @@ public class Fragment_Project_History extends Fragment {
     }
 
     private void InitListener(){
+
+        tie_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                loAdapter.GetFilter().filter(charSequence == null ? "" : charSequence);
+                loAdapter.GetFilter().InitTypes(laType);
+                loAdapter.GetFilter().InitStatus(laStatus);
+                loAdapter.notifyDataSetChanged();
+            }
+        });
 
         btn_filter.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -265,33 +288,37 @@ public class Fragment_Project_History extends Fragment {
                             });
                             loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
                         } else if (menuItem.getItemId() == R.id.action_item_all_status) {
-                            FilterStatus(List.of("0", "1", "2", "3", "4"));
+                            laType = List.of("0", "1", "2", "3");
+                            FilterStatus(laType);
                         } else if (menuItem.getItemId() == R.id.action_item_plan) {
+                            laType = List.of("0");
                             FilterStatus(List.of("0"));
                         } else if (menuItem.getItemId() == R.id.action_item_on_going) {
+                            laType = List.of("1");
                             FilterStatus(List.of("1"));
-                        } else if (menuItem.getItemId() == R.id.action_item_on_hold) {
-                            FilterStatus(List.of("2"));
                         } else if (menuItem.getItemId() == R.id.action_item_complete) {
-                            FilterStatus(List.of("3"));
+                            laType = List.of("2");
+                            FilterStatus(List.of("2"));
                         } else if (menuItem.getItemId() == R.id.action_item_cancelled) {
-                            FilterStatus(List.of("4"));
+                            laType = List.of("3");
+                            FilterStatus(List.of("3"));
                         }
 
                         else if (menuItem.getItemId() == R.id.action_item_all_type) {
-                            FilterTypes(List.of("0", "1", "2", "3", "4", "5"));
-                        } else if (menuItem.getItemId() == R.id.action_item_brick) {
+                            laStatus = List.of("0", "1", "2", "3");
+                            FilterTypes(List.of("0", "1", "2", "3"));
+                        } else if (menuItem.getItemId() == R.id.action_item_education) {
+                            laType = List.of("0");
                             FilterTypes(List.of("0"));
-                        } else if (menuItem.getItemId() == R.id.action_item_stone) {
+                        } else if (menuItem.getItemId() == R.id.action_item_health) {
+                            laType = List.of("1");
                             FilterTypes(List.of("1"));
-                        } else if (menuItem.getItemId() == R.id.action_item_concrete) {
+                        } else if (menuItem.getItemId() == R.id.action_item_outreach) {
+                            laType = List.of("2");
                             FilterTypes(List.of("2"));
-                        } else if (menuItem.getItemId() == R.id.action_item_glass) {
+                        } else if (menuItem.getItemId() == R.id.action_item_environmental) {
+                            laType = List.of("3");
                             FilterTypes(List.of("3"));
-                        } else if (menuItem.getItemId() == R.id.action_item_adobe) {
-                            FilterTypes(List.of("4"));
-                        } else if (menuItem.getItemId() == R.id.action_item_reinforce) {
-                            FilterTypes(List.of("5"));
                         }
 
                         return true;
