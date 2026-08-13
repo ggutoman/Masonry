@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EFundTurnOver;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 
@@ -67,22 +68,16 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
         switch (laProjectFiltered.get(position).getCProjctTp()){
 
             case "0":
-                holder.mtv_type.setText("Brick Project");
+                holder.mtv_type.setText("Education Program");
                 break;
             case "1":
-                holder.mtv_type.setText("Stone Project");
+                holder.mtv_type.setText("Health Program");
                 break;
             case "2":
-                holder.mtv_type.setText("Concrete Project");
+                holder.mtv_type.setText("Outreach Program");
                 break;
             case "3":
-                holder.mtv_type.setText("Glass Block Project");
-                break;
-            case "4":
-                holder.mtv_type.setText("Adobe Project");
-                break;
-            case "5":
-                holder.mtv_type.setText("Reinforced Project");
+                holder.mtv_type.setText("Environmental Program");
                 break;
         }
 
@@ -95,12 +90,9 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
                 holder.mtv_status.setText("On Going");
                 break;
             case "2":
-                holder.mtv_status.setText("On Hold");
-                break;
-            case "3":
                 holder.mtv_status.setText("Completed");
                 break;
-            case "4":
+            case "3":
                 holder.mtv_status.setText("Cancelled");
                 break;
         }

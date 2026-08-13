@@ -223,7 +223,7 @@ public class Activity_Main extends AppCompatActivity {
                 poLoad.DismissDialog();
 
                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
-                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 poLogin.launch(loIntent);
             }
 
@@ -241,12 +241,14 @@ public class Activity_Main extends AppCompatActivity {
                             public void OnPositive(@NotNull AlertDialog poDialog) {
                                 poDialog.dismiss();
 
-                                //clear session before login
+                                if (loService != null){
+                                    stopService(loService);
+                                }
                                 mviewModel.EndSession();
 
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
                                 loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(loIntent);
+                                poLogin.launch(loIntent);
                             }
 
                             @Override

@@ -186,21 +186,6 @@ public class Fragment_Lodge_List extends Fragment {
                                     fragmentTransaction.addToBackStack("lodge_annual_approval");
                                     break;
 
-                                //project history
-                                case "project_information":
-
-                                    Fragment_Lodge_Calendar_List loProjects = new Fragment_Lodge_Calendar_List();
-
-                                    loBundle = new Bundle();
-                                    loBundle.putString("lodge_id", lodge.getSLodgeIDx());
-
-                                    loProjects.setArguments(loBundle);
-
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_information", loProjects));
-                                    fragmentTransaction.addToBackStack("project_information");
-                                    break;
-
                                 //project summary
                                 case "project_summary":
 

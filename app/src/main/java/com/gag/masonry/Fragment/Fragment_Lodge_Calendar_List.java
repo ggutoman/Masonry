@@ -121,101 +121,44 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                     public void Selected(LodgeCalendarList poItem) {
 
                         FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+
+                        Fragment loFragment = new Fragment();
                         Bundle loBundle = new Bundle();
 
                         switch (lsStackIDxx){
 
-                            //view lodge calendar info
-                            case "lodge_calendars":
-
-                                Fragment_Lodge_Calendar_Entry loDetail = new Fragment_Lodge_Calendar_Entry();
-
-
+                            //open project history
+                            case "project_information":
+                                loFragment = new Fragment_Project_History();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
+                                break;
 
-                                loDetail.setArguments(loBundle);
+                            //open lodge calendar project summary
+                            case "project_summary":
 
-                                fragmentTransaction.replace(R.id.layout_container, loDetail);
-                                fragmentTransaction.addToBackStack("lodge_calendar_list");
+                                loFragment = new Fragment_Project_Summary();
+                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
                                 break;
 
                             //open turnover fund history
                             case "lodge_funds":
-
-                                Fragment_Fund_History loFund = new Fragment_Fund_History();
-
-                                loBundle = new Bundle();
+                                loFragment = new Fragment_Fund_History();
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loFund.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("fund_history", loFund));
-                                fragmentTransaction.addToBackStack("fund_history");
                                 break;
 
                             //open turnover fund approval
                             case "lodge_fund_approval":
-
-                                Fragment_Fund_History loFundApproval = new Fragment_Fund_History();
-
-                                loBundle = new Bundle();
+                                loFragment = new Fragment_Fund_History();
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loFundApproval.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("lodge_fund_approval", loFundApproval));
-                                fragmentTransaction.addToBackStack("lodge_fund_approval");
-                                break;
-
-                            //open project history
-                            case "project_information":
-
-                                Fragment_Project_History loProjHistory = new Fragment_Project_History();
-
-                                loBundle = new Bundle();
-                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loProjHistory.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_info", loProjHistory));
-                                fragmentTransaction.addToBackStack("project_info");
-                                break;
-                            //open lodge calendar project summary
-                            case "project_summary":
-
-                                Fragment_Project_Summary loProjSummary = new Fragment_Project_Summary();
-
-                                loBundle = new Bundle();
-                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loProjSummary.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_summary", loProjSummary));
-                                fragmentTransaction.addToBackStack("project_summary");
-                                break;
-
-                            //open project info with change status
-                            case "project_status":
-
-                                Fragment_Project_History loProjStatus = new Fragment_Project_History();
-
-                                loBundle = new Bundle();
-                                loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-
-                                loProjStatus.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("project_status", loProjStatus));
-                                fragmentTransaction.addToBackStack("project_status");
                                 break;
                         }
+
+                        //initialize fragment properties
+                        loFragment.setArguments(loBundle);
+                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                        fragmentTransaction.addToBackStack(lsStackIDxx);
                         fragmentTransaction.commit();
 
                     }

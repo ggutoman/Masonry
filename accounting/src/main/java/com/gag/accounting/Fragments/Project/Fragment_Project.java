@@ -1,6 +1,5 @@
 package com.gag.accounting.Fragments.Project;
 
-import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 
@@ -18,13 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.gag.accounting.Dialog.Dialog_Project_Entry;
-import com.gag.accounting.Dialog.Dialog_Project_Status;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.button.MaterialButton;
@@ -33,10 +30,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
 import com.gag.accounting.Adapter.Project.Adapter_Project_Member_Entry;
-import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.ProjectDetail;
+import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -60,10 +56,10 @@ public class Fragment_Project extends Fragment {
     private ProjectDetail loSelectDetail;
 
     private ConstraintLayout layout_tools;
-    private TextInputLayout til_proj_type;
+    private TextInputLayout til_proj_type, til_proj_status;
     private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount;
-    private MaterialAutoCompleteTextView auto_proj_type, auto_lodge_member;
-    private MaterialTextView btn_change_status, btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb, mtv_status;
+    private MaterialAutoCompleteTextView auto_proj_type, auto_lodge_member, auto_proj_status;
+    private MaterialTextView btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb;
     private ImageButton btn_add_detail;
     private MaterialButton btn_save;
 
@@ -78,7 +74,14 @@ public class Fragment_Project extends Fragment {
         poLoad = new LoadDialog(requireActivity());
 
         //allow status change, based on root navigation
-        lsStackID = (getArguments() == null || getArguments().getString("stack_id") == null) ? "" : getArguments().getString("stack_id");
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackID = entry.getName() == null ? "" : entry.getName();
+        }
+
+        //initialze arguments
         lsLodgeIDx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
         lsTransNox = getArguments() == null || getArguments().getString("project_cd") == null ? "" : getArguments().getString("project_cd");
 
@@ -100,7 +103,6 @@ public class Fragment_Project extends Fragment {
 
         tie_transaction_no = view.findViewById(R.id.tie_transaction_no);
         tie_dtransact = view.findViewById(R.id.tie_dtransact);
-        mtv_status = view.findViewById(R.id.mtv_status);
         tie_name = view.findViewById(R.id.tie_name);
         auto_proj_type = view.findViewById(R.id.auto_proj_type);
         tie_due = view.findViewById(R.id.tie_due);
@@ -111,9 +113,11 @@ public class Fragment_Project extends Fragment {
 
         layout_tools = view.findViewById(R.id.layout_tools);
         til_proj_type = view.findViewById(R.id.til_proj_type);
+        til_proj_status = view.findViewById(R.id.til_proj_status);
         btn_download = view.findViewById(R.id.btn_download);
         btn_view = view.findViewById(R.id.btn_view);
         auto_lodge_member = view.findViewById(R.id.auto_lodge_member);
+        auto_proj_status = view.findViewById(R.id.auto_proj_status);
         tie_pledge_date = view.findViewById(R.id.tie_pledge_date);
         tie_pledge_amount = view.findViewById(R.id.tie_pledge_amount);
         btn_save = view.findViewById(R.id.btn_save);
@@ -150,10 +154,26 @@ public class Fragment_Project extends Fragment {
             return;
         }
 
+        List<String> laStatus = new ArrayList<>();
+        for (PROJECT_CONSTANTS proj_types : mViewModel.GetProjectStatus()) {
+            laStatus.add(proj_types.getFsDescr());
+        }
+
+        List<String> laTypes = new ArrayList<>();
+        for (PROJECT_CONSTANTS proj_types : mViewModel.GetProjectTypes()) {
+            laTypes.add(proj_types.getFsDescr());
+        }
+
+        auto_proj_status.setAdapter(new ArrayAdapter<String>(
+                requireActivity(),
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                laStatus
+        ));
+
         auto_proj_type.setAdapter(new ArrayAdapter<String>(
                 requireActivity(),
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
-                mViewModel.GetProjectTypes()
+                laTypes
         ));
 
         //load master
@@ -186,38 +206,28 @@ public class Fragment_Project extends Fragment {
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
-                switch (loMaster.getCTranStat()){
+                //allow button objects based on status
+                boolean isOpen = loMaster.getCTranStat().equalsIgnoreCase("0") || loMaster.getCTranStat().equalsIgnoreCase("1");
 
-                    case "0":
-                        mtv_status.setText("Planned");
-                        break;
-                    case "1":
-                        mtv_status.setText("On Going"); //disbursement happens
-                        break;
-                    case "2":
-                        mtv_status.setText("On Hold");
-                        break;
-                    case "3":
-                        mtv_status.setText("Completed"); //disbursement happens
-                        break;
-                    case "4":
-                        mtv_status.setText("Cancelled");
-                        break;
-                }
+                //allow objects based on status (Complete / Cancelled)
+                btn_add_detail.setEnabled(isOpen);
+                btn_save.setVisibility(isOpen ? View.VISIBLE: View.GONE);
 
-                btn_add_detail.setEnabled(!lsStackID.equalsIgnoreCase("project_status"));
-                btn_save.setText(lsStackID.equalsIgnoreCase("project_entry") ? "Save Project" : "Change Status");
+                //allow status change if record is for update or status is not open
+                til_proj_status.setEnabled(!lsStackID.equalsIgnoreCase("project_entry") || !isOpen);
 
-                //enable selection
-                AllowFields(!(loMaster.getCTranStat().equalsIgnoreCase("3") || loMaster.getCTranStat().equalsIgnoreCase("4")) && !lsStackID.equalsIgnoreCase("project_status"));
+                //enable fields
+                AllowFields(isOpen);
 
                 lnSelectStatus = Integer.parseInt(loMaster.getCTranStat());
                 lnSelectType = Integer.parseInt(loMaster.getCProjctTp());
 
+                auto_proj_status.setText(mViewModel.GetProjectStatus().get(lnSelectStatus).getFsDescr(), false);
+                auto_proj_type.setText(mViewModel.GetProjectTypes().get(lnSelectType).getFsDescr(), false);
+
                 tie_transaction_no.setText(loMaster.getSProjctCd());
                 tie_dtransact.setText(loMaster.getDTransact());
                 tie_name.setText(loMaster.getSProjctNm());
-                auto_proj_type.setText(mViewModel.GetProjectTypes().get(Integer.parseInt(loMaster.getCProjctTp())), false);
                 tie_due.setText(loMaster.getDDueDatex());
                 tie_remarks.setText(loMaster.getSRemarksx());
                 mtv_totaldisb.setText(loMaster.getNDisbTotl());
@@ -303,7 +313,19 @@ public class Fragment_Project extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 lnSelectType = i;
-                auto_proj_type.setText(mViewModel.GetProjectTypes().get(lnSelectType), false);
+                auto_proj_type.setText(mViewModel.GetProjectTypes().get(lnSelectType).getFsDescr(), false);
+            }
+        });
+
+        auto_proj_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                lnSelectStatus = i;
+                auto_proj_status.setText(mViewModel.GetProjectStatus().get(lnSelectStatus).getFsDescr(), false);
+
+                //selection of status should not allow modifications
+                AllowFields(lnSelectStatus < 2);
             }
         });
 
@@ -492,161 +514,79 @@ public class Fragment_Project extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if (lsStackID.equalsIgnoreCase("project_entry")){
+                //check primary selections
+                if (lnSelectStatus < 0){
+                    Toast.makeText(requireActivity(), "Please select project status", Toast.LENGTH_SHORT).show();
+                    return;
+                }else if (lnSelectType < 0){
+                    Toast.makeText(requireActivity(), "Please select project type", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                    //check primary selections
-                    if (lnSelectStatus < 0){
-                        Toast.makeText(requireActivity(), "Please select project status", Toast.LENGTH_SHORT).show();
-                        return;
-                    }else if (lnSelectType < 0){
-                        Toast.makeText(requireActivity(), "Please select project type", Toast.LENGTH_SHORT).show();
-                        return;
+                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
                     }
 
-                    poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                        @Override
-                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
-                        }
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
 
-                        @Override
-                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                            poDialog.dismiss();
+                        //initialize parameters
+                        loMaster.setSProjctNm(tie_name.getText() == null ? "" : tie_name.getText().toString());
+                        loMaster.setCProjctTp(String.valueOf(lnSelectType));
+                        loMaster.setDDueDatex(tie_due.getText() == null ? "1900-00-00" : tie_due.getText().toString());
+                        loMaster.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
 
-                            //initialize parameters
-                            loMaster.setSProjctNm(tie_name.getText() == null ? "" : tie_name.getText().toString());
-                            loMaster.setCProjctTp(String.valueOf(lnSelectType));
-                            loMaster.setDDueDatex(tie_due.getText() == null ? "1900-00-00" : tie_due.getText().toString());
-                            loMaster.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
-                            loMaster.setCTranStat(String.valueOf(lnSelectStatus));
-
-                            mViewModel.SaveProject(loMaster, laDetails, new VM_Projects.OnTransaction() {
-                                @Override
-                                public void OnLoad() {
-                                    poLoad.ShowDialog("Saving project. Please wait . .");
-                                }
-
-                                @Override
-                                public void OnSuccess() {
-                                    poLoad.DismissDialog();
-
-                                    poMessage.ShowMessage(0, "Project saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-
-                                            requireActivity().getSupportFragmentManager()
-                                                    .popBackStack("project_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void OnFailed(String fsMessage) {
-                                    poLoad.DismissDialog();
-
-                                    poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-
-                }else {
-
-                    Dialog_Project_Status loStatus = new Dialog_Project_Status(requireActivity(), loMaster == null ? "" : loMaster.getSProjctNm(), mViewModel, new Dialog_Project_Status.OnSubmitEntry() {
-                        @Override
-                        public void OnSubmit(String fStatus) {
-
-                            String lsdescript = "planned";
-                            switch (fStatus){
-
-                                case "1":
-                                    lsdescript = "on-going";
-                                    break;
-                                case "2":
-                                    lsdescript = "completed";
-                                    break;
-                                case "3":
-                                    lsdescript = "cancelled";
-                                    break;
+                        mViewModel.SaveProject(loMaster, laDetails, String.valueOf(lnSelectStatus), new VM_Projects.OnTransaction() {
+                            @Override
+                            public void OnLoad() {
+                                poLoad.ShowDialog("Saving project. Please wait . .");
                             }
 
-                            if (fStatus.equalsIgnoreCase(loMaster.getCTranStat())){
-                                Toast.makeText(requireActivity(), "Project is already on " + lsdescript, Toast.LENGTH_SHORT).show();
-                                return;
-                            }
+                            @Override
+                            public void OnSuccess() {
+                                poLoad.DismissDialog();
 
-                            poMessage.ShowMessage(2, "Your about to change the status of the project into " + lsdescript + ". Continue?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                @Override
-                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                    poDialog.dismiss();
-                                }
+                                poMessage.ShowMessage(0, "Project saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
 
-                                @Override
-                                public void OnNegative(@NotNull AlertDialog poDialog) {
-                                    poDialog.dismiss();
-
-                                    //set transaction properties for status change
-                                    if (loMaster == null || loMaster.getSProjctCd().isEmpty()){
-                                        Toast.makeText(requireActivity(), "Project is not initialized for status update", Toast.LENGTH_SHORT).show();
-                                        return;
+                                        requireActivity().getSupportFragmentManager()
+                                                .popBackStack(lsStackID, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
-                                    loMaster.setCTranStat(fStatus);
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+                                });
+                            }
 
-                                    mViewModel.UpdateProjectStatus(loMaster, new VM_Projects.OnTransaction() {
-                                        @Override
-                                        public void OnLoad() {
-                                            poLoad.ShowDialog("Updating project status. Please wait . .");
-                                        }
+                            @Override
+                            public void OnFailed(String fsMessage) {
+                                poLoad.DismissDialog();
 
-                                        @Override
-                                        public void OnSuccess() {
-                                            poLoad.DismissDialog();
-                                            Toast.makeText(requireActivity(), "Project status has been changed successfully", Toast.LENGTH_SHORT).show();
+                                poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
 
-                                            InitDataReceiver();
-                                        }
+                                        //reload details
+                                        DownloadInfo();
+                                    }
 
-                                        @Override
-                                        public void OnFailed(String fsMessage) {
-                                            poLoad.DismissDialog();
-
-                                            poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                                @Override
-                                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                    poDialog.dismiss();
-
-                                                    InitDataReceiver();
-                                                }
-
-                                                @Override
-                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    loStatus.Show();
-
-                }
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             }
         });
     }

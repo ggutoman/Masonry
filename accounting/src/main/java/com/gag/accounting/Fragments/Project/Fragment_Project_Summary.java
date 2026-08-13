@@ -246,8 +246,8 @@ public class Fragment_Project_Summary extends Fragment {
                                             loProject.setArguments(loBundle);
 
                                             //add to child container, as bridge to initiate another fragment after call
-                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("project_entry", loProject));
-                                            fragmentTransaction.addToBackStack("project_entry");
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("project_information", loProject));
+                                            fragmentTransaction.addToBackStack("project_information");
 
                                             fragmentTransaction.commit();
 
@@ -280,7 +280,7 @@ public class Fragment_Project_Summary extends Fragment {
 
 
                     mtv_project_name.setText(eProjectMaster.getSProjctNm());
-                    mtv_project_type.setText(mViewModel.GetProjectTypes().get(Integer.parseInt(eProjectMaster.getCProjctTp())));
+                    mtv_project_type.setText(mViewModel.GetProjectTypes().get(Integer.parseInt(eProjectMaster.getCProjctTp())).getFsDescr());
                     mtv_transaction.setText("Pledges as of");
                     mtv_pledge_date.setText(mViewModel.GetFormattedDate(lsDto, "MMMM d, yyyy"));
                     mtv_trans_total.setText("0.00");
@@ -298,12 +298,9 @@ public class Fragment_Project_Summary extends Fragment {
                             mtv_trans_stat.setText("On-Going");
                             break;
                         case "2":
-                            mtv_trans_stat.setText("On-Hold");
-                            break;
-                        case "3":
                             mtv_trans_stat.setText("Completed");
                             break;
-                        case "4":
+                        case "3":
                             mtv_trans_stat.setText("Cancelled");
                             break;
                     }
