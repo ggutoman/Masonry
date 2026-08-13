@@ -127,18 +127,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                         switch (lsStackIDxx){
 
-                            //open turnover fund history
-                            case "lodge_funds":
-                                loFragment = new Fragment_Fund_History();
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-                                break;
-
-                            //open turnover fund approval
-                            case "lodge_fund_approval":
-                                loFragment = new Fragment_Fund_History();
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-                                break;
-
                             //open project history
                             case "project_information":
                                 loFragment = new Fragment_Project_History();
@@ -151,6 +139,18 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                                 loFragment = new Fragment_Project_Summary();
                                 loBundle.putString("lodge_id", poItem.getSLodgeIDx());
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+                                break;
+
+                            //open turnover fund history
+                            case "lodge_funds":
+                                loFragment = new Fragment_Fund_History();
+                                loBundle.putString("year_id", poItem.getSYearIDxx());
+                                break;
+
+                            //open turnover fund approval
+                            case "lodge_fund_approval":
+                                loFragment = new Fragment_Fund_History();
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
                                 break;
                         }

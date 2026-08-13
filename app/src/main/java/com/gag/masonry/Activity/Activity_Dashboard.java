@@ -237,6 +237,10 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loProjSummary);
                 fragmentTransaction.addToBackStack("project_summary");
                 break;
+            case "011":
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
+                fragmentTransaction.addToBackStack("turnover_funds");
+                break;
             case "MEM004":
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
                 fragmentTransaction.addToBackStack("view_officer_history");
@@ -244,10 +248,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "ACC002": //reports
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
                 fragmentTransaction.addToBackStack("generate_report");
-                break;
-            case "FND001":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
-                fragmentTransaction.addToBackStack("turnover_funds");
                 break;
             case "FND002": //lodge fund entries information
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
