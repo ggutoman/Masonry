@@ -1,7 +1,6 @@
 package org.gag.appdriver.App.DataModels
 
 import kotlinx.serialization.Serializable
-import org.gag.appdriver.App.Models.AnnualInfo
 import org.gag.appdriver.App.Models.LodgeFundInfo
 import org.gag.appdriver.App.Models.ReceiptInfo
 

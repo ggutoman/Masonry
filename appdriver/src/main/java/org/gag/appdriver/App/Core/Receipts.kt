@@ -90,8 +90,6 @@ class Receipts(instance : Context) {
 
     fun GetCountedDate(fnCount : Int, fnDateIndex : Int, fbIsAdd : Boolean) : String = dateRepository.GetCountedDate(fnCount, fnDateIndex, fbIsAdd)
 
-    fun GetLodgeCalendars(fsLodgeIDxx : String) : LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(fsLodgeIDxx)
-
     fun GetMemberInfo(fsMemberIdxx : String) : EMemberInfo = poMemberInfo.GetMemberInfo(fsMemberIdxx)
 
     fun ObserveReceiptMaster(fsTransnox : String) : LiveData<EReceiptMaster> = poReceipt.ObserveReceiptMaster(fsTransnox)

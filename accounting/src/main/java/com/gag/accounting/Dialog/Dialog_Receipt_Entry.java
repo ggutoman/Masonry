@@ -7,34 +7,23 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 
-import com.gag.accounting.Adapter.Fund.Adapter_Lodge_Fund_List;
 import com.gag.accounting.Adapter.Receipt.Adapter_Receipt_Sources;
 import com.gag.accounting.Adapter.Receipt.Adapter_Receipt_Transactions;
 import com.gag.accounting.R;
-import com.gag.accounting.ViewModel.VM_Annual;
-import com.gag.accounting.ViewModel.VM_Projects;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.App.Adapters.MemberAdapter;
 import org.gag.appdriver.App.Models.AnnualMembers;
-import org.gag.appdriver.App.Models.LodgeFundMasterList;
-import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ReceiptDetail;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Room.Entities.EReceiptDetail;
 
 import java.util.ArrayList;
 import java.util.List;

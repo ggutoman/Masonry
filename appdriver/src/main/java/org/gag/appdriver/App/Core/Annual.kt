@@ -2,7 +2,6 @@ package org.gag.appdriver.App.Core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import io.ktor.client.call.body
 import kotlinx.coroutines.CoroutineScope
@@ -10,14 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.gag.appdriver.App.DataModels.DownloadAnnualInfo
 import org.gag.appdriver.App.DataModels.DownloadAnnualMembers
 import org.gag.appdriver.App.DataModels.DownloadError
-import org.gag.appdriver.App.DataModels.DownloadKey
-import org.gag.appdriver.App.DataModels.DownloadSaveFund
-import org.gag.appdriver.App.Models.AnnualMembers
 import org.gag.appdriver.App.Models.AnnualSummary
-import org.gag.appdriver.App.Models.LodgeCalendarList
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
@@ -26,17 +20,12 @@ import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
-import org.gag.appdriver.Room.DataObject.DLodgeCalendar
-import org.gag.appdriver.Room.DataObject.DMemberInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.Entities.EAnnualDetail
 import org.gag.appdriver.Room.Entities.EAnnualMaster
-import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.ML_DBF
-import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Date
 import java.util.concurrent.CompletableFuture
 
 class Annual(instance : Context) {
@@ -52,8 +41,6 @@ class Annual(instance : Context) {
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance)?.GetUserDao() as DUserInfo
     val poAnnualMaster : DAnnualMaster = ML_DBF.getDatabase(instance)?.GetAnnualMaster() as DAnnualMaster
     val poAnnualDetail : DAnnualDetail = ML_DBF.getDatabase(instance)?.GetAnnualDetail() as DAnnualDetail
-    val poLodgeYear : DLodgeCalendar = ML_DBF.getDatabase(instance)?.GetLodgeCalendar() as DLodgeCalendar
-    val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance)?.GetMemberDao() as DMemberInfo
 
     fun GetUserInfo() : EUserInfo  = poUserInfo.GetUserInfo()
 
@@ -67,103 +54,9 @@ class Annual(instance : Context) {
 
     fun FormatDateString(fsDate : String, fsFormat : String) : String = dateRepository.FormatDate(fsDate, fsFormat)
 
-    fun ConvertStringDate(fsDate : String, fsFormat : String) : Date? = dateRepository.ConvertStringDate(fsDate, fsFormat)
-
-    fun ConvertDateString(fsDate : Date, fsFormat : String) : String = dateRepository.ConvertDateString(fsDate, fsFormat)
-
     fun FormatLongDate(fsParam : Long) : String = dateRepository.FormatLongDate(fsParam)
 
-    fun GetLodgeCalendars(fsLodgeIDxx : String) : LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(fsLodgeIDxx)
-
-    fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
-
-    fun GetAnnualMaster(fsYearIDxx : String) : LiveData<EAnnualMaster> = poAnnualMaster.GetAnnualMaster(fsYearIDxx)
-
-    fun GetAnnualDetail(fsTransNox : String) : LiveData<List<AnnualMembers>> = poAnnualDetail.GetAnnualDetail(fsTransNox)
-
-    fun GetAnnualMasterSummary(fsLodgeIDxx : String, fsYearFrom : String, fsYearTo : String) : LiveData<List<EAnnualMaster>> = poAnnualMaster.GetAnnualSummary(fsLodgeIDxx, fsYearFrom, fsYearTo)
-
-    fun GetAnnualDetailSummary(fsTransNox : String) : AnnualSummary = poAnnualDetail.GetAnnualSummary(fsTransNox)
-
     fun GetAnnualMemberInfo() : LiveData<List<AnnualSummary>> = poAnnualDetail.GetAnnualMemberInfo(GetUserID())
-
-    @SuppressLint("MissingPermission")
-    fun DownloadAnnualDue(fsLodgeIDxx : String, fsYearIDxx : String, fsYearFrom : String, fsYearTo : String) : CompletableFuture<Boolean>{
-
-        val future = CompletableFuture<Boolean>()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val result = try {
-                if (!httpInstance.checkDeviceConnection(loInstance)) {
-                    message = "No internet connection"
-                    false
-
-                } else {
-
-                    val loParams = JSONObject().apply {
-                        put("sLodgeIDx", fsLodgeIDxx)
-
-                        //filter by year id, start and end of year, if not empty
-                        if (fsYearIDxx.isNotEmpty()) put("sYearIDxx", fsYearIDxx)
-                        if (fsYearFrom.isNotEmpty()) put("sYearFrom", fsYearFrom)
-                        if (fsYearTo.isNotEmpty()) put("sYearTo", fsYearTo)
-                    }
-
-                    when (val response = httpInstance.makeRequest(
-                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_ANNUAL_DUES.fsURL,
-                        loParams,
-                        mapOf(
-                            "access-token" to session.getokenID()
-                        )
-                    )) {
-                        is KTORepository.OnRequest.onSuccess -> {
-                            val resultData = Json.Default.decodeFromString<DownloadAnnualInfo>(response.data.body())
-
-                            //get payload details
-                            val loMaster : EAnnualMaster = resultData.GetPayload().master
-                            val loDetail : List<EAnnualDetail> = resultData.GetPayload().detail
-
-                            //save master
-                            poAnnualMaster.SaveAnnualMaster(loMaster)
-
-                            //save detail
-                            loDetail.forEach { loItem ->
-                                poAnnualDetail.SaveAnnualDetail(loItem)
-                            }
-
-                            true
-                        }
-
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                message =  "Could not make request at this moment:\n\n ${ex.message}"
-                false
-            }
-
-            // Complete the future on the main thread
-            withContext(Dispatchers.Main) {
-                future.complete(result)
-            }
-        }
-
-        return future
-    }
 
     @SuppressLint("MissingPermission")
     fun DownloadAnnualMember(fsMemberID : String) : CompletableFuture<Boolean>{
@@ -291,72 +184,6 @@ class Annual(instance : Context) {
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                message =  "Could not make request at this moment:\n\n ${ex.message}"
-                false
-            }
-
-            // Complete the future on the main thread
-            withContext(Dispatchers.Main) {
-                future.complete(result)
-            }
-        }
-
-        return future
-    }
-
-    @SuppressLint("MissingPermission")
-    fun ApproveAnnualDue(loMaster : EAnnualMaster) : CompletableFuture<Boolean>{
-
-        val future = CompletableFuture<Boolean>()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val result = try {
-                if (!httpInstance.checkDeviceConnection(loInstance)) {
-                    message = "No internet connection"
-                    false
-
-                } else {
-
-                    //initialize master parameters
-                    val loParams = JSONObject().apply {
-
-                        put("sTransNox", loMaster.sTransNox)
-                        put("cTranStat", loMaster.cTranStat)
-                    }
-
-                    when (val response = httpInstance.makeRequest(
-                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_APPROVE_ANNUAL_DUES.fsURL,
-                        loParams,
-                        mapOf(
-                            "access-token" to session.getokenID()
-                        )
-                    )) {
-                        is KTORepository.OnRequest.onSuccess -> {
-
-                            //save status change
-                            poAnnualMaster.SaveAnnualMaster(loMaster)
-
-                            true
-                        }
-
-                        is KTORepository.OnRequest.onFailed -> {
-                            val errorData = Json.Default.decodeFromString<DownloadError>(response.data.body())
-                            message = errorData.GetPayload().message
-                            false
-                        }
-
-                        is KTORepository.OnRequest.onError<*> -> {
-                            message =  "Could not make request at this moment:\n\n ${response.exception.toString()}"
-                            false
-                        }
-
-                        else -> {
-                            message = "Invalid transaction. Could not proceed"
-                            false
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }

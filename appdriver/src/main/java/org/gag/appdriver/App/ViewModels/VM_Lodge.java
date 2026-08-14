@@ -44,28 +44,8 @@ public class VM_Lodge extends AndroidViewModel {
         return poFunds.GetLodgeInfo(fsLodgeIDx);
     }
 
-    public TownProvince GetTownInfo(String fsSearch){
-        return poLodge.GetTownInfo(fsSearch);
-    }
-
-    public LiveData<ELodgeInfo> ObserveLodgeInfo(String fsLodgeIDx){
-        return poFunds.ObserveLodgeInfo(fsLodgeIDx);
-    }
-
-    public LiveData<List<LodgeInfo>> GetLodgeList() {
-        return poLodge.GetLodges();
-    }
-
-    public LiveData<List<TownProvince>> SearchTown(String fsSearch){
-        return poLodge.SearchTown(fsSearch);
-    }
-
     public LiveData<List<EFundLedger>> GetFundLedger(String fsLodgeIDx, String fsDfrom, String fsDto){
         return poFunds.ObserveLedgers(fsLodgeIDx, fsDfrom, fsDto);
-    }
-
-    public LiveData<ELodgeCalendar> GetLodgeCalendarInfo(String sYearIDx){
-        return poLodge.GetLodgeCalendarInfo(sYearIDx);
     }
 
     public LiveData<List<LodgeCalendarList>> GetLodgeCalendarList(String fsLodgeIDx, String fsDateFrom, String fsDateTo){
