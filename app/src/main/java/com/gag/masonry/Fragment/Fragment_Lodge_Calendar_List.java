@@ -24,7 +24,6 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
 import com.gag.accounting.Fragments.Project.Fragment_Project_History;
 import com.gag.accounting.Fragments.Project.Fragment_Project_Summary;
 import com.gag.masonry.R;
@@ -139,18 +138,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                                 loFragment = new Fragment_Project_Summary();
                                 loBundle.putString("lodge_id", poItem.getSLodgeIDx());
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-                                break;
-
-                            //open turnover fund history
-                            case "lodge_funds":
-                                loFragment = new Fragment_Fund_History();
-                                loBundle.putString("year_id", poItem.getSYearIDxx());
-                                break;
-
-                            //open turnover fund approval
-                            case "lodge_fund_approval":
-                                loFragment = new Fragment_Fund_History();
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
                                 break;
                         }

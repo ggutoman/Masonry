@@ -1,13 +1,9 @@
 package com.gag.accounting.Fragments.Project;
 
-import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -19,13 +15,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.gag.accounting.Adapter.Annual.Adapter_Annual_Members;
-import com.gag.accounting.Adapter.Annual.Adapter_Annual_Summary;
 import com.gag.accounting.Adapter.Project.Adapter_Pledge_Summary;
 import com.gag.accounting.Adapter.Project.Adapter_Project_List;
 import com.gag.accounting.R;
-import com.gag.accounting.ViewModel.VM_Annual;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -34,22 +26,12 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
-import org.gag.appdriver.App.Models.AnnualMembers;
-import org.gag.appdriver.App.Models.AnnualSummary;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.ProjectDetail;
-import org.gag.appdriver.Room.Entities.EAnnualMaster;
-import org.gag.appdriver.Room.Entities.ELodgeCalendar;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class Fragment_Project_Summary extends Fragment {

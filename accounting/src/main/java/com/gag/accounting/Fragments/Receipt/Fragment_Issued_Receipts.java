@@ -12,11 +12,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,12 +24,10 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.gag.accounting.Adapter.Receipt.Adapter_Issued_Receipts;
-import com.gag.accounting.Fragments.Fund.Fragment_Fund_History;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 

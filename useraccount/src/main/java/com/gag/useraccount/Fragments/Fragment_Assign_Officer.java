@@ -25,10 +25,6 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.App.Adapters.LodgeCalendarAdapter;
 import org.gag.appdriver.App.Adapters.MemberAdapter;
 import org.gag.appdriver.App.Adapters.PositionAdapter;
 import org.gag.appdriver.App.Models.LodgeCalendarList;

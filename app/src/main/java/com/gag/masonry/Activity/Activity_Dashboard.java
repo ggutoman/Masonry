@@ -17,13 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
-import com.gag.accounting.Fragments.Fund.Fragment_Turnover_Funds;
+import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
-import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
@@ -31,10 +30,7 @@ import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
 
-import com.gag.masonry.Fragment.Fragment_Lodge_List;
-
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
-import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -97,7 +93,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "030": //Sync Data
+                    case "027": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -124,7 +120,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             }
                         });
                         break;
-                    case "031": //Logout
+                    case "028": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -237,49 +233,18 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loProjSummary);
                 fragmentTransaction.addToBackStack("project_summary");
                 break;
-            case "011":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Turnover_Funds());
-                fragmentTransaction.addToBackStack("turnover_funds");
-                break;
-            case "MEM004":
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Officer_history());
-                fragmentTransaction.addToBackStack("view_officer_history");
+            case "011": //lodge fund summary information
+                Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+
+                loFund.setArguments(loArgs);
+
+                fragmentTransaction.replace(R.id.layout_container, loFund);
+                fragmentTransaction.addToBackStack("lodge_fund_information");
                 break;
             case "ACC002": //reports
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
                 fragmentTransaction.addToBackStack("generate_report");
-                break;
-            case "FND002": //lodge fund entries information
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("fund_history");
-                break;
-            case "FND003": //lodge fund summary information
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_fund_information");
-                break;
-            case "FND004": //lodge fund approval
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_fund_approval");
-                break;
-            case "ANNL001": //annual due entry
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("annual_due_entry");
-                break;
-            case "ANNL002": //annual due information
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_annual_dues");
-                break;
-            case "ANNL003": //lodge annual summary information
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_annual_information");
-                break;
-            case "ANNL004": //lodge annual approval
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("lodge_annual_approval");
-                break;
-            case "RCPT001": //receipt entry
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Lodge_List());
-                fragmentTransaction.addToBackStack("receipt_entry");
                 break;
             case "RCPT002": //receipt list
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("issued_receipt", new Fragment_Issued_Receipts()));

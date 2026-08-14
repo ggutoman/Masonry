@@ -41,7 +41,7 @@ public class Fragment_Lodge_Fund extends Fragment {
     private Message_Dialog poMessage;
     private Adapter_Fund_Ledger loAdapter;
 
-    private String lsDfrom, lsDto, lsStackIDxx;
+    private String lsDfrom, lsDto;
 
     private ConstraintLayout layout_no_record;
     private MaterialCardView layout_ledger;
@@ -70,13 +70,6 @@ public class Fragment_Lodge_Fund extends Fragment {
         //initialize default range of date to display for the whole year
         lsDfrom = mViewmodel.GetFormatDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
         lsDto =  mViewmodel.GetFormatDate(lsCurrentYear + "-12-30", "yyyy-MM-dd");
-
-        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
-        if (count > 0) {
-
-            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
-            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
-        }
 
         poMessage.InitDialog();
         poLoading.InitDialog();
