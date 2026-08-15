@@ -64,7 +64,7 @@ class Funds(instance : Context) {
     fun GetFormattedDate(fsInput : String, fsFormat : String) : String = dateRepository.FormatDate(fsInput, fsFormat)
 
     @SuppressLint("MissingPermission")
-    fun SaveLodgeFund() : CompletableFuture<Boolean> {
+    fun SaveLodgeFundMaster() : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -79,6 +79,67 @@ class Funds(instance : Context) {
 
                     httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_FUND_MASTER.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+
+    }
+
+    @SuppressLint("MissingPermission")
+    fun SaveFundTurnover() : CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GENERATE_FUND_TURNOVER.fsURL,
                         JSONObject(),
                         mapOf(
                             "access-token" to session.getokenID()
