@@ -93,7 +93,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "027": //Sync Data
+                    case "026": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -120,7 +120,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             }
                         });
                         break;
-                    case "028": //Logout
+                    case "027": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -199,11 +199,11 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loFragUser);
                 fragmentTransaction.addToBackStack("view_account");
                 break;
-            case "005":
+            case "005": //create member
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
                 fragmentTransaction.addToBackStack("create_member");
                 break;
-            case "006":
+            case "006": //assign officer
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
                 fragmentTransaction.addToBackStack("assign_officer");
                 break;
@@ -233,7 +233,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.layout_container, loProjSummary);
                 fragmentTransaction.addToBackStack("project_summary");
                 break;
-            case "011": //lodge fund summary information
+            case "013": //lodge fund summary information
                 Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
 

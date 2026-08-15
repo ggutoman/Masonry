@@ -38,6 +38,8 @@ class DataSyncService : Service(){
 
                         if (!(loIntent.hasExtra("user_id") && loIntent.hasExtra("member_id"))){
                             Toast.makeText(applicationContext, "User information not found", Toast.LENGTH_SHORT).show()
+
+                            stopSelf(startId)
                             return@launch
                         }
 
@@ -46,82 +48,110 @@ class DataSyncService : Service(){
 
                         if (!userId.isNullOrEmpty()) {
 
-                            // Step 1: Lodge tasks
                             Lodge(applicationContext).apply {
 
-                                //initalize other core classes for syncing data
+                                //initialize core classes
                                 val poDashboard = Dashboard(applicationContext)
                                 val poAccount = UserAccount(applicationContext)
                                 val poAnnual = Annual(applicationContext)
                                 val poFunds = Funds(applicationContext)
 
+                                //download lodge information
                                 DownloadLodgeInfo().thenAccept { lodgeSuccess ->
 
-                                    //continue syncing data if lodge information is successfully downloaded
+                                    //continue if lodge information is downloaded
                                     if (lodgeSuccess) {
 
-                                        //save lodge calendar
-                                        SaveLodgeCalendar().thenAccept { loCalendar->
+                                        //save lodge fund and masonic calendar
+                                        val laSaveData = listOf(
+                                            poFunds.SaveLodgeFundMaster(),
+                                            SaveLodgeCalendar()
+                                        )
 
-                                            if (loCalendar is Boolean){
+                                        CompletableFuture.allOf(*laSaveData.toTypedArray()).thenAccept {
 
-                                                if (!loCalendar){
-                                                    println("Save Calendar Error $message")
-                                                    stopSelf(startId)
-                                                    return@thenAccept
-                                                }
-                                            }else if (loCalendar is String){
+                                            laSaveData.forEachIndexed { idx, future ->
 
-                                                if (loCalendar.isEmpty()){
-                                                    println("Save Calendar Error $message")
-                                                    stopSelf(startId)
-                                                    return@thenAccept
-                                                }
+                                                val result = future.get()
+                                                if (result is Boolean){
 
-                                                val laSyncData = listOf(
-                                                    poFunds.SaveLodgeFund(),
-                                                    poAnnual.SaveAnnualDue(loCalendar, memberId.toString()),
-                                                    poDashboard.DownloadPositionInfo(),
-                                                    poDashboard.DownloadProvinceInfo(),
-                                                    poDashboard.DownloadTownInfo(),
-                                                    poAccount.DownloadUserObjects(),
-                                                    poAccount.DownloadMemberList(),
-                                                    poAccount.DownloadOfficerList(),
-                                                )
+                                                    if (!result){
+                                                        println("Save $idx Error: ${if (idx == 0) poFunds.message else message}")
 
-                                                CompletableFuture.allOf(*laSyncData.toTypedArray())
-                                                    .thenAccept {
+                                                        stopSelf(startId)
+                                                        return@thenAccept
+                                                    }else{
 
-                                                        laSyncData.forEachIndexed { idx, future ->
+                                                        //sync other data
+                                                        val laSyncData = listOf(
+                                                            poFunds.SaveFundTurnover(),
+                                                            poDashboard.DownloadPositionInfo(),
+                                                            poDashboard.DownloadProvinceInfo(),
+                                                            poDashboard.DownloadTownInfo(),
+                                                            poAccount.DownloadUserObjects(),
+                                                            poAccount.DownloadMemberList(),
+                                                            poAccount.DownloadOfficerList(),
+                                                        )
 
-                                                            val result = future.get()
-                                                            if (!result) {
-                                                                val errorMsg = when (idx) {
-                                                                    0 -> poFunds.message
-                                                                    1 -> poAnnual.message
-                                                                    2 -> poDashboard.message
-                                                                    else -> poAccount.message
-                                                                }.takeIf { it.isNotEmpty() } ?: "No message returned"
+                                                        //execute task list
+                                                        CompletableFuture.allOf(*laSyncData.toTypedArray()).thenAccept {
 
-                                                                println("Sync $idx Error $errorMsg")
-                                                            } else {
-                                                                println("Sync Data: Task $idx success")
+                                                            //print each indexed error
+                                                            laSyncData.forEachIndexed { idx, future ->
+
+                                                                val result = future.get()
+                                                                if (!result) {
+                                                                    val errorMsg = when (idx) {
+                                                                        0 -> poFunds.message
+                                                                        1 -> poAnnual.message
+                                                                        2 -> poDashboard.message
+                                                                        else -> poAccount.message
+                                                                    }.takeIf { it.isNotEmpty() } ?: "No message returned"
+
+                                                                    println("Sync $idx Error $errorMsg")
+                                                                } else {
+                                                                    println("Sync Data: Task $idx success")
+                                                                }
                                                             }
-                                                        }
-                                                        stopSelf(startId)
-                                                    }
-                                                    .exceptionally { throwable ->
-                                                        throwable.printStackTrace()
-                                                        stopSelf(startId)
-                                                        null
-                                                    }
-                                            }else{
-                                                stopSelf(startId)
-                                                println("Failed to save calendar")
-                                                return@thenAccept
-                                            }
+                                                            stopSelf(startId)
 
+                                                        }.exceptionally { throwable ->
+                                                            throwable.printStackTrace()
+                                                            stopSelf(startId)
+
+                                                            null
+                                                        }
+
+                                                    }
+                                                }else if (result is String){
+
+                                                    if (result.isEmpty()){
+                                                        println("Save $idx Error: ${if (idx == 0) poFunds.message else message}")
+
+                                                        stopSelf(startId)
+                                                        return@thenAccept
+                                                    }else{
+
+                                                        //save annual due
+                                                        poAnnual.SaveAnnualDue(result, memberId.toString()).thenAccept { isSuccess->
+
+                                                            if (!isSuccess){
+                                                                println("Save $idx Error: ${if (idx == 0) poFunds.message else message}")
+
+                                                                stopSelf(startId)
+                                                                return@thenAccept
+                                                            }
+                                                        }.exceptionally { throwable ->
+                                                            throwable.printStackTrace()
+
+                                                            stopSelf(startId)
+                                                            null
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
+
                                     }else{
                                         stopSelf(startId)
                                     }

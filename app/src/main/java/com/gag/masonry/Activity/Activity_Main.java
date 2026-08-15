@@ -179,8 +179,6 @@ public class Activity_Main extends AppCompatActivity {
 
                                     if (memberDashboardInfo == null) return;
 
-                                    Log.d("Member Info", "Start of service: " + String.valueOf(DataSyncService.Companion.isRunning()));
-
                                     //execute if sync data is not started
                                     if (!DataSyncService.Companion.isRunning()){
 
@@ -194,7 +192,7 @@ public class Activity_Main extends AppCompatActivity {
                                     }
 
                                 }catch (Exception ex){
-                                    Log.d("Sync Data", ex.getMessage().toString());
+                                    ex.printStackTrace();
                                 }
                             }
                         });
@@ -223,7 +221,7 @@ public class Activity_Main extends AppCompatActivity {
                 poLoad.DismissDialog();
 
                 Intent loIntent = new Intent(Activity_Main.this, Activity_Login.class);
-                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 poLogin.launch(loIntent);
             }
 
