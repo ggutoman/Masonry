@@ -14,15 +14,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
+import com.gag.accounting.Fragments.Receipt.Fragment_Receipt;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
+import com.gag.masonry.Fragment.Fragment_Member_List;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
@@ -93,7 +94,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "026": //Sync Data
+                    case "030": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -120,7 +121,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             }
                         });
                         break;
-                    case "027": //Logout
+                    case "031": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -169,9 +170,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
     public void InitView(String fsItemID){
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
         //do not proceed if user level is not initialized
         if (!getIntent().hasExtra("user_level")){
             Toast.makeText(Activity_Dashboard.this, "User level is not initialzed", Toast.LENGTH_SHORT).show();
@@ -182,65 +180,86 @@ public class Activity_Dashboard extends AppCompatActivity {
         main_drawer.closeDrawer(GravityCompat.START);
 
         //paramter object for arguments
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        Fragment loFragment;
         Bundle loArgs = new Bundle();;
-        switch (fsItemID){
+
+        String lsStackId = "";
+
+        switch (fsItemID) {
 
             case "000":
-                Fragment_Home loHome = new Fragment_Home();
+                loFragment = new Fragment_Home();
                 loArgs.putInt("user_level", getIntent().getIntExtra("user_level", 0));
-                loHome.setArguments(loArgs);
+                loFragment.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loHome);
-                fragmentTransaction.addToBackStack("home");
+                lsStackId = "home";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
             case "029": //account info
-                Fragment_UserInfo loFragUser = new Fragment_UserInfo();
-
-                fragmentTransaction.replace(R.id.layout_container, loFragUser);
-                fragmentTransaction.addToBackStack("view_account");
+                loFragment = new Fragment_UserInfo();
+                lsStackId = "view_account";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
             case "005": //create member
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Member());
-                fragmentTransaction.addToBackStack("create_member");
+                loFragment = new Fragment_Member();
+                lsStackId = "create_member";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
             case "006": //assign officer
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Assign_Officer());
-                fragmentTransaction.addToBackStack("assign_officer");
+                loFragment = new Fragment_Assign_Officer();
+                lsStackId = "assign_officer";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
             case "007": //project entry
-                Fragment_Project loProject = new Fragment_Project();
+                loFragment = new Fragment_Project();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loProject.setArguments(loArgs);
+                loFragment.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loProject);
-                fragmentTransaction.addToBackStack("project_entry");
+                lsStackId = "project_entry";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "008": //project history
-                Fragment_Lodge_Calendar_List loProjHistory = new Fragment_Lodge_Calendar_List();
-
+            case "008", "009": //project history
+                loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loProjHistory.setArguments(loArgs);
+                loFragment.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loProjHistory);
-                fragmentTransaction.addToBackStack("project_information");
+                lsStackId = fsItemID.equalsIgnoreCase("008") ? "project_confirm" : "project_information";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "009": //project summary
-                Fragment_Lodge_Calendar_List loProjSummary = new Fragment_Lodge_Calendar_List();
-
+            case "010": //project summary
+                loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loProjSummary.setArguments(loArgs);
+                loFragment.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loProjSummary);
-                fragmentTransaction.addToBackStack("project_summary");
+                lsStackId = "project_summary";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "013": //lodge fund summary information
-                Fragment_Lodge_Fund loFund = new Fragment_Lodge_Fund();
+            case "015": //lodge fund summary information
+                loFragment = new Fragment_Lodge_Fund();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loFragment.setArguments(loArgs);
 
-                loFund.setArguments(loArgs);
+                lsStackId = "lodge_fund_information";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                break;
+            case "017": //receipt entry
+                loFragment = new Fragment_Member_List();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loFragment.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loFund);
-                fragmentTransaction.addToBackStack("lodge_fund_information");
+                lsStackId = "receipt_entry";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                break;
+            case "018": //confirm receipts
+                loFragment = new Fragment_Issued_Receipts();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loFragment.setArguments(loArgs);
+
+                lsStackId = "receipt_confirm";
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
             case "ACC002": //reports
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
@@ -249,10 +268,6 @@ public class Activity_Dashboard extends AppCompatActivity {
             case "RCPT002": //receipt list
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("issued_receipt", new Fragment_Issued_Receipts()));
                 fragmentTransaction.addToBackStack("issued_receipt");
-                break;
-            case "RCPT003": //confirm receipts
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("receipt_confirm", new Fragment_Issued_Receipts()));
-                fragmentTransaction.addToBackStack("receipt_confirm");
                 break;
             case "DISB001": //create disbursement
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_entry", new Fragment_Disbursement()));
@@ -278,10 +293,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                     }
 
                     @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                    }
                 });
 
         }
+        fragmentTransaction.addToBackStack(lsStackId);
         fragmentTransaction.commit();
 
     }

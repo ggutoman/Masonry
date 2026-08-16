@@ -127,7 +127,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                         switch (lsStackIDxx){
 
                             //open project history
-                            case "project_information":
+                            case "project_confirm", "project_information":
                                 loFragment = new Fragment_Project_History();
                                 loBundle.putString("lodge_id", poItem.getSLodgeIDx());
                                 loBundle.putString("year_id", poItem.getSYearIDxx());

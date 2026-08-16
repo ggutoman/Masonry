@@ -1,5 +1,6 @@
 package com.gag.masonry.Fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -43,7 +44,6 @@ public class Fragment_UserInfo extends Fragment {
 
     private VM_Main mViewModel;
     private HashMap<String, ArrayList<String>> laMemberInfoOthers;
-    private String lsMemberID;
 
     //User Information
     private ShapeableImageView siv_status;
@@ -123,6 +123,7 @@ public class Fragment_UserInfo extends Fragment {
 
         //observe user information
         mViewModel.ObserveUserInfo().observe(getViewLifecycleOwner(), new Observer<EUserInfo>() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onChanged(EUserInfo eUserInfo) {
 
@@ -147,13 +148,25 @@ public class Fragment_UserInfo extends Fragment {
                 switch (eUserInfo.getNUserLevl()){
 
                     case 1:
-                        mtv_user_level.setText("User Account");
+                        mtv_user_level.setText("Regular Member");
                         break;
                     case 2:
-                        mtv_user_level.setText("Admin Account");
+                        mtv_user_level.setText("Junior Warden");
                         break;
                     case 4:
-                        mtv_user_level.setText("Owner Account");
+                        mtv_user_level.setText("Senior Warden");
+                        break;
+                    case 8:
+                        mtv_user_level.setText("Auditor");
+                        break;
+                    case 16:
+                        mtv_user_level.setText("Secretary");
+                        break;
+                    case 32:
+                        mtv_user_level.setText("Treasurer");
+                        break;
+                    case 64:
+                        mtv_user_level.setText("Worshipful Master");
                         break;
                 }
 

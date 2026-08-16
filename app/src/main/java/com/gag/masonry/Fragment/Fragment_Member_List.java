@@ -17,8 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
-import com.gag.accounting.Fragments.Receipt.Fragment_Receipt_Entry;
+import com.gag.accounting.Fragments.Receipt.Fragment_Receipt;
 import com.gag.masonry.R;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.textfield.TextInputEditText;
@@ -96,24 +95,23 @@ public class Fragment_Member_List extends Fragment {
                     public void Selected(EMemberInfo foMember) {
 
                         FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                        Fragment loFragment = new Fragment();
                         Bundle loBundle = new Bundle();
 
                         switch (lsStackIDxx){
 
                             case "receipt_entry":
 
-                                Fragment_Receipt_Entry loReceiptMembers = new Fragment_Receipt_Entry();
+                                loFragment = new Fragment_Receipt();
                                 loBundle.putString("member_id", foMember.getSMemberID());
 
-                                loReceiptMembers.setArguments(loBundle);
-
-                                //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("receipt_entry", loReceiptMembers));
-                                fragmentTransaction.addToBackStack("receipt_entry");
-                                fragmentTransaction.commit();
-
+                                loFragment.setArguments(loBundle);
                                 break;
                         }
+                        //add to child container, as bridge to initiate another fragment after call
+                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                        fragmentTransaction.addToBackStack("receipt_entry");
+                        fragmentTransaction.commit();
                     }
                 });
 

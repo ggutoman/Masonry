@@ -53,7 +53,7 @@ public class Adapter_Receipt_Transactions extends ArrayAdapter<ReceiptDetail> {
         MaterialTextView mtv_src_amount = view.findViewById(R.id.mtv_src_amount);
         MaterialTextView mtv_src_code = view.findViewById(R.id.mtv_src_code);
 
-        mtv_src_no.setText(laDetailsFiltered.get(position).getSSourceNo());
+        mtv_src_no.setText(laDetailsFiltered.get(position).getSSourceDscrpt().isEmpty() ? laDetailsFiltered.get(position).getSSourceNo() : laDetailsFiltered.get(position).getSSourceDscrpt());
         mtv_src_amount.setText(laDetailsFiltered.get(position).getNAmtPaidx());
 
         mtv_src_no.setVisibility(laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("DUES") || laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);

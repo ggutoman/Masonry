@@ -15,7 +15,7 @@ interface DUserObjects {
     @Query("DELETE FROM User_Objects")
     fun ClearObjects()
 
-    @Query("SELECT * FROM User_Objects WHERE (:fnUsrLevel & nRights) > 0 ORDER BY idxx ASC, sParentIDxx ASC")
+    @Query("SELECT * FROM User_Objects WHERE (:fnUsrLevel & nRights) > 0 AND cRecdStat = '1' ORDER BY idxx ASC, sParentIDxx ASC")
     fun GetUserObjects(fnUsrLevel : Int) : LiveData<List<EUserObjects>>
 
     @Query("DELETE FROM User_Objects")

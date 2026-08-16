@@ -128,6 +128,7 @@ public class Dialog_Receipt_Entry {
                                                         "",
                                                         s,
                                                         loMember.getSTransNox(),
+                                                        "Member's Contribution",
                                                         String.valueOf(ldbl_bal)
                                                 )
                                         );
@@ -165,6 +166,7 @@ public class Dialog_Receipt_Entry {
                                                         "",
                                                         s,
                                                         loMember.getSProjctCd(),
+                                                        loMember.getSProjctNm(),
                                                         String.valueOf(ldbl_bal)
                                                 )
                                         );
@@ -267,7 +269,7 @@ public class Dialog_Receipt_Entry {
                 if (auto_source_transaction.getAdapter() == null) return;
                 loSelectSource = ((ReceiptDetail) auto_source_transaction.getAdapter().getItem(i));
 
-                auto_source_transaction.setText(loSelectSource.getSSourceNo(), false);
+                auto_source_transaction.setText(loSelectSource.getSSourceDscrpt().isEmpty() ? loSelectSource.getSSourceNo() : loSelectSource.getSSourceDscrpt(), false);
                 tie_paid_amount.setText(loSelectSource.getNAmtPaidx());
             }
         });
@@ -300,6 +302,7 @@ public class Dialog_Receipt_Entry {
                     loSelectSource = new ReceiptDetail(
                             "",
                             lsSelectType,
+                            "",
                             "",
                             tie_paid_amount.getText().toString()
                     );

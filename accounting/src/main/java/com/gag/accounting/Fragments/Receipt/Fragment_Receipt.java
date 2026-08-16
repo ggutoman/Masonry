@@ -21,7 +21,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.gag.accounting.Adapter.Receipt.Adapter_Receipt_Sources;
@@ -32,9 +31,12 @@ import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
+import org.gag.appdriver.App.Models.AnnualMembers;
+import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
@@ -45,7 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fragment_Receipt_Entry extends Fragment {
+public class Fragment_Receipt extends Fragment {
 
     private VM_Receipts mViewModel;
     private Message_Dialog poMessage;
@@ -60,6 +62,8 @@ public class Fragment_Receipt_Entry extends Fragment {
     private ReceiptDetail loSelectDetail;
 
     private MaterialTextView mtv_status, btn_download, btn_view, mtv_totalpledge, btn_save_detail;
+
+    private TextInputLayout til_rcpt_status;
 
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_or, tie_remarks, tie_paid_amount,  auto_lodge_member;
 
@@ -231,12 +235,62 @@ public class Fragment_Receipt_Entry extends Fragment {
                         mViewModel.ClearDetail();
                         for (EReceiptDetail loDetail : eReceiptDetails){
 
-                            mViewModel.AddReceiptDetail(
-                                    loDetail.getSTransNox(),
-                                    loDetail.getSSourceCD(),
-                                    loDetail.getSSourceNo(),
-                                    loDetail.getNAmtPaidx()
-                            );
+                            if (loDetail.getSSourceCD().equalsIgnoreCase("PROJ")){
+
+                                mViewModel.GetProjects(lsMemberID).observe(getViewLifecycleOwner(), new Observer<List<MemberPledges>>() {
+                                    @Override
+                                    public void onChanged(List<MemberPledges> memberPledges) {
+
+                                        if (memberPledges == null || memberPledges.size() < 1){
+
+                                            mViewModel.AddReceiptDetail(
+                                                    loDetail.getSTransNox(),
+                                                    loDetail.getSSourceCD(),
+                                                    loDetail.getSSourceNo(),
+                                                    "",
+                                                    loDetail.getNAmtPaidx()
+                                            );
+
+                                        }else {
+
+                                            memberPledges
+                                                    .stream()
+                                                    .filter(item -> item.getSProjctCd().equalsIgnoreCase(loDetail.getSSourceNo()))
+                                                    .findAny()
+                                                    .ifPresent(result -> {
+
+                                                        mViewModel.AddReceiptDetail(
+                                                                loDetail.getSTransNox(),
+                                                                loDetail.getSSourceCD(),
+                                                                loDetail.getSSourceNo(),
+                                                                result.getSProjctNm(),
+                                                                loDetail.getNAmtPaidx()
+                                                        );
+
+                                                    });
+                                        }
+                                    }
+                                });
+
+                            }else if (loDetail.getSSourceCD().equalsIgnoreCase("DUES")){
+
+                                mViewModel.AddReceiptDetail(
+                                        loDetail.getSTransNox(),
+                                        loDetail.getSSourceCD(),
+                                        loDetail.getSSourceNo(),
+                                        "Member's Contribution",
+                                        loDetail.getNAmtPaidx()
+                                );
+                            }else {
+
+                                mViewModel.AddReceiptDetail(
+                                        loDetail.getSTransNox(),
+                                        loDetail.getSSourceCD(),
+                                        loDetail.getSSourceNo(),
+                                        "",
+                                        loDetail.getNAmtPaidx()
+                                );
+                            }
                         }
                     }
                 });
@@ -369,7 +423,7 @@ public class Fragment_Receipt_Entry extends Fragment {
 
                 loSelectDetail = (ReceiptDetail) auto_source_transaction.getAdapter().getItem(i);
 
-                auto_source_transaction.setText(loSelectDetail.getSSourceNo());
+                auto_source_transaction.setText(loSelectDetail.getSSourceDscrpt().isEmpty() ? loSelectDetail.getSSourceNo() : loSelectDetail.getSSourceDscrpt());
                 tie_paid_amount.setText(loSelectDetail.getNAmtPaidx());
 
                 btn_save_detail.setVisibility(View.GONE);
@@ -389,12 +443,7 @@ public class Fragment_Receipt_Entry extends Fragment {
                 if (charSequence.length() < 1 || loSelectDetail == null){
                     return;
                 }
-
-                if (!(loSelectDetail.getSSourceCD().equalsIgnoreCase("DUES") || loSelectDetail.getSSourceCD().equalsIgnoreCase("PROJ]"))){
-                    btn_save_detail.setVisibility(Double.parseDouble(loSelectDetail.getNAmtPaidx()) != Double.parseDouble(charSequence.toString()) ? View.VISIBLE : View.GONE);
-                }else {
-                    btn_save_detail.setVisibility(View.GONE);
-                }
+                btn_save_detail.setVisibility(Double.parseDouble(loSelectDetail.getNAmtPaidx()) != Double.parseDouble(charSequence.toString()) ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -442,6 +491,7 @@ public class Fragment_Receipt_Entry extends Fragment {
                                         lsTransNox,
                                         loEntry.getSSourceCD(),
                                         loEntry.getSSourceNo(),
+                                        loEntry.getSSourceDscrpt(),
                                         loEntry.getNAmtPaidx()
                                 )){
                                     Toast.makeText(requireActivity(), "Transaction is already added", Toast.LENGTH_SHORT).show();

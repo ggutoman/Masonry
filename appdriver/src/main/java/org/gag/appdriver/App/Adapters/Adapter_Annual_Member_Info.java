@@ -43,18 +43,6 @@ public class Adapter_Annual_Member_Info extends RecyclerView.Adapter<Adapter_Ann
         holder.mtv_totalcoll.setText(String.valueOf(laList.get(position).getNTotalColl()));
         holder.mtv_year.setText("L.Y " + laList.get(position).getNYearxx());
         holder.mtv_due.setText(laList.get(position).getDDueDate());
-
-        switch (laList.get(position).getCTranStat()){
-            case "1":
-                holder.mtv_status.setText("Active");
-                break;
-            case "2":
-                holder.mtv_status.setText("Approved");
-                break;
-            case "3":
-                holder.mtv_status.setText("Disapproved");
-                break;
-        }
     }
 
     @Override

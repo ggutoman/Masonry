@@ -151,12 +151,13 @@ public class VM_Receipts extends AndroidViewModel {
         });
     }
 
-    public boolean AddReceiptDetail(String fsTransNox, String fsSourceCd, String fsSourceNo, String fnAmtPaid){
+    public boolean AddReceiptDetail(String fsTransNox, String fsSourceCd, String fsSourceNo, String fsSourceDescript, String fnAmtPaid){
 
         ReceiptDetail loReceipt = new ReceiptDetail(
                 fsTransNox,
                 fsSourceCd,
                 fsSourceNo,
+                fsSourceDescript,
                 fnAmtPaid
         );
 
@@ -201,6 +202,7 @@ public class VM_Receipts extends AndroidViewModel {
                 currentList.get(fnIndex).getSTransNox(),
                 currentList.get(fnIndex).getSSourceCD(),
                 currentList.get(fnIndex).getSSourceNo(),
+                currentList.get(fnIndex).getSSourceDscrpt(),
                 fnAmtPaid
         );
         currentList.set(fnIndex, loReceipt);

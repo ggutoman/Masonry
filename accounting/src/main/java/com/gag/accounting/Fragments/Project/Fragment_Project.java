@@ -31,6 +31,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import com.gag.accounting.Adapter.Project.Adapter_Project_Member_Entry;
+
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.ProjectDetail;
 import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
@@ -51,7 +53,7 @@ public class Fragment_Project extends Fragment {
     private List<ProjectDetail> laDetails = new ArrayList<>();
     private Adapter_Project_Member_Entry loProjectDetailAdapter;
 
-    private String lsLodgeIDx, lsTransNox, lsStackID;
+    private String lsTransNox, lsLodgeIDxx, lsStackID, lsYearID;
     private int lnSelectStatus = -1, lnSelectDetail = -1, lnSelectType = -1;
     private ProjectDetail loSelectDetail;
 
@@ -82,7 +84,8 @@ public class Fragment_Project extends Fragment {
         }
 
         //initialze arguments
-        lsLodgeIDx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
+        lsYearID = "";
+        lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
         lsTransNox = getArguments() == null || getArguments().getString("project_cd") == null ? "" : getArguments().getString("project_cd");
 
         poMessage.InitDialog();
@@ -137,23 +140,6 @@ public class Fragment_Project extends Fragment {
 
     private void InitDataReceiver(){
 
-        //check if selected lodge id has been initialized for the project
-        if (lsLodgeIDx.isEmpty()){
-
-            poMessage.ShowMessage(1, "Lodge ID for the project is not initialized", "Okay", "", new Message_Dialog.OnDialogClick() {
-                @Override
-                public void OnPositive(@NotNull AlertDialog poDialog) {
-
-                    requireActivity().getSupportFragmentManager()
-                            .popBackStack(lsStackID, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                }
-
-                @Override
-                public void OnNegative(@NotNull AlertDialog poDialog) {}
-            });
-            return;
-        }
-
         List<String> laStatus = new ArrayList<>();
         for (PROJECT_CONSTANTS proj_types : mViewModel.GetProjectStatus()) {
             laStatus.add(proj_types.getFsDescr());
@@ -176,6 +162,30 @@ public class Fragment_Project extends Fragment {
                 laTypes
         ));
 
+        //get current masonic year id
+        mViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
+            @Override
+            public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
+
+                if (lodgeCalendarLists == null){
+                    Toast.makeText(requireActivity(), "Could not load masonic year info", Toast.LENGTH_SHORT).show();
+                    AllowFields(false);
+                    til_proj_status.setEnabled(false);
+                    return;
+                }
+
+                String lsCurrentYear = mViewModel.GetFormattedDate(mViewModel.GetCurrentDate(), "yyyy");
+                for (LodgeCalendarList lodgeYear : lodgeCalendarLists){
+                    if (lodgeYear.getNYearxxxx().equalsIgnoreCase(lsCurrentYear)) lsYearID = lodgeYear.getSYearIDxx();
+                }
+                if (lsYearID.isEmpty()){
+                    Toast.makeText(requireActivity(), "Could not load masonic year info", Toast.LENGTH_SHORT).show();
+                    AllowFields(false);
+                    til_proj_status.setEnabled(false);
+                }
+            }
+        });
+
         //load master
         mViewModel.GetProject(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EProjectMaster>() {
             @Override
@@ -187,7 +197,7 @@ public class Fragment_Project extends Fragment {
                             lsTransNox,
                             "",
                             "0",
-                            lsLodgeIDx,
+                            lsYearID,
                             mViewModel.GetCurrentDate(),
                             "1900-00-00",
                             "",
@@ -207,17 +217,17 @@ public class Fragment_Project extends Fragment {
                 }
 
                 //allow button objects based on status
-                boolean isOpen = loMaster.getCTranStat().equalsIgnoreCase("0") || loMaster.getCTranStat().equalsIgnoreCase("1");
+                boolean isOpen = Integer.parseInt(loMaster.getCTranStat()) < 2;
 
                 //allow objects based on status (Complete / Cancelled)
                 btn_add_detail.setEnabled(isOpen);
                 btn_save.setVisibility(isOpen ? View.VISIBLE: View.GONE);
 
                 //allow status change if record is for update or status is not open
-                til_proj_status.setEnabled(!lsStackID.equalsIgnoreCase("project_entry") || !isOpen);
+                til_proj_status.setEnabled((lsStackID.equalsIgnoreCase("project_confirm") && isOpen));
 
                 //enable fields
-                AllowFields(isOpen);
+                AllowFields((!lsStackID.equalsIgnoreCase("project_confirm") && isOpen));
 
                 lnSelectStatus = Integer.parseInt(loMaster.getCTranStat());
                 lnSelectType = Integer.parseInt(loMaster.getCProjctTp());
@@ -323,9 +333,6 @@ public class Fragment_Project extends Fragment {
 
                 lnSelectStatus = i;
                 auto_proj_status.setText(mViewModel.GetProjectStatus().get(lnSelectStatus).getFsDescr(), false);
-
-                //selection of status should not allow modifications
-                AllowFields(lnSelectStatus < 2);
             }
         });
 
@@ -463,7 +470,7 @@ public class Fragment_Project extends Fragment {
 
                 Dialog_Project_Entry loEntry = new Dialog_Project_Entry(
                         requireActivity(),
-                        getArguments().getString("lodge_id"),
+                        lsLodgeIDxx,
                         mViewModel,
                         getViewLifecycleOwner(),
                         new Dialog_Project_Entry.OnSubmitEntry() {
@@ -575,7 +582,7 @@ public class Fragment_Project extends Fragment {
                                         poDialog.dismiss();
 
                                         //reload details
-                                        DownloadInfo();
+                                        if (!lsTransNox.isEmpty()) DownloadInfo();
                                     }
 
                                     @Override
