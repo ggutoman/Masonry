@@ -41,7 +41,6 @@ interface DAnnualDetail {
                         "c.sMemberID, " +
                         "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
                         "b.cExemptID cExemptID," +
-                        "a.sRemarksx sRemarksx," +
                         "b.nAmtDuexx nAmtDuexx," +
                         "b.nAmtPaidx nAmtPaidx " +
                     "FROM " +
@@ -58,8 +57,6 @@ interface DAnnualDetail {
                         "b.sMemberID = :fsMemberIDxx " +
                     "AND " +
                         "b.nAmtDuexx > 0 " +
-                    "AND " +
-                        "a.cTranStat = '1' " +
                     "GROUP BY " +
                         "a.sTransNox " +
                     "ORDER BY " +
@@ -69,7 +66,6 @@ interface DAnnualDetail {
 
     @Query("SELECT " +
             "a.sTransNox, " +
-            "b.cTranStat, " +
             "c.nYearxxxx nYearxx, " +
             "b.dDueDatex dDueDate," +
             "SUM(a.nAmtDuexx) nTotalTrans, " +
@@ -100,7 +96,6 @@ interface DAnnualDetail {
 
     @Query("SELECT " +
                         "a.sTransNox, " +
-                        "b.cTranStat, " +
                         "c.nYearxxxx nYearxx, " +
                         "b.dDueDatex dDueDate," +
                         "SUM(a.nAmtDuexx) nTotalTrans, " +

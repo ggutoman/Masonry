@@ -9,10 +9,8 @@ data class EAnnualMaster(
     var sTransNox: String,
     var sYearIDxx: String,
     var dDueDatex: String,
-    var sRemarksx: String,
     var nTranTotl: String,
     var nCollTotl: String,
-    var cTranStat: String,
     var sModified: String,
     var dModified: String,
     var dTimeStmp: String

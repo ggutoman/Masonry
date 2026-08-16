@@ -69,6 +69,12 @@ class Projects(instance : Context) {
 
     fun FormatLongDate(fsParam : Long) : String = dateRepository.FormatLongDate(fsParam)
 
+    fun ObserveLodgeCalendarList(): LiveData<List<LodgeCalendarList>> = poLodgeYear.GetLodgeCalendarList(
+        TextFormatter()
+            .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
+            .getOrNull(0) ?: ""
+    )
+
     fun GetLodgeCalendarInfo(fsLodgeIDxx : String) : LiveData<LodgeCalendarList> = poLodgeYear.GetLodgeYearInfo(fsLodgeIDxx)
 
     fun GetProject(fsProjectCd : String) : LiveData<EProjectMaster> = poProjects.GetProjectMasterTransaction(fsProjectCd)

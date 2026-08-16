@@ -36,6 +36,10 @@ public class VM_Lodge extends AndroidViewModel {
         poFunds = new Funds(application);
     }
 
+    public String GetLodgeId(){
+        return poLodge.GetLodgeID();
+    }
+
     public String GetFormatDate(String fsDate, String fsFormat){
         return poFunds.GetFormattedDate(fsDate, fsFormat);
     }

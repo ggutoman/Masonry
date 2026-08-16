@@ -36,6 +36,7 @@ import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Fragment_Project_History extends Fragment {
@@ -86,6 +87,8 @@ public class Fragment_Project_History extends Fragment {
         InitViews(view);
         InitDataReceiver();
         InitListener();
+
+        DownloadList();
 
         return view;
     }
@@ -154,7 +157,18 @@ public class Fragment_Project_History extends Fragment {
                 rcv_project_list.setVisibility(View.VISIBLE);
                 layout_no_record.setVisibility(View.GONE);
 
-                loAdapter = new Adapter_Project_List(requireContext(), eProjectMasters, new Adapter_Project_List.OnSelectProject() {
+                //load list based on root navigation
+                List<EProjectMaster> laList = eProjectMasters;
+                if (lsStackIDxx.equalsIgnoreCase("project_confirm")){
+
+                    //only show list for confirmation
+                    laList = new ArrayList<>();
+                    for (EProjectMaster loProject : eProjectMasters){
+                        if (Integer.parseInt(loProject.getCTranStat()) < 2) laList.add(loProject);
+                    }
+                }
+
+                loAdapter = new Adapter_Project_List(requireContext(), laList, new Adapter_Project_List.OnSelectProject() {
                     @Override
                     public void OnSelect(EProjectMaster loProj) {
 

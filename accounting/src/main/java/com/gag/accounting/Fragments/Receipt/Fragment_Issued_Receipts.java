@@ -140,40 +140,31 @@ public class Fragment_Issued_Receipts extends Fragment {
                             public void OnSelec(ReceiptMasterList loItem) {
 
                                 FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
-
-                                Fragment loFragment;
+                                Fragment loFragment = new Fragment();
                                 Bundle loBundle = new Bundle();
 
                                 switch (lsStackIDxx){
 
                                     case "issued_receipt":
 
-                                        loFragment = new Fragment_Receipt_Entry();
-
+                                        loFragment = new Fragment_Receipt();
                                         loBundle.putString("member_id", loItem.getSMemberID());
                                         loBundle.putString("transaction_id", loItem.getSTransNox());
 
                                         loFragment.setArguments(loBundle);
-
-                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("issued_receipt", loFragment))
-                                            .addToBackStack("issued_receipt");
-
                                         break;
 
                                     case "receipt_confirm":
 
                                         loFragment = new Fragment_Receipt_Detail();
-
                                         loBundle.putString("member_id", loItem.getSMemberID());
                                         loBundle.putString("transaction_id", loItem.getSTransNox());
 
                                         loFragment.setArguments(loBundle);
-
-                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("receipt_confirm", loFragment))
-                                                .addToBackStack("receipt_confirm");
-
                                         break;
                                 }
+                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                loTransaction.addToBackStack(lsStackIDxx);
                                 loTransaction.commit();
 
                             }

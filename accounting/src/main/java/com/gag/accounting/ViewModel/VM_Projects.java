@@ -71,6 +71,10 @@ public class VM_Projects extends AndroidViewModel {
         return new ArrayList<>(List.of(PROJECT_CONSTANTS.PLANNING, PROJECT_CONSTANTS.ON_GOING, PROJECT_CONSTANTS.COMPLETED, PROJECT_CONSTANTS.CANCELLED));
     }
 
+    public LiveData<List<LodgeCalendarList>> GetLodgeCalendarList(){
+        return poProjects.ObserveLodgeCalendarList();
+    }
+
     public LiveData<LodgeCalendarList> GetLodgeCalendarInfo(String fsYearIDxx){
         return poProjects.GetLodgeCalendarInfo(fsYearIDxx);
     }
@@ -186,6 +190,10 @@ public class VM_Projects extends AndroidViewModel {
         foCallback.OnLoad();
 
         //check required prppertoes
+        if (foMaster.getSYearIDxx().isEmpty()){
+            foCallback.OnFailed("Year id is not initialized");
+            return;
+        }
         if (foMaster.getDTransact().isEmpty()){
             foCallback.OnFailed("Transaction date is not initialized");
             return;

@@ -14,8 +14,6 @@ import org.gag.appdriver.App.DataModels.DownloadLodgeCalendar
 import org.gag.appdriver.App.DataModels.DownloadLodgeCalendarList
 import org.gag.appdriver.App.DataModels.DownloadLodgeInfo
 import org.gag.appdriver.App.Models.LodgeCalendarList
-import org.gag.appdriver.App.Models.LodgeInfo
-import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
@@ -25,7 +23,6 @@ import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
 import org.gag.appdriver.Room.DataObject.DLodgeCalendar
 import org.gag.appdriver.Room.DataObject.DLodgeInfo
 import org.gag.appdriver.Room.DataObject.DTownInfo
-import org.gag.appdriver.Room.Entities.ELodgeCalendar
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -41,26 +38,13 @@ class Lodge(loInstance : Context) {
 
     val poLodgeInfo : DLodgeInfo = ML_DBF.getDatabase(loInstance).GetLodge()
     val poLodgeCalendar : DLodgeCalendar = ML_DBF.getDatabase(loInstance)?.GetLodgeCalendar() as DLodgeCalendar
-    val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val dateRepository : DateRepository = DateRepository()
 
     fun GetLodgeID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
         .getOrNull(0) ?: ""
 
-    fun GetLodgeCalendarInfo( sYearIDx : String) : LiveData<ELodgeCalendar> = poLodgeCalendar.ObserveLodgeCalendarInfo(sYearIDx)
-
-    fun GetLodges() : LiveData<List<LodgeInfo>> = poLodgeInfo.ObserveLodgeList()
-
     fun GetLodgeCalendarList(fsLodgeIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<LodgeCalendarList>> = poLodgeCalendar.GetLodgeCalendarList(fsLodgeIDx, fsDateFrom, fsDateTo)
-
-    fun SearchTown(fsSearch : String) : LiveData<List<TownProvince>> {
-        return poTownInfo.SearchTown("%$fsSearch%")
-    }
-
-    fun GetTownInfo(fsSearch : String) : TownProvince {
-        return poTownInfo.GetTownInfo(fsSearch)
-    }
 
     fun GetCurrentDate() : String = dateRepository.GetCurrentDate()
 
