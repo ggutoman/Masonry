@@ -74,7 +74,7 @@ public class Adapter_Pledge_Summary extends RecyclerView.Adapter<Adapter_Pledge_
     @Override
     public void onBindViewHolder(@NonNull VH_Pledge_List holder, int position) {
 
-        holder.mtv_name.setText(laProjects.get(position).getSMemberNme());
+        holder.mtv_name.setText(laMembers.get(position));
 
         holder.mtv_view.setOnClickListener(new View.OnClickListener() {
             @Override
