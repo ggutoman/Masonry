@@ -47,10 +47,10 @@ public class Fragment_UserInfo extends Fragment {
 
     //User Information
     private ShapeableImageView siv_status;
-    private MaterialTextView mtv_name, mtv_user_level, mtv_glpid;
+    private MaterialTextView mtv_name, mtv_glpid;
 
     // Member Information card
-    private MaterialTextView mtv_lodge, mtv_title, mtv_status, mtv_membership, mtv_sponsors;
+    private MaterialTextView mtv_lodge, mtv_status, mtv_membership;
 
     //Officer Information
     private MaterialCardView card_officer;
@@ -85,15 +85,12 @@ public class Fragment_UserInfo extends Fragment {
         //User information
         mtv_name = view.findViewById(R.id.mtv_name);
         siv_status = view.findViewById(R.id.siv_status);
-        mtv_user_level = view.findViewById(R.id.mtv_user_level);
         mtv_glpid = view.findViewById(R.id.mtv_glpid);
 
         // Member Information card
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
-        mtv_title = view.findViewById(R.id.mtv_title);
         mtv_status = view.findViewById(R.id.mtv_status);
         mtv_membership = view.findViewById(R.id.mtv_membership);
-        mtv_sponsors = view.findViewById(R.id.mtv_sponsors);
 
         //Officer Information
         mtv_label_officer = view.findViewById(R.id.mtv_label_officer);
@@ -145,31 +142,6 @@ public class Fragment_UserInfo extends Fragment {
                         break;
                 }
 
-                switch (eUserInfo.getNUserLevl()){
-
-                    case 1:
-                        mtv_user_level.setText("Regular Member");
-                        break;
-                    case 2:
-                        mtv_user_level.setText("Junior Warden");
-                        break;
-                    case 4:
-                        mtv_user_level.setText("Senior Warden");
-                        break;
-                    case 8:
-                        mtv_user_level.setText("Auditor");
-                        break;
-                    case 16:
-                        mtv_user_level.setText("Secretary");
-                        break;
-                    case 32:
-                        mtv_user_level.setText("Treasurer");
-                        break;
-                    case 64:
-                        mtv_user_level.setText("Worshipful Master");
-                        break;
-                }
-
                 //hide edit of membership if user level
                 if (eUserInfo.getNUserLevl() < 2) btn_edit_member.setVisibility(View.GONE);
             }
@@ -186,7 +158,6 @@ public class Fragment_UserInfo extends Fragment {
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
                 mtv_lodge.setText(memberDashboardInfo.getSLodgeNme());
-                mtv_title.setText(memberDashboardInfo.getSTitleDsc());
                 mtv_status.setText(GetMemberStatus.get(Integer.parseInt(memberDashboardInfo.getCMmbrStat())).getFsDescr());
                 mtv_membership.setText(mViewModel.GetFormattedDate(memberDashboardInfo.getDMembrshp(), "MMMM d, yyyy"));
 
@@ -335,7 +306,7 @@ public class Fragment_UserInfo extends Fragment {
                                 );
 
 
-                                mtv_term.setText(String.valueOf(eOfficer.getNYearxxxx()));
+                                mtv_term.setText(String.valueOf("M.Y " + eOfficer.getNYearxxxx()));
                                 mtv_position.setText(eOfficer.getSPositionNme());
                                 mtv_type.setText(laType.get(Integer.parseInt(eOfficer.getCAppointx())).getFsDescr());
                                 mtv_off_status.setText(laOfficerStatus.get(Integer.parseInt(eOfficer.getCStatusxx())).getFsDescr());

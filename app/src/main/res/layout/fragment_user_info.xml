@@ -66,12 +66,6 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/mtv_user_level"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"/>
-
-                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/mtv_glpid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -370,31 +364,6 @@
                         app:layout_constraintStart_toEndOf="@+id/mtv_label_lodge"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
-                    <!-- Member Title -->
-                    <com.google.android.material.textview.MaterialTextView
-                        style="@style/Text_Header"
-                        android:id="@+id/mtv_label_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="Member Title:"
-                        android:gravity="end"
-                        android:paddingVertical="2dp"
-                        android:paddingHorizontal="5dp"
-                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_lodge"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintWidth_percent="0.35"/>
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/mtv_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="N/A"
-                        android:paddingVertical="2dp"
-                        android:paddingHorizontal="5dp"
-                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_title"
-                        app:layout_constraintStart_toEndOf="@+id/mtv_label_title"
-                        app:layout_constraintEnd_toEndOf="parent"/>
-
                     <!-- Status -->
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/Text_Header"
@@ -405,7 +374,7 @@
                         android:gravity="end"
                         android:paddingVertical="2dp"
                         android:paddingHorizontal="5dp"
-                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_title"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_lodge"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintWidth_percent="0.35"/>
 
@@ -426,7 +395,7 @@
                         android:id="@+id/mtv_label_membership"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Date Membership:"
+                        android:text="Member Since:"
                         android:gravity="end"
                         android:paddingVertical="2dp"
                         android:paddingHorizontal="5dp"
@@ -443,31 +412,6 @@
                         android:paddingHorizontal="5dp"
                         app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_membership"
                         app:layout_constraintStart_toEndOf="@+id/mtv_label_membership"
-                        app:layout_constraintEnd_toEndOf="parent"/>
-
-                    <!-- Sponsors -->
-                    <com.google.android.material.textview.MaterialTextView
-                        style="@style/Text_Header"
-                        android:id="@+id/mtv_label_sponsors"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="Sponsors:"
-                        android:gravity="end"
-                        android:paddingVertical="2dp"
-                        android:paddingHorizontal="5dp"
-                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_membership"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintWidth_percent="0.35"/>
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/mtv_sponsors"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="N/A"
-                        android:paddingVertical="2dp"
-                        android:paddingHorizontal="5dp"
-                        app:layout_constraintTop_toBottomOf="@+id/mtv_membership"
-                        app:layout_constraintStart_toEndOf="@+id/mtv_label_sponsors"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
