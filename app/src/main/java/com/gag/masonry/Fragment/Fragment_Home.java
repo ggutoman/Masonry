@@ -43,6 +43,7 @@ import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.Adapter_Annual_Member_Info;
 import org.gag.appdriver.App.Models.AnnualSummary;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.OfficerInfo;
@@ -60,7 +61,7 @@ public class Fragment_Home extends Fragment {
     private VM_Projects mProjectsViewModel;
     private Message_Dialog poMessage;
 
-    private MaterialTextView mtv_username, mtv_lodge;
+    private MaterialTextView mtv_username, mtv_lodge, mtv_year;
     private TabLayout tab_layout;
 
     private Adapter_Member_List loMemberAdaoter;
@@ -119,6 +120,7 @@ public class Fragment_Home extends Fragment {
 
         mtv_username = view.findViewById(R.id.mtv_username);
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
+        mtv_year = view.findViewById(R.id.mtv_year);
 
         //officer objects
         tab_layout = view.findViewById(R.id.tab_layout);
@@ -181,6 +183,26 @@ public class Fragment_Home extends Fragment {
                     layout_pledges.setVisibility(View.GONE);
 
                     InitOfficerList();
+                }
+            }
+        });
+
+        mProjectsViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
+            @Override
+            public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
+
+                if (lodgeCalendarLists == null || lodgeCalendarLists.size() < 1){
+                    mtv_year.setVisibility(View.GONE);
+                    return;
+                }
+
+                for (LodgeCalendarList calendars : lodgeCalendarLists){
+
+                    if (calendars.getNYearxxxx().equalsIgnoreCase(mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy"))){
+                        mtv_year.setText("M.Y " + calendars.getNYearxxxx());
+                        mtv_year.setVisibility(View.VISIBLE);
+                        break;
+                    }
                 }
             }
         });

@@ -58,6 +58,12 @@
                     android:layout_height="wrap_content"
                     android:text="N/A"/>
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="N/A"/>
+
             </LinearLayout>
 
             <View
