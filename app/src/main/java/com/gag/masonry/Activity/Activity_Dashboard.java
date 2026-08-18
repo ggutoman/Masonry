@@ -253,12 +253,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "receipt_entry";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "018": //confirm receipts
+            case "019", "018": //confirm receipts or list of receipts
                 loFragment = new Fragment_Issued_Receipts();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = "receipt_confirm";
+                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_confirm" : "issued_receipt";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
             case "ACC002": //reports

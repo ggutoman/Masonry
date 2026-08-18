@@ -555,7 +555,18 @@ public class Fragment_Receipt extends Fragment {
                            public void OnSuccess() {
                                poLoading.DismissDialog();
 
-                               requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
+                               poMessage.ShowMessage(0, "Receipt has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                   @Override
+                                   public void OnPositive(@NotNull AlertDialog poDialog) {
+                                       poDialog.dismiss();
+                                       requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
+                                   }
+
+                                   @Override
+                                   public void OnNegative(@NotNull AlertDialog poDialog) {
+                                       poDialog.dismiss();
+                                   }
+                               });
                            }
 
                            @Override
