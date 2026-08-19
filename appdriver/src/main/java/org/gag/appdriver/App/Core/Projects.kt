@@ -109,8 +109,11 @@ class Projects(instance : Context) {
                     loDetail.forEach { loItem ->
                         val obj = JSONObject().apply {
 
-                            //add transaction no to parameters, if not empty
-                            if (loItem.sProjctCd.isNotEmpty()) put("sTransNox", loItem.sProjctCd)
+                            //add transaction no and entry nox to parameters, if not empty
+                            if (loItem.sProjctCd.isNotEmpty()){
+                                put("sTransNox", loItem.sProjctCd)
+                                put("nEntryNox", loItem.nEntryNox)
+                            }
 
                             put("sMemberID", loItem.sMemberID)
                             put("sORNoxxxx", loItem.sORNoxxxx)

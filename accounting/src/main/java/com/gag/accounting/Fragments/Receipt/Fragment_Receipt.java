@@ -35,7 +35,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
-import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
@@ -62,8 +61,6 @@ public class Fragment_Receipt extends Fragment {
     private ReceiptDetail loSelectDetail;
 
     private MaterialTextView mtv_status, btn_download, btn_view, mtv_totalpledge, btn_save_detail;
-
-    private TextInputLayout til_rcpt_status;
 
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_or, tie_remarks, tie_paid_amount,  auto_lodge_member;
 
@@ -101,7 +98,7 @@ public class Fragment_Receipt extends Fragment {
         InitDataReceiver();
         InitListener();
 
-        if (!lsTransNox.isEmpty()) DownloadList();
+        if (!lsTransNox.isEmpty()) DownloadReceipt();
 
         return view;
     }
@@ -223,7 +220,7 @@ public class Fragment_Receipt extends Fragment {
                 tie_or.setText(loReceipt.getSORNoxxxx());
                 tie_remarks.setText(loReceipt.getSRemarksx());
 
-                AllowFields(List.of(auto_pay_type, tie_or, tie_remarks, btn_add_detail, tie_paid_amount), loReceipt.getCTranStat().equalsIgnoreCase("0"));
+                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount), loReceipt.getCTranStat().equalsIgnoreCase("0"));
 
                 //load existing details of record
                 mViewModel.ObserveReceiptDetail(lsTransNox).observe(getViewLifecycleOwner(), new Observer<List<EReceiptDetail>>() {
@@ -371,18 +368,22 @@ public class Fragment_Receipt extends Fragment {
         }
     }
 
-    private void DownloadList(){
+    private void DownloadReceipt(){
 
         mViewModel.DownloadReceiptInfo(lsTransNox, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
                 poLoading.ShowDialog("Downloading receipt information. Please wait . .");
+
+                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_download, btn_add_detail), false);
             }
 
             @Override
             public void OnFinished(String fsMessage) {
                 poLoading.DismissDialog();
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_download, btn_add_detail), loReceipt.getCTranStat().equalsIgnoreCase("0"));
             }
         });
     }
@@ -450,7 +451,7 @@ public class Fragment_Receipt extends Fragment {
         btn_download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DownloadList();
+                DownloadReceipt();
             }
         });
 
