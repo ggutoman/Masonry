@@ -1,6 +1,7 @@
 package com.gag.accounting.Fragments.Receipt;
 
 import static androidx.core.content.ContextCompat.getSystemService;
+import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 
 import android.app.Activity;
 import android.content.Context;
@@ -302,14 +303,38 @@ public class Fragment_Receipt_Detail extends Fragment {
                     public void OnSuccess() {
                         poLoad.DismissDialog();
 
-                        //reload transaction, to display share button after approving
-                        InitDataReceiver();
+                        String lsDescript = switch (fsTranStat) {
+                            case "1" -> "confirmed";
+                            case "3" -> "cancelled";
+                            case "4" -> "voided";
+                            default -> "opened";
+                        };
+
+                        poMessage.ShowMessage(0, "Receipt has been " + lsDescript + " successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                                requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
                     }
 
                     @Override
                     public void OnFailed(String fsMessage) {
                         poLoad.DismissDialog();
-                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                        poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
                     }
                 });
             }

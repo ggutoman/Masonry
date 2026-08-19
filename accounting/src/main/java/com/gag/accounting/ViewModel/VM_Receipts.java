@@ -290,9 +290,6 @@ public class VM_Receipts extends AndroidViewModel {
         }else if (foMaster.getCPaymForm().isEmpty()){
             foCallback.OnFailed("Payment Type is not initialized");
             return;
-        }else if (foMaster.getSORNoxxxx().isEmpty()){
-            foCallback.OnFailed("OR Number is not initialized");
-            return;
         }else if (foMaster.getCTranStat().isEmpty()){
             foCallback.OnFailed("Status not initialized");
             return;
