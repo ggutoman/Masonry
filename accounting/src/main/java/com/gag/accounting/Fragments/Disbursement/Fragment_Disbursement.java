@@ -58,6 +58,7 @@ import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -78,24 +79,22 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
     private int lnSelectAttached = -1;
 
-    private String lsStackIDxx, lsTransNox;
-    private LodgeInfo loSelectLodge;
+    private String lsStackIDxx, lsTransNox, lsLodgeIDxx;
     private DISBURSEMENT_CONSTANTS loSelectType;
     private DisbursementDetail loSelectTransaction;
     private Adapter_Disbursement_Attachments loAdapterAttachment;
     private EDisbursementAttachment loSelectAttachment;
     private File loAttached;
 
-    private View parent_view;
     private View view_image;
     private ShapeableImageView img_file;
     private MaterialTextView mtv_filenme, mtv_filepth;
     private ImageButton btn_transaction;
 
     private MaterialTextView mtv_status, mtv_status_attachment, mtv_fileloc, btn_download, btn_download_sources, btn_view_details, btn_save_attachment, btn_view_attachment;
-    private TextInputLayout til_source_type, til_source_no, til_lodge;
+    private TextInputLayout til_source_type, til_source_no;
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, tie_amount, tie_doctitle, tie_remarks;
-    private MaterialAutoCompleteTextView auto_source_type, auto_source_no, auto_lodge, auto_attachment_transaction;
+    private MaterialAutoCompleteTextView auto_source_type, auto_source_no, auto_attachment_transaction;
     private ConstraintLayout layout_tools;
     private MaterialButton btn_save;
     private ImageButton btn_attachment;
@@ -152,6 +151,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         poMessage.InitDialog();
 
         lsTransNox = getArguments() == null || getArguments().getString("transaction_id") == null ? "" : getArguments().getString("transaction_id");
+        lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
 
         if (!lsTransNox.isEmpty()) DownloadDisbursement();
 
@@ -175,7 +175,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         btn_download = view.findViewById(R.id.btn_download);
         btn_download_sources= view.findViewById(R.id.btn_download_source);
 
-        til_lodge = view.findViewById(R.id.til_lodge);
         til_source_type = view.findViewById(R.id.til_source_type);
         til_source_no = view.findViewById(R.id.til_source_no);
 
@@ -186,7 +185,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         tie_voucher = view.findViewById(R.id.tie_voucher);
         tie_amount = view.findViewById(R.id.tie_amount);
 
-        auto_lodge = view.findViewById(R.id.auto_lodge);
         auto_source_type = view.findViewById(R.id.auto_source_type);
         auto_source_no = view.findViewById(R.id.auto_source_no);
         auto_attachment_transaction= view.findViewById(R.id.auto_attachment_transaction);
@@ -235,35 +233,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 mViewModel.GetSources()
         ));
 
-        mViewModel.ObserveLodgeList().observe(getViewLifecycleOwner(), new Observer<List<LodgeInfo>>() {
-            @Override
-            public void onChanged(List<LodgeInfo> lodgeInfos) {
-
-                if (lodgeInfos == null) return;
-
-                auto_lodge.setAdapter(new LodgeAdapter(
-                        requireContext(),
-                        android.R.layout.simple_spinner_dropdown_item,
-                        lodgeInfos
-                ));
-
-                //initialize default selection of lodge
-                if (loSelectLodge == null){
-
-                    for (LodgeInfo loLodge : lodgeInfos){
-
-                        if (loLodge.getSLodgeIDx().equalsIgnoreCase(mViewModel.GetLodgeID())){
-                            loSelectLodge = loLodge;
-                            auto_lodge.setText(loSelectLodge.getSLodgeNme(), false);
-                            break;
-                        }
-
-                    }
-
-                }
-            }
-        });
-
         mViewModel.GetDisbursement(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EDisbursement>() {
             @Override
             public void onChanged(EDisbursement eDisbursement) {
@@ -291,11 +260,10 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                     layout_tools.setVisibility(View.GONE);
                 }else {
                     loDisbursement = eDisbursement;
-
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
-                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment, mtv_fileloc), true);
+                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment, mtv_fileloc), true);
 
                 tie_transaction_no.setText(loDisbursement.getSTransNox());
                 tie_dtransact.setText(loDisbursement.getDTransact());
@@ -303,6 +271,9 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 tie_particulars.setText(loDisbursement.getSParticlr());
                 tie_voucher.setText(loDisbursement.getSVouchrNo());
                 tie_amount.setText(loDisbursement.getNAmountxx());
+
+                //reload type selection
+                mViewModel.SelectType(loDisbursement.getSSourceCD());
 
                 switch (loDisbursement.getCTranStat()){
 
@@ -325,11 +296,12 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         mtv_status.setText("Completed");
                         break;
                 }
-                til_lodge.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_save.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
-                AllowFields(List.of(tie_payee, tie_particulars, tie_voucher, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks), loDisbursement.getCTranStat().equals("0"));
+                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks), loDisbursement.getCTranStat().equals("0"));
+
+                til_source_no.setEnabled(loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ"));
 
                 //load source type on selection
                 for (DISBURSEMENT_CONSTANTS loSrcTypes : mViewModel.GetSources()){
@@ -338,7 +310,10 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         loSelectType = loSrcTypes;
                         auto_source_type.setText(loSrcTypes.getFsDescript());
 
-                        if (loSelectLodge == null || loSelectLodge.getSLodgeIDx().isEmpty()) break;
+                        if (lsLodgeIDxx == null || lsLodgeIDxx.isEmpty()){
+                            Toast.makeText(requireActivity(), "Lodge ID is not initialized", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
 
                         if (loDisbursement.getSSourceCD().equalsIgnoreCase("FND")){
                             DownloadLodgeFunds();
@@ -378,91 +353,67 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             @Override
             public void onChanged(String s) {
 
-                switch (s){
+                til_source_no.setVisibility(s.equalsIgnoreCase("FND") ? View.GONE : View.VISIBLE);
+                if (s.equalsIgnoreCase("PROJ")){
 
-                    case "FND":
+                    mViewModel.GetLodgeProjects(lsLodgeIDxx).observe(getViewLifecycleOwner(), new Observer<List<EProjectMaster>>() {
+                        @Override
+                        public void onChanged(List<EProjectMaster> eProjectMasters) {
 
-                        mViewModel.GetLodgeFunds(loSelectLodge == null ? "" : loSelectLodge.getSLodgeIDx()).observe(getViewLifecycleOwner(), new Observer<List<LodgeFundMasterList>>() {
-                            @Override
-                            public void onChanged(List<LodgeFundMasterList> lodgeFundMasterLists) {
-
-                                if (lodgeFundMasterLists == null){
-                                    return;
-                                }
-
-                                List<DisbursementDetail> laDetails = new ArrayList<>();
-                                for (LodgeFundMasterList loFund : lodgeFundMasterLists){
-
-                                    DisbursementDetail loDisb = new DisbursementDetail(
-                                            "FND",
-                                            loFund.getSLodgeNme(),
-                                            loFund.getSLodgeIDx(),
-                                            loFund.getNBalancex()
-                                    );
-
-                                    //add to list
-                                    laDetails.add(loDisb);
-
-                                    //select transaction if matched the entry source no
-                                    if (loFund.getSLodgeIDx().equalsIgnoreCase(loDisbursement.getSSourceNo())){
-                                        loSelectTransaction = loDisb;
-
-                                        auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
-                                    }
-                                }
-
-                                auto_source_no.setAdapter(
-                                        new Adapter_Disbursement_Transactions(
-                                                requireContext(),
-                                                R.layout.list_disbursement_details,
-                                                laDetails
-                                        )
-                                );
+                            if (eProjectMasters == null){
+                                Toast.makeText(requireActivity(), "No project source", Toast.LENGTH_SHORT).show();
+                                return;
                             }
-                        });
-                        break;
-                    case "PROJ":
 
-                        mViewModel.GetLodgeProjects(loSelectLodge == null ? "" : loSelectLodge.getSLodgeIDx()).observe(getViewLifecycleOwner(), new Observer<List<EProjectMaster>>() {
-                            @Override
-                            public void onChanged(List<EProjectMaster> eProjectMasters) {
+                            List<DisbursementDetail> laDetails = new ArrayList<>();
+                            for (EProjectMaster loProject : eProjectMasters){
 
-                                if (eProjectMasters == null){
-                                    Toast.makeText(requireActivity(), "No project source", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-
-                                List<DisbursementDetail> laDetails = new ArrayList<>();
-                                for (EProjectMaster loProject : eProjectMasters){
-
-                                    DisbursementDetail loDisb = new DisbursementDetail(
-                                            "PROJ",
-                                            loProject.getSProjctNm(),
-                                            loProject.getSProjctCd(),
-                                            loProject.getNCollTotl()
-                                    );
-
-                                    //add to list
-                                    laDetails.add(loDisb);
-
-                                    //select transaction if matched the entry source no
-                                    if (loProject.getSProjctCd().equalsIgnoreCase(loDisbursement.getSSourceNo())){
-                                        loSelectTransaction = loDisb;
-
-                                        auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
-                                    }
-                                }
-
-                                auto_source_no.setAdapter(
-                                        new Adapter_Disbursement_Transactions(
-                                                requireContext(),
-                                                R.layout.list_disbursement_details,
-                                                laDetails
-                                        )
+                                DisbursementDetail loDisb = new DisbursementDetail(
+                                        "PROJ",
+                                        loProject.getSProjctNm(),
+                                        loProject.getSProjctCd(),
+                                        loProject.getNCollTotl()
                                 );
+
+                                //add to list
+                                laDetails.add(loDisb);
+
+                                //select transaction if matched the entry source no
+                                if (loProject.getSProjctCd().equalsIgnoreCase(loDisbursement.getSSourceNo())){
+                                    loSelectTransaction = loDisb;
+                                    auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
+                                }
                             }
-                        });
-                        break;
+
+                            auto_source_no.setAdapter(
+                                    new Adapter_Disbursement_Transactions(
+                                            requireContext(),
+                                            R.layout.list_disbursement_details,
+                                            laDetails
+                                    )
+                            );
+                        }
+                    });
+
+                }else{
+
+                    mViewModel.ObserveLodgeFund(lsLodgeIDxx).observe(getViewLifecycleOwner(), new Observer<LodgeFundMasterList>() {
+                        @Override
+                        public void onChanged(LodgeFundMasterList lodgeFundMasterList) {
+
+                            if (lodgeFundMasterList == null){
+                                Toast.makeText(requireActivity(), "Could not find lodge fund information", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            loSelectTransaction = new DisbursementDetail(
+                                    "FND",
+                                    lodgeFundMasterList.getSLodgeNme(),
+                                    lodgeFundMasterList.getSLodgeIDx(),
+                                    lodgeFundMasterList.getNBalancex()
+                            );
+                        }
+                    });
                 }
             }
         });
@@ -510,10 +461,10 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
     private void DownloadProjects(){
 
-        mViewModel.DownloadProjects(loSelectLodge == null ? "" : loSelectLodge.getSLodgeIDx(), new VM_Receipts.OnDownload() {
+        mViewModel.DownloadProjects(lsLodgeIDxx, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                Toast.makeText(requireActivity(), "Downloading projects. Please wait . .", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireActivity(), "Downloading projects funds. Please wait . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -528,17 +479,15 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
     private void DownloadLodgeFunds(){
 
-        mViewModel.DownloadLodgeFunds(loSelectLodge == null ? "" : loSelectLodge.getSLodgeIDx(), new VM_Receipts.OnDownload() {
+        mViewModel.DownloadLodgeFunds(lsLodgeIDxx, new VM_Receipts.OnDownload() {
             @Override
             public void OnLoad() {
-                poLoad.ShowDialog("Downloading lodge funds. Please wait . .");
+                Toast.makeText(requireActivity(), "Downloading lodge funds. Please wait . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void OnFinished(String fsMessage) {
-                poLoad.DismissDialog();
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-
                 mViewModel.SelectType(loSelectType.getFsID());
             }
         });
@@ -549,8 +498,8 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         if (loSelectType == null){
             Toast.makeText(requireActivity(), "Please select source type", Toast.LENGTH_SHORT).show();
             return;
-        } else if (loSelectLodge == null) {
-            Toast.makeText(requireActivity(), "Please select a lodge first", Toast.LENGTH_SHORT).show();
+        } else if (lsLodgeIDxx.isEmpty()) {
+            Toast.makeText(requireActivity(), "Lodge ID is not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -670,17 +619,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
     private void InitListener(){
 
-        auto_lodge.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                if (auto_lodge.getAdapter() == null) return;
-                loSelectLodge = (LodgeInfo) auto_lodge.getAdapter().getItem(i);
-
-                auto_lodge.setText(loSelectLodge.getSLodgeNme(), false);
-            }
-        });
-
         auto_source_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -689,6 +627,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 loSelectType = (DISBURSEMENT_CONSTANTS) auto_source_type.getAdapter().getItem(i);
 
                 auto_source_type.setText(loSelectType.getFsDescript(), false);
+                til_source_no.setEnabled(loSelectType.getFsID().equalsIgnoreCase("PROJ"));
 
                 //clear voucher fields
                 ClearFields(List.of(auto_source_no, tie_amount), true);
@@ -843,9 +782,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         }else if (tie_particulars.getText() == null || tie_particulars.getText().toString().isEmpty()){
                             Toast.makeText(requireActivity(), "Please enter particulars", Toast.LENGTH_SHORT).show();
                             return;
-                        }else if (tie_voucher.getText() == null || tie_voucher.getText().toString().isEmpty()){
-                            Toast.makeText(requireActivity(), "Please enter voucher", Toast.LENGTH_SHORT).show();
-                            return;
                         }else if (loDisbursement == null){
                             Toast.makeText(requireActivity(), "Disbursement is not initialized properly", Toast.LENGTH_SHORT).show();
                             return;
@@ -860,7 +796,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         //initialize voucher information
                         loDisbursement.setSPayeeNme(tie_payee.getText() == null ? "" : tie_payee.getText().toString());
                         loDisbursement.setSParticlr(tie_particulars.getText() == null ? "" : tie_particulars.getText().toString());
-                        loDisbursement.setSVouchrNo(tie_voucher.getText() == null ? "" : tie_voucher.getText().toString());
                         loDisbursement.setSSourceCD(loSelectType.getFsID());
                         loDisbursement.setSSourceNo(loSelectTransaction.getSSourceNo());
                         loDisbursement.setNAmountxx(tie_amount.getText() == null ? "" : tie_amount.getText().toString());
@@ -874,9 +809,17 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                             @Override
                             public void OnSuccess() {
                                 poLoad.DismissDialog();
-                                Toast.makeText(requireActivity(), "Disbursement saved successfully", Toast.LENGTH_SHORT).show();
 
-                                requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                poMessage.ShowMessage(0, "Disbursement has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                        requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
                             }
 
                             @Override
@@ -887,6 +830,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
+                                        DownloadDisbursement();
                                     }
 
                                     @Override

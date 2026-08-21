@@ -49,15 +49,11 @@ class Funds(instance : Context) {
 
     fun GetLodgeInfo(fsLodgeIDxx : String) : ELodgeInfo = poLodge.GetLodgeInfo(fsLodgeIDxx)
 
-    fun ObserveLodgeInfo(fsLodgeIDxx : String) : LiveData<ELodgeInfo> = poLodge.ObserveLodgeInfo(fsLodgeIDxx)
-
-    fun ObserveLodgeList() : LiveData<List<LodgeInfo>> = poLodge.ObserveLodgeList()
+    fun ObserveLodgeFund(fsLodgeIDxx : String) : LiveData<LodgeFundMasterList> = poLodgeFundMaster.ObserveLodgeFund(fsLodgeIDxx)
 
     fun ObserveLedgers(fsLodgeIDxx: String, fsDfromx: String, fsDTox: String): LiveData<List<EFundLedger>> = poLodgeFundLedger.ObserveLedgers(fsLodgeIDxx, fsDfromx, fsDTox)
 
     fun GetUserInfo() : EUserInfo  = poUserInfo.GetUserInfo()
-
-    fun ObserveLodgeFunds(fsLodgeIDxx : String) : LiveData<List<LodgeFundMasterList>> = poLodgeFundMaster.ObserveLodgeFunds(fsLodgeIDxx)
 
     fun GetCurrentDate() = dateRepository.GetCurrentDate()
 

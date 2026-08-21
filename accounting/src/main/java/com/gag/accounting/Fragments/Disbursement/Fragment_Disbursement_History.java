@@ -56,7 +56,7 @@ public class Fragment_Disbursement_History extends Fragment {
     private RecyclerView rcv_list;
 
     private int lnTabSelected;
-    private String lsStackIDxx, lsDfrom, lsDto;
+    private String lsStackIDxx, lsDfrom, lsDto, lsLodgeIDxx;
     private List<String> laStatus;
 
     @Override
@@ -84,6 +84,8 @@ public class Fragment_Disbursement_History extends Fragment {
             FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
             lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
+
+        lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
 
         InitViews(view);
         InitListener();
@@ -143,7 +145,7 @@ public class Fragment_Disbursement_History extends Fragment {
 
                                 FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
 
-                                Fragment loFragment;
+                                Fragment loFragment = new Fragment();
                                 Bundle loBundle = new Bundle();
 
                                 switch (lsStackIDxx){
@@ -153,11 +155,8 @@ public class Fragment_Disbursement_History extends Fragment {
                                         loFragment = new Fragment_Disbursement();
 
                                         loBundle.putString("transaction_id", loItem.getSTransNox());
+                                        loBundle.putString("lodge_id", lsLodgeIDxx);
                                         loFragment.setArguments(loBundle);
-
-                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_list", loFragment))
-                                                .addToBackStack("disbursement_list");
-
                                         break;
 
                                     case "disbursement_confirm":
@@ -165,11 +164,8 @@ public class Fragment_Disbursement_History extends Fragment {
                                         loFragment = new Fragment_Disbursement_Detail();
 
                                         loBundle.putString("transaction_id", loItem.getSTransNox());
+                                        loBundle.putString("lodge_id", lsLodgeIDxx);
                                         loFragment.setArguments(loBundle);
-
-                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_confirm", loFragment))
-                                                .addToBackStack("disbursement_confirm");
-
                                         break;
 
                                     case "disbursement_attachments":
@@ -178,12 +174,11 @@ public class Fragment_Disbursement_History extends Fragment {
 
                                         loBundle.putString("source", loItem.getSTransNox());
                                         loFragment.setArguments(loBundle);
-
-                                        loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance("disbursement_attachments", loFragment))
-                                                .addToBackStack("disbursement_attachments");
-
                                         break;
                                 }
+
+                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment))
+                                        .addToBackStack(lsStackIDxx);
                                 loTransaction.commit();
 
                             }

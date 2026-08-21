@@ -17,6 +17,7 @@ import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
@@ -88,16 +89,12 @@ public class VM_Disbursement extends AndroidViewModel {
         return GetAttachedFile;
     }
 
-    public LiveData<List<LodgeInfo>> ObserveLodgeList(){
-        return poFunds.ObserveLodgeList();
+    public LiveData<LodgeFundMasterList> ObserveLodgeFund(String fsLodgeIDxx){
+        return poFunds.ObserveLodgeFund(fsLodgeIDxx);
     }
 
     public LiveData<List<EProjectMaster>> GetLodgeProjects(String fsLodgeIDxx){
         return poProjects.GetLodgeProjects(fsLodgeIDxx);
-    }
-
-    public LiveData<List<LodgeFundMasterList>> GetLodgeFunds(String fsLodgeIDxx){
-        return poFunds.ObserveLodgeFunds(fsLodgeIDxx);
     }
 
     public LiveData<EDisbursement> GetDisbursement(String fsTransNox){
@@ -233,9 +230,6 @@ public class VM_Disbursement extends AndroidViewModel {
             return;
         }else if (loDisbursement.getSParticlr().isEmpty()){
             foCallback.OnFailed("Particulars is not initialized");
-            return;
-        }else if (loDisbursement.getSVouchrNo().isEmpty()){
-            foCallback.OnFailed("Voucher number is not initialized");
             return;
         }else if (loDisbursement.getSSourceCD().isEmpty()){
             foCallback.OnFailed("Source code is not initialized");

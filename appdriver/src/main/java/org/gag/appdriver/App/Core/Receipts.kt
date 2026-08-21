@@ -299,7 +299,10 @@ class Receipts(instance : Context) {
                         val obj = JSONObject().apply {
 
                             //add transaction no to parameters, if not empty
-                            if (loItem.sTransNox.isNotEmpty()) put("sTransNox", loItem.sTransNox)
+                            if (loItem.sTransNox.isNotEmpty()){
+                                put("sTransNox", loItem.sTransNox)
+                                put("nEntryNox", loItem.nEntryNox)
+                            }
 
                             put("sSourceCD", loItem.sSourceCD)
                             put("sSourceNo", loItem.sSourceNo)

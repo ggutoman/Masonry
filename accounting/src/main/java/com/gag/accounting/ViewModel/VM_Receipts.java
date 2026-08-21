@@ -151,15 +151,7 @@ public class VM_Receipts extends AndroidViewModel {
         });
     }
 
-    public boolean AddReceiptDetail(String fsTransNox, String fsSourceCd, String fsSourceNo, String fsSourceDescript, String fnAmtPaid){
-
-        ReceiptDetail loReceipt = new ReceiptDetail(
-                fsTransNox,
-                fsSourceCd,
-                fsSourceNo,
-                fsSourceDescript,
-                fnAmtPaid
-        );
+    public boolean AddReceiptDetail(String fsTransNox, String fsSourceCd, String fsSourceNo, String fsEntryNox, String fsSourceDescript, String fnAmtPaid){
 
         List<ReceiptDetail> currentList = GetReceipttDetail.getValue();
         if (currentList == null) {
@@ -183,6 +175,15 @@ public class VM_Receipts extends AndroidViewModel {
         if (exists) {
             return false;
         }
+
+        ReceiptDetail loReceipt = new ReceiptDetail(
+                fsTransNox,
+                fsSourceCd,
+                fsSourceNo,
+                fsEntryNox.isEmpty() ? String.valueOf(currentList.size() + 1) : fsEntryNox,
+                fsSourceDescript,
+                fnAmtPaid
+        );
         currentList.add(loReceipt);
 
         GetReceipttDetail.setValue(currentList);
@@ -202,6 +203,7 @@ public class VM_Receipts extends AndroidViewModel {
                 currentList.get(fnIndex).getSTransNox(),
                 currentList.get(fnIndex).getSSourceCD(),
                 currentList.get(fnIndex).getSSourceNo(),
+                currentList.get(fnIndex).getNEntryNox(),
                 currentList.get(fnIndex).getSSourceDscrpt(),
                 fnAmtPaid
         );
@@ -322,7 +324,7 @@ public class VM_Receipts extends AndroidViewModel {
 
             EReceiptDetail loParam = new EReceiptDetail(
                     foDetail.get(i).getSTransNox(),
-                    String.valueOf(i),
+                    foDetail.get(i).getNEntryNox(),
                     foDetail.get(i).getSSourceCD(),
                     foDetail.get(i).getSSourceNo(),
                     foDetail.get(i).getNAmtPaidx(),

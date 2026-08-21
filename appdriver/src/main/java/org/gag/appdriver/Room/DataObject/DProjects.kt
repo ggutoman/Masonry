@@ -34,6 +34,7 @@ interface DProjects {
                             "a.sProjctCd sProjectCd, " +
                             "a.sMemberID sMemberID, " +
                             "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
+                            "a.nEntryNox, " +
                             "a.dPledgexx dPledgexx, " +
                             "a.nPledgexx nPledgexx, " +
                             "a.sORNoxxxx sORNoxx, " +
@@ -52,6 +53,7 @@ interface DProjects {
             "a.sProjctCd sProjectCd, " +
             "a.sMemberID sMemberID, " +
             "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
+            "a.nEntryNox, " +
             "a.dPledgexx dPledgexx, " +
             "a.nPledgexx nPledgexx, " +
             "a.sORNoxxxx sORNoxx, " +
