@@ -238,13 +238,15 @@ public class Fragment_Receipt extends Fragment {
                                     @Override
                                     public void onChanged(List<MemberPledges> memberPledges) {
 
+                                        //initialize source description for project
                                         if (memberPledges == null || memberPledges.size() < 1){
 
                                             mViewModel.AddReceiptDetail(
                                                     loDetail.getSTransNox(),
                                                     loDetail.getSSourceCD(),
                                                     loDetail.getSSourceNo(),
-                                                    "",
+                                                    loDetail.getNEntryNox(),
+                                                    "", //no description found
                                                     loDetail.getNAmtPaidx()
                                             );
 
@@ -260,7 +262,8 @@ public class Fragment_Receipt extends Fragment {
                                                                 loDetail.getSTransNox(),
                                                                 loDetail.getSSourceCD(),
                                                                 loDetail.getSSourceNo(),
-                                                                result.getSProjctNm(),
+                                                                loDetail.getNEntryNox(),
+                                                                result.getSProjctNm(), //
                                                                 loDetail.getNAmtPaidx()
                                                         );
 
@@ -275,15 +278,18 @@ public class Fragment_Receipt extends Fragment {
                                         loDetail.getSTransNox(),
                                         loDetail.getSSourceCD(),
                                         loDetail.getSSourceNo(),
+                                        loDetail.getNEntryNox(),
                                         "Member's Contribution",
                                         loDetail.getNAmtPaidx()
                                 );
+
                             }else {
 
                                 mViewModel.AddReceiptDetail(
                                         loDetail.getSTransNox(),
                                         loDetail.getSSourceCD(),
                                         loDetail.getSSourceNo(),
+                                        loDetail.getNEntryNox(),
                                         "",
                                         loDetail.getNAmtPaidx()
                                 );
@@ -492,6 +498,7 @@ public class Fragment_Receipt extends Fragment {
                                         lsTransNox,
                                         loEntry.getSSourceCD(),
                                         loEntry.getSSourceNo(),
+                                        "",
                                         loEntry.getSSourceDscrpt(),
                                         loEntry.getNAmtPaidx()
                                 )){
@@ -509,7 +516,7 @@ public class Fragment_Receipt extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if (loSelectDetail == null) {
+                if (loSelectDetail == null || laDetails.indexOf(loSelectDetail) < 0) {
                     Toast.makeText(requireActivity(), "Please select a detail", Toast.LENGTH_SHORT).show();
                     return;
                 }

@@ -128,6 +128,7 @@ public class Dialog_Receipt_Entry {
                                                         "",
                                                         s,
                                                         loMember.getSTransNox(),
+                                                        "",
                                                         "Member's Contribution",
                                                         String.valueOf(ldbl_bal)
                                                 )
@@ -166,6 +167,7 @@ public class Dialog_Receipt_Entry {
                                                         "",
                                                         s,
                                                         loMember.getSProjctCd(),
+                                                        "",
                                                         loMember.getSProjctNm(),
                                                         String.valueOf(ldbl_bal)
                                                 )
@@ -302,6 +304,7 @@ public class Dialog_Receipt_Entry {
                     loSelectSource = new ReceiptDetail(
                             "",
                             lsSelectType,
+                            "",
                             "",
                             "",
                             tie_paid_amount.getText().toString()

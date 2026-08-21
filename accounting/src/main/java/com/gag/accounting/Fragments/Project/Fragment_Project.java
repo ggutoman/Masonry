@@ -258,6 +258,7 @@ public class Fragment_Project extends Fragment {
                             loItem.getSProjectCd(),
                             loItem.getSMemberID(),
                             loItem.getSMemberNme(),
+                            loItem.getNEntryNox(),
                             loItem.getDPledgexx(),
                             loItem.getNPledgexx()
                     );
@@ -481,6 +482,7 @@ public class Fragment_Project extends Fragment {
                                         loEntry.getSProjectCd(),
                                         loEntry.getSMemberID(),
                                         loEntry.getSMemberNme(),
+                                        "",
                                         loEntry.getDPledgexx(),
                                         loEntry.getNPledgexx()
                                     )

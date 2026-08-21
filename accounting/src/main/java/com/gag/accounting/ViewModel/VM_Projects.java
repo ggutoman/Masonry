@@ -107,17 +107,7 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto);
     }
 
-    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fdPledge, String fnPledge){
-
-        ProjectDetail loProject = new ProjectDetail(
-                fsTransNox,
-                fsMemberID,
-                fsMemberNme,
-                fdPledge,
-                fnPledge,
-                "",
-                "0.00"
-        );
+    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fnEntryNox, String fdPledge, String fnPledge){
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
         if (currentList == null) {
@@ -137,6 +127,17 @@ public class VM_Projects extends AndroidViewModel {
         if (exists) {
             return false;
         }
+
+        ProjectDetail loProject = new ProjectDetail(
+                fsTransNox,
+                fsMemberID,
+                fsMemberNme,
+                fnEntryNox.isEmpty() ? String.valueOf(currentList.size() + 1) : fnEntryNox,
+                fdPledge,
+                fnPledge,
+                "",
+                "0.00"
+        );
         currentList.add(loProject);
 
         GetProjectDetail.setValue(currentList);
@@ -170,6 +171,7 @@ public class VM_Projects extends AndroidViewModel {
                 currentList.get(fnIndex).getSProjectCd(),
                 currentList.get(fnIndex).getSMemberID(),
                 currentList.get(fnIndex).getSMemberNme(),
+                currentList.get(fnIndex).getNEntryNox(),
                 fdPledge,
                 fnPledge,
                 "",
@@ -238,7 +240,7 @@ public class VM_Projects extends AndroidViewModel {
 
             EProjectDetail loParam = new EProjectDetail(
                     foDetail.get(i).getSProjectCd(),
-                    String.valueOf(i),
+                    foDetail.get(i).getNEntryNox(),
                     foDetail.get(i).getSMemberID(),
                     foDetail.get(i).getSORNoxx(),
                     foDetail.get(i).getDPledgexx(),

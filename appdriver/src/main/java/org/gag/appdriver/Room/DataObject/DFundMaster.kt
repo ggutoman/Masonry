@@ -14,7 +14,7 @@ interface DFundMaster {
     fun SaveFundMaster(eFund: EFundMaster)
 
     @Query("SELECT a.sLodgeIDx sLodgeIDx, b.sLodgeNme sLodgeNme, a.nBalancex nBalancex FROM Lodge_Fund_Master a JOIN Lodge_Info b ON a.sLodgeIDx = b.sLodgeIDx WHERE a.sLodgeIDx = :fsLodgeIDxx")
-    fun ObserveLodgeFunds(fsLodgeIDxx : String) : LiveData<List<LodgeFundMasterList>>
+    fun ObserveLodgeFund(fsLodgeIDxx : String) : LiveData<LodgeFundMasterList>
 
     @Query("DELETE FROM Lodge_Fund_Master")
     fun DeleteFunds()

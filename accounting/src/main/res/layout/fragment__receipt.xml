@@ -182,7 +182,8 @@
                                 android:id="@+id/til_lodge_cal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Member Name">
+                                android:hint="Member Name"
+                                android:enabled="false">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/auto_lodge_member"
@@ -197,7 +198,8 @@
                                 style="@style/TextInputStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="OR Number">
+                                android:hint="OR Number"
+                                android:enabled="false">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/TextInputStyle.Edittext"

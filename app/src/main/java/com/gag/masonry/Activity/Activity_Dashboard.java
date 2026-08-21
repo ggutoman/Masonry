@@ -19,7 +19,6 @@ import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
 import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
-import com.gag.accounting.Fragments.Receipt.Fragment_Receipt;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
@@ -261,25 +260,25 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_confirm" : "issued_receipt";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
+            case "021": //create disbursement
+                loFragment = new Fragment_Disbursement();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loFragment.setArguments(loArgs);
+
+                lsStackId= "disbursement_entry";
+                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                break;
+            case "022", "023": //view & confirm disbursements
+                loFragment = new Fragment_Disbursement_History();
+                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loFragment.setArguments(loArgs);
+
+                lsStackId = fsItemID.equalsIgnoreCase("022") ? "disbursement_confirm" : "disbursement_list";
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
+                break;
             case "ACC002": //reports
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
                 fragmentTransaction.addToBackStack("generate_report");
-                break;
-            case "RCPT002": //receipt list
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("issued_receipt", new Fragment_Issued_Receipts()));
-                fragmentTransaction.addToBackStack("issued_receipt");
-                break;
-            case "DISB001": //create disbursement
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_entry", new Fragment_Disbursement()));
-                fragmentTransaction.addToBackStack("disbursement_entry");
-                break;
-            case "DISB002": //view disbursements
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_list", new Fragment_Disbursement_History()));
-                fragmentTransaction.addToBackStack("disbursement_list");
-                break;
-            case "DISB003": //view disbursements
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_confirm", new Fragment_Disbursement_History()));
-                fragmentTransaction.addToBackStack("disbursement_confirm");
                 break;
             case "DISB004": //view dv attachments
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
