@@ -16,9 +16,11 @@ import android.widget.Toast;
 
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Disbursement;
+import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.DataModels.DownloadDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -199,13 +201,44 @@ public class Fragment_Disbursement_Detail extends Fragment {
                     public void OnSuccess() {
                         poLoad.DismissDialog();
 
-                        requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                        poMessage.ShowMessage(0, "Disbursement status has been updated " + " successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
                     }
 
                     @Override
                     public void OnFailed(String fsMessage) {
                         poLoad.DismissDialog();
-                        Toast.makeText(requireContext(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                        poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+
+                                mViewmodel.DownloadDisbursementInfo(loDisb.getSTransNox(), new VM_Receipts.OnDownload() {
+                                    @Override
+                                    public void OnLoad() {
+                                        Toast.makeText(requireActivity(), "Downloading disbursement. Please wait . .", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void OnFinished(String fsMessage) {
+                                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
                     }
                 });
             }

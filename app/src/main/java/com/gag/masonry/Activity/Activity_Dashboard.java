@@ -32,6 +32,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
+import org.gag.appdriver.App.Fragments.Fragment_Report_List;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -93,7 +94,19 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "030": //Sync Data
+                    case "024": //reports
+
+                        //close drawer
+                        main_drawer.closeDrawer(GravityCompat.START);
+
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Report_List());
+                        fragmentTransaction.addToBackStack("generate_report");
+                        fragmentTransaction.commit();
+                        break;
+                    case "026": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -120,7 +133,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             }
                         });
                         break;
-                    case "031": //Logout
+                    case "027": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -197,7 +210,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "home";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "029": //account info
+            case "025": //account info
                 loFragment = new Fragment_UserInfo();
                 lsStackId = "view_account";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
@@ -275,14 +288,6 @@ public class Activity_Dashboard extends AppCompatActivity {
 
                 lsStackId = fsItemID.equalsIgnoreCase("022") ? "disbursement_confirm" : "disbursement_list";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
-                break;
-            case "ACC002": //reports
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Attachment_List()));
-                fragmentTransaction.addToBackStack("generate_report");
-                break;
-            case "DISB004": //view dv attachments
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("disbursement_attachments", new Fragment_Disbursement_History()));
-                fragmentTransaction.addToBackStack("disbursement_attachments");
                 break;
             default:
                 poMessage.ShowMessage(1, "Feature under maintenance. Thankyou for understanding.", "Okay", "", new Message_Dialog.OnDialogClick() {

@@ -263,7 +263,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
-                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment, mtv_fileloc), true);
+                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment), true);
 
                 tie_transaction_no.setText(loDisbursement.getSTransNox());
                 tie_dtransact.setText(loDisbursement.getDTransact());
@@ -299,7 +299,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 btn_save.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
-                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks), loDisbursement.getCTranStat().equals("0"));
+                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks, img_file, btn_attachment), loDisbursement.getCTranStat().equals("0"));
 
                 til_source_no.setEnabled(loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ"));
 

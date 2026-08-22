@@ -167,14 +167,6 @@ public class Fragment_Disbursement_History extends Fragment {
                                         loBundle.putString("lodge_id", lsLodgeIDxx);
                                         loFragment.setArguments(loBundle);
                                         break;
-
-                                    case "disbursement_attachments":
-
-                                        loFragment = new Fragment_Attachment_List();
-
-                                        loBundle.putString("source", loItem.getSTransNox());
-                                        loFragment.setArguments(loBundle);
-                                        break;
                                 }
 
                                 loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment))
