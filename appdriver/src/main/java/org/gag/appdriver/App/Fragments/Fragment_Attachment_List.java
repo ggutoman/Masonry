@@ -371,54 +371,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         });
     }
 
-    private void GenerateSOAReports(String fsIDxx, String fsDromxx, String fsDtoxx){
-
-        mViewModel.GenerateSoa(fsIDxx, fsDromxx, fsDtoxx, new VM_Attachments.OnGenerate() {
-            @Override
-            public void OnLoad() {
-                poLoad.ShowDialog("Generating SOA report. Please wait . .");
-            }
-
-            @Override
-            public void OnSuccess(String lsURL) {
-                poLoad.DismissDialog();
-                Toast.makeText(requireActivity(), "SOA Report successfully generated", Toast.LENGTH_SHORT).show();
-
-                LoadReports();
-            }
-
-            @Override
-            public void OnFailed(String fsMessage) {
-                poLoad.DismissDialog();
-                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void GenerateProjectBalance(String fsCritera, String fsSearch){
-
-        mViewModel.GenerateProjectBalance(fsCritera, fsSearch, new VM_Attachments.OnGenerate() {
-            @Override
-            public void OnLoad() {
-                poLoad.ShowDialog("Generating project balance report. Please wait . .");
-            }
-
-            @Override
-            public void OnSuccess(String lsURL) {
-                poLoad.DismissDialog();
-                Toast.makeText(requireActivity(), "Balance Report successfully generated", Toast.LENGTH_SHORT).show();
-
-                LoadReports();
-            }
-
-            @Override
-            public void OnFailed(String fsMessage) {
-                poLoad.DismissDialog();
-                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void InitDataReceiver(){
 
         switch (lsStackIDxx){
@@ -580,9 +532,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
-
-                                            //download data from server with date to get
-                                            GenerateSOAReports("ALL", fsDfrom, fsDto);
                                         }
                                     });
 
@@ -603,9 +552,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
-
-                                            //download data from server with date to get
-                                            GenerateSOAReports("FND", fsDfrom, fsDto);
                                         }
                                     });
 
@@ -626,9 +572,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
-
-                                            //download data from server with date to get
-                                            GenerateSOAReports("PROJ", fsDfrom, fsDto);
                                         }
                                     });
 
@@ -639,8 +582,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                             SelectYear(new OnYear() {
                                 @Override
                                 public void OnYearSelected(String fsYear) {
-
-                                    GenerateProjectBalance("by_year", fsYear);
                                 }
                             });
                         }
