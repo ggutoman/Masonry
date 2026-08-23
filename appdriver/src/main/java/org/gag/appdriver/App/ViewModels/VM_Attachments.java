@@ -12,6 +12,8 @@ import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
+import org.gag.appdriver.Room.Entities.EReports;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,6 +59,10 @@ public class VM_Attachments extends AndroidViewModel {
         return poDisb.GetAttachments(fsTransNox);
     }
 
+    public LiveData<EReports> GetReportInfo(String fsIDxx){
+        return poReport.GetReportInfo(fsIDxx);
+    }
+
     public Boolean IsDateCompared(String fsDfrom, String fsDto){
         return poDate.IsDateCompared(fsDfrom, fsDto);
     }
@@ -81,26 +87,26 @@ public class VM_Attachments extends AndroidViewModel {
         });
     }
 
-    public void GenerateSoa(String fsFilter, String fsDfromxx, String fsDtoxx, OnGenerate foCallback){
+    public void GenerateReport(String fsUrl, JSONObject foParam, OnGenerate foCallback){
 
         foCallback.OnLoad();
-//        poReport.GenerateSOA(fsFilter, fsDfromxx, fsDtoxx).thenAccept(new Consumer<Object>() {
-//            @Override
-//            public void accept(Object o) {
-//
-//                if (o instanceof Boolean){
-//                    foCallback.OnFailed(poReport.GetMessage());
-//                } else if (o instanceof String) {
-//
-//                    String lsURL = (String) o;
-//                    if (lsURL == null || lsURL.isEmpty() || !new File(lsURL).exists()){
-//                        foCallback.OnFailed("Failed to generate report");
-//                    }else {
-//                        foCallback.OnSuccess(lsURL);
-//                    }
-//                }
-//            }
-//        });
+        poReport.GenerateReport(fsUrl, foParam).thenAccept(new Consumer<Object>() {
+            @Override
+            public void accept(Object o) {
+
+                if (o instanceof Boolean){
+                    foCallback.OnFailed(poReport.GetMessage());
+                } else if (o instanceof String) {
+
+                    String lsURL = (String) o;
+                    if (lsURL == null || lsURL.isEmpty() || !new File(lsURL).exists()){
+                        foCallback.OnFailed("Failed to generate report");
+                    }else {
+                        foCallback.OnSuccess(lsURL);
+                    }
+                }
+            }
+        });
     }
 
     public void GenerateProjectBalance(String fsCriteria, String fsSearch, OnGenerate foCallback){
@@ -131,6 +137,10 @@ public class VM_Attachments extends AndroidViewModel {
         poReport.DownloadReportObjects().thenAccept(isSuccess -> {
             foCallback.OnFinished(isSuccess ? "Successfully downloaded reports" : poReport.message);
         });
+    }
+
+    public LiveData<List<EReports>> GetObjects(){
+        return poReport.GetObjects();
     }
 
     public void GetReportList(OnGetReports foCallback){

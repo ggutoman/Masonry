@@ -20,7 +20,7 @@
             style="@style/Text_Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Transaction List"
+            android:text="Generate Report"
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="20dp"/>
 
@@ -28,23 +28,24 @@
             style="@style/CustomDropDownTilStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Type">
+            android:hint="Select Parameter">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/auto_transaction_type"
+                android:id="@+id/auto_parameter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/CustomDropDownTilStyle"
+            style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Transaction">
+            android:hint="Value">
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/auto_transaction"
+            <com.google.android.material.textfield.TextInputEditText
+                style="@style/TextInputStyle.Edittext"
+                android:id="@+id/tie_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
@@ -52,10 +53,11 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
-            android:id="@+id/mtv_download"
+            android:id="@+id/mtv_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Download Sources"
+            android:text="Save"
+            android:visibility="gone"
             android:gravity="end"
             android:padding="10dp"
             android:textColor="?attr/colorPrimary"/>
@@ -64,7 +66,7 @@
             android:id="@+id/btn_submit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Load Transaction"
+            android:text="Submit"
             android:layout_marginTop="10dp"
             android:padding="10dp"/>
 

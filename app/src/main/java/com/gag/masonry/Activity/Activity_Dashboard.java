@@ -102,7 +102,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Report_List());
+                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Report_List()));
                         fragmentTransaction.addToBackStack("generate_report");
                         fragmentTransaction.commit();
                         break;

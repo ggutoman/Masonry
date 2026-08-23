@@ -12,34 +12,7 @@
 
     <item
         android:id="@+id/action_by_generate"
-        android:orderInCategory="100"
-        android:title="Generate"
-        app:showAsAction="never">
-
-        <menu>
-
-            <item
-                android:id="@+id/action_item_all_soa"
-                android:title="All"/>
-
-            <item
-                android:id="@+id/action_item_fund_soa"
-                android:title="SOA Funds"/>
-
-            <item
-                android:id="@+id/action_item_pledge_soa"
-                android:title="SOA Pledges"/>
-
-            <item
-                android:id="@+id/action_item_bal_year"
-                android:title="Pledges of the Year"/>
-
-            <item
-                android:id="@+id/action_item_bal_proj"
-                android:title="Project Pledges"/>
-
-        </menu>
-
+        android:title="Generate Report">
     </item>
 
 </menu>

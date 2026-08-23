@@ -43,14 +43,18 @@ import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.Adapter_Attachment_List;
 import org.gag.appdriver.App.Core.GestureListener;
+import org.gag.appdriver.App.Dialog.Dialog_Reports;
 import org.gag.appdriver.App.Interface.OnSwipeListener;
 import org.gag.appdriver.App.Models.Attachments;
+import org.gag.appdriver.App.Models.ProjectDetail;
 import org.gag.appdriver.App.ViewModels.VM_Attachments;
 import org.gag.appdriver.R;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
+import org.gag.appdriver.Room.Entities.EReports;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,6 +66,8 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
     private VM_Attachments mViewModel;
     private LoadDialog poLoad;
     private Message_Dialog poMessage;
+
+    private String lsID, lsParams;
 
     private String lsStackIDxx, lsSource, lsDfrom, lsDto;
     private Attachments loSelectAttachment;
@@ -111,6 +117,8 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
             lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
 
+        lsID = getArguments() == null ? "" : getArguments().getString("idxx");
+        lsParams = getArguments() == null ? "" : getArguments().getString("params");
         lsSource = getArguments() == null ? "" : getArguments().getString("source");
 
         InitViews(view);
@@ -408,28 +416,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
     }
 
-    private void SelectYear(OnYear foCallback){
-
-        Calendar loCalendar = Calendar.getInstance();
-
-        NumberPicker yearPicker = new NumberPicker(requireContext());
-        int currentYear = loCalendar.get(Calendar.YEAR);
-
-        yearPicker.setMinValue(currentYear);
-        yearPicker.setMaxValue(currentYear + 20);
-        yearPicker.setValue(currentYear);
-
-        new android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Select Year")
-                .setView(yearPicker)
-                .setPositiveButton("OK", (dialog, which) -> {
-
-                    foCallback.OnYearSelected(String.valueOf(yearPicker.getValue()));
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
     private void InitListener(){
 
         layout_image_viewer.setOnTouchListener(new View.OnTouchListener() {
@@ -479,112 +465,89 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
 
-                        if (menuItem.getItemId() == R.id.action_item_filter){
+                        try {
 
-                            SelectDateRange(new OnDateRange() {
-                                @Override
-                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+                            if (menuItem.getItemId() == R.id.action_item_filter){
 
-                                    //filter list by date
-                                    InitDataReceiver();
-                                }
-                            });
-                            return true;
+                                SelectDateRange(new OnDateRange() {
+                                    @Override
+                                    public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
-                        }else if (menuItem.getItemId() == R.id.action_item_download_dv){
+                                        //filter list by date
+                                        InitDataReceiver();
+                                    }
+                                });
+                                return true;
 
-                            SelectDateRange(new OnDateRange() {
-                                @Override
-                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+                            }else if (menuItem.getItemId() == R.id.action_item_download_dv){
 
-                                    poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
+                                SelectDateRange(new OnDateRange() {
+                                    @Override
+                                    public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
+                                        poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                            @Override
+                                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                poDialog.dismiss();
+                                            }
 
-                                            //download data from server with date to get
-                                            DownloadAttachments();
-                                        }
-                                    });
+                                            @Override
+                                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                                poDialog.dismiss();
 
-                                }
-                            });
+                                                //download data from server with date to get
+                                                DownloadAttachments();
+                                            }
+                                        });
 
-                            return true;
+                                    }
+                                });
 
-                        }else if (menuItem.getItemId() == R.id.action_item_all_soa){
+                                return true;
 
-                            SelectDateRange(new OnDateRange() {
-                                @Override
-                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+                            }else if (menuItem.getItemId() == R.id.action_by_generate){
 
-                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
+                                Dialog_Reports loReport = new Dialog_Reports(requireActivity(), new JSONObject(lsParams), new Dialog_Reports.OnSubmitEntry() {
+                                    @Override
+                                    public void OnSubmit(JSONObject foParams) {
 
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
+                                        mViewModel.GetReportInfo(lsID).observe(getViewLifecycleOwner(), new Observer<EReports>() {
+                                            @Override
+                                            public void onChanged(EReports eReports) {
 
-                                }
-                            });
-                        }else if (menuItem.getItemId() == R.id.action_item_fund_soa){
+                                                if (eReports == null) return;
 
-                            SelectDateRange(new OnDateRange() {
-                                @Override
-                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
+                                                mViewModel.GenerateReport(eReports.getXxTemplateDir(), foParams, new VM_Attachments.OnGenerate() {
+                                                    @Override
+                                                    public void OnLoad() {
+                                                        poLoad.ShowDialog("Generating report. Please wait . .");
+                                                    }
 
-                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
+                                                    @Override
+                                                    public void OnSuccess(String lsURL) {
+                                                        poLoad.DismissDialog();
+                                                    }
 
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
+                                                    @Override
+                                                    public void OnFailed(String fsMessage) {
+                                                        poLoad.DismissDialog();
+                                                        Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                                loReport.Show();
 
-                                }
-                            });
-                        }else if (menuItem.getItemId() == R.id.action_item_pledge_soa){
+                                return true;
+                            }
 
-                            SelectDateRange(new OnDateRange() {
-                                @Override
-                                public void OnDateRangeSelected(String fsDfrom, String fsDto) {
-
-                                    poMessage.ShowMessage(2,  "Do you want to generate soa report withtin " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-                                    });
-
-                                }
-                            });
-                        }else if (menuItem.getItemId() == R.id.action_item_bal_year){
-
-                            SelectYear(new OnYear() {
-                                @Override
-                                public void OnYearSelected(String fsYear) {
-                                }
-                            });
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                            return false;
                         }
+
                         return false;
                     }
                 });

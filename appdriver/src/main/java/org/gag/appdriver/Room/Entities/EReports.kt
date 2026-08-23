@@ -7,8 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EReports(
     var idxx : String,
+    var xxParams : String,
     var xxsDescript : String,
     var xxTemplateDir : String,
-    var nRightsxx : String,
+    var nRightsxx : Int,
     var cRecdStat : String,
 )
