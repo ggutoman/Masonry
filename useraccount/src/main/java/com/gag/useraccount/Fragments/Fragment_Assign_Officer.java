@@ -43,6 +43,8 @@ public class Fragment_Assign_Officer extends Fragment {
     private LoadDialog poLoading;
     private Message_Dialog poMessage;
 
+    private String lsStackIDxx;
+
     private MemberAdapter loMemberAdapter;
     private PositionAdapter loPositionAdapter;
 
@@ -69,6 +71,13 @@ public class Fragment_Assign_Officer extends Fragment {
 
         poMessage.InitDialog();
         poLoading.InitDialog();
+
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         InitViews(view);
         InitDataReceiver();
@@ -111,9 +120,7 @@ public class Fragment_Assign_Officer extends Fragment {
 
                                 requireActivity()
                                         .getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .remove(Fragment_Assign_Officer.this)
-                                        .commit();
+                                        .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                             }
 
                             @Override
@@ -344,7 +351,7 @@ public class Fragment_Assign_Officer extends Fragment {
                                         poDialog.dismiss();
 
                                         requireActivity().getSupportFragmentManager()
-                                                .popBackStack("assign_officer", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

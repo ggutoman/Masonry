@@ -208,6 +208,8 @@ public class Fragment_Disbursement_History extends Fragment {
             @Override
             public void onClick(View view) {
 
+                if (loAdapter == null) return;
+
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_disbursement, loMenu.getMenu());

@@ -68,6 +68,7 @@ class SMSApp(val loInstance : Context, val foCallback : OnSMSStatus){
             // Send SMS
             smsManager.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI)
 
+            foCallback.OnResult("SMS has been sent")
         }catch (ex : Exception){
             foCallback.OnResult(ex.message.toString())
         }

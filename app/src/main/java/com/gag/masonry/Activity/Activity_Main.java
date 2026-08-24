@@ -44,21 +44,15 @@ public class Activity_Main extends AppCompatActivity {
     // Initialize the launcher
     private final ActivityResultLauncher<String[]> poPermissions = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
 
-            boolean isAllGranted = true;
             for (Map.Entry<String, Boolean> entry : result.entrySet()) {
 
                 Boolean isGranted = entry.getValue();
                 if (!isGranted) {
-                    isAllGranted = false;
+                    Log.d("Permission", entry.getKey() + " has been denied");
                     break;
                 }
             }
-
-            if (!isAllGranted){
-                System.exit(0);
-            }else {
-                InitData();
-            }
+            InitData();
         }
     );
 
