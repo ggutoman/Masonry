@@ -90,11 +90,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
         void OnDateRangeSelected(String fsDfrom, String fsDto);
     }
 
-    private interface OnYear{
-        void OnYearSelected(String fsYear);
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -331,7 +326,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
     private void LoadReports(){
 
-        mViewModel.GetReportList(new VM_Attachments.OnGetReports() {
+        mViewModel.GetReportList(lsID, new VM_Attachments.OnGetReports() {
             @Override
             public void OnLoad() {
                 poLoad.ShowDialog("Loading reports. Please wait . .");
@@ -517,7 +512,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
                                                 if (eReports == null) return;
 
-                                                mViewModel.GenerateReport(eReports.getXxTemplateDir(), foParams, new VM_Attachments.OnGenerate() {
+                                                mViewModel.GenerateReport(eReports.getIdxx(), eReports.getXxTemplateDir(), foParams, new VM_Attachments.OnGenerate() {
                                                     @Override
                                                     public void OnLoad() {
                                                         poLoad.ShowDialog("Generating report. Please wait . .");

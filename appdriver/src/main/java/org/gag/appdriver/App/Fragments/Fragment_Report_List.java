@@ -93,6 +93,8 @@ public class Fragment_Report_List extends Fragment {
 
         mtv_title.setText("Reports");
         mtv_no_record.setText("No reports found");
+
+        rcv_report_list.setPadding(25, 0, 0, 0);
     }
 
     public void InitDataReceiver(){

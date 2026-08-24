@@ -87,10 +87,10 @@ public class VM_Attachments extends AndroidViewModel {
         });
     }
 
-    public void GenerateReport(String fsUrl, JSONObject foParam, OnGenerate foCallback){
+    public void GenerateReport(String fsIDxx, String fsUrl, JSONObject foParam, OnGenerate foCallback){
 
         foCallback.OnLoad();
-        poReport.GenerateReport(fsUrl, foParam).thenAccept(new Consumer<Object>() {
+        poReport.GenerateReport(fsIDxx, fsUrl, foParam).thenAccept(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
 
@@ -109,28 +109,6 @@ public class VM_Attachments extends AndroidViewModel {
         });
     }
 
-    public void GenerateProjectBalance(String fsCriteria, String fsSearch, OnGenerate foCallback){
-
-        foCallback.OnLoad();
-//        poReport.GenerateProjBalance(fsCriteria, fsSearch).thenAccept(new Consumer<Object>() {
-//            @Override
-//            public void accept(Object o) {
-//
-//                if (o instanceof Boolean){
-//                    foCallback.OnFailed(poReport.GetMessage());
-//                } else if (o instanceof String) {
-//
-//                    String lsURL = (String) o;
-//                    if (lsURL == null || lsURL.isEmpty() || !new File(lsURL).exists()){
-//                        foCallback.OnFailed("Failed to generate report");
-//                    }else {
-//                        foCallback.OnSuccess(lsURL);
-//                    }
-//                }
-//            }
-//        });
-    }
-
     public void DownloadReports(OnDownload foCallback){
 
         foCallback.OnLoad();
@@ -143,11 +121,11 @@ public class VM_Attachments extends AndroidViewModel {
         return poReport.GetObjects();
     }
 
-    public void GetReportList(OnGetReports foCallback){
+    public void GetReportList(String fsIDxx, OnGetReports foCallback){
 
         foCallback.OnLoad();
 
-       poReport.GetReportList().thenAccept(new Consumer<List<File>>() {
+       poReport.GetReportList(fsIDxx).thenAccept(new Consumer<List<File>>() {
             @Override
             public void accept(List<File> files) {
 

@@ -371,7 +371,6 @@ public class Fragment_Member extends Fragment{
                         memberAddresses
                 );
                 auto_town.setAdapter(MemberAddressAdapter);
-                auto_town.postDelayed(() -> auto_town.showDropDown(), 200);
             }
         });
 
@@ -387,7 +386,6 @@ public class Fragment_Member extends Fragment{
                         eMemberContactInfos
                 );
                 auto_contact.setAdapter(MemberContactAdapter);
-                auto_contact.postDelayed(() -> auto_contact.showDropDown(), 200);
             }
         });
 
@@ -403,7 +401,6 @@ public class Fragment_Member extends Fragment{
                         eMemberEmailInfos
                 );
                 auto_email.setAdapter(MemberEmailAdapter);
-                auto_email.postDelayed(() -> auto_email.showDropDown(), 200);
             }
         });
     }
