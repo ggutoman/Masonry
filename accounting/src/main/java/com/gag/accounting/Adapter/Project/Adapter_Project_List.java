@@ -13,9 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
-import org.gag.appdriver.Room.Entities.EFundTurnOver;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 
 import java.util.ArrayList;

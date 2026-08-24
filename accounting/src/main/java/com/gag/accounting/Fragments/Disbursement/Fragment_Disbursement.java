@@ -48,17 +48,13 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.App.Adapters.LodgeAdapter;
 import org.gag.appdriver.App.Core.GestureListener;
 import org.gag.appdriver.App.Interface.OnSwipeListener;
 import org.gag.appdriver.App.Models.DisbursementDetail;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
-import org.gag.appdriver.App.Models.LodgeInfo;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Room.Entities.EDisbursementAttachment;
-import org.gag.appdriver.Room.Entities.ELodgeInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
