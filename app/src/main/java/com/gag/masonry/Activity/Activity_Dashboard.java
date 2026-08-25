@@ -2,6 +2,7 @@ package com.gag.masonry.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Fragments.Fragment_Report_List;
@@ -45,7 +47,11 @@ public class Activity_Dashboard extends AppCompatActivity {
     private LoadDialog poLoading;
     private VM_Main mViewmodel;
 
+    private String lsGLPID;
+    private int lnUsrLvl;
+
     private DrawerLayout main_drawer;
+    private ShapeableImageView siv_logo;
     private MaterialToolbar toolbar;
     private ExpandableListView list_menus;
 
@@ -59,10 +65,14 @@ public class Activity_Dashboard extends AppCompatActivity {
         poLoading = new LoadDialog(this);
         mViewmodel = new ViewModelProvider(Activity_Dashboard.this).get(VM_Main.class);
 
+        lsGLPID = getIntent().hasExtra("user_id") ? getIntent().getStringExtra("user_id") : "";
+        lnUsrLvl = getIntent().hasExtra("user_level") ? getIntent().getIntExtra("user_level", 0) : 0;
+
         poMessage.InitDialog();
         poLoading.InitDialog();
 
         toolbar = findViewById(R.id.toolbar);
+        siv_logo = findViewById(R.id.siv_logo);
         main_drawer = findViewById(R.id.main_drawer);
         list_menus = findViewById(R.id.list_menus);
 
@@ -84,6 +94,14 @@ public class Activity_Dashboard extends AppCompatActivity {
         ArrayList<EUserObjects> parentMenu =
                 getIntent().getParcelableArrayListExtra("parent_key");
 
+        //home navigator by default
+        siv_logo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InitView("000");
+            }
+        });
+
         Adapter_Drawer_Expandable loAdapter =  new Adapter_Drawer_Expandable(Activity_Dashboard.this, parentMenu, new Adapter_Drawer_Expandable.SelectMenu() {
             @Override
             public void OnSelect(EUserObjects foObject, int fnPosition) {
@@ -93,7 +111,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "024": //reports
+                    case "025": //reports
 
                         //close drawer
                         main_drawer.closeDrawer(GravityCompat.START);
@@ -105,7 +123,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         fragmentTransaction.addToBackStack("generate_report");
                         fragmentTransaction.commit();
                         break;
-                    case "026": //Sync Data
+                    case "027": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -132,7 +150,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             }
                         });
                         break;
-                    case "027": //Logout
+                    case "028": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -203,13 +221,13 @@ public class Activity_Dashboard extends AppCompatActivity {
 
             case "000":
                 loFragment = new Fragment_Home();
-                loArgs.putInt("user_level", getIntent().getIntExtra("user_level", 0));
+                loArgs.putInt("user_level", lnUsrLvl);
                 loFragment.setArguments(loArgs);
 
                 lsStackId = "home";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "025": //account info
+            case "026": //account info
                 loFragment = new Fragment_UserInfo();
                 lsStackId = "view_account";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
@@ -224,7 +242,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "assign_officer";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "007": //project entry
+            case "008": //project entry
                 loFragment = new Fragment_Project();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -232,15 +250,15 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "project_entry";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "008", "009": //project history
+            case "009", "010": //project history
                 loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("008") ? "project_confirm" : "project_information";
+                lsStackId = fsItemID.equalsIgnoreCase("009") ? "project_confirm" : "project_information";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "010": //project summary
+            case "011": //project summary
                 loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -248,7 +266,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "project_summary";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "015": //lodge fund summary information
+            case "016": //lodge fund summary information
                 loFragment = new Fragment_Lodge_Fund();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -256,23 +274,25 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "lodge_fund_information";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "017": //receipt entry
+            case "018", "007": //receipt entry, view members
                 loFragment = new Fragment_Member_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
+                loArgs.putString("user_id", lsGLPID);
+                loArgs.putInt("user_level", lnUsrLvl);
                 loFragment.setArguments(loArgs);
 
-                lsStackId = "receipt_entry";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_entry" : "create_member";
+                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
-            case "019", "018": //confirm receipts or list of receipts
+            case "019", "020": //confirm receipts or list of receipts
                 loFragment = new Fragment_Issued_Receipts();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_confirm" : "issued_receipt";
+                lsStackId = fsItemID.equalsIgnoreCase("019") ? "receipt_confirm" : "issued_receipt";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
-            case "021": //create disbursement
+            case "022": //create disbursement
                 loFragment = new Fragment_Disbursement();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -280,12 +300,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId= "disbursement_entry";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "022", "023": //view & confirm disbursements
+            case "023", "024": //view & confirm disbursements
                 loFragment = new Fragment_Disbursement_History();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("022") ? "disbursement_confirm" : "disbursement_list";
+                lsStackId = fsItemID.equalsIgnoreCase("023") ? "disbursement_confirm" : "disbursement_list";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
             default:

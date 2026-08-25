@@ -41,7 +41,6 @@ public class Adapter_Annual_Member_Info extends RecyclerView.Adapter<Adapter_Ann
         holder.mtv_transaction.setText(laList.get(position).getSTransNox());
         holder.mtv_totaltrans.setText(String.valueOf(laList.get(position).getNTotalTrans()));
         holder.mtv_totalcoll.setText(String.valueOf(laList.get(position).getNTotalColl()));
-        holder.mtv_year.setText("L.Y " + laList.get(position).getNYearxx());
         holder.mtv_due.setText(laList.get(position).getDDueDate());
     }
 
@@ -52,16 +51,14 @@ public class Adapter_Annual_Member_Info extends RecyclerView.Adapter<Adapter_Ann
 
     public static class VH_Annual_Member_Info extends RecyclerView.ViewHolder{
 
-        private MaterialTextView mtv_transaction, mtv_status, mtv_totaltrans, mtv_totalcoll, mtv_year, mtv_due;
+        private MaterialTextView mtv_transaction, mtv_totaltrans, mtv_totalcoll, mtv_due;
 
         public VH_Annual_Member_Info(@NonNull View itemView) {
             super(itemView);
 
             mtv_transaction = itemView.findViewById(R.id.mtv_transaction);
-            mtv_status = itemView.findViewById(R.id.mtv_status);
             mtv_totaltrans = itemView.findViewById(R.id.mtv_totaltrans);
             mtv_totalcoll = itemView.findViewById(R.id.mtv_totalcoll);
-            mtv_year = itemView.findViewById(R.id.mtv_year);
             mtv_due = itemView.findViewById(R.id.mtv_due);
 
         }

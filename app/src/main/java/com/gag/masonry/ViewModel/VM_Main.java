@@ -1,8 +1,6 @@
 package com.gag.masonry.ViewModel;
 
 import android.app.Application;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -22,7 +20,6 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 
@@ -96,10 +93,6 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.SearchOfficerHistory(fsFilter);
     }
 
-    public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberIDx, String fsDfrom, String fsDto) {
-        return poDashboard.ObserveMemberList(fsMemberIDx, fsDfrom, fsDto);
-    }
-
     public LiveData<List<TownProvince>> ObserveMemberAddress(String fsMemberID){
         return poDashboard.GetMemberAddress(fsMemberID);
     }
@@ -108,12 +101,8 @@ public class VM_Main extends AndroidViewModel {
         return poDashboard.GetMemberContact(fsMemberID);
     }
 
-    public LiveData<List<EMemberEmailInfo>> ObserveMemberEmail(String fsMemberID){
+    public LiveData<List<EMemberEmailInfo>> ObserveMemberEmail(String fsMemberID) {
         return poDashboard.GetMemberEmail(fsMemberID);
-    }
-
-    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
-        return poDashboard.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public LiveData<HashMap<String, ArrayList<String>>> ObserveMemberInfoList(){
@@ -250,44 +239,6 @@ public class VM_Main extends AndroidViewModel {
                 }
                 foCallback.OnFinished("Successfully downloaded data");
             }
-        });
-    }
-
-    public void DownloadMembers( OnDownloadData foCallback){
-
-        foCallback.OnDownload();
-        poAccount.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.OnFinished(poDashboard.getMessage());
-                }else {
-                    foCallback.OnFinished("Successfully downloaded member list");
-                }
-            }
-        }).exceptionally(throwable -> {
-            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
-            return null;
-        });
-    }
-
-    public void DownloadOfficers(OnDownloadData foCallback){
-
-        foCallback.OnDownload();
-        poAccount.DownloadOfficerList().thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.OnFinished(poDashboard.getMessage());
-                }else {
-                    foCallback.OnFinished("Successfully downloaded officer list");
-                }
-            }
-        }).exceptionally(throwable -> {
-            foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
-            return null;
         });
     }
 

@@ -26,45 +26,31 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
-            android:id="@+id/mtv_year"
+            android:id="@+id/mtv_due_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="N/A"
+            android:text="Due Date:"
             android:alpha="0.5"
             android:gravity="end"
             android:layout_marginEnd="5dp"
-            app:layout_constraintTop_toTopOf="@+id/mtv_transaction"
-            app:layout_constraintBottom_toBottomOf="@+id/mtv_transaction"
             app:layout_constraintStart_toEndOf="@+id/mtv_transaction"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Header"
-            android:id="@+id/mtv_status"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="N/A"
-            android:alpha="0.5"
-            android:textSize="13sp"
-            app:layout_constraintTop_toBottomOf="@+id/mtv_transaction"
-            app:layout_constraintStart_toStartOf="@+id/mtv_transaction"
-            app:layout_constraintEnd_toEndOf="@+id/mtv_transaction"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/mtv_transaction"
+            app:layout_constraintBottom_toBottomOf="@+id/mtv_transaction"/>
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
             android:id="@+id/mtv_due"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="N/A "
-            android:textSize="14sp"
+            android:text="N/A"
             android:alpha="0.5"
+            android:textSize="12sp"
             android:gravity="end"
-            android:layout_marginTop="3dp"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintStart_toEndOf="@+id/mtv_status"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mtv_status"
-            app:layout_constraintBottom_toBottomOf="@+id/mtv_status"/>
+            android:layout_marginTop="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_due_title"
+            app:layout_constraintStart_toStartOf="@+id/mtv_due_title"
+            app:layout_constraintEnd_toEndOf="@+id/mtv_due_title"/>
 
         <View
             android:id="@+id/view_divider"
@@ -106,6 +92,7 @@
             android:text="0.00"
             android:layout_marginStart="1dp"
             android:gravity="end"
+            android:layout_marginEnd="5dp"
             app:layout_constraintTop_toTopOf="@+id/mtv_totaltrans_label"
             app:layout_constraintStart_toEndOf="@+id/mtv_totaltrans_label"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -117,7 +104,7 @@
             android:layout_height="wrap_content"
             android:text="0.00"
             android:gravity="end"
-            android:layout_marginEnd="1dp"
+            android:layout_marginEnd="5dp"
             app:layout_constraintTop_toTopOf="@+id/mtv_totalcoll_label"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_totalcoll_label"
             app:layout_constraintStart_toEndOf="@+id/mtv_totalcoll_label"

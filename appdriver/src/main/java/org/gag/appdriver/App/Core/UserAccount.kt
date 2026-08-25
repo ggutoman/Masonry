@@ -81,6 +81,8 @@ class UserAccount(instance : Context) {
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
         .getOrNull(1) ?: ""
 
+    fun FormatLongDate(fsLongDate : Long) : String = dateObj.FormatLongDate(fsLongDate)
+
     fun GetCurrentDate() : String = dateObj.GetCurrentDate()
 
     fun GetCurrentDateTime() : String = dateObj.GetCurrentDateTime()
@@ -112,6 +114,10 @@ class UserAccount(instance : Context) {
                                                                                                 .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
                                                                                                 .getOrNull(0) ?: ""
                                                                                         )
+
+    fun ObserveMemberList(fsMemberID : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemberListByFilter(fsMemberID, fsDateFrom, fsDateTo)
+
+    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficer.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 

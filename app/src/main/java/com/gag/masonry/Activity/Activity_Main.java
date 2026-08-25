@@ -201,6 +201,7 @@ public class Activity_Main extends AppCompatActivity {
                                 Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
                                 loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
+                                loIntent.putExtra("user_id", eUserInfo.getSGLPIDNoX());
                                 loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
 
                                 poLogout.launch(loIntent);
