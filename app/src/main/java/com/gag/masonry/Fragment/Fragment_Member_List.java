@@ -104,6 +104,8 @@ public class Fragment_Member_List extends Fragment {
         InitDataReceiver();
         InitListener();
 
+        DownloadOfficerList();
+
         return view;
     }
 

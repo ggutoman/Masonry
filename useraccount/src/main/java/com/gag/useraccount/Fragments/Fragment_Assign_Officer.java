@@ -53,10 +53,9 @@ public class Fragment_Assign_Officer extends Fragment {
     private EPosition loSelectPosition;
 
     private String lsSelectMember, lsSelectCalendar;
-    private int lnSelectLevel = -1, lnSelectStatus = -1;
 
     private TextInputEditText tie_remarks;
-    private MaterialAutoCompleteTextView auto_member, auto_position, auto_type, auto_status;
+    private MaterialAutoCompleteTextView auto_member, auto_position;
     private MaterialButton btn_create;
 
     @Nullable
@@ -89,8 +88,6 @@ public class Fragment_Assign_Officer extends Fragment {
     private void InitViews(View view){
         auto_member = view.findViewById(R.id.auto_member);
         auto_position = view.findViewById(R.id.auto_position);
-        auto_type = view.findViewById(R.id.auto_type);
-        auto_status = view.findViewById(R.id.auto_status);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
         btn_create = view.findViewById(R.id.btn_create);
@@ -203,27 +200,6 @@ public class Fragment_Assign_Officer extends Fragment {
                                 });
                     }
                 });
-
-                auto_type.setAdapter(
-                        new ArrayAdapter<>(
-                                requireActivity(),
-                                android.R.layout.simple_spinner_dropdown_item,
-                                mViewmodel.GetOfficerTypes()
-                        ));
-
-                auto_status.setAdapter(
-                        new ArrayAdapter<>(
-                                requireActivity(),
-                                android.R.layout.simple_spinner_dropdown_item,
-                                mViewmodel.GetOfficerStatus()
-                        ));
-
-                if (loOfficer == null) return;
-                lnSelectLevel = loOfficer.getCAppointx() == null ? 0 : Integer.parseInt(loOfficer.getCAppointx());
-                auto_type.setText(mViewmodel.GetOfficerTypes().get(loOfficer.getCAppointx() == null ? 0 : Integer.parseInt(loOfficer.getCAppointx())), false);
-
-                lnSelectStatus = loOfficer.getCStatusxx() == null ? 0 : Integer.parseInt(loOfficer.getCStatusxx());
-                auto_status.setText(mViewmodel.GetOfficerStatus().get(loOfficer.getCStatusxx() == null ? 0 : Integer.parseInt(loOfficer.getCStatusxx())), false);
             }
         });
     }
@@ -242,6 +218,7 @@ public class Fragment_Assign_Officer extends Fragment {
 
                 String lsMiddlNme = loSelectMember.getSMiddName() == null ? "" : loSelectMember.getSMiddName();
                 String lsSuffix = loSelectMember.getSSuffixNm() == null ? "" : loSelectMember.getSSuffixNm();
+
 
                 String lsMemberNm = loSelectMember.getSFrstName() + " " +
                         lsMiddlNme + " " +
@@ -294,20 +271,6 @@ public class Fragment_Assign_Officer extends Fragment {
             }
         });
 
-        auto_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                lnSelectLevel = i;
-            }
-        });
-
-        auto_status.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                lnSelectStatus = i;
-            }
-        });
-
         btn_create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -328,8 +291,6 @@ public class Fragment_Assign_Officer extends Fragment {
                                 lsSelectCalendar,
                                 loSelectPosition.getSPositnCd(),
                                 loSelectMember.getSMemberID(),
-                                String.valueOf(lnSelectLevel),
-                                String.valueOf(lnSelectStatus),
                                 mViewmodel.GetUserID() == null ? "" : mViewmodel.GetUserID(),
                                 mViewmodel.GetCurrentDate(),
                                 mViewmodel.GetCurrentDateTime()
@@ -395,12 +356,6 @@ public class Fragment_Assign_Officer extends Fragment {
             return false;
         }else if (loSelectPosition == null){
             Toast.makeText(requireActivity(), "Please select a position", Toast.LENGTH_SHORT).show();
-            return false;
-        }else if (lnSelectLevel < 0){
-            Toast.makeText(requireActivity(), "Please select a officer level", Toast.LENGTH_SHORT).show();
-            return false;
-        }else if (lnSelectStatus < 0){
-            Toast.makeText(requireActivity(), "Please select a officer status", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

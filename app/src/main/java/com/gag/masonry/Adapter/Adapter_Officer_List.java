@@ -64,27 +64,6 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
         holder.mtv_position.setText(loOfficer.getSPositionNme());
         holder.mtv_term.setText(loOfficer.getNYearxxxx());
 
-        switch (loOfficer.getCStatusxx()){
-            case "0":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
-                break;
-            case "1":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_member_regular);
-                break;
-            case "2":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_reassign);
-                break;
-            case "3":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_remove);
-                break;
-            case "4":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_exit);
-                break;
-            case "5":
-                holder.btn_icone.setImageResource(org.gag.appdriver.R.drawable.baseline_member_life);
-                break;
-        }
-
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -134,10 +113,6 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
 
                 laOfficersFiltered = filterSearch;
             }
-
-            laOfficersFiltered = laOfficersFiltered.stream()
-                    .filter(loOfficer -> laStatus.contains(loOfficer.getCStatusxx()))
-                    .collect(Collectors.toList());
 
             FilterResults loResults = new FilterResults();
             loResults.values = laOfficersFiltered;

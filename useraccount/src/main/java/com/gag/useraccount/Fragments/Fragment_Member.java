@@ -80,7 +80,11 @@ public class Fragment_Member extends Fragment{
             tie_birthdate,
             tie_glpid,
             tie_address,
-            tie_remarks;
+            tie_remarks,
+            tie_intn,
+            tie_passing,
+            tie_raising,
+            tie_suspend;
 
     private CheckBox chkbx_homeaddr, chkbx_active, chkbx_activecontact, chkbx_activeemail;
 
@@ -169,6 +173,11 @@ public class Fragment_Member extends Fragment{
         tie_birthdate = view.findViewById(R.id.tie_birthdate);
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
+
+        tie_intn = view.findViewById(R.id.tie_intn);
+        tie_passing = view.findViewById(R.id.tie_passing);
+        tie_raising = view.findViewById(R.id.tie_raising);
+        tie_suspend = view.findViewById(R.id.tie_suspend);
 
         btn_add_address = view.findViewById(R.id.btn_add_address);
         btn_add_contact = view.findViewById(R.id.btn_add_contact);
@@ -349,6 +358,10 @@ public class Fragment_Member extends Fragment{
                 tie_middlename.setText(loMemberInfo.getSMiddName());
                 tie_suffix.setText(loMemberInfo.getSSuffixNm());
                 tie_birthdate.setText(loMemberInfo.getDBirthDte());
+                tie_intn.setText(loMemberInfo.getDInitiatn());
+                tie_passing.setText(loMemberInfo.getDPassedxx());
+                tie_raising.setText(loMemberInfo.getDRaisingX());
+                tie_suspend.setText(loMemberInfo.getDSuspendx());
 
                 auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
                 lnSelectStatus = Integer.parseInt(loMemberInfo.getCMmbrStat());
@@ -371,6 +384,17 @@ public class Fragment_Member extends Fragment{
                         memberAddresses
                 );
                 auto_town.setAdapter(MemberAddressAdapter);
+
+                lnSelectAddress = memberAddresses.size() - 1;
+                if (lnSelectAddress < 0) return;
+
+                loSelectAddress = memberAddresses.get(lnSelectAddress);
+
+                //display added data
+                auto_town.setText(loSelectAddress.getPsTownProvNme(), false);
+                tie_address.setText(loSelectAddress.getPsAddressx());
+                chkbx_homeaddr.setChecked(loSelectAddress.isHomeAddr().equalsIgnoreCase("1"));
+                chkbx_active.setChecked(loSelectAddress.isActive().equalsIgnoreCase("1"));
             }
         });
 
@@ -386,6 +410,16 @@ public class Fragment_Member extends Fragment{
                         eMemberContactInfos
                 );
                 auto_contact.setAdapter(MemberContactAdapter);
+
+                lnSelectContact = eMemberContactInfos.size() -1;
+                if (lnSelectContact < 0) return;
+
+                loSelectContact = eMemberContactInfos.get(lnSelectContact);
+
+                //display added data
+                auto_contact.setText(loSelectContact.getSContctNo(), false);
+                tie_remarks.setText(loSelectContact.getSRemarksx());
+                chkbx_activecontact.setChecked(loSelectContact.getCRecdStat().equalsIgnoreCase("1"));
             }
         });
 
@@ -401,11 +435,74 @@ public class Fragment_Member extends Fragment{
                         eMemberEmailInfos
                 );
                 auto_email.setAdapter(MemberEmailAdapter);
+
+                lnSelectEmail = eMemberEmailInfos.size() - 1;
+                if (lnSelectEmail < 0) return;
+
+                loSelectEmail = eMemberEmailInfos.get(lnSelectEmail);
+
+                //display added data
+                auto_email.setText(loSelectEmail.getSEmailAdd(), false);
+                chkbx_activeemail.setChecked(loSelectEmail.getCRecdStat().equalsIgnoreCase("1"));
             }
         });
     }
 
     private void initListeners() {
+
+        tie_intn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Calendar loCalendar = Calendar.getInstance();
+
+                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        tie_intn.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    }
+                }, loCalendar.get(Calendar.YEAR),
+                        loCalendar.get(Calendar.MONTH),
+                        loCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show();
+            }
+        });
+
+        tie_passing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Calendar loCalendar = Calendar.getInstance();
+
+                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        tie_passing.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    }
+                }, loCalendar.get(Calendar.YEAR),
+                        loCalendar.get(Calendar.MONTH),
+                        loCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show();
+            }
+        });
+
+        tie_raising.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Calendar loCalendar = Calendar.getInstance();
+
+                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        tie_raising.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    }
+                }, loCalendar.get(Calendar.YEAR),
+                        loCalendar.get(Calendar.MONTH),
+                        loCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show();
+            }
+        });
 
         tie_birthdate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -444,8 +541,8 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                loSelectAddress = (TownProvince) adapterView.getItemAtPosition(i);
-                lnSelectAddress = i;
+                lnSelectAddress = paramTownProvince.indexOf((TownProvince) adapterView.getItemAtPosition(i));
+                loSelectAddress = paramTownProvince.get(lnSelectAddress);
 
                 auto_town.setText(loSelectAddress.getPsTownProvNme(), false);
                 tie_address.setText(loSelectAddress.getPsAddressx());
@@ -586,8 +683,8 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                loSelectContact = (EMemberContactInfo) adapterView.getItemAtPosition(i);
-                lnSelectContact = i;
+                lnSelectContact = paramContact.indexOf((EMemberContactInfo) adapterView.getItemAtPosition(i));
+                loSelectContact = paramContact.get(lnSelectContact);
 
                 auto_contact.setText(loSelectContact.getSContctNo(), false);
                 tie_remarks.setText(loSelectContact.getSRemarksx());
@@ -694,13 +791,12 @@ public class Fragment_Member extends Fragment{
         });
 
         /*MEMBER EMAIL LISTENER*/
-
         auto_email.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                loSelectEmail = (EMemberEmailInfo) adapterView.getItemAtPosition(i);
-                lnSelectEmail = i;
+                lnSelectEmail = paramEmail.indexOf((EMemberEmailInfo) adapterView.getItemAtPosition(i));
+                loSelectEmail = paramEmail.get(lnSelectEmail);
 
                 auto_email.setText(loSelectEmail.getSEmailAdd(), false);
                 chkbx_activeemail.setChecked(loSelectEmail.getCRecdStat().equalsIgnoreCase("1"));
@@ -812,7 +908,7 @@ public class Fragment_Member extends Fragment{
                     return;
                 }
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Do you want to save member information?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poConfirmDialog) {
                         poConfirmDialog.dismiss();
@@ -835,6 +931,9 @@ public class Fragment_Member extends Fragment{
                                     "",
                                     mviewModel.GetLodgeID(),
                                     tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
+                                    tie_intn.getText() == null ? "" : tie_intn.getText().toString(),
+                                    tie_passing.getText() == null ? "" : tie_passing.getText().toString(),
+                                    tie_raising.getText() == null ? "" : tie_raising.getText().toString(),
                                     lsLastNme,
                                     lsFrstNme,
                                     lsMiddNme,
@@ -843,7 +942,7 @@ public class Fragment_Member extends Fragment{
                                     tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
                                     String.valueOf(lnSelectStatus),
                                     mviewModel.GetCurrentDate(),
-                                    lnSelectStatus > 1 ? mviewModel.GetCurrentDateTime() : null,
+                                    tie_suspend.getText() == null ? "" : tie_suspend.getText().toString(),
                                     null,
                                     lnSelectStatus != 1 ? "0" : "1"
                             );
@@ -860,6 +959,10 @@ public class Fragment_Member extends Fragment{
                             }
 
                             loMemberInfo.setSLodgeIDx(mviewModel.GetLodgeID());
+                            loMemberInfo.setDInitiatn(tie_intn.getText() == null ? "" : tie_intn.getText().toString());
+                            loMemberInfo.setDPassedxx(tie_passing.getText() == null ? "" : tie_passing.getText().toString());
+                            loMemberInfo.setDRaisingX(tie_raising.getText() == null ? "" : tie_raising.getText().toString());
+                            loMemberInfo.setDSuspendx(tie_suspend.getText() == null ? "" : tie_suspend.getText().toString());
                             loMemberInfo.setSLastName(lsLastNme);
                             loMemberInfo.setSFrstName(lsFrstNme);
                             loMemberInfo.setSMiddName(lsMiddNme);

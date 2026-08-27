@@ -2,6 +2,7 @@ package org.gag.appdriver.App.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +44,7 @@ public class MemberEmailAdapter extends ArrayAdapter<EMemberEmailInfo> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(laMemberEmail.get(position).getSEmailAdd());
+        textView.setText(laMemberEmailFiltered.get(position).getSEmailAdd());
 
         return view;
 
@@ -79,7 +80,6 @@ public class MemberEmailAdapter extends ArrayAdapter<EMemberEmailInfo> {
                 }
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = results;
-
                 return filterResults;
             }
 

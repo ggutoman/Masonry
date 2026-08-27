@@ -1031,6 +1031,9 @@ class UserAccount(instance : Context) {
 
                         put("sGLPIDNoX", memberInfo.sGLPIDNoX)
                         put("sLodgeIDx", sLodgeIDx)
+                        put("dInitiatn", memberInfo.dInitiatn)
+                        put("dPassedxx", memberInfo.dPassedxx)
+                        put("dRaisingX", memberInfo.dRaisingX)
                         put("sLastName", memberInfo.sLastName)
                         put("sFrstName", memberInfo.sFrstName)
                         put("sSuffixNm", memberInfo.sSuffixNm)
@@ -1359,8 +1362,6 @@ class UserAccount(instance : Context) {
                     val loParams = JSONObject().apply {
                         put("sMemberID", fOfficer.sMemberID)
                         put("sPositnCd", fOfficer.sPositnCd)
-                        put("cNewStatx", fOfficer.cStatusxx)
-                        put("cAppointx", fOfficer.cAppointx)
                         put("sRemarksx", fsRemarks)
                     }
 

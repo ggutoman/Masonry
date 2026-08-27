@@ -2,6 +2,7 @@ package com.gag.masonry.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -144,12 +145,14 @@ public class Activity_Dashboard extends AppCompatActivity {
                                     @Override
                                     public void OnFinished(String fsMessage) {
                                         poLoading.DismissDialog();
+                                        Log.d("sYNC dATA", fsMessage);
                                         Toast.makeText(Activity_Dashboard.this, fsMessage, Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             }
                         });
                         break;
+
                     case "028": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override

@@ -274,8 +274,7 @@ public class VM_Member extends AndroidViewModel {
                 MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER.getFsDescr(),
                 MEMBER_CONSTANTS.STATUS_LIFE_MEMBER.getFsDescr(),
                 MEMBER_CONSTANTS.STATUS_DUAL_MEMBER.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_DEMIT_MEMBER.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr()
         );
         return laAccount;
     }
