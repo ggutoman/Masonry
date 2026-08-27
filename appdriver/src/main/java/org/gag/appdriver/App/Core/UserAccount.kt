@@ -81,6 +81,8 @@ class UserAccount(instance : Context) {
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
         .getOrNull(1) ?: ""
 
+    fun FormatLongDate(fsLongDate : Long) : String = dateObj.FormatLongDate(fsLongDate)
+
     fun GetCurrentDate() : String = dateObj.GetCurrentDate()
 
     fun GetCurrentDateTime() : String = dateObj.GetCurrentDateTime()
@@ -112,6 +114,10 @@ class UserAccount(instance : Context) {
                                                                                                 .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
                                                                                                 .getOrNull(0) ?: ""
                                                                                         )
+
+    fun ObserveMemberList(fsMemberID : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemberListByFilter(fsMemberID, fsDateFrom, fsDateTo)
+
+    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficer.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
 
     fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 
@@ -1025,6 +1031,9 @@ class UserAccount(instance : Context) {
 
                         put("sGLPIDNoX", memberInfo.sGLPIDNoX)
                         put("sLodgeIDx", sLodgeIDx)
+                        put("dInitiatn", memberInfo.dInitiatn)
+                        put("dPassedxx", memberInfo.dPassedxx)
+                        put("dRaisingX", memberInfo.dRaisingX)
                         put("sLastName", memberInfo.sLastName)
                         put("sFrstName", memberInfo.sFrstName)
                         put("sSuffixNm", memberInfo.sSuffixNm)
@@ -1353,8 +1362,6 @@ class UserAccount(instance : Context) {
                     val loParams = JSONObject().apply {
                         put("sMemberID", fOfficer.sMemberID)
                         put("sPositnCd", fOfficer.sPositnCd)
-                        put("cNewStatx", fOfficer.cStatusxx)
-                        put("cAppointx", fOfficer.cAppointx)
                         put("sRemarksx", fsRemarks)
                     }
 

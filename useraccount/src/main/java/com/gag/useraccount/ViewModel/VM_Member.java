@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Constants.MEMBER_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
@@ -34,7 +35,6 @@ public class VM_Member extends AndroidViewModel {
     private final MutableLiveData<List<EMemberEmailInfo>> laEmail;
 
     private final UserAccount poAccount;
-
 
     public interface OnSubmit{
         void OnLoad();
@@ -183,6 +183,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.GetCurrentDateTime();
     }
 
+    public String GetFormattedDate(Long flDate){
+        return poAccount.FormatLongDate(flDate);
+    }
+
     public String GetFormattedDate(String fsInput, String fsFormat){
         return poAccount.GetFormattedDate(fsInput, fsFormat);
     }
@@ -193,6 +197,14 @@ public class VM_Member extends AndroidViewModel {
 
     public String GetLodgeID(){
         return poAccount.GetLodgeID();
+    }
+
+    public LiveData<List<EMemberInfo>> GetMemberList(String fsMemberID, String fsDfrom, String fsDto) {
+        return poAccount.ObserveMemberList(fsMemberID, fsDfrom, fsDto);
+    }
+
+    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
+        return poAccount.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
     }
 
     public LiveData<List<EMemberInfo>> ObserverMemberList(){
@@ -262,8 +274,7 @@ public class VM_Member extends AndroidViewModel {
                 MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER.getFsDescr(),
                 MEMBER_CONSTANTS.STATUS_LIFE_MEMBER.getFsDescr(),
                 MEMBER_CONSTANTS.STATUS_DUAL_MEMBER.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_DEMIT_MEMBER.getFsDescr()
+                MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr()
         );
         return laAccount;
     }
@@ -291,6 +302,44 @@ public class VM_Member extends AndroidViewModel {
 
         );
         return laType;
+    }
+
+    public void DownloadMembers(OnDownload foCallback){
+
+        foCallback.Loading();
+        poAccount.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.Finished(poAccount.getMessage());
+                }else {
+                    foCallback.Finished("Successfully downloaded member list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void DownloadOfficers(OnDownload foCallback){
+
+        foCallback.Loading();
+        poAccount.DownloadOfficerList().thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.Finished(poAccount.getMessage());
+                }else {
+                    foCallback.Finished("Successfully downloaded officer list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
     }
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){

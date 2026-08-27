@@ -72,9 +72,7 @@ public class MemberContactAdapter extends ArrayAdapter<EMemberContactInfo> {
                     results.addAll(laMemberContact);
                 } else {
                     for (EMemberContactInfo contactInfo : laMemberContact) {
-                        if (contactInfo.getSContctNo().toLowerCase().contains(constraint.toString().toLowerCase()) ||
-                                contactInfo.getSRemarksx().toLowerCase().contains(constraint.toString().toLowerCase())) {
-
+                        if (contactInfo.getSContctNo().toLowerCase().contains(constraint.toString().toLowerCase())) {
                             results.add(contactInfo);
                         }
                     }

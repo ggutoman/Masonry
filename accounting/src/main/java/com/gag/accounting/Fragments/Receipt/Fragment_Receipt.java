@@ -263,7 +263,7 @@ public class Fragment_Receipt extends Fragment {
                                                                 loDetail.getSSourceCD(),
                                                                 loDetail.getSSourceNo(),
                                                                 loDetail.getNEntryNox(),
-                                                                result.getSProjctNm(), //
+                                                                result.getSProjctNm(),
                                                                 loDetail.getNAmtPaidx()
                                                         );
 
@@ -495,7 +495,7 @@ public class Fragment_Receipt extends Fragment {
                             public void OnSubmit(ReceiptDetail loEntry) {
 
                                 if (!mViewModel.AddReceiptDetail(
-                                        lsTransNox,
+                                        "",
                                         loEntry.getSSourceCD(),
                                         loEntry.getSSourceNo(),
                                         "",

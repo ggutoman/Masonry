@@ -54,7 +54,7 @@ public class Fragment_UserInfo extends Fragment {
 
     //Officer Information
     private MaterialCardView card_officer;
-    private MaterialTextView mtv_term, mtv_position, mtv_type, mtv_off_status, mtv_label_officer;
+    private MaterialTextView mtv_term, mtv_position,  mtv_label_officer;
     private MaterialButton btn_view_officer;
 
     // Personal Information card
@@ -97,8 +97,6 @@ public class Fragment_UserInfo extends Fragment {
         card_officer = view.findViewById(R.id.card_officer);
         mtv_term = view.findViewById(R.id.mtv_term);
         mtv_position = view.findViewById(R.id.mtv_position);
-        mtv_type = view.findViewById(R.id.mtv_type);
-        mtv_off_status = view.findViewById(R.id.mtv_off_status);
         btn_view_officer = view.findViewById(R.id.btn_view_officer);
 
         // Personal Information card
@@ -154,7 +152,7 @@ public class Fragment_UserInfo extends Fragment {
 
                 if (memberDashboardInfo == null) return;
 
-                List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER, MEMBER_CONSTANTS.STATUS_LIFE_MEMBER, MEMBER_CONSTANTS.STATUS_DUAL_MEMBER, MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER, MEMBER_CONSTANTS.STATUS_DEMIT_MEMBER);
+                List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER, MEMBER_CONSTANTS.STATUS_LIFE_MEMBER, MEMBER_CONSTANTS.STATUS_DUAL_MEMBER, MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER);
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
                 mtv_lodge.setText(memberDashboardInfo.getSLodgeNme());
@@ -291,25 +289,8 @@ public class Fragment_UserInfo extends Fragment {
                                 card_officer.setVisibility(View.VISIBLE);
                                 btn_view_officer.setVisibility(View.VISIBLE);
 
-                                List<MEMBER_CONSTANTS> laType = List.of(
-                                        MEMBER_CONSTANTS.STATUS_ELECTED,
-                                        MEMBER_CONSTANTS.STATUS_APPOINTED
-                                );
-
-                                List<MEMBER_CONSTANTS> laOfficerStatus = List.of(
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_SUSPENDED,
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_ACTIVE,
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_REASSIGN,
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_REMOVED,
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_RESIGNED,
-                                        MEMBER_CONSTANTS.STATUS_OFFICER_DECEASE
-                                );
-
-
                                 mtv_term.setText(String.valueOf("M.Y " + eOfficer.getNYearxxxx()));
                                 mtv_position.setText(eOfficer.getSPositionNme());
-                                mtv_type.setText(laType.get(Integer.parseInt(eOfficer.getCAppointx())).getFsDescr());
-                                mtv_off_status.setText(laOfficerStatus.get(Integer.parseInt(eOfficer.getCStatusxx())).getFsDescr());
                             }
                         });
                     }

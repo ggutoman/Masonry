@@ -92,9 +92,6 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
             case "3": //deceased
                 holder.siv_status.setImageResource(R.drawable.baseline_member_deceased);
                 break;
-            case "4": //demit
-                holder.siv_status.setImageResource(R.drawable.baseline_member_demit);
-                break;
         }
 
         holder.view.setOnClickListener(new View.OnClickListener() {

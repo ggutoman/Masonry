@@ -24,6 +24,5 @@ enum class MEMBER_CONSTANTS(val fsIDx : String, val fsDescr : String){
     STATUS_REGULAR_MEMBER("0", "Regular"),
     STATUS_LIFE_MEMBER("1", "Life"),
     STATUS_DUAL_MEMBER("2", "Dual"),
-    STATUS_DECEASED_MEMBER("3", "Deceased"),
-    STATUS_DEMIT_MEMBER("4", "Demit")
+    STATUS_DECEASED_MEMBER("3", "Deceased")
 }

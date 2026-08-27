@@ -18,7 +18,7 @@ interface DOfficer {
 
     @Query("SELECT " +
             "b.nYearxxxx, " +
-            "a.sMemberID, a.sYearIDxx, a.cAppointx, a.cStatusxx, a.sPositnCd," +
+            "a.sMemberID, a.sYearIDxx, a.sPositnCd," +
             "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
             "d.sPositnDs sPositionNme " +
             "FROM " +
@@ -41,7 +41,7 @@ interface DOfficer {
     @Query("""
             SELECT
             b.nYearxxxx,
-            a.sMemberID, a.sYearIDxx, a.cAppointx, a.cStatusxx, a.sPositnCd,
+            a.sMemberID, a.sYearIDxx, a.sPositnCd,
             (c.sFrstName || ' ' || c.sLastName) sMemberNme,
             d.sPositnDs sPositionNme
             FROM
@@ -51,8 +51,6 @@ interface DOfficer {
             JOIN  Position_Info d ON (a.sPositnCd = d.sPositnCd)
             WHERE 
                 a.sMemberID = :fsMemberIDx 
-            AND 
-                a.cStatusxx = '1' 
             AND
                 b.dThruDate >= CURRENT_DATE
             ORDER BY
