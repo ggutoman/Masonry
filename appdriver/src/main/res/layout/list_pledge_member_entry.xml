@@ -21,7 +21,7 @@
             style="@style/Text_Header"
             android:id="@+id/mtv_amt_pledge"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="0.00"
             android:alpha="0.7"
             android:gravity="end"
@@ -34,14 +34,12 @@
             android:id="@+id/mtv_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="1900-00-00"
+            android:text="Pledged until "
             android:alpha="0.7"
             android:layout_marginTop="5dp"
             android:textSize="13sp"
-            android:layout_marginStart="2dp"
-            android:gravity="end"
-            app:layout_constraintTop_toBottomOf="@+id/mtv_amt_pledge"
-            app:layout_constraintStart_toStartOf="@+id/mtv_amt_pledge"
+            app:layout_constraintTop_toBottomOf="@+id/mtv_name"
+            app:layout_constraintStart_toStartOf="@+id/mtv_name"
             app:layout_constraintEnd_toEndOf="@+id/mtv_amt_pledge"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

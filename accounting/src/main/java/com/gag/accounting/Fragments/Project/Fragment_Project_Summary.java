@@ -42,9 +42,9 @@ public class Fragment_Project_Summary extends Fragment {
 
     private String lsYearIDxx, lsProjectCd, lsDfrom, lsDto;
 
-    private MaterialTextView mtv_project_name, mtv_project_type, mtv_transaction, mtv_pledge_date, mtv_trans_stat, mtv_trans_total, mtv_collect_total;
+    private MaterialTextView mtv_project_name, mtv_project_type, mtv_transaction, mtv_pledge_date, mtv_trans_stat, mtv_trans_total;
     private ShapeableImageView btn_download;
-    private ConstraintLayout layout_no_record;
+    private ConstraintLayout layout_no_record, layout_status;
     private MaterialCardView layout_pledges;
     private RecyclerView rcv_pledge_list;
 
@@ -89,8 +89,8 @@ public class Fragment_Project_Summary extends Fragment {
         mtv_pledge_date = view.findViewById(R.id.mtv_pledge_date);
         mtv_trans_stat = view.findViewById(R.id.mtv_trans_stat);
         mtv_trans_total = view.findViewById(R.id.mtv_trans_total);
-        mtv_collect_total = view.findViewById(R.id.mtv_collect_total);
         btn_download = view.findViewById(R.id.btn_download);
+        layout_status = view.findViewById(R.id.layout_status);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         layout_pledges = view.findViewById(R.id.layout_pledges);
         rcv_pledge_list = view.findViewById(R.id.rcv_pledge_list);
@@ -183,10 +183,9 @@ public class Fragment_Project_Summary extends Fragment {
                     mtv_transaction.setText("Projects as of");
                     mtv_pledge_date.setText(mViewModel.GetFormattedDate(lsDto, "MMMM d, yyyy"));
                     mtv_trans_total.setText("0.00");
-                    mtv_collect_total.setText("0.00");
 
                     //no need to display, summary of all projects
-                    mtv_trans_stat.setVisibility(View.GONE);
+                    layout_status.setVisibility(View.GONE);
 
                     mViewModel.GetProjectList(lsYearIDxx, lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EProjectMaster>>() {
                         @Override
@@ -209,7 +208,6 @@ public class Fragment_Project_Summary extends Fragment {
                             }
 
                             mtv_trans_total.setText(String.valueOf(ldbl_trans_total));
-                            mtv_collect_total.setText(String.valueOf(ldbl_collect_total));
 
                             //display and add viewing per projects
                             rcv_pledge_list.setAdapter(
@@ -266,10 +264,9 @@ public class Fragment_Project_Summary extends Fragment {
                     mtv_transaction.setText("Pledges as of");
                     mtv_pledge_date.setText(mViewModel.GetFormattedDate(lsDto, "MMMM d, yyyy"));
                     mtv_trans_total.setText("0.00");
-                    mtv_collect_total.setText("0.00");
 
                     //no need to display, summary of all projects
-                    mtv_trans_stat.setVisibility(View.VISIBLE);
+                    layout_status.setVisibility(View.VISIBLE);
 
                     switch (eProjectMaster.getCTranStat()){
 
@@ -309,7 +306,6 @@ public class Fragment_Project_Summary extends Fragment {
                             }
 
                             mtv_trans_total.setText(String.valueOf(ldbl_trans_total));
-                            mtv_collect_total.setText(String.valueOf(ldbl_collect_total));
 
                             rcv_pledge_list.setAdapter(new Adapter_Pledge_Summary(requireActivity(), projectDetails));
                             rcv_pledge_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));

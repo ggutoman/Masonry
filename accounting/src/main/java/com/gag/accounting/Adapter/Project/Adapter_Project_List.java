@@ -60,7 +60,6 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
     public void onBindViewHolder(@NonNull VH_Project_List holder, int position) {
 
         holder.mtv_name.setText(laProjectFiltered.get(position).getSProjctNm());
-        holder.mtv_date.setText(laProjectFiltered.get(position).getDTransact());
 
         switch (laProjectFiltered.get(position).getCProjctTp()){
 
@@ -169,7 +168,7 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
     public static class VH_Project_List extends RecyclerView.ViewHolder {
 
         private View view;
-        private MaterialTextView mtv_name, mtv_type, mtv_status, mtv_date;
+        private MaterialTextView mtv_name, mtv_type, mtv_status;
 
         public VH_Project_List(@NonNull View itemView) {
             super(itemView);
@@ -178,7 +177,6 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_type = itemView.findViewById(R.id.mtv_type);
             mtv_status = itemView.findViewById(R.id.mtv_status);
-            mtv_date = itemView.findViewById(R.id.mtv_date);
         }
     }
 }

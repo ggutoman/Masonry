@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Core.Projects;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
+import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 
 import java.util.ArrayList;
@@ -25,13 +27,13 @@ import java.util.List;
 public class Adapter_Receipt_Details extends RecyclerView.Adapter<Adapter_Receipt_Details.VH_Receipt_Details> {
 
     private final Context loInstance;
-    private final DateRepository loDate;
+    private final Projects poProject;
     private final List<EReceiptDetail> laDetails;
 
     public Adapter_Receipt_Details(Context foInstance, List<EReceiptDetail> foDetails){
 
         loInstance = foInstance;
-        loDate = new DateRepository();
+        poProject = new Projects(loInstance);
         laDetails = foDetails;
     }
 
@@ -46,11 +48,13 @@ public class Adapter_Receipt_Details extends RecyclerView.Adapter<Adapter_Receip
     @Override
     public void onBindViewHolder(@NonNull VH_Receipt_Details holder, int position) {
 
-        holder.mtv_date.setText(laDetails.get(position).getDModified());
-        holder.mtv_src_no.setText(laDetails.get(position).getSSourceNo());
+        EProjectMaster loProject = poProject.GetProjectInfo(laDetails.get(position).getSSourceNo());
+        String lsProjDescr = loProject == null || loProject.getSProjctNm().isEmpty() ? laDetails.get(position).getSSourceNo() : loProject.getSProjctNm();
+
+        holder.mtv_src_no.setText(lsProjDescr);
         holder.mtv_src_amount.setText(laDetails.get(position).getNAmtPaidx());
 
-        holder.mtv_src_no.setVisibility(laDetails.get(position).getSSourceCD().equalsIgnoreCase("DUES") || laDetails.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
+        holder.mtv_src_no.setVisibility(laDetails.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
 
         switch (laDetails.get(position).getSSourceCD()){
             case "DUES":
@@ -75,12 +79,11 @@ public class Adapter_Receipt_Details extends RecyclerView.Adapter<Adapter_Receip
 
     public static class VH_Receipt_Details extends RecyclerView.ViewHolder {
 
-        private MaterialTextView mtv_date, mtv_src_no, mtv_src_code, mtv_src_amount;
+        private MaterialTextView  mtv_src_no, mtv_src_code, mtv_src_amount;
 
         public VH_Receipt_Details(@NonNull View itemView) {
             super(itemView);
 
-            mtv_date = itemView.findViewById(R.id.mtv_date);
             mtv_src_no = itemView.findViewById(R.id.mtv_src_no);
             mtv_src_code = itemView.findViewById(R.id.mtv_src_code);
             mtv_src_amount = itemView.findViewById(R.id.mtv_src_amount);

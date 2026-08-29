@@ -9,6 +9,7 @@ data class EOfficer(
     var sYearIDxx: String,
     var sPositnCd: String?,
     var sMemberID: String,
+    var cAppointx: String?,
     var sModified: String?,
     var dModified: String?,
     var dTimeStmp: String?

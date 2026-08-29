@@ -342,16 +342,31 @@ public class VM_Receipts extends AndroidViewModel {
         }
         foMaster.setNTotlPaid(String.valueOf(ldbl_paid));
 
-        poReceipt.SaveReceipt(foMaster, laDetails).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poReceipt.SaveReceipt(foMaster, laDetails).thenCompose(o -> {
 
-                if (!aBoolean){
-                    foCallback.OnFailed(poReceipt.getMessage());
-                }else{
-                    foCallback.OnSuccess();
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(false);
+
+            if (o instanceof Boolean){
+                chain = CompletableFuture.completedFuture(false);
+            }else if (o instanceof EReceiptMaster loReceipt){
+
+                if (loReceipt.getSTransNox().isEmpty()){
+                    chain = CompletableFuture.completedFuture(false);
+                }else {
+
+                    //update receipt as confirmed, new entries are considered payment has been received
+                    loReceipt.setCTranStat("1");
+                    chain = poReceipt.UpdateReceiptStatus(loReceipt);
                 }
             }
+            return chain;
+        }).thenAccept(o -> {
+
+            if (!o){
+                foCallback.OnFailed(poReceipt.getMessage());
+                return;
+            }
+            foCallback.OnSuccess();
         });
     }
 

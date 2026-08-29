@@ -63,7 +63,6 @@ public class Fragment_Receipt_Detail extends Fragment {
     private Message_Dialog poMessage;
 
     private EReceiptMaster loReceipt;
-    private List<EReceiptDetail> loReceiptDetail;
 
     private String lsStackIDxx, lsMemberID, lsTransNox;
 
@@ -219,8 +218,6 @@ public class Fragment_Receipt_Detail extends Fragment {
                         layout_no_record.setVisibility(View.GONE);
                         rcv_list.setVisibility(View.VISIBLE);
 
-                        loReceiptDetail = eReceiptDetails;
-
                         double ldbl_totalpaid = 0.00;
                         for (EReceiptDetail loDetail : eReceiptDetails){
                             ldbl_totalpaid += Double.parseDouble(loDetail.getNAmtPaidx());
@@ -271,13 +268,13 @@ public class Fragment_Receipt_Detail extends Fragment {
         switch (fsTranStat){
 
             case "1":
-                lsConfirm = "confirm this transaction?";
+                lsConfirm = "confirm this receipt?";
                 break;
             case "3":
-                lsConfirm = "cancel this transaction?";
+                lsConfirm = "cancel this receipt?";
                 break;
             case "4":
-                lsConfirm = "void this transaction?";
+                lsConfirm = "void this receipt?";
                 break;
         }
 

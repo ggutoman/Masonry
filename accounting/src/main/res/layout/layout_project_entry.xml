@@ -41,7 +41,7 @@
             android:id="@+id/til_pledge_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Promised Date">
+            android:hint="Date of Pledge">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"
@@ -58,7 +58,7 @@
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Promised to Pay">
+            android:hint="Amount of Pledge">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputStyle.Edittext"

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.R;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.List;
 public class LodgeCalendarListAdapter extends RecyclerView.Adapter<LodgeCalendarListAdapter.VH_Lodge_Calendar_List> {
 
     private final Context loContext;
+    private final DateRepository poDate;
     private final LodgeFilter loFilter;
     private final List<LodgeCalendarList> lodges;
     private final OnSelectCalendar loCallback;
@@ -36,6 +38,7 @@ public class LodgeCalendarListAdapter extends RecyclerView.Adapter<LodgeCalendar
     public LodgeCalendarListAdapter(Context context, List<LodgeCalendarList> objects, OnSelectCalendar foCallback){
 
         loContext = context;
+        poDate = new DateRepository();
         lodges = objects;
         lodgesFiltered = objects;
         loCallback = foCallback;
@@ -60,8 +63,9 @@ public class LodgeCalendarListAdapter extends RecyclerView.Adapter<LodgeCalendar
     @Override
     public void onBindViewHolder(@NonNull VH_Lodge_Calendar_List holder, int position) {
 
-        holder.mtv_descr.setText(lodgesFiltered.get(position).getSLodgeNme() + " " + "(" + lodgesFiltered.get(position).getNYearxxxx() + ")");
-        holder.mtv_validity.setText(lodgesFiltered.get(position).getDThruDate());
+        holder.mtv_descr.setText("M.Y " + lodgesFiltered.get(position).getNYearxxxx());
+        holder.mtv_validity.setText(poDate.FormatDate(lodgesFiltered.get(position).getDFromDate(), "MMMM dd, yyyy") + " - " +
+                poDate.FormatDate(lodgesFiltered.get(position).getDThruDate(), "MMMM dd, yyyy"));
 
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,8 +98,7 @@ public class LodgeCalendarListAdapter extends RecyclerView.Adapter<LodgeCalendar
             } else {
                 for (LodgeCalendarList lodgeCalendar : lodges) {
 
-                    if (lodgeCalendar.getSLodgeNme().toLowerCase().contains(charSequence.toString().toLowerCase()) ||
-                            lodgeCalendar.getNYearxxxx().equalsIgnoreCase(charSequence.toString().toLowerCase())) {
+                    if (lodgeCalendar.getNYearxxxx().contains(charSequence.toString().toLowerCase())) {
 
                         results.add(lodgeCalendar);
                     }

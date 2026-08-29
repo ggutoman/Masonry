@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Lodge Calendars" />
+            android:text="List of Masonic Calendars" />
 
         <View
             android:layout_width="match_parent"
@@ -43,7 +43,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:hint="Search Lodge Year" />
+                    android:hint="Search Masonic Year" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

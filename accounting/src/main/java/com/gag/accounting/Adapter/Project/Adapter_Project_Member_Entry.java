@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.ProjectDetail;
+import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.R;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.List;
 public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
 
     private final Context loContext;
+    private final DateRepository poDate;
     public final List<ProjectDetail> loProject;
 
     public List<ProjectDetail> loProjectFiltered;
@@ -29,6 +31,8 @@ public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
         super(context, resource, objects);
 
         loContext = context;
+
+        poDate = new DateRepository();
         loProject = objects;
         loProjectFiltered = objects;
     }
@@ -50,7 +54,7 @@ public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
 
         mtv_name.setText(loProjectFiltered.get(position).getSMemberNme());
         mtv_amt_pledge.setText(loProjectFiltered.get(position).getNPledgexx());
-        mtv_date.setText(loProjectFiltered.get(position).getDPledgexx());
+        mtv_date.setText("Pledged until " + poDate.FormatDate(loProjectFiltered.get(position).getDPledgexx(), "MMMM dd, yyyy"));
 
         return view;
 

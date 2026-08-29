@@ -281,9 +281,9 @@ class Receipts(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun SaveReceipt(loMaster : EReceiptMaster, loDetail : List<EReceiptDetail>) : CompletableFuture<Boolean>{
+    fun SaveReceipt(loMaster : EReceiptMaster, loDetail : List<EReceiptDetail>) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -317,8 +317,9 @@ class Receipts(instance : Context) {
                     //initialize master parameters
                     val loParams = JSONObject().apply {
 
-                        //add transaction no to parameters, if not empty
-                        if (loMaster.sTransNox.isNotEmpty()) put("sTransNox", loMaster.sTransNox)
+                        if (loMaster.sTransNox.isNotEmpty()){ //add transaction no to parameters, if not empty
+                            put("sTransNox", loMaster.sTransNox)
+                        }
 
                         put("sMemberID", loMaster.sMemberID)
                         put("cPaymForm", loMaster.cPaymForm)
@@ -349,7 +350,7 @@ class Receipts(instance : Context) {
                                 poReceipt.SaveReceiptDetail(loItem)
                             }
 
-                            true
+                            loMaster
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

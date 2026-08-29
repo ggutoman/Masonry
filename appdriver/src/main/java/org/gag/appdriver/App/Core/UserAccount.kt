@@ -117,7 +117,7 @@ class UserAccount(instance : Context) {
 
     fun ObserveMemberList(fsMemberID : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemberListByFilter(fsMemberID, fsDateFrom, fsDateTo)
 
-    fun ObserveOfficersList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>> = poOfficer.ObserveOfficerList(fsMemberIDx, fsDateFrom, fsDateTo)
+    fun ObserveOfficersList(fsMemberIDx : String, fsYear : String) : LiveData<List<OfficerInfo>> = poOfficer.ObserveOfficerList(fsMemberIDx, fsYear)
 
     fun ObserveMemberList() : LiveData<List<EMemberInfo>> = poMemberInfo.ObserveMemeberList(GetUserID())
 
@@ -568,7 +568,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadOfficerList() : CompletableFuture<Boolean> {
+    fun DownloadOfficerList(fsYear : String) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -581,9 +581,13 @@ class UserAccount(instance : Context) {
 
                 }else{
 
+                    val params : JSONObject = JSONObject().let {
+                        it.put("nYearxx", fsYear);
+                    }
+
                     httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_OFFICERS.fsURL,
-                        JSONObject(),
+                        params,
                         mapOf(
                             "access-token" to session.getokenID()
                         )

@@ -77,6 +77,8 @@ class Projects(instance : Context) {
 
     fun GetLodgeCalendarInfo(fsLodgeIDxx : String) : LiveData<LodgeCalendarList> = poLodgeYear.GetLodgeYearInfo(fsLodgeIDxx)
 
+    fun GetProjectInfo(fsProjectCd : String) : EProjectMaster = poProjects.GetProjectMasterInfo(fsProjectCd)
+
     fun GetProject(fsProjectCd : String) : LiveData<EProjectMaster> = poProjects.GetProjectMasterTransaction(fsProjectCd)
 
     fun GetProjectDetails(fsProjectCd : String) : LiveData<List<ProjectDetail>> = poProjects.GetProjectDetails(fsProjectCd)

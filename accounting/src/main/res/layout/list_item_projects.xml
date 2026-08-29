@@ -37,7 +37,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp">
+        android:layout_marginTop="5dp">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/mtv_type"
@@ -45,18 +45,9 @@
             android:layout_height="wrap_content"
             android:text="N/A"
             android:textSize="13sp"
+            android:alpha="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintWidth_percent="0.5"/>
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/mtv_date"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="1900-00-00"
-            android:textSize="13sp"
-            android:gravity="end"
-            app:layout_constraintStart_toEndOf="@+id/mtv_type"
-            app:layout_constraintWidth_percent="0.5"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
