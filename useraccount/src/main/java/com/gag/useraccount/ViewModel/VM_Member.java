@@ -203,8 +203,8 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveMemberList(fsMemberID, fsDfrom, fsDto);
     }
 
-    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsDfrom, String fsDto) {
-        return poAccount.ObserveOfficersList(fsMemberIDx, fsDfrom, fsDto);
+    public LiveData<List<OfficerInfo>> ObserveOfficerList(String fsMemberIDx, String fsYear) {
+        return poAccount.ObserveOfficersList(fsMemberIDx, fsYear);
     }
 
     public LiveData<List<EMemberInfo>> ObserverMemberList(){
@@ -323,10 +323,10 @@ public class VM_Member extends AndroidViewModel {
         });
     }
 
-    public void DownloadOfficers(OnDownload foCallback){
+    public void DownloadOfficers(String fsYear, OnDownload foCallback){
 
         foCallback.Loading();
-        poAccount.DownloadOfficerList().thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerList(fsYear).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -453,7 +453,7 @@ public class VM_Member extends AndroidViewModel {
 
     }
 
-    public void AssignOfficer(EOfficer foOfficer, String fsRemarksx, VM_Account.OnSubmit foCallback){
+    public void AssignOfficer(EOfficer foOfficer, String fsYear, String fsRemarksx, VM_Account.OnSubmit foCallback){
 
         foCallback.onLoad();
 
@@ -461,7 +461,7 @@ public class VM_Member extends AndroidViewModel {
 
             CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(aBoolean);
             if (aBoolean){
-                chain = poAccount.DownloadOfficerList();
+                chain = poAccount.DownloadOfficerList(fsYear);
             }
             return chain;
 

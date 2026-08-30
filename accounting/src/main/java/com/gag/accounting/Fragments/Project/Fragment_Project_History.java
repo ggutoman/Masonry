@@ -29,8 +29,10 @@ import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -45,10 +47,12 @@ public class Fragment_Project_History extends Fragment {
     private Message_Dialog poMessage;
     private LoadDialog poLoading;
     private Adapter_Project_List loAdapter;
+    private LodgeCalendarList loYear;
 
     private String lsDfrom, lsDto, lsStackIDxx;
     private List<String> laType, laStatus;
 
+    private MaterialTextView mtv_year;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
     private ConstraintLayout layout_no_record;
@@ -94,6 +98,7 @@ public class Fragment_Project_History extends Fragment {
     }
 
     private void InitViews(View view){
+        mtv_year = view.findViewById(R.id.mtv_year);
         tie_search = view.findViewById(R.id.tie_search);
         btn_filter = view.findViewById(R.id.btn_filter);
         layout_no_record = view.findViewById(R.id.layout_no_record);
@@ -145,11 +150,11 @@ public class Fragment_Project_History extends Fragment {
             return;
         }
 
-        mViewModel.GetProjectList(getArguments().getString("year_id"), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EProjectMaster>>() {
+        mViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
             @Override
-            public void onChanged(List<EProjectMaster> eProjectMasters) {
+            public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
 
-                if (eProjectMasters == null || eProjectMasters.size() < 1){
+                if (lodgeCalendarLists == null || lodgeCalendarLists.size() < 1){
                     rcv_project_list.setVisibility(View.GONE);
                     layout_no_record.setVisibility(View.VISIBLE);
                     return;
@@ -157,43 +162,66 @@ public class Fragment_Project_History extends Fragment {
                 rcv_project_list.setVisibility(View.VISIBLE);
                 layout_no_record.setVisibility(View.GONE);
 
-                //load list based on root navigation
-                List<EProjectMaster> laList = eProjectMasters;
-                if (lsStackIDxx.equalsIgnoreCase("project_confirm")){
+                for (LodgeCalendarList loCalendar : lodgeCalendarLists){
 
-                    //only show list for confirmation
-                    laList = new ArrayList<>();
-                    for (EProjectMaster loProject : eProjectMasters){
-                        if (Integer.parseInt(loProject.getCTranStat()) < 2) laList.add(loProject);
+                    if (loCalendar.getSYearIDxx().equalsIgnoreCase(getArguments().getString("year_id"))){
+                        loYear = loCalendar;
+                        mtv_year.setText("(Year " + loCalendar.getNYearxxxx() + ")");
+                        break;
                     }
                 }
 
-                loAdapter = new Adapter_Project_List(requireContext(), laList, new Adapter_Project_List.OnSelectProject() {
+                mViewModel.GetProjectList(loYear.getSYearIDxx(), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EProjectMaster>>() {
                     @Override
-                    public void OnSelect(EProjectMaster loProj) {
+                    public void onChanged(List<EProjectMaster> eProjectMasters) {
 
-                        FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                        if (eProjectMasters == null || eProjectMasters.size() < 1){
+                            rcv_project_list.setVisibility(View.GONE);
+                            layout_no_record.setVisibility(View.VISIBLE);
+                            return;
+                        }
+                        rcv_project_list.setVisibility(View.VISIBLE);
+                        layout_no_record.setVisibility(View.GONE);
 
-                        //show information of selected project
-                        Fragment_Project loProject = new Fragment_Project();
-                        Bundle loBundle = new Bundle();
+                        //load list based on root navigation
+                        List<EProjectMaster> laList = eProjectMasters;
+                        if (lsStackIDxx.equalsIgnoreCase("project_confirm")){
 
-                        loBundle.putString("lodge_id", getArguments().getString("lodge_id"));
-                        loBundle.putString("project_cd", loProj.getSProjctCd());
-                        loProject.setArguments(loBundle);
+                            //only show list for confirmation
+                            laList = new ArrayList<>();
+                            for (EProjectMaster loProject : eProjectMasters){
+                                if (Integer.parseInt(loProject.getCTranStat()) < 2) laList.add(loProject);
+                            }
+                        }
 
-                        //add to child container, as bridge to initiate another fragment after call
-                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loProject));
-                        fragmentTransaction.addToBackStack(lsStackIDxx);
+                        loAdapter = new Adapter_Project_List(requireContext(), laList, new Adapter_Project_List.OnSelectProject() {
+                            @Override
+                            public void OnSelect(EProjectMaster loProj) {
 
-                        fragmentTransaction.commit();
+                                FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+
+                                //show information of selected project
+                                Fragment_Project loProject = new Fragment_Project();
+                                Bundle loBundle = new Bundle();
+
+                                loBundle.putString("lodge_id", getArguments().getString("lodge_id"));
+                                loBundle.putString("project_cd", loProj.getSProjctCd());
+                                loProject.setArguments(loBundle);
+
+                                //add to child container, as bridge to initiate another fragment after call
+                                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loProject));
+                                fragmentTransaction.addToBackStack(lsStackIDxx);
+
+                                fragmentTransaction.commit();
+
+                            }
+                        });
+
+                        rcv_project_list.setAdapter(loAdapter);
+                        rcv_project_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
 
                     }
                 });
-
-                rcv_project_list.setAdapter(loAdapter);
-                rcv_project_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-
             }
         });
     }

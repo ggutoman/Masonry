@@ -15,8 +15,18 @@
             style="@style/Text_Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:text="Project List" />
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="5dp"
+            android:text="List of Projects" />
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="(Year)"
+            android:alpha="0.6"
+            android:gravity="center"/>
 
         <View
             android:layout_width="match_parent"

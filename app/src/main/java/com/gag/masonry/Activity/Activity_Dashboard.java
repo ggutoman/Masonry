@@ -253,20 +253,18 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "project_entry";
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
-            case "009", "010": //project history
+            case "009", "010", "011": //project history
                 loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("009") ? "project_confirm" : "project_information";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
-                break;
-            case "011": //project summary
-                loFragment = new Fragment_Lodge_Calendar_List();
-                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loFragment.setArguments(loArgs);
-
-                lsStackId = "project_summary";
+                if (fsItemID.equalsIgnoreCase("009")){
+                    lsStackId = "project_confirm";
+                }else if (fsItemID.equalsIgnoreCase("010")){
+                    lsStackId = "project_information";
+                }else {
+                    lsStackId = "project_summary";
+                }
                 fragmentTransaction.replace(R.id.layout_container, loFragment);
                 break;
             case "016": //lodge fund summary information
@@ -284,7 +282,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loArgs.putInt("user_level", lnUsrLvl);
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_entry" : "create_member";
+                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_entry" : "view_members";
                 fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
                 break;
             case "019", "020": //confirm receipts or list of receipts

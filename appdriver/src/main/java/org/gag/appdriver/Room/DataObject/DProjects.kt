@@ -28,6 +28,9 @@ interface DProjects {
     fun DeleteDetail()
 
     @Query("SELECT * FROM Project_Master WHERE sProjctCd= :fsProjectCd")
+    fun GetProjectMasterInfo(fsProjectCd : String) : EProjectMaster
+
+    @Query("SELECT * FROM Project_Master WHERE sProjctCd= :fsProjectCd")
     fun GetProjectMasterTransaction(fsProjectCd : String) : LiveData<EProjectMaster>
 
     @Query("SELECT " +

@@ -46,8 +46,6 @@ public class Adapter_Pledge_Summary_Details extends RecyclerView.Adapter<Adapter
 
         holder.mtv_date_pledge.setText(loDate.FormatDate(laProjects.get(position).getDPledgexx(), "MMMM d, yyyy"));
         holder.mtv_amt_pledge.setText(laProjects.get(position).getNPledgexx());
-        holder.mtv_or.setText(laProjects.get(position).getSORNoxx());
-        holder.mtv_paid.setText(laProjects.get(position).getNAmtPaidxx());
     }
 
     @Override
@@ -57,15 +55,13 @@ public class Adapter_Pledge_Summary_Details extends RecyclerView.Adapter<Adapter
 
     public static class VH_Pledge_List_Details extends RecyclerView.ViewHolder {
 
-        private MaterialTextView mtv_date_pledge, mtv_amt_pledge, mtv_or, mtv_paid;
+        private MaterialTextView mtv_date_pledge, mtv_amt_pledge;
 
         public VH_Pledge_List_Details(@NonNull View itemView) {
             super(itemView);
 
             mtv_date_pledge = itemView.findViewById(R.id.mtv_date_pledge);
             mtv_amt_pledge = itemView.findViewById(R.id.mtv_amt_pledge);
-            mtv_or = itemView.findViewById(R.id.mtv_or);
-            mtv_paid = itemView.findViewById(R.id.mtv_paid);
         }
     }
 }

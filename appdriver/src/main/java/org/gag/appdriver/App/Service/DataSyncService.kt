@@ -12,6 +12,7 @@ import org.gag.appdriver.App.Core.Dashboard
 import org.gag.appdriver.App.Core.Funds
 import org.gag.appdriver.App.Core.Lodge
 import org.gag.appdriver.App.Core.UserAccount
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
@@ -82,6 +83,8 @@ class DataSyncService : Service(){
                                                         return@thenAccept
                                                     }else{
 
+                                                        val poDate : DateRepository = DateRepository()
+
                                                         //sync other data
                                                         val laSyncData = listOf(
                                                             poFunds.SaveFundTurnover(),
@@ -90,7 +93,7 @@ class DataSyncService : Service(){
                                                             poDashboard.DownloadTownInfo(),
                                                             poAccount.DownloadUserObjects(),
                                                             poAccount.DownloadMemberList(),
-                                                            poAccount.DownloadOfficerList(),
+                                                            poAccount.DownloadOfficerList(poDate.GetCurrentDate())
                                                         )
 
                                                         //execute task list

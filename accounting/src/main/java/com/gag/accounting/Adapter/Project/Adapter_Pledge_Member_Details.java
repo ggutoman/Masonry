@@ -68,8 +68,6 @@ public class Adapter_Pledge_Member_Details extends RecyclerView.Adapter<Adapter_
 
             mtv_date_pledge = itemView.findViewById(R.id.mtv_date_pledge);
             mtv_amt_pledge = itemView.findViewById(R.id.mtv_amt_pledge);
-            mtv_or = itemView.findViewById(R.id.mtv_or);
-            mtv_paid = itemView.findViewById(R.id.mtv_paid);
         }
     }
 }

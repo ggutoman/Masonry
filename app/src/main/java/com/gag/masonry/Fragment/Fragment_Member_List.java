@@ -20,6 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -31,6 +33,7 @@ import com.gag.useraccount.Fragments.Fragment_Member;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -38,6 +41,7 @@ import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.Adapter_Member_List;
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -54,13 +58,13 @@ public class Fragment_Member_List extends Fragment {
     private LoadDialog poLoad;
     private Message_Dialog poMessage;
 
-    private String lsStackIDxx, lsGLPIDxx, lsDfrom, lsDto;
+    private String lsStackIDxx, lsGLPIDxx, lsDfrom, lsDto, lsYear;
 
     private Adapter_Officer_List loOfficerAdapter;
 
     private TabLayout tab_layout;
     private ConstraintLayout layout_no_record;
-    private MaterialTextView mtv_no_record;
+    private MaterialTextView mtv_no_record, mtv_lodge;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -77,18 +81,18 @@ public class Fragment_Member_List extends Fragment {
         poMessage = new Message_Dialog(requireActivity());
 
         lsGLPIDxx = getArguments() == null ? "" : getArguments().getString("user_id");
-        String lsCurrentYear = mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy");
+        lsYear = mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy");
 
         //get max date for december
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, Integer.parseInt(lsCurrentYear));
+        calendar.set(Calendar.YEAR, Integer.parseInt(lsYear));
         calendar.set(Calendar.MONTH, Calendar.DECEMBER);
 
         int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         //initialize default range of date to display for the whole year
-        lsDfrom = mviewModel.GetFormattedDate(lsCurrentYear + "-01-01", "yyyy-MM-dd");
-        lsDto =  mviewModel.GetFormattedDate(lsCurrentYear + "-12-" + String.valueOf(maxDay), "yyyy-MM-dd");
+        lsDfrom = mviewModel.GetFormattedDate(lsYear + "-01-01", "yyyy-MM-dd");
+        lsDto =  mviewModel.GetFormattedDate(lsYear + "-12-" + String.valueOf(maxDay), "yyyy-MM-dd");
 
         poLoad.InitDialog();
         poMessage.InitDialog();
@@ -111,6 +115,7 @@ public class Fragment_Member_List extends Fragment {
 
     private void InitViews(View view){
 
+        mtv_lodge = view.findViewById(R.id.mtv_lodge);
         tab_layout = view.findViewById(R.id.tab_layout);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         mtv_no_record = view.findViewById(R.id.mtv_no_record);
@@ -128,111 +133,136 @@ public class Fragment_Member_List extends Fragment {
 
                 if (eMemberInfo == null) return;
 
-                if (tab_layout.getSelectedTabPosition() == 0){
+                mviewModel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
+                    @Override
+                    public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
 
-                    mviewModel.GetMemberList(eMemberInfo.getSMemberID(), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
-                        @Override
-                        public void onChanged(List<EMemberInfo> eMemberInfos) {
+                        for (LodgeCalendarList loCalendar : lodgeCalendarLists){
 
-                            if (eMemberInfos == null || eMemberInfos.size() < 1){
-                                layout_no_record.setVisibility(View.VISIBLE);
-                                rcv_members.setVisibility(View.GONE);
-
-                                mtv_no_record.setText("No members found on this lodge");
-                                return;
+                            if (loCalendar.getNYearxxxx().equalsIgnoreCase(mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy"))){
+                                mtv_lodge.setText(loCalendar.getSLodgeNme());
+                                break;
                             }
-                            layout_no_record.setVisibility(View.GONE);
-                            rcv_members.setVisibility(View.VISIBLE);
+                        }
 
-                            loMemberAdaoter = new Adapter_Member_List(requireActivity(), eMemberInfos, new Adapter_Member_List.OnSelect() {
+                        if (tab_layout.getSelectedTabPosition() == 0){
+
+                            mviewModel.GetMemberList(eMemberInfo.getSMemberID(), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
                                 @Override
-                                public void Selected(EMemberInfo foMember) {
+                                public void onChanged(List<EMemberInfo> eMemberInfos) {
 
-                                    FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                                    Fragment loFragment = new Fragment();
-                                    Bundle loBundle = new Bundle();
+                                    if (eMemberInfos == null || eMemberInfos.size() < 1){
+                                        layout_no_record.setVisibility(View.VISIBLE);
+                                        rcv_members.setVisibility(View.GONE);
 
-                                    switch (lsStackIDxx){
-
-                                        case "create_member":
-
-                                            //do not allow viewing and editing of member details for users with acc level (1)
-                                            if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
-
-                                            loFragment = new Fragment_Member();
-                                            loBundle.putString("fsGLPIDxx", foMember.getSGLPIDNoX());
-
-                                            loFragment.setArguments(loBundle);
-                                            break;
-
-                                        case "receipt_entry":
-
-                                            loFragment = new Fragment_Receipt();
-                                            loBundle.putString("member_id", foMember.getSMemberID());
-
-                                            loFragment.setArguments(loBundle);
-                                            break;
+                                        mtv_no_record.setText("No members found on this lodge");
+                                        return;
                                     }
-                                    //add to child container, as bridge to initiate another fragment after call
-                                    fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
-                                    fragmentTransaction.addToBackStack(lsStackIDxx);
-                                    fragmentTransaction.commit();
+                                    layout_no_record.setVisibility(View.GONE);
+                                    rcv_members.setVisibility(View.VISIBLE);
+
+                                    loMemberAdaoter = new Adapter_Member_List(requireActivity(), eMemberInfos, new Adapter_Member_List.OnSelect() {
+                                        @Override
+                                        public void Selected(EMemberInfo foMember) {
+
+                                            FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                                            Fragment loFragment = new Fragment();
+                                            Bundle loBundle = new Bundle();
+
+                                            switch (lsStackIDxx){
+
+                                                case "view_members":
+
+                                                    //do not allow viewing and editing of member details for users with acc level (1)
+                                                    if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
+
+                                                    loFragment = new Fragment_Member();
+                                                    loBundle.putString("fsGLPIDxx", foMember.getSGLPIDNoX());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+
+                                                case "receipt_entry":
+
+                                                    loFragment = new Fragment_Receipt();
+                                                    loBundle.putString("member_id", foMember.getSMemberID());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+                                            }
+                                            //add to child container, as bridge to initiate another fragment after call
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.addToBackStack(lsStackIDxx);
+                                            fragmentTransaction.commit();
+                                        }
+                                    });
+                                    rcv_members.setAdapter(loMemberAdaoter);
+                                    rcv_members.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+
                                 }
                             });
+                        }else {
 
-                            rcv_members.setAdapter(loMemberAdaoter);
-                            rcv_members.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-
-                        }
-                    });
-                }else {
-
-                    mviewModel.ObserveOfficerList(eMemberInfo.getSMemberID(), lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<OfficerInfo>>() {
-                        @Override
-                        public void onChanged(List<OfficerInfo> officerInfos) {
-
-                            if (officerInfos == null || officerInfos.size() < 1){
-                                layout_no_record.setVisibility(View.VISIBLE);
-                                rcv_members.setVisibility(View.GONE);
-
-                                mtv_no_record.setText("No officers found on this lodge");
-                                return;
-                            }
-                            layout_no_record.setVisibility(View.GONE);
-                            rcv_members.setVisibility(View.VISIBLE);
-
-                            loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerInfos, new Adapter_Officer_List.OnSelect() {
+                            mviewModel.ObserveOfficerList(eMemberInfo.getSMemberID(), lsYear).observe(getViewLifecycleOwner(), new Observer<List<OfficerInfo>>() {
                                 @Override
-                                public void Selected(OfficerInfo poItem) {
+                                public void onChanged(List<OfficerInfo> officerInfos) {
 
-                                    //do not allow viewing and editing of officer details for users with acc level (1)
-                                    if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
+                                    if (officerInfos == null || officerInfos.size() < 1){
+                                        layout_no_record.setVisibility(View.VISIBLE);
+                                        rcv_members.setVisibility(View.GONE);
 
-                                    Fragment loDetail = new Fragment_Assign_Officer();
+                                        mtv_no_record.setText("No officers found on this lodge");
+                                        return;
+                                    }
+                                    layout_no_record.setVisibility(View.GONE);
+                                    rcv_members.setVisibility(View.VISIBLE);
 
-                                    Bundle loArgs = new Bundle();
-                                    loArgs.putString("fsYearID", poItem.getSYearIDxx());
-                                    loArgs.putString("fsMemberID", poItem.getSMemberID());
+                                    loOfficerAdapter = new Adapter_Officer_List(requireActivity(), officerInfos, new Adapter_Officer_List.OnSelect() {
+                                        @Override
+                                        public void Selected(OfficerInfo poItem) {
 
-                                    loDetail.setArguments(loArgs);
+                                            FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                                            Fragment loFragment = new Fragment();
+                                            Bundle loBundle = new Bundle();
 
-                                    requireActivity()
-                                            .getSupportFragmentManager()
-                                            .beginTransaction()
-                                            .replace(R.id.layout_container, loDetail)
-                                            .addToBackStack("assign_officer")
-                                            .commit();
+                                            switch (lsStackIDxx){
+
+                                                case "view_members":
+
+                                                    //do not allow viewing and editing of member details for users with acc level (1)
+                                                    if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
+
+                                                    loFragment = new Fragment_Assign_Officer();
+                                                    loBundle.putString("fsYearID", poItem.getSYearIDxx());
+                                                    loBundle.putString("fsMemberID", poItem.getSMemberID());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+
+                                                case "receipt_entry":
+
+                                                    loFragment = new Fragment_Receipt();
+                                                    loBundle.putString("member_id", poItem.getSMemberID());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+                                            }
+                                            //add to child container, as bridge to initiate another fragment after call
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.addToBackStack(lsStackIDxx);
+                                            fragmentTransaction.commit();
+
+                                        }
+                                    });
+                                    rcv_members.setAdapter(loOfficerAdapter);
+                                    rcv_members.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+
                                 }
                             });
 
-                            rcv_members.setAdapter(loOfficerAdapter);
-                            rcv_members.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-
                         }
-                    });
-
-                }
-
+                    }
+                });
             }
         });
     }
@@ -258,7 +288,7 @@ public class Fragment_Member_List extends Fragment {
 
         }else {
 
-            mviewModel.DownloadOfficers(new VM_Member.OnDownload() {
+            mviewModel.DownloadOfficers(lsYear, new VM_Member.OnDownload() {
                 @Override
                 public void Loading() {
                     poLoad.ShowDialog("Downloading members. Please wait . .");
@@ -273,6 +303,85 @@ public class Fragment_Member_List extends Fragment {
                 }
             });
         }
+    }
+
+    private void ShowDateChooser(boolean isDownload){
+
+        if (tab_layout.getSelectedTabPosition() == 0){
+
+            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
+            loBuilder.setTitleText("Select Date Range");
+
+            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
+            loPicker.addOnPositiveButtonClickListener(selection -> {
+
+                //set date range parameters for downloading history
+                lsDfrom = mviewModel.GetFormattedDate(selection.first);
+                lsDto = mviewModel.GetFormattedDate(selection.second);
+
+
+
+                if (isDownload){
+
+                    poMessage.ShowMessage(2,  "Do you want download list of member entries within " + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                            DownloadOfficerList();
+                        }
+                    });
+                    return;
+                }
+                InitDataReceiver();
+
+            });
+            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+
+        }else {
+
+            NumberPicker yearPicker = new NumberPicker(requireContext());
+            yearPicker.setMinValue(1600);
+            yearPicker.setMaxValue(9999);
+            yearPicker.setValue(Calendar.getInstance().get(Calendar.YEAR));
+
+            LinearLayout layout = new LinearLayout(requireContext());
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.addView(yearPicker);
+
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Select Year")
+                    .setView(layout)
+                    .setPositiveButton("OK", (dialog, which) -> {
+
+                        lsYear = String.valueOf(yearPicker.getValue());
+                        if (isDownload){
+
+                            poMessage.ShowMessage(2,  "Do you want download list of officers for the year " + lsYear + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                    DownloadOfficerList();
+                                }
+                            });
+                            return;
+                        }
+                        InitDataReceiver();
+
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
+
     }
 
     private void InitListener(){
@@ -315,23 +424,9 @@ public class Fragment_Member_List extends Fragment {
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_home, loMenu.getMenu());
 
                 if (tab_layout.getSelectedTabPosition() == 0){ //members tab
-
-                    loMenu.getMenu().findItem (R.id.action_item_inactive).setVisible(true);
-
-                    //disable other menus
-                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(false);
-                    loMenu.getMenu().findItem(R.id.action_item_remove).setVisible(false);
-                    loMenu.getMenu().findItem(R.id.action_item_resign).setVisible(false);
-                    loMenu.getMenu().findItem(R.id.action_item_decease).setVisible(false);
+                    loMenu.getMenu().findItem (R.id.action_by_status).setVisible(true);
                 }else {
-
-                    loMenu.getMenu().findItem (R.id.action_item_inactive).setVisible(false);
-
-                    //disable other menus
-                    loMenu.getMenu().findItem(R.id.action_item_reassign).setVisible(true);
-                    loMenu.getMenu().findItem(R.id.action_item_remove).setVisible(true);
-                    loMenu.getMenu().findItem(R.id.action_item_resign).setVisible(true);
-                    loMenu.getMenu().findItem(R.id.action_item_decease).setVisible(true);
+                    loMenu.getMenu().findItem (R.id.action_by_status).setVisible(false);
                 }
                 loMenu.show();
 
@@ -341,87 +436,26 @@ public class Fragment_Member_List extends Fragment {
 
                         if (menuItem.getItemId() == R.id.action_item_filter){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
-
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
-                                @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
-
-                                    //set date range parameters for downloading history
-                                    lsDfrom = mviewModel.GetFormattedDate(selection.first);
-                                    lsDto = mviewModel.GetFormattedDate(selection.second);
-
-                                    //initialize list based on user level
-                                    InitDataReceiver();
-                                }
-                            });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
+                           ShowDateChooser(false);
                             return true;
-
                         }else if (menuItem.getItemId() == R.id.action_item_download){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
-
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
-                                @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
-
-                                    //set date range parameters for downloading history
-                                    lsDfrom = mviewModel.GetFormattedDate(selection.first);
-                                    lsDto = mviewModel.GetFormattedDate(selection.second);
-
-                                    //initialize message based on user level
-                                    String lsMessage = "Do you want download list of member entries within ";
-                                    if (tab_layout.getSelectedTabPosition() > 1) lsMessage = "Do you want download list of officer entries within ";
-
-                                    poMessage.ShowMessage(2,  lsMessage + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-
-                                            //download list based on user level
-                                            DownloadOfficerList();
-                                        }
-                                    });
-                                }
-                            });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
+                            ShowDateChooser(true);
                             return true;
-
                         }else if (menuItem.getItemId() == R.id.action_item_all){
                             InitFilterStatus(-1);
                             return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_inactive){
+                        }else if (menuItem.getItemId() == R.id.action_item_regular){
                             InitFilterStatus(0);
                             return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_active){
+                        }else if (menuItem.getItemId() == R.id.action_item_life){
                             InitFilterStatus(1);
                             return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_suspended){
+                        }else if (menuItem.getItemId() == R.id.action_item_dual){
                             InitFilterStatus(2);
                             return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_reassign){
-                            InitFilterStatus(2);
-                            return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_remove){
+                        }else if (menuItem.getItemId() == R.id.action_item_deceased){
                             InitFilterStatus(3);
-                            return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_resign){
-                            InitFilterStatus(4);
-                            return true;
-                        }else if (menuItem.getItemId() == R.id.action_item_decease){
-                            InitFilterStatus(5);
                             return true;
                         }
                         return false;
@@ -460,7 +494,7 @@ public class Fragment_Member_List extends Fragment {
 
             List<String> filterStat;
             if (status < 0){
-                filterStat = List.of("0", "1", "2");
+                filterStat = List.of("0", "1", "2", "3", "4");
             }else {
                 filterStat = List.of(String.valueOf(status));
             }

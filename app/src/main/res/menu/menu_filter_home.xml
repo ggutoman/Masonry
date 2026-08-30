@@ -34,31 +34,19 @@
                 android:title="All"/>
 
             <item
-                android:id="@+id/action_item_active"
-                android:title="Active"/>
+                android:id="@+id/action_item_regular"
+                android:title="Regular"/>
 
             <item
-                android:id="@+id/action_item_suspended"
-                android:title="Suspended"/>
+                android:id="@+id/action_item_life"
+                android:title="Life"/>
 
             <item
-                android:id="@+id/action_item_inactive"
-                android:title="Inactive"/>
+                android:id="@+id/action_item_dual"
+                android:title="Dual"/>
 
             <item
-                android:id="@+id/action_item_reassign"
-                android:title="Re-assigned"/>
-
-            <item
-                android:id="@+id/action_item_remove"
-                android:title="Removed"/>
-
-            <item
-                android:id="@+id/action_item_resign"
-                android:title="Resigned"/>
-
-            <item
-                android:id="@+id/action_item_decease"
+                android:id="@+id/action_item_deceased"
                 android:title="Deceased"/>
         </menu>
 

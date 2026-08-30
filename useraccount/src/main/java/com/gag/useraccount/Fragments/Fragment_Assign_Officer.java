@@ -287,16 +287,24 @@ public class Fragment_Assign_Officer extends Fragment {
                     public void OnNegative(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
 
+                        int positLne = Integer.parseInt(loSelectPosition.getSPositnCd().replaceAll("\\D", ""));
+
+                        int lnType = 1;
+                        if (positLne > 007){
+                            lnType = 0;
+                        }
+
                         EOfficer loParam = new EOfficer(
                                 lsSelectCalendar,
                                 loSelectPosition.getSPositnCd(),
                                 loSelectMember.getSMemberID(),
+                                String.valueOf(lnType),
                                 mViewmodel.GetUserID() == null ? "" : mViewmodel.GetUserID(),
                                 mViewmodel.GetCurrentDate(),
                                 mViewmodel.GetCurrentDateTime()
                         );
 
-                        mViewmodel.AssignOfficer(loParam, tie_remarks.getText() == null ? "" : tie_remarks.getText().toString(), new VM_Account.OnSubmit() {
+                        mViewmodel.AssignOfficer(loParam, mViewmodel.GetFormattedDate(mViewmodel.GetCurrentDate(), "yyyy"), tie_remarks.getText() == null ? "" : tie_remarks.getText().toString(), new VM_Account.OnSubmit() {
                             @Override
                             public void onLoad() {
                                 poLoading.ShowDialog("Submitting changes. Please wait , , ,");

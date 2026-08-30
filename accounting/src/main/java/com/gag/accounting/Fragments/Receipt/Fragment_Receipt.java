@@ -172,7 +172,7 @@ public class Fragment_Receipt extends Fragment {
                             "",
                             "",
                             "0",
-                            "0",
+                            "0", //new entries are considered approved
                             mViewModel.GetUserID(),
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
@@ -543,7 +543,7 @@ public class Fragment_Receipt extends Fragment {
                 loReceipt.setSORNoxxxx(tie_or.getText() == null ? "" : tie_or.getText().toString());
                 loReceipt.setSRemarksx(tie_remarks.getText() == null ? "" : tie_remarks.getText().toString());
 
-               poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+               poMessage.ShowMessage(2, "Do you want to save receipt information?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                    @Override
                    public void OnPositive(@NotNull AlertDialog poDialog) {
                        poDialog.dismiss();
@@ -571,9 +571,7 @@ public class Fragment_Receipt extends Fragment {
                                    }
 
                                    @Override
-                                   public void OnNegative(@NotNull AlertDialog poDialog) {
-                                       poDialog.dismiss();
-                                   }
+                                   public void OnNegative(@NotNull AlertDialog poDialog) {}
                                });
                            }
 
@@ -585,6 +583,7 @@ public class Fragment_Receipt extends Fragment {
                                    @Override
                                    public void OnPositive(@NotNull AlertDialog poDialog) {
                                        poDialog.dismiss();
+                                       requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
                                    }
 
                                    @Override

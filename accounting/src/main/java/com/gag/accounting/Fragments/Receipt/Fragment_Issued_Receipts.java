@@ -47,13 +47,11 @@ public class Fragment_Issued_Receipts extends Fragment {
     private LoadDialog poLoad;
     private Adapter_Issued_Receipts loAdapter;
 
-    private TabLayout layout_tab;
     private ConstraintLayout layout_no_record;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
     private RecyclerView rcv_list;
 
-    private int lnTabSelected;
     private String lsStackIDxx, lsDfrom, lsDto;
     private List<String> laStatus;
 
@@ -70,18 +68,17 @@ public class Fragment_Issued_Receipts extends Fragment {
         poMessage.InitDialog();
         poLoad.InitDialog();
 
-        lnTabSelected = 0;
-        laStatus = List.of("0");
-
-        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
-        lsDto = mViewModel.GetCurrentDate();
-
         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (count > 0) {
 
             FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
             lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
+
+        laStatus = lsStackIDxx.equalsIgnoreCase("issued_receipt") ? List.of("0", "1", "3", "4") : List.of("1");
+
+        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
+        lsDto = mViewModel.GetCurrentDate();
 
         InitViews(view);
         InitListener();
@@ -93,8 +90,6 @@ public class Fragment_Issued_Receipts extends Fragment {
     }
 
     private void InitViews(View view){
-
-        layout_tab = view.findViewById(R.id.layout_tab);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
@@ -208,8 +203,8 @@ public class Fragment_Issued_Receipts extends Fragment {
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_receipts, loMenu.getMenu());
 
-                //hide category filtering if tab is for unconfirmed status only
-                loMenu.getMenu().findItem (R.id.action_by_category).setVisible(lnTabSelected > 0);
+                //show status filter for viewing history only, not for voiding
+                loMenu.getMenu().findItem(R.id.action_by_category).setVisible(lsStackIDxx.equalsIgnoreCase("issued_receipt"));
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -273,7 +268,7 @@ public class Fragment_Issued_Receipts extends Fragment {
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_all){
-                            laStatus = List.of("0", "1", "3", "4");
+                            laStatus = lsStackIDxx.equalsIgnoreCase("issued_receipt") ? List.of("0", "1", "3", "4") : List.of("1");
                             loAdapter.GetFilter().InitStatus(laStatus);
                             loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
@@ -325,25 +320,5 @@ public class Fragment_Issued_Receipts extends Fragment {
             }
         });
 
-        layout_tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-                //display list based on tab selected
-                lnTabSelected = layout_tab.getSelectedTabPosition();
-                if (lnTabSelected > 0){
-                    laStatus = List.of("1", "3", "4");
-                }else {
-                    laStatus = List.of("0");
-                }
-                InitDataReceiver();
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        });
     }
 }

@@ -199,7 +199,7 @@ public class Fragment_Project extends Fragment {
                             "0",
                             lsYearID,
                             mViewModel.GetCurrentDate(),
-                            "1900-00-00",
+                            mViewModel.GetCurrentDate(),
                             "",
                             "1900-00-00",
                             "0.00",
@@ -532,7 +532,7 @@ public class Fragment_Project extends Fragment {
                     return;
                 }
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Do you want to save project information?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();

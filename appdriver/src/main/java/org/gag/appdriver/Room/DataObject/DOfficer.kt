@@ -27,13 +27,12 @@ interface DOfficer {
             "JOIN  Member_Info c ON (a.sMemberID = c.sMemberID) " +
             "JOIN  Position_Info d ON (a.sPositnCd = d.sPositnCd) " +
             "WHERE (a.sMemberID != :fsMemberIDx) " +
-            "AND (b.dFromDate >= :fsDateFrom " +
-            "AND b.dThruDate <= :fsDateTo) " +
+            "AND b.nYearxxxx = :fsYear " +
             "GROUP BY " +
             "a.sMemberID " +
             "ORDER BY " +
             "a.dModified DESC")
-    fun ObserveOfficerList(fsMemberIDx : String, fsDateFrom : String, fsDateTo : String) : LiveData<List<OfficerInfo>>
+    fun ObserveOfficerList(fsMemberIDx : String, fsYear : String) : LiveData<List<OfficerInfo>>
 
     @Query("SELECT * FROM Officer_Info WHERE sMemberID= :fsMemberIDx AND sYearIDxx= :fsYearIDx")
     fun ObserveOfficeInfo(fsMemberIDx : String, fsYearIDx : String) : LiveData<EOfficer>
