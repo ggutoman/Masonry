@@ -120,6 +120,7 @@ public class Fragment_Report_List extends Fragment {
 
                         Bundle loBundle = new Bundle();
                         loBundle.putString("idxx", foReport.getIdxx());
+                        loBundle.putString("descriptxx", foReport.getXxsDescript());
                         loBundle.putString("params", foReport.getXxParams());
                         loAttachments.setArguments(loBundle);
 

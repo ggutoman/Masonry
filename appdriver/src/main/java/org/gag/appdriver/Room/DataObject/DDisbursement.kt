@@ -23,6 +23,9 @@ interface DDisbursement {
     fun DeleteDisbursements()
 
     @Query("SELECT * FROM Disbursement WHERE sTransNox= :fsTransNox")
+    fun GetDisbursementInfo(fsTransNox : String) : EDisbursement
+
+    @Query("SELECT * FROM Disbursement WHERE sTransNox= :fsTransNox")
     fun GetDisbursement(fsTransNox : String) : LiveData<EDisbursement>
 
     @Query("SELECT * FROM Disbursement WHERE dTransact BETWEEN :fDfromxx AND :fDtoxx")

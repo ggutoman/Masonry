@@ -126,7 +126,7 @@ public class Activity_Account extends AppCompatActivity {
             getSupportActionBar().setTitle("Update Account");
             btn_create_acct.setText("Confirm Changes");
 
-            tie_username.setEnabled(false);
+            tie_lastname.setEnabled(false);
             tie_birthdate.setEnabled(false);
             tie_glpid.setEnabled(false);
         }

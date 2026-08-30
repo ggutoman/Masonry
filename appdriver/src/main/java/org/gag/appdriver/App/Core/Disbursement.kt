@@ -70,6 +70,8 @@ class Disbursement(instance : Context) {
 
     fun GetCountedDate(fnCount : Int, fnDateIndex : Int, fbIsAdd : Boolean) : String = dateRepository.GetCountedDate(fnCount, fnDateIndex, fbIsAdd)
 
+    fun GetDisbursementInfo(fsTransNox : String) : EDisbursement = poDisbursement.GetDisbursementInfo(fsTransNox)
+
     fun GetDisbursement(fsTransNox : String) : LiveData<EDisbursement> = poDisbursement.GetDisbursement(fsTransNox)
 
     fun GetDisbursementList(fDfromxx : String, fDtoxx : String) : LiveData<List<EDisbursement>> = poDisbursement.GetDisbursementList(fDfromxx, fDtoxx)

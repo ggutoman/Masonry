@@ -30,6 +30,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.ReceiptMasterList;
@@ -48,6 +49,7 @@ public class Fragment_Issued_Receipts extends Fragment {
     private Adapter_Issued_Receipts loAdapter;
 
     private ConstraintLayout layout_no_record;
+    private MaterialTextView mtv_title;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
     private RecyclerView rcv_list;
@@ -86,10 +88,14 @@ public class Fragment_Issued_Receipts extends Fragment {
 
         DownloadList();
 
+        //change screen title to identify which are type of lists are displayed
+        mtv_title.setText(lsStackIDxx.equalsIgnoreCase("issued_receipt") ? "List of Receipts" : "Issued Receipts");
+
         return view;
     }
 
     private void InitViews(View view){
+        mtv_title = view.findViewById(R.id.mtv_title);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);

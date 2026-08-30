@@ -480,7 +480,7 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                     @Override
                                     public void OnDateRangeSelected(String fsDfrom, String fsDto) {
 
-                                        poMessage.ShowMessage(2,  "Do you want download list of fund entries within " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                        poMessage.ShowMessage(2,  "Do you want download list of dv attachments within " + fsDfrom + " to " + fsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                             @Override
                                             public void OnPositive(@NotNull AlertDialog poDialog) {
                                                 poDialog.dismiss();

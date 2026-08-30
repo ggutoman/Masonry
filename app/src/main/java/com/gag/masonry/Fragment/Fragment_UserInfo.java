@@ -141,7 +141,7 @@ public class Fragment_UserInfo extends Fragment {
                 }
 
                 //hide edit of membership if user level
-                if (eUserInfo.getNUserLevl() < 2) btn_edit_member.setVisibility(View.GONE);
+                //if (eUserInfo.getNUserLevl() < 2) btn_edit_member.setVisibility(View.GONE);
             }
         });
 
