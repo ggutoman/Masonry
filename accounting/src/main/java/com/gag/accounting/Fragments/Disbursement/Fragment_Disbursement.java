@@ -762,7 +762,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             @Override
             public void onClick(View view) {
 
-                poMessage.ShowMessage(2, "Is your information complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Do you want to save voucher information?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
@@ -799,14 +799,14 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         mViewModel.SaveDisbursement(loDisbursement, laAttachments, new VM_Disbursement.OnTransaction() {
                             @Override
                             public void OnLoad() {
-                                poLoad.ShowDialog("Saving disbursement. Please wait . .");
+                                poLoad.ShowDialog("Saving voucher. Please wait . .");
                             }
 
                             @Override
                             public void OnSuccess() {
                                 poLoad.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Disbursement has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                poMessage.ShowMessage(0, "Disbursement voucher has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
@@ -826,7 +826,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
-                                        DownloadDisbursement();
+                                        requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
 
                                     @Override

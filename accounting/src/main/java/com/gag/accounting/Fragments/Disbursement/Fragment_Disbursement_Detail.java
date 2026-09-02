@@ -39,9 +39,7 @@ public class Fragment_Disbursement_Detail extends Fragment {
 
     private MaterialTextView
             mtv_name,
-            mtv_transno,
             mtv_date,
-            mtv_src_no,
             mtv_src_cd,
             mtv_voucher_amt,
             mtv_voucher_no,
@@ -86,9 +84,7 @@ public class Fragment_Disbursement_Detail extends Fragment {
         layout_buttons = view.findViewById(R.id.layout_buttons);
 
         mtv_name         = view.findViewById(R.id.mtv_name);
-        mtv_transno      = view.findViewById(R.id.mtv_transno);
         mtv_date         = view.findViewById(R.id.mtv_date);
-        mtv_src_no       = view.findViewById(R.id.mtv_src_no);
         mtv_src_cd       = view.findViewById(R.id.mtv_src_cd);
         mtv_voucher_amt  = view.findViewById(R.id.mtv_voucher_amt);
         mtv_voucher_no   = view.findViewById(R.id.mtv_voucher_no);
@@ -118,19 +114,19 @@ public class Fragment_Disbursement_Detail extends Fragment {
                 layout_buttons.setVisibility(lsStackIDxx.equalsIgnoreCase("disbursement_confirm") ? View.VISIBLE : View.GONE);
                 btn_confirm.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_void.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
-                btn_cancel.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
                 btn_release.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
+
+                //disbursement can be cancelled or complete after release
+                btn_cancel.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
                 btn_complete.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
 
                 loDisb = eDisbursement;
 
                 mtv_name.setText(loDisb.getSPayeeNme());
-                mtv_transno.setText(loDisb.getSTransNox());
                 mtv_date.setText(loDisb.getDTransact());
                 mtv_voucher_amt.setText("₱" + loDisb.getNAmountxx());
                 mtv_voucher_no.setText(loDisb.getSVouchrNo());
                 mtv_partclr.setText(loDisb.getSParticlr());
-                mtv_src_no.setText(loDisb.getSSourceNo());
 
                 switch (loDisb.getSSourceCD()){
 
@@ -148,7 +144,7 @@ public class Fragment_Disbursement_Detail extends Fragment {
     private void UpdateStatus(String fcTranStat){
 
         if (loDisb == null){
-            Toast.makeText(requireActivity(), "Disbursement is not initialzed porperly", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireActivity(), "Disbursement is not initialized properly", Toast.LENGTH_SHORT).show();
             return;
         } else if (fcTranStat == null || fcTranStat.isEmpty()) {
             Toast.makeText(requireActivity(), "Status is invalid", Toast.LENGTH_SHORT).show();

@@ -332,7 +332,7 @@
                                     style="@style/CustomDropDownTilStyle"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:hint="Sources of Transaction">
+                                    android:hint="Sources">
 
                                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                         android:id="@+id/auto_source_transaction"

@@ -253,15 +253,19 @@ public class VM_Disbursement extends AndroidViewModel {
 
             //if return is empty string
             if (result instanceof String && (((String) result).isEmpty())) {
-                foCallback.OnFailed("Could not save attachments. Source number is empty");
+                foCallback.OnFailed("Disbursement is not saved properly");
                 return CompletableFuture.completedFuture(false);
             }
             String lsSourceno = (String) result;
 
-            //initialize result holder, return true as default
-            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+            //get information of saved disbursement
+            EDisbursement loDisb = poDisbursement.GetDisbursementInfo(lsSourceno);
+            if (loDisb == null || loDisb.getSTransNox().isEmpty()){
+                return CompletableFuture.completedFuture(false);
+            }
 
-            // Save attachments one by one
+            //save attachments
+            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
             for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
 
                 loAttachment.setSSourceNo(lsSourceno);
@@ -269,10 +273,23 @@ public class VM_Disbursement extends AndroidViewModel {
                 //bind the result after each thread runs
                 chain = chain.thenCompose(ok -> {
 
-                    if (!ok) return CompletableFuture.completedFuture(false);
-                    return poDisbursement.SaveAttachment(loAttachment);
+                    //continue saving attachment if previous is success
+                    if (ok) poDisbursement.SaveAttachment(loAttachment);
+                    return CompletableFuture.completedFuture(ok);
                 });
             }
+
+            chain = chain.thenCompose(aBoolean -> {
+
+                if (aBoolean){
+
+                    //update disbursement status into release, consider every entry has released a fund
+                    loDisb.setCTranStat("2");
+                    return poDisbursement.UpdateDisbursementStatus(loDisb);
+                }
+                return CompletableFuture.completedFuture(aBoolean);
+            });
+
             return chain;
 
         })

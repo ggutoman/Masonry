@@ -1,17 +1,6 @@
 package com.gag.accounting.Fragments.Receipt;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
-
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.ImageFormat;
-import android.media.Image;
-import android.media.ImageReader;
-import android.media.projection.MediaProjection;
-import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -26,14 +15,10 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -43,7 +28,6 @@ import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -51,9 +35,6 @@ import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Fragment_Receipt_Detail extends Fragment {
@@ -67,11 +48,8 @@ public class Fragment_Receipt_Detail extends Fragment {
     private String lsStackIDxx, lsMemberID, lsTransNox;
 
     private View layoutView;
-    private MaterialTextView mtv_transno;
     private MaterialTextView mtv_transdate;
     private MaterialTextView mtv_member;
-    private MaterialTextView mtv_remarks;
-    private MaterialTextView mtv_payment_total;
     private MaterialTextView mtv_payment;
     private MaterialTextView mtv_or;
 
@@ -144,11 +122,8 @@ public class Fragment_Receipt_Detail extends Fragment {
     }
 
     private void InitViews(View view){
-        mtv_transno = view.findViewById(R.id.mtv_transno);
         mtv_transdate = view.findViewById(R.id.mtv_transdate);
         mtv_member = view.findViewById(R.id.mtv_member);
-        mtv_remarks = view.findViewById(R.id.mtv_remarks);
-        mtv_payment_total = view.findViewById(R.id.mtv_payment_total);
         mtv_payment = view.findViewById(R.id.mtv_payment);
         mtv_or = view.findViewById(R.id.mtv_or);
 
@@ -178,10 +153,8 @@ public class Fragment_Receipt_Detail extends Fragment {
 
                 loReceipt = eReceiptMaster;
 
-                mtv_transno.setText(loReceipt.getSTransNox());
                 mtv_transdate.setText(mViewModel.GetFormattedDate(loReceipt.getDTransact(), "MMMM dd, yyyy"));
                 mtv_member.setText(mViewModel.GetMemberInfo(lsMemberID).getSFrstName() + " " + mViewModel.GetMemberInfo(lsMemberID).getSLastName());
-                mtv_remarks.setText(loReceipt.getSRemarksx() == null || eReceiptMaster.getSRemarksx().isEmpty() ? "No remarks" : loReceipt.getSRemarksx());
                 mtv_or.setText(loReceipt.getSORNoxxxx());
 
                 //display buttons based on status
@@ -223,7 +196,7 @@ public class Fragment_Receipt_Detail extends Fragment {
                             ldbl_totalpaid += Double.parseDouble(loDetail.getNAmtPaidx());
                         }
 
-                        mtv_payment_total.setText("₱ "+ String.valueOf(ldbl_totalpaid));
+                        mtv_payment.setText("₱ "+ String.valueOf(ldbl_totalpaid));
 
                         rcv_list.setAdapter(
                                 new Adapter_Receipt_Details(

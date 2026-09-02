@@ -177,6 +177,8 @@ public class Fragment_Home extends Fragment {
                     }
 
                     boolean isShowDues = laDues.size() > 0;
+                    if (!isShowDues) Toast.makeText(requireActivity(), "No annual dues found for the member", Toast.LENGTH_SHORT).show();
+
                     layout_no_record_pledge.setVisibility(isShowDues ? View.GONE : View.VISIBLE);
                     rcv_pledges.setVisibility(isShowDues ? View.VISIBLE : View.GONE);
 
@@ -196,7 +198,6 @@ public class Fragment_Home extends Fragment {
 
                         layout_no_record_pledge.setVisibility(View.VISIBLE);
                         rcv_pledges.setVisibility(View.GONE);
-
                         return;
                     }
                     layout_no_record_pledge.setVisibility(View.GONE);

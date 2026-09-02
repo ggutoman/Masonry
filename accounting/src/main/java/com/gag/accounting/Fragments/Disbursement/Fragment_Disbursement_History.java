@@ -29,12 +29,11 @@ import com.gag.accounting.ViewModel.VM_Disbursement;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Room.Entities.EDisbursement;
-import org.gag.appdriver.App.Fragments.Fragment_Attachment_List;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -49,13 +48,12 @@ public class Fragment_Disbursement_History extends Fragment {
     private LoadDialog poLoad;
     private Adapter_Disbursement_List loAdapter;
 
-    private TabLayout layout_tab;
     private ConstraintLayout layout_no_record;
+    private MaterialTextView mtv_title;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
     private RecyclerView rcv_list;
 
-    private int lnTabSelected;
     private String lsStackIDxx, lsDfrom, lsDto, lsLodgeIDxx;
     private List<String> laStatus;
 
@@ -72,18 +70,16 @@ public class Fragment_Disbursement_History extends Fragment {
         poMessage.InitDialog();
         poLoad.InitDialog();
 
-        lnTabSelected = 0;
-        laStatus = List.of("0");
-
-        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
-        lsDto = mViewModel.GetCurrentDate();
-
         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (count > 0) {
 
             FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
             lsStackIDxx = entry.getName() == null ? "" : entry.getName();
         }
+        laStatus = lsStackIDxx.equalsIgnoreCase("disbursement_list") ? List.of("0", "1", "2", "3", "4") : List.of("2");
+
+        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
+        lsDto = mViewModel.GetCurrentDate();
 
         lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
 
@@ -93,12 +89,14 @@ public class Fragment_Disbursement_History extends Fragment {
 
         DownloadList();
 
+        mtv_title.setText(lsStackIDxx.equalsIgnoreCase("disbursement_list") ? "Voucher List" : "Released Funds");
+
         return view;
     }
 
     private void InitViews(View view){
 
-        layout_tab = view.findViewById(R.id.layout_tab);
+        mtv_title = view.findViewById(R.id.mtv_title);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
@@ -215,7 +213,7 @@ public class Fragment_Disbursement_History extends Fragment {
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_disbursement, loMenu.getMenu());
 
                 //hide category filtering if tab is for unconfirmed status only
-                loMenu.getMenu().findItem (R.id.action_by_category).setVisible(lnTabSelected > 0);
+                loMenu.getMenu().findItem (R.id.action_by_category).setVisible(lsStackIDxx.equalsIgnoreCase("disbursement_list"));
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -341,27 +339,6 @@ public class Fragment_Disbursement_History extends Fragment {
                 if (loAdapter == null) return;
                 loAdapter.GetFilter().filter(charSequence.toString());
             }
-        });
-
-        layout_tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-                //display list based on tab selected
-                lnTabSelected = layout_tab.getSelectedTabPosition();
-                if (lnTabSelected > 0){
-                    laStatus = List.of("1", "2", "3", "4", "5");
-                }else {
-                    laStatus = List.of("0");
-                }
-                InitDataReceiver();
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 }
