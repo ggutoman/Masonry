@@ -58,7 +58,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class Fragment_Attachment_List extends Fragment implements OnSwipeListener {

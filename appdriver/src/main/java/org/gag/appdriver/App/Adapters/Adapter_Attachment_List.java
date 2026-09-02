@@ -100,10 +100,19 @@ public class Adapter_Attachment_List extends RecyclerView.Adapter<Adapter_Attach
                         loFile
                 );
 
+                int lnIconxx;
+                if (loFile.getName().contains(".doc")){
+                    lnIconxx = R.drawable.baseline_word_com;
+                }else if (loFile.getName().contains(".csv") || loFile.getName().contains(".xls")){
+                    lnIconxx = R.drawable.baseline_csv;
+                }else {
+                    lnIconxx = R.drawable.baseline_file;
+                }
+
                 //display image
                 Glide.with(holder.itemView.getContext())
                         .asBitmap() // force bitmap decoding
-                        .load(!(loFile.getName().contains(".png") || loFile.getName().contains(".jpg")) ? R.drawable.baseline_csv : uri)  // use safe URI instead of raw path
+                        .load((loFile.getName().contains(".png") || loFile.getName().contains(".jpg")) ? uri : lnIconxx)  // use safe URI instead of raw path
                         .apply(new RequestOptions()
                                 .skipMemoryCache(true)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE))
