@@ -111,7 +111,6 @@ class AttachmentReport(loInstance : Context) {
                 }
             } catch (ex: Exception) {
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
-                ex.printStackTrace()
                 false
             }
 
@@ -121,7 +120,6 @@ class AttachmentReport(loInstance : Context) {
             }
         }
         return future
-
     }
 
     fun GetObjects() : LiveData<List<EReports>>{
@@ -158,6 +156,7 @@ class AttachmentReport(loInstance : Context) {
                             resultData.GetPayload().forEach { loItem ->
                                 poReports.SaveReport(loItem)
                             }
+                            true
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -185,7 +184,7 @@ class AttachmentReport(loInstance : Context) {
 
             //Complete the future on the main thread
             withContext(Dispatchers.Main) {
-                future.complete(false)
+                future.complete(result)
             }
         }
         return future

@@ -520,12 +520,15 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
                                                     @Override
                                                     public void OnSuccess(String lsURL) {
                                                         poLoad.DismissDialog();
+                                                        InitDataReceiver();
                                                     }
 
                                                     @Override
                                                     public void OnFailed(String fsMessage) {
                                                         poLoad.DismissDialog();
                                                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                                                        InitDataReceiver();
                                                     }
                                                 });
                                             }

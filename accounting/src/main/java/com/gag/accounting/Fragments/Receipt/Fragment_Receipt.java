@@ -279,7 +279,7 @@ public class Fragment_Receipt extends Fragment {
                                         loDetail.getSSourceCD(),
                                         loDetail.getSSourceNo(),
                                         loDetail.getNEntryNox(),
-                                        "Member's Contribution",
+                                        "Membership Fee",
                                         loDetail.getNAmtPaidx()
                                 );
 
@@ -290,7 +290,7 @@ public class Fragment_Receipt extends Fragment {
                                         loDetail.getSSourceCD(),
                                         loDetail.getSSourceNo(),
                                         loDetail.getNEntryNox(),
-                                        "",
+                                        loDetail.getSSourceNo(),
                                         loDetail.getNAmtPaidx()
                                 );
                             }

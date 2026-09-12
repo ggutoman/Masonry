@@ -208,7 +208,7 @@ public class Activity_Account extends AppCompatActivity {
                     return;
                 }
 
-                poMessage.ShowMessage(2, "Are you sure your information is complete?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                poMessage.ShowMessage(2, "Save account information?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) { poDialog.dismiss();}
 
@@ -276,7 +276,8 @@ public class Activity_Account extends AppCompatActivity {
                             return;
                         }
 
-                        //allow update of the existing recorf
+                        //allow update of the existing record
+                        poUser.setSUserName(tie_username.getText()== null ? "" : tie_username.getText().toString());
                         poUser.setSGLPIDNoX(tie_glpid.getText()== null ? "" : tie_glpid.getText().toString());
                         poUser.setSLastName(tie_lastname.getText()== null ? "" : tie_lastname.getText().toString());
                         poUser.setDBirthDte(tie_birthdate.getText()== null ? "" : tie_birthdate.getText().toString());

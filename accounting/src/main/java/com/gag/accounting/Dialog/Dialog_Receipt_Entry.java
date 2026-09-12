@@ -129,7 +129,7 @@ public class Dialog_Receipt_Entry {
                                                         s,
                                                         loMember.getSTransNox(),
                                                         "",
-                                                        "Member's Contribution",
+                                                        "Membership Fee",
                                                         String.valueOf(ldbl_bal)
                                                 )
                                         );
@@ -250,6 +250,8 @@ public class Dialog_Receipt_Entry {
                 auto_source_type.setText(loViewModel.GetSources().get(i).getFsDescript());
                 loViewModel.SelectType(lsSelectType);
 
+                til_source_transaction.setHint(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ") ? "Select Transaction" : "Enter Description");
+
                 //clear adapter for new list
                 tie_paid_amount.setText("0.00");
                 auto_source_transaction.setText("");
@@ -259,7 +261,7 @@ public class Dialog_Receipt_Entry {
                 tie_paid_amount.setEnabled(!(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ")));
 
                 //show other fields  based on selected type
-                til_source_transaction.setVisibility(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
+                //til_source_transaction.setVisibility(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
                 btn_download_source.setVisibility(lsSelectType.equalsIgnoreCase("DUES") || lsSelectType.equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
             }
         });
@@ -301,12 +303,17 @@ public class Dialog_Receipt_Entry {
 
                 }else{
 
+                    if (auto_source_transaction.getText() == null || auto_source_transaction.getText().toString().isEmpty()){
+                        Toast.makeText(loInstance, "Please enter payment description", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     loSelectSource = new ReceiptDetail(
                             "",
                             lsSelectType,
+                            auto_source_transaction.getText().toString(),
                             "",
-                            "",
-                            "",
+                            auto_source_transaction.getText().toString(),
                             tie_paid_amount.getText().toString()
                     );
                 }

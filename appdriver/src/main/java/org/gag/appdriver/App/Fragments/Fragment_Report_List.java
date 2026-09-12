@@ -158,6 +158,8 @@ public class Fragment_Report_List extends Fragment {
                     public void OnFinished(String fsMessage) {
                         poLoad.DismissDialog();
                         Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                        InitDataReceiver();
                     }
                 });
             }

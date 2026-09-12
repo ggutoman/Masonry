@@ -48,28 +48,25 @@ public class Adapter_Receipt_Details extends RecyclerView.Adapter<Adapter_Receip
     @Override
     public void onBindViewHolder(@NonNull VH_Receipt_Details holder, int position) {
 
-        EProjectMaster loProject = poProject.GetProjectInfo(laDetails.get(position).getSSourceNo());
-        String lsProjDescr = loProject == null || loProject.getSProjctNm().isEmpty() ? laDetails.get(position).getSSourceNo() : loProject.getSProjctNm();
-
-        holder.mtv_src_no.setText(lsProjDescr);
-        holder.mtv_src_amount.setText(laDetails.get(position).getNAmtPaidx());
-
-        holder.mtv_src_no.setVisibility(laDetails.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
-
+        //holder.mtv_src_no.setVisibility(laDetails.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
         switch (laDetails.get(position).getSSourceCD()){
             case "DUES":
+                holder.mtv_src_no.setText("Membership Fee");
                 holder.mtv_src_code.setText("Annual Dues");
                 break;
             case "PROJ":
+                EProjectMaster loProject = poProject.GetProjectInfo(laDetails.get(position).getSSourceNo());
+                String lsProjDescr = loProject == null || loProject.getSProjctNm().isEmpty() ? laDetails.get(position).getSSourceNo() : loProject.getSProjctNm();
+                holder.mtv_src_no.setText(lsProjDescr);
+
                 holder.mtv_src_code.setText("Project");
                 break;
-            case "BINT":
-                holder.mtv_src_code.setText("Bank Interest");
-                break;
-            case "OTHR":
-                holder.mtv_src_code.setText("Others");
+            default:
+                holder.mtv_src_no.setText(laDetails.get(position).getSSourceNo());
+                holder.mtv_src_code.setText(laDetails.get(position).getSSourceCD() .equalsIgnoreCase("BINT") ? "Bank Interest" : "Others");
                 break;
         }
+        holder.mtv_src_amount.setText(laDetails.get(position).getNAmtPaidx());
     }
 
     @Override

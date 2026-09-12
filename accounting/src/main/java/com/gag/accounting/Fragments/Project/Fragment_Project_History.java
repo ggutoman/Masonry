@@ -194,7 +194,7 @@ public class Fragment_Project_History extends Fragment {
                             }
                         }
 
-                        loAdapter = new Adapter_Project_List(requireContext(), laList, new Adapter_Project_List.OnSelectProject() {
+                        loAdapter = new Adapter_Project_List(requireContext(), laList, false, new Adapter_Project_List.OnSelectProject() {
                             @Override
                             public void OnSelect(EProjectMaster loProj) {
 

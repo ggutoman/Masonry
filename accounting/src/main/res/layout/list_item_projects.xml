@@ -47,6 +47,19 @@
             android:textSize="13sp"
             android:alpha="0.5"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.7"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_amt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="0.00"
+            android:alpha="0.5"
+            android:textSize="13sp"
+            android:gravity="end"
+            android:layout_marginEnd="5dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/mtv_type"
             app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

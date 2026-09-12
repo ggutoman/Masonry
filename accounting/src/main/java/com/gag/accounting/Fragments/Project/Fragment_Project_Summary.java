@@ -211,7 +211,7 @@ public class Fragment_Project_Summary extends Fragment {
 
                             //display and add viewing per projects
                             rcv_pledge_list.setAdapter(
-                                    new Adapter_Project_List(requireActivity(), eProjectMasters, new Adapter_Project_List.OnSelectProject() {
+                                    new Adapter_Project_List(requireActivity(), eProjectMasters, true, new Adapter_Project_List.OnSelectProject() {
                                         @Override
                                         public void OnSelect(EProjectMaster loProj) {
 

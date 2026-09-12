@@ -56,7 +56,7 @@ public class Adapter_Receipt_Transactions extends ArrayAdapter<ReceiptDetail> {
         mtv_src_no.setText(laDetailsFiltered.get(position).getSSourceDscrpt().isEmpty() ? laDetailsFiltered.get(position).getSSourceNo() : laDetailsFiltered.get(position).getSSourceDscrpt());
         mtv_src_amount.setText(laDetailsFiltered.get(position).getNAmtPaidx());
 
-        mtv_src_no.setVisibility(laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("DUES") || laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
+        //mtv_src_no.setVisibility(laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("DUES") || laDetailsFiltered.get(position).getSSourceCD().equalsIgnoreCase("PROJ") ? View.VISIBLE : View.GONE);
 
         switch (laDetailsFiltered.get(position).getSSourceCD()){
 
