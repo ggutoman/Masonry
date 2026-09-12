@@ -93,6 +93,8 @@ public class Fragment_Member extends Fragment{
     private MemberContactAdapter MemberContactAdapter;
     private MemberEmailAdapter MemberEmailAdapter;
 
+    private String lsStackIDxx;
+
     private List<TownProvince> paramTownProvince= new ArrayList<>();
     private List<EMemberContactInfo> paramContact= new ArrayList<>();
     private List<EMemberEmailInfo> paramEmail= new ArrayList<>();
@@ -118,6 +120,12 @@ public class Fragment_Member extends Fragment{
         poMessage.InitDialog();
         poDialog.InitDialog();
 
+        int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
+        if (count > 0) {
+
+            FragmentManager.BackStackEntry entry = requireActivity().getSupportFragmentManager().getBackStackEntryAt(count - 1);
+            lsStackIDxx = entry.getName() == null ? "" : entry.getName();
+        }
 
         initViews(view);
         initDataReceiver();
@@ -1124,7 +1132,6 @@ public class Fragment_Member extends Fragment{
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
-
                                         FinishTask();
                                     }
 
@@ -1229,7 +1236,7 @@ public class Fragment_Member extends Fragment{
 
         requireActivity()
                 .getSupportFragmentManager()
-                .popBackStack("create_member", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
     }
 }

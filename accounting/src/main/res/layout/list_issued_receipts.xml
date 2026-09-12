@@ -17,7 +17,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/Text_Header"
-                android:id="@+id/mtv_src_code"
+                android:id="@+id/mtv_src_no"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="N/A"
@@ -41,7 +41,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Header"
-            android:id="@+id/mtv_src_no"
+            android:id="@+id/mtv_src_code"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:alpha="0.7"
@@ -55,7 +55,7 @@
         android:layout_height="0.6dp"
         android:layout_marginTop="5dp"
         android:background="@android:color/darker_gray"
-        app:layout_constraintTop_toBottomOf="@+id/mtv_src_no"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_src_code"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

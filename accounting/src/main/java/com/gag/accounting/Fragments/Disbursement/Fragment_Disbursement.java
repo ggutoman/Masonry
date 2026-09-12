@@ -356,7 +356,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         @Override
                         public void onChanged(List<EProjectMaster> eProjectMasters) {
 
-                            if (eProjectMasters == null){
+                            if (eProjectMasters == null || loDisbursement == null){
                                 Toast.makeText(requireActivity(), "No project source", Toast.LENGTH_SHORT).show();
                                 return;
                             }

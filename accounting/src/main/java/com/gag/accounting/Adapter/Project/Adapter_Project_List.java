@@ -27,16 +27,19 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
     private final OnSelectProject loCallback;
 
     private List<EProjectMaster> laProjectFiltered;
+    private Boolean ShowAmt = false;
 
     public interface OnSelectProject {
         void OnSelect(EProjectMaster loTurnover);
     }
 
-    public Adapter_Project_List(Context context, List<EProjectMaster> faProjects, OnSelectProject foCallback){
+    public Adapter_Project_List(Context context, List<EProjectMaster> faProjects, Boolean fShowAmt,  OnSelectProject foCallback){
         loInstance = context;
         laProjects = faProjects;
         loCallback = foCallback;
         laProjectFiltered = faProjects;
+
+        ShowAmt = fShowAmt;
     }
 
     public Adapter_Project_List_Filter GetFilter(){
@@ -60,6 +63,9 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
     public void onBindViewHolder(@NonNull VH_Project_List holder, int position) {
 
         holder.mtv_name.setText(laProjectFiltered.get(position).getSProjctNm());
+        holder.mtv_amt.setText(laProjectFiltered.get(position).getNTranTotl());
+
+        holder.mtv_amt.setVisibility(ShowAmt ? View.VISIBLE : View.GONE);
 
         switch (laProjectFiltered.get(position).getCProjctTp()){
 
@@ -168,7 +174,7 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
     public static class VH_Project_List extends RecyclerView.ViewHolder {
 
         private View view;
-        private MaterialTextView mtv_name, mtv_type, mtv_status;
+        private MaterialTextView mtv_name, mtv_type, mtv_status, mtv_amt;
 
         public VH_Project_List(@NonNull View itemView) {
             super(itemView);
@@ -177,6 +183,7 @@ public class Adapter_Project_List extends RecyclerView.Adapter<Adapter_Project_L
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_type = itemView.findViewById(R.id.mtv_type);
             mtv_status = itemView.findViewById(R.id.mtv_status);
+            mtv_amt = itemView.findViewById(R.id.mtv_amt);
         }
     }
 }

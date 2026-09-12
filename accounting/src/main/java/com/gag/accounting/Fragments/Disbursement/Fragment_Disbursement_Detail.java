@@ -116,9 +116,10 @@ public class Fragment_Disbursement_Detail extends Fragment {
                 btn_void.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_release.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("1") ? View.VISIBLE : View.GONE);
 
-                //disbursement can be cancelled or complete after release
+                //disbursement can be cancelled release, automatic released so no need to complete
                 btn_cancel.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
-                btn_complete.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
+                btn_complete.setVisibility(View.GONE);
+                //btn_complete.setVisibility(eDisbursement.getCTranStat().equalsIgnoreCase("2") ? View.VISIBLE : View.GONE);
 
                 loDisb = eDisbursement;
 
@@ -134,7 +135,7 @@ public class Fragment_Disbursement_Detail extends Fragment {
                         mtv_src_cd.setText("Lodge Fund");
                         break;
                     case "PROJ":
-                        mtv_src_cd.setText("Project");
+                        mtv_src_cd.setText("Project Fund");
                         break;
                 }
             }

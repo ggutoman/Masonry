@@ -293,6 +293,7 @@ class UserAccount(instance : Context) {
                     poUser.sPassword = lsEncrPass
 
                     val loParams = JSONObject().apply {
+                        put("sUserNme", poUser.sUserName)
                         put("sPassword", poUser.sPassword)
                         put("sGLPIDNoX", poUser.sGLPIDNoX)
                         put("sLastName", poUser.sLastName)
