@@ -45,11 +45,13 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/mcv_ids"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:cardElevation="6dp"
                         app:cardUseCompatPadding="true"
-                        app:cardCornerRadius="10dp">
+                        app:cardCornerRadius="10dp"
+                        android:visibility="gone">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -185,6 +187,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Payee Information"
                                 android:padding="10dp"
+                                android:layout_marginBottom="10dp"
                                 android:background="@android:color/darker_gray"/>
 
                             <com.google.android.material.textfield.TextInputLayout
@@ -220,7 +223,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Voucher Information"
                                 android:padding="10dp"
-                                android:layout_marginTop="15dp"
+                                android:layout_marginVertical="15dp"
                                 android:background="@android:color/darker_gray"/>
 
                             <com.google.android.material.textfield.TextInputLayout
@@ -278,7 +281,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:padding="10dp"
-                                android:layout_marginTop="5dp"
+                                android:layout_marginVertical="10dp"
                                 android:background="@android:color/darker_gray">
 
                                 <com.google.android.material.textview.MaterialTextView

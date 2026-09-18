@@ -45,6 +45,7 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/mcv_ids"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:cardElevation="6dp"

@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -31,6 +33,7 @@ import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.Utilities.Message_Dialog;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,6 +45,8 @@ public class Fragment_Home extends Fragment {
     private VM_Annual mAnnualViewModel;
     private VM_Projects mProjectsViewModel;
     private Message_Dialog poMessage;
+
+    private OnBackPressedCallback backCallback;
 
     private MaterialTextView mtv_username, mtv_lodge, mtv_year;
 
@@ -88,7 +93,43 @@ public class Fragment_Home extends Fragment {
         InitData();
         InitListeners();
 
+        backCallback = new OnBackPressedCallback(false) { // start disabled
+            @Override
+            public void handleOnBackPressed() {
+                poMessage.ShowMessage(2,
+                        "You're about to exit the application. Continue?",
+                        "No", "Yes",
+                        new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                                requireActivity().finishAffinity();
+                            }
+                        });
+            }
+        };
+
+        requireActivity().getOnBackPressedDispatcher()
+                .addCallback(getViewLifecycleOwner(), backCallback);
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (backCallback != null) backCallback.setEnabled(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (backCallback != null) backCallback.setEnabled(false);
     }
 
     private void InitViews(View view){
@@ -142,7 +183,7 @@ public class Fragment_Home extends Fragment {
                 for (LodgeCalendarList calendars : lodgeCalendarLists){
 
                     if (calendars.getNYearxxxx().equalsIgnoreCase(mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy"))){
-                        mtv_year.setText("M.Y " + calendars.getNYearxxxx());
+                        mtv_year.setText("(M.Y " + calendars.getNYearxxxx() + " - " + String.valueOf(Integer.parseInt(calendars.getNYearxxxx()) + 1) + ")");
                         mtv_year.setVisibility(View.VISIBLE);
                         break;
                     }

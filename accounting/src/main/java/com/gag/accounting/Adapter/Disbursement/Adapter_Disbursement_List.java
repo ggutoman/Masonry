@@ -1,13 +1,10 @@
 package com.gag.accounting.Adapter.Disbursement;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.BaseExpandableListAdapter;
 
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
@@ -16,157 +13,174 @@ import org.gag.appdriver.App.Models.ReceiptMasterList;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-public class Adapter_Disbursement_List extends RecyclerView.Adapter<Adapter_Disbursement_List.VH_Issued_Receipts> {
+public class Adapter_Disbursement_List extends BaseExpandableListAdapter {
 
-    private final List<EDisbursement> laDisbursement;
     private final OnSelectItem loCallback;
-    private final Adapter_Disbursement_Filter loFilter;
 
-    private List<EDisbursement> laDisbursementFiltered;
+    private final Context loInstance;
+    private List<String> laStatus = List.of("0", "1", "2", "3", "4");
 
-    public Adapter_Disbursement_Filter GetFilter(){
-        return loFilter;
-    }
+    private final List<String> paParentList;
+    private final HashMap<String, List<EDisbursement>> paDisb;
+
+    private final List<String> paParentListFiltered;
+    private final HashMap<String, List<EDisbursement>> paDisbFiltered;
 
     public interface OnSelectItem {
         void OnSelec(EDisbursement loItem);
     }
 
-    public Adapter_Disbursement_List(List<EDisbursement> faReceipts, OnSelectItem foCallback){
-        laDisbursement = faReceipts;
-        laDisbursementFiltered = laDisbursement;
+    public Adapter_Disbursement_List(Context foInstance, List<String> faParentList, HashMap<String, List<EDisbursement>> faDisb, OnSelectItem foCallback){
+
+        loInstance = foInstance;
+
+        paParentList = faParentList;
+        paDisb = faDisb;
+
+        paParentListFiltered = new ArrayList<>(paParentList);
+        paDisbFiltered = new HashMap<>(paDisb);
+
         loCallback = foCallback;
-        loFilter = new Adapter_Disbursement_Filter(this);
     }
 
-    @NonNull
-    @Override
-    public VH_Issued_Receipts onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new VH_Issued_Receipts(
-                LayoutInflater.from(
-                        parent.getContext()
-                ).inflate(
-                        R.layout.list_disbursements,
-                        parent,
-                        false
-                )
-        );
+    public void InitStatus(List<String> faStatus){
+        laStatus = faStatus;
+    }
+
+    public void Filter(String fsFilter) {
+
+        //clear filtered list
+        paParentListFiltered.clear();
+        paDisbFiltered.clear();
+
+        for (String parent : paParentList) {
+
+            List<EDisbursement> children = paDisb.get(parent);
+            List<EDisbursement> filteredChildren = new ArrayList<>();
+
+            if (children.size() > 0){
+
+                for (EDisbursement item : children) {
+
+                    if (laStatus.contains(item.getCTranStat())) {
+                        if (fsFilter.isEmpty() || (item.getSVouchrNo().toLowerCase().contains(fsFilter) || parent.toLowerCase().contains(fsFilter))) filteredChildren.add(item);
+                    }
+                }
+
+                if (filteredChildren.size() > 0) {
+                    paParentListFiltered.add(parent);
+                    paDisbFiltered.put(parent, filteredChildren);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH_Issued_Receipts holder, int position) {
+    public String getGroup(int i) {
+        return paParentListFiltered.get(i);
+    }
 
-        holder.mtv_payee.setText(laDisbursementFiltered.get(position).getSPayeeNme());
-        holder.mtv_src_amount.setText(laDisbursementFiltered.get(position).getNAmountxx());
-        holder.mtv_voucher.setText(laDisbursementFiltered.get(position).getSVouchrNo());
+    @Override
+    public int getGroupCount() {
+        return paParentListFiltered.size();
+    }
 
-        switch (laDisbursementFiltered.get(position).getCTranStat()){
+    @Override
+    public long getGroupId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
+
+        if (view == null){
+
+            view = LayoutInflater.from(loInstance).inflate(R.layout.list_item_parent, viewGroup, false);
+        }
+        MaterialTextView mtv_group = view.findViewById(R.id.mtv_group);
+        mtv_group.setText(paParentListFiltered.get(i));
+
+        return view;
+
+    }
+
+    @Override
+    public EDisbursement getChild(int i, int i1) {
+        return Objects.requireNonNull(paDisbFiltered.get(paParentListFiltered.get(i))).get(i1);
+    }
+
+    @Override
+    public long getChildId(int i, int i1) {
+        return i1;
+    }
+
+    @Override
+    public int getChildrenCount(int i) {
+        return paDisbFiltered.size();
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    @Override
+    public boolean isChildSelectable(int i, int i1) {
+        return true;
+    }
+
+    @Override
+    public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
+
+        if (view == null){
+
+            view = LayoutInflater.from(loInstance).inflate(R.layout.list_disbursements, viewGroup, false);
+        }
+
+        MaterialTextView mtv_voucher = view.findViewById(R.id.mtv_voucher);
+        MaterialTextView mtv_src_amount = view.findViewById(R.id.mtv_src_amount);
+        MaterialTextView mtv_vstatus = view.findViewById(R.id.mtv_vstatus);
+
+        EDisbursement loItem = paDisbFiltered.get(paParentListFiltered.get(i)).get(i1);
+
+        mtv_voucher.setText(loItem.getSVouchrNo());
+        mtv_src_amount.setText(loItem.getNAmountxx());
+
+        switch (loItem.getCTranStat()){
 
             case "0":
-                holder.mtv_vstatus.setText("Open");
+                mtv_vstatus.setText("Open");
                 break;
             case "1":
-                holder.mtv_vstatus.setText("Confirmed");
+                mtv_vstatus.setText("Confirmed");
                 break;
             case "2":
-                holder.mtv_vstatus.setText("Released");
+                mtv_vstatus.setText("Released");
                 break;
             case "3":
-                holder.mtv_vstatus.setText("Cancelled");
+                mtv_vstatus.setText("Cancelled");
                 break;
             case "4":
-                holder.mtv_vstatus.setText("Void");
+                mtv_vstatus.setText("Void");
                 break;
             case "5":
-                holder.mtv_vstatus.setText("Completed");
+                mtv_vstatus.setText("Completed");
                 break;
         }
 
-        holder.view.setOnClickListener(new View.OnClickListener() {
+        view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                loCallback.OnSelec(laDisbursementFiltered.get(position));
+                loCallback.OnSelec(loItem);
             }
         });
+        return view;
     }
 
-    @Override
-    public int getItemCount() {
-        return laDisbursementFiltered.size();
-    }
-
-    public class Adapter_Disbursement_Filter extends Filter {
-
-        private final Adapter_Disbursement_List loAdapter;
-        private List<String> laStatus = new ArrayList<>(List.of("0", "1", "3", "4"));
-        public void InitStatus(List<String> faStatus){
-            laStatus = faStatus;
-        }
-
-        public Adapter_Disbursement_Filter(Adapter_Disbursement_List foAdapter){
-            loAdapter = foAdapter;
-        }
-
-        @SuppressLint("NotifyDataSetChanged")
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-
-            if (charSequence.length() < 1){
-                laDisbursementFiltered = laDisbursement;
-            }else {
-
-                List<EDisbursement> filterSearch = new ArrayList<>();
-
-                //first filter, via search text
-                for (EDisbursement loDisbursement : laDisbursement){
-
-                    if (loDisbursement.getSPayeeNme().toLowerCase().contains(charSequence.toString().toLowerCase()) ||
-                            loDisbursement.getSVouchrNo().toLowerCase().contains(charSequence.toString().toLowerCase())){
-
-                        filterSearch.add(loDisbursement);
-                    }
-                }
-                laDisbursementFiltered = filterSearch;
-            }
-
-            laDisbursementFiltered = laDisbursementFiltered.stream()
-                    .filter(loItem -> laStatus.contains(loItem.getCTranStat()))
-                    .collect(Collectors.toList());
-
-            FilterResults loResults = new FilterResults();
-            loResults.values = laDisbursementFiltered;
-            loResults.count = laDisbursementFiltered.size();
-
-            return loResults;
-        }
-
-        @SuppressLint("NotifyDataSetChanged")
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-
-            laDisbursementFiltered = (List<EDisbursement>) filterResults.values;
-            loAdapter.notifyDataSetChanged();
-        }
-    }
-
-    public static class VH_Issued_Receipts extends RecyclerView.ViewHolder {
-
-        private View view;
-        private MaterialTextView mtv_payee, mtv_voucher, mtv_src_amount, mtv_vstatus;
-
-        public VH_Issued_Receipts(@NonNull View itemView) {
-            super(itemView);
-
-            view = itemView;
-            mtv_payee = itemView.findViewById(R.id.mtv_payee);
-            mtv_voucher = itemView.findViewById(R.id.mtv_voucher);
-            mtv_src_amount = itemView.findViewById(R.id.mtv_src_amount);
-            mtv_vstatus = itemView.findViewById(R.id.mtv_vstatus);
-        }
-
-    }
 }

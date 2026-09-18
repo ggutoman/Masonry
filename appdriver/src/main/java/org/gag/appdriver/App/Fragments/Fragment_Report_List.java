@@ -125,7 +125,7 @@ public class Fragment_Report_List extends Fragment {
                         loAttachments.setArguments(loBundle);
 
                         //add to child container, as bridge to initiate another fragment after call
-                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loAttachments));
+                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loAttachments);
                         fragmentTransaction.addToBackStack(lsStackIDxx);
                         fragmentTransaction.commit();
                     }

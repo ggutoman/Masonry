@@ -74,12 +74,31 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Link"
-            android:id="@+id/mtv_signup"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/signup_help"/>
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Link"
+                android:id="@+id/mtv_signup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/signup_help"
+                android:layout_marginTop="5dp"
+                app:layout_constraintWidth_percent="0.5"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/Text_Link"
+                android:id="@+id/mtv_forgot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/forgot_help"
+                android:layout_marginTop="5dp"
+                android:gravity="end"
+                app:layout_constraintStart_toEndOf="@+id/mtv_signup"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_login"

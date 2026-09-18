@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -117,6 +118,26 @@ public class Fragment_Receipt_Detail extends Fragment {
         InitListener();
 
         DownloadList();
+
+        // Register a back press callback
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+
+                        if (lsStackIDxx.equalsIgnoreCase("receipt_entry")){
+                            requireActivity()
+                                    .getSupportFragmentManager()
+                                    .popBackStack("receipt_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                        }else {
+                            requireActivity()
+                                    .getSupportFragmentManager()
+                                    .popBackStack();
+                        }
+                    }
+                }
+        );
 
         return layoutView;
     }

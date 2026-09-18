@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,12 +30,10 @@ import com.gag.accounting.Dialog.Dialog_Receipt_Entry;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
@@ -70,6 +69,7 @@ public class Fragment_Receipt extends Fragment {
 
     private MaterialButton btn_save;
 
+    private MaterialCardView mcv_ids;
     private ConstraintLayout layout_tools;
 
 
@@ -125,6 +125,7 @@ public class Fragment_Receipt extends Fragment {
         btn_add_detail = view.findViewById(R.id.btn_add_detail);
         btn_save = view.findViewById(R.id.btn_save);
 
+        mcv_ids = view.findViewById(R.id.mcv_ids);
         layout_tools = view.findViewById(R.id.layout_tools);
 
     }
@@ -177,11 +178,14 @@ public class Fragment_Receipt extends Fragment {
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
+                    mcv_ids.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
 
                 }else {
 
                     loReceipt = eReceiptMaster;
+
+                    mcv_ids.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
@@ -227,7 +231,7 @@ public class Fragment_Receipt extends Fragment {
                     @Override
                     public void onChanged(List<EReceiptDetail> eReceiptDetails) {
 
-                        if (eReceiptDetails == null) return;
+                        if (eReceiptDetails == null || eReceiptDetails.size() < 1) return;
 
                         mViewModel.ClearDetail();
                         for (EReceiptDetail loDetail : eReceiptDetails){
@@ -295,6 +299,7 @@ public class Fragment_Receipt extends Fragment {
                                 );
                             }
                         }
+                        mViewModel.SelectType(eReceiptDetails.get(eReceiptDetails.size() - 1).getSSourceCD());
                     }
                 });
             }
@@ -342,6 +347,18 @@ public class Fragment_Receipt extends Fragment {
                                         laTransactions
                                 )
                         );
+
+                        mViewModel.GetSources()
+                                .stream()
+                                .filter(receiptConstants -> receiptConstants.getFsID().equalsIgnoreCase(s))
+                                .findAny()
+                                .ifPresent(receiptConstants -> auto_source_type.setText(receiptConstants.getFsDescript(), false));
+
+                        laTransactions
+                                .stream()
+                                .filter(receiptDetail -> receiptDetail.getSSourceCD().equalsIgnoreCase(s))
+                                .reduce((first, second) -> second)
+                                .ifPresent(receiptDetail -> auto_source_transaction.setText(receiptDetail.getSSourceDscrpt(), false));
                     }
                 });
 
@@ -381,7 +398,7 @@ public class Fragment_Receipt extends Fragment {
             public void OnLoad() {
                 poLoading.ShowDialog("Downloading receipt information. Please wait . .");
 
-                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_download, btn_add_detail), false);
+                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_add_detail), false);
             }
 
             @Override
@@ -389,7 +406,7 @@ public class Fragment_Receipt extends Fragment {
                 poLoading.DismissDialog();
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
 
-                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_download, btn_add_detail), loReceipt.getCTranStat().equalsIgnoreCase("0"));
+                AllowFields(List.of(auto_pay_type, tie_remarks, btn_add_detail, tie_paid_amount, btn_save, btn_add_detail), loReceipt.getCTranStat().equalsIgnoreCase("0"));
             }
         });
     }
@@ -475,7 +492,7 @@ public class Fragment_Receipt extends Fragment {
                 loReceiptDetail.setArguments(loBundle);
 
                 //add to child container, as bridge to initiate another fragment after call
-                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loReceiptDetail));
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loReceiptDetail);
                 fragmentTransaction.addToBackStack(lsStackIDxx);
                 fragmentTransaction.commit();
             }
@@ -553,21 +570,38 @@ public class Fragment_Receipt extends Fragment {
                    public void OnNegative(@NotNull AlertDialog poDialog) {
                        poDialog.dismiss();
 
-                       mViewModel.SaveReceipt(loReceipt, laDetails, new VM_Receipts.OnTransaction() {
+                       mViewModel.SaveReceipt(loReceipt, laDetails, new VM_Receipts.OnSaveReceipt() {
                            @Override
                            public void OnLoad() {
                                poLoading.ShowDialog("Saving receipt. Please wait . .");
                            }
 
                            @Override
-                           public void OnSuccess() {
+                           public void OnSuccess(String loTransNox) {
                                poLoading.DismissDialog();
 
                                poMessage.ShowMessage(0, "Receipt has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                    @Override
                                    public void OnPositive(@NotNull AlertDialog poDialog) {
                                        poDialog.dismiss();
-                                       requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, POP_BACK_STACK_INCLUSIVE);
+
+                                       //reload entry
+                                       lsTransNox = loTransNox;
+
+                                       //open receipt information to share
+                                       Fragment_Receipt_Detail loReceiptDetail = new Fragment_Receipt_Detail();
+                                       FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+
+                                       Bundle loBundle = new Bundle();
+                                       loBundle.putString("member_id", lsMemberID);
+                                       loBundle.putString("transaction_id", lsTransNox);
+
+                                       loReceiptDetail.setArguments(loBundle);
+
+                                       //add to child container, as bridge to initiate another fragment after call
+                                       fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loReceiptDetail);
+                                       fragmentTransaction.addToBackStack(lsStackIDxx);
+                                       fragmentTransaction.commit();
                                    }
 
                                    @Override

@@ -1,160 +1,171 @@
 package com.gag.accounting.Adapter.Receipt;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
+import android.widget.BaseExpandableListAdapter;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import com.gag.accounting.R;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.ReceiptMasterList;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-public class Adapter_Issued_Receipts extends RecyclerView.Adapter<Adapter_Issued_Receipts.VH_Issued_Receipts> {
+public class Adapter_Issued_Receipts extends BaseExpandableListAdapter {
 
-    private final List<ReceiptMasterList> laReceipts;
-    private List<ReceiptMasterList> laReceiptsFiltered;
+    private final Context loInstance;
+
+    private final List<String> paParentList;
+    private final HashMap<String, List<ReceiptMasterList>> paChildList;
+
+    private List<String> paParentFiltered;
+    private HashMap<String, List<ReceiptMasterList>> paChildFiltered;
+
+    private List<String> laStatus = List.of("0", "1", "3", "4");
+
     private final OnSelectItem loCallback;
-    private final Adapter_Receipt_Filter loFilter;
-
-    public Adapter_Receipt_Filter GetFilter(){
-        return loFilter;
-    }
 
     public interface OnSelectItem {
-        void OnSelec(ReceiptMasterList loItem);
+        void OnSelect(ReceiptMasterList loItem);
     }
 
-    public Adapter_Issued_Receipts(List<ReceiptMasterList> faReceipts, OnSelectItem foCallback){
-        laReceipts = faReceipts;
-        laReceiptsFiltered = laReceipts;
+    public Adapter_Issued_Receipts(Context foInstance, List<String> foParentList, HashMap<String, List<ReceiptMasterList>> foItems, OnSelectItem foCallback){
+        loInstance = foInstance;
+        paParentList = foParentList;
+        paChildList = foItems;
         loCallback = foCallback;
-        loFilter = new Adapter_Receipt_Filter(this);
+
+        // start filtered lists as full copies
+        paParentFiltered = new ArrayList<>(paParentList);
+        paChildFiltered = new HashMap<>(paChildList);
     }
 
-    @NonNull
-    @Override
-    public VH_Issued_Receipts onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new VH_Issued_Receipts(
-                LayoutInflater.from(
-                        parent.getContext()
-                ).inflate(
-                        R.layout.list_receipt_master_list,
-                        parent,
-                        false
-                )
-        );
+    public void InitStatus(List<String> faStatus){
+        laStatus = faStatus;
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull VH_Issued_Receipts holder, int position) {
+    public void Filter(String fsFilter) {
 
-        holder.mtv_src_nme.setText(laReceiptsFiltered.get(position).getSMemberNme());
-        holder.mtv_src_amount.setText(laReceiptsFiltered.get(position).getNTotlPaid());
+        //clear filtered list
+        paParentFiltered.clear();
+        paChildFiltered.clear();
 
-        switch (laReceiptsFiltered.get(position).getCTranStat()){
+        for (String parent : paParentList) {
 
-            case "0":
-                holder.mtv_status.setText("Open");
-                break;
-            case "1":
-                holder.mtv_status.setText("Confirmed");
-                break;
-            case "3":
-                holder.mtv_status.setText("Cancelled");
-                break;
-            case "4":
-                holder.mtv_status.setText("Void");
-                break;
-        }
-        holder.mtv_date.setText(laReceiptsFiltered.get(position).getDTransact());
+            List<ReceiptMasterList> children = paChildList.get(parent);
+            List<ReceiptMasterList> filteredChildren = new ArrayList<>();
 
-        holder.view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            if (children.size() > 0){
 
-                loCallback.OnSelec(laReceiptsFiltered.get(position));
-            }
-        });
-    }
+                for (ReceiptMasterList item : children) {
 
-    @Override
-    public int getItemCount() {
-        return laReceiptsFiltered.size();
-    }
-
-    public class Adapter_Receipt_Filter extends Filter {
-
-        private final Adapter_Issued_Receipts loAdapter;
-        private List<String> laStatus = new ArrayList<>(List.of("0", "1", "3", "4"));
-        public void InitStatus(List<String> faStatus){
-            laStatus = faStatus;
-        }
-
-        public Adapter_Receipt_Filter(Adapter_Issued_Receipts foAdapter){
-            loAdapter = foAdapter;
-        }
-
-        @SuppressLint("NotifyDataSetChanged")
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-
-            if (charSequence.length() < 1){
-                laReceiptsFiltered = laReceipts;
-            }else {
-
-                List<ReceiptMasterList> filterSearch = new ArrayList<>();
-
-                //first filter, via search text
-                for (ReceiptMasterList loReceipt : laReceipts){
-
-                    if (loReceipt.getSMemberNme().toLowerCase().contains(charSequence.toString().toLowerCase())){
-                        filterSearch.add(loReceipt);
+                    if (laStatus.contains(item.getCTranStat())) {
+                        if (fsFilter.isEmpty() || (item.getSORNoxxxx().toLowerCase().contains(fsFilter) || parent.toLowerCase().contains(fsFilter))) filteredChildren.add(item);
                     }
                 }
-                laReceiptsFiltered = filterSearch;
+
+                if (filteredChildren.size() > 0) {
+                    paParentFiltered.add(parent);
+                    paChildFiltered.put(parent, filteredChildren);
+                }
             }
-
-            laReceiptsFiltered = laReceiptsFiltered.stream()
-                    .filter(loItem -> laStatus.contains(loItem.getCTranStat()))
-                    .collect(Collectors.toList());
-
-            FilterResults loResults = new FilterResults();
-            loResults.values = laReceiptsFiltered;
-            loResults.count = laReceiptsFiltered.size();
-
-            return loResults;
         }
-
-        @SuppressLint("NotifyDataSetChanged")
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-
-            laReceiptsFiltered = (List<ReceiptMasterList>) filterResults.values;
-            loAdapter.notifyDataSetChanged();
-        }
+        notifyDataSetChanged();
     }
 
-    public static class VH_Issued_Receipts extends RecyclerView.ViewHolder {
 
-        private View view;
-        private MaterialTextView mtv_src_nme, mtv_src_amount, mtv_status, mtv_date;
+    @Override
+    public String getGroup(int i) {
+        return paParentFiltered.get(i);
+    }
 
-        public VH_Issued_Receipts(@NonNull View itemView) {
-            super(itemView);
+    @Override
+    public int getGroupCount() {
+        return paParentFiltered.size();
+    }
 
-            view = itemView;
-            mtv_src_nme = itemView.findViewById(R.id.mtv_src_nme);
-            mtv_src_amount = itemView.findViewById(R.id.mtv_src_amount);
-            mtv_status = itemView.findViewById(R.id.mtv_status);
-            mtv_date = itemView.findViewById(R.id.mtv_date);
+    @Override
+    public long getGroupId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
+
+        if (view == null){
+
+            view = LayoutInflater.from(loInstance).inflate(R.layout.list_item_parent, viewGroup, false);
+        }
+        MaterialTextView mtv_group = view.findViewById(R.id.mtv_group);
+        mtv_group.setText(paParentFiltered.get(i));
+
+        return view;
+    }
+
+    @Override
+    public Object getChild(int i, int i1) {
+        return Objects.requireNonNull(paChildFiltered.get(paParentFiltered.get(i))).get(i1);
+    }
+
+    @Override
+    public long getChildId(int i, int i1) {
+        return i1;
+    }
+
+    @Override
+    public int getChildrenCount(int i) {
+        return Objects.requireNonNull(paChildFiltered.get(paParentFiltered.get(i))).size();
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    @Override
+    public boolean isChildSelectable(int i, int i1) {
+        return true;
+    }
+
+    @Override
+    public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
+
+        if (view == null){
+
+            view = LayoutInflater.from(loInstance).inflate(R.layout.list_receipt_master_list, viewGroup, false);
         }
 
+        MaterialTextView mtv_or = view.findViewById(R.id.mtv_or);
+        MaterialTextView mtv_src_amount = view.findViewById(R.id.mtv_src_amount);
+        MaterialTextView mtv_status = view.findViewById(R.id.mtv_status);
+
+        ReceiptMasterList item = paChildFiltered.get(paParentFiltered.get(i)).get(i1);
+
+        mtv_or.setText(item.getSORNoxxxx());
+        mtv_src_amount.setText(item.getNTotlPaid());
+
+        switch (item.getCTranStat()){
+
+            case "0":
+                mtv_status.setText("Open");
+                break;
+            case "1":
+                mtv_status.setText("Confirmed");
+                break;
+            case "2":
+                mtv_status.setText("Cancelled");
+                break;
+        }
+
+        //capture selection
+        view.setOnClickListener(view1 -> loCallback.OnSelect(item));
+
+        return view;
     }
+
 }

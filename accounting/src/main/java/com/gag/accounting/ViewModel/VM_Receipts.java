@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -46,6 +47,12 @@ public class VM_Receipts extends AndroidViewModel {
     public interface OnTransaction{
         void OnLoad();
         void OnSuccess();
+        void OnFailed(String fsMessage);
+    }
+
+    public interface OnSaveReceipt{
+        void OnLoad();
+        void OnSuccess(String fsTransaction);
         void OnFailed(String fsMessage);
     }
 
@@ -132,8 +139,16 @@ public class VM_Receipts extends AndroidViewModel {
         return poReceipt.ObserveProjectReceipts(fsMemberIDxx);
     }
 
-    public LiveData<List<ReceiptMasterList>> GetReceiptMasterList(String fDfrom, String fDto){
-        return poReceipt.ObserveReceiptMasterList(fDfrom, fDto);
+    public EProjectMaster GetProjectInfo(String fsProjctCd){
+        return poProjects.GetProjectInfo(fsProjctCd);
+    }
+
+    public LiveData<List<ReceiptMasterList>> GetReceiptMembers(String fDfrom, String fDto){
+        return poReceipt.ObserveReceiptMembers(fDfrom, fDto);
+    }
+
+    public LiveData<List<ReceiptMasterList>> GetReceiptSources(String fsSourceCd, String fDfrom, String fDto){
+        return poReceipt.ObserveReceiptSources(fsSourceCd, fDfrom, fDto);
     }
 
     public void CreateFileFromView(View layoutView, String fileNme, OnShareFile foCallback){
@@ -252,36 +267,77 @@ public class VM_Receipts extends AndroidViewModel {
     public void DownloadReceiptInfo(String fsTransNox, OnDownload foCallback){
 
         foCallback.OnLoad();
-        poReceipt.DownloadReceipt(fsTransNox).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poReceipt.DownloadReceipt(fsTransNox).thenCompose(result -> {
 
-                if (!aBoolean){
-                    foCallback.OnFinished(poReceipt.getMessage());
-                    return;
+            if (result instanceof Boolean){
+                return CompletableFuture.completedFuture(false);
+            } else if (result instanceof List) {
+
+                List<EReceiptDetail> details = (List<EReceiptDetail>) result;
+                if (details.size() > 0){
+
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+                    for (EReceiptDetail loReceipt : details) {
+
+                        //download each information for source project
+                        if (loReceipt.getSSourceCD().equalsIgnoreCase("PROJ")){
+                            chain = poProjects.DownloadProjectInfo(loReceipt.getSSourceNo());
+                        }
+                    }
+                    return chain;
+                }else {
+                    return CompletableFuture.completedFuture(false);
                 }
-                foCallback.OnFinished("Successfully downloaded receipt information");
             }
+            return CompletableFuture.completedFuture(false);
+
+        }).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFinished("Failed to download receipts");
+                return;
+            }
+            foCallback.OnFinished("Successfully download receipts");
         });
     }
 
     public void DownloadReceiptList(String fsDfrom, String fsDto, List<String> fatatus, OnDownload foCallback){
 
         foCallback.OnLoad();
-        poReceipt.DownloadReceiptList(fsDfrom, fsDto, fatatus).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poReceipt.DownloadReceiptList(fsDfrom, fsDto, fatatus).thenCompose(result -> {
 
-                if (!aBoolean){
-                    foCallback.OnFinished(poReceipt.getMessage());
-                    return;
+            if (result instanceof Boolean){
+                return CompletableFuture.completedFuture(false);
+            } else if (result instanceof List) {
+
+                List<EReceiptDetail> details = (List<EReceiptDetail>) result;
+                if (details.size() > 0){
+
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+                    for (EReceiptDetail loReceipt : details) {
+
+                        //download each information for source project
+                        if (loReceipt.getSSourceCD().equalsIgnoreCase("PROJ")){
+                            chain = poProjects.DownloadProjectInfo(loReceipt.getSSourceNo());
+                        }
+                    }
+                    return chain;
+                }else {
+                    return CompletableFuture.completedFuture(false);
                 }
-                foCallback.OnFinished("Successfully downloaded receipt list");
             }
+            return CompletableFuture.completedFuture(false);
+        }).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFinished("Failed to download receipts");
+                return;
+            }
+            foCallback.OnFinished("Successfully download receipts");
         });
     }
 
-    public void SaveReceipt(EReceiptMaster foMaster, List<ReceiptDetail> foDetail, OnTransaction foCallback){
+    public void SaveReceipt(EReceiptMaster foMaster, List<ReceiptDetail> foDetail, OnSaveReceipt foCallback){
 
         foCallback.OnLoad();
 
@@ -342,31 +398,29 @@ public class VM_Receipts extends AndroidViewModel {
         }
         foMaster.setNTotlPaid(String.valueOf(ldbl_paid));
 
-        poReceipt.SaveReceipt(foMaster, laDetails).thenCompose(o -> {
-
-            CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(false);
+        poReceipt.SaveReceipt(foMaster, laDetails).thenAccept(o -> {
 
             if (o instanceof Boolean){
-                chain = CompletableFuture.completedFuture(false);
+                foCallback.OnFailed(poReceipt.getMessage());
             }else if (o instanceof EReceiptMaster loReceipt){
 
                 if (loReceipt.getSTransNox().isEmpty()){
-                    chain = CompletableFuture.completedFuture(false);
+                    foCallback.OnFailed(poReceipt.getMessage());
                 }else {
 
                     //update receipt as confirmed, new entries are considered payment has been received
                     loReceipt.setCTranStat("1");
-                    chain = poReceipt.UpdateReceiptStatus(loReceipt);
+                    poReceipt.UpdateReceiptStatus(loReceipt).thenAccept(aBoolean -> {
+
+                        if (!aBoolean){
+                            foCallback.OnFailed(poReceipt.getMessage());
+                        }else {
+                            foCallback.OnSuccess(loReceipt.getSTransNox());
+                        }
+                    });
                 }
             }
-            return chain;
-        }).thenAccept(o -> {
 
-            if (!o){
-                foCallback.OnFailed(poReceipt.getMessage());
-                return;
-            }
-            foCallback.OnSuccess();
         });
     }
 

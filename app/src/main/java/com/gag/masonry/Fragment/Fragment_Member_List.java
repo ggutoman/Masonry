@@ -64,7 +64,7 @@ public class Fragment_Member_List extends Fragment {
 
     private TabLayout tab_layout;
     private ConstraintLayout layout_no_record;
-    private MaterialTextView mtv_no_record, mtv_lodge;
+    private MaterialTextView mtv_no_record, mtv_lodge, mtv_year;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -108,6 +108,8 @@ public class Fragment_Member_List extends Fragment {
         InitDataReceiver();
         InitListener();
 
+        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
+
         DownloadOfficerList();
 
         return view;
@@ -117,6 +119,7 @@ public class Fragment_Member_List extends Fragment {
 
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
         tab_layout = view.findViewById(R.id.tab_layout);
+        mtv_year = view.findViewById(R.id.mtv_year);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         mtv_no_record = view.findViewById(R.id.mtv_no_record);
         btn_filter= view.findViewById(R.id.btn_filter);
@@ -191,7 +194,7 @@ public class Fragment_Member_List extends Fragment {
                                                     break;
                                             }
                                             //add to child container, as bridge to initiate another fragment after call
-                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                                             fragmentTransaction.addToBackStack(lsStackIDxx);
                                             fragmentTransaction.commit();
                                         }
@@ -319,7 +322,9 @@ public class Fragment_Member_List extends Fragment {
                 lsDfrom = mviewModel.GetFormattedDate(selection.first);
                 lsDto = mviewModel.GetFormattedDate(selection.second);
 
-
+                //display year filtered
+                String lStartYear = mviewModel.GetFormattedDate(lsDfrom, "yyyy");
+                String lsEndYear = mviewModel.GetFormattedDate(lsDfrom, "yyyy");
 
                 if (isDownload){
 
@@ -332,11 +337,14 @@ public class Fragment_Member_List extends Fragment {
                         @Override
                         public void OnNegative(@NotNull AlertDialog poDialog) {
                             poDialog.dismiss();
+
+                            mtv_year.setText("(M.Y " + lStartYear + " - " + String.valueOf(Integer.parseInt(lsEndYear) + 1) + ")");
                             DownloadOfficerList();
                         }
                     });
                     return;
                 }
+                mtv_year.setText("(M.Y " + lStartYear + " - " + String.valueOf(Integer.parseInt(lsEndYear) + 1) + ")");
                 InitDataReceiver();
 
             });
@@ -370,11 +378,14 @@ public class Fragment_Member_List extends Fragment {
                                 @Override
                                 public void OnNegative(@NotNull AlertDialog poDialog) {
                                     poDialog.dismiss();
+
+                                    mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
                                     DownloadOfficerList();
                                 }
                             });
                             return;
                         }
+                        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
                         InitDataReceiver();
 
                     })

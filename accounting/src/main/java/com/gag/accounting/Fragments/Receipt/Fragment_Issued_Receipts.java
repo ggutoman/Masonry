@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -34,11 +36,13 @@ import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.ReceiptMasterList;
+import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Fragment_Issued_Receipts extends Fragment {
@@ -52,8 +56,10 @@ public class Fragment_Issued_Receipts extends Fragment {
     private MaterialTextView mtv_title;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
-    private RecyclerView rcv_list;
+    private TabLayout tab_layout;
+    private ExpandableListView rcv_list;
 
+    private int lnTabSelected = 0;
     private String lsStackIDxx, lsDfrom, lsDto;
     private List<String> laStatus;
 
@@ -79,7 +85,7 @@ public class Fragment_Issued_Receipts extends Fragment {
 
         laStatus = lsStackIDxx.equalsIgnoreCase("issued_receipt") ? List.of("0", "1", "3", "4") : List.of("1");
 
-        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
+        lsDfrom = mViewModel.GetCountedDate(1, 1, false);
         lsDto = mViewModel.GetCurrentDate();
 
         InitViews(view);
@@ -99,46 +105,58 @@ public class Fragment_Issued_Receipts extends Fragment {
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
+        tab_layout = view.findViewById(R.id.tab_layout);
         rcv_list = view.findViewById(R.id.rcv_list);
     }
 
     public void InitDataReceiver(){
 
-        mViewModel.GetReceiptMasterList(lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<ReceiptMasterList>>() {
-            @Override
-            public void onChanged(List<ReceiptMasterList> receiptMasterLists) {
+        if (lnTabSelected > 0){
 
-                List<ReceiptMasterList> filteredList = new ArrayList<>();
+            mViewModel.GetReceiptSources("PROJ", lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<ReceiptMasterList>>() {
+                @Override
+                public void onChanged(List<ReceiptMasterList> receiptMasterLists) {
 
-                if (receiptMasterLists == null){
-                    layout_no_record.setVisibility(View.VISIBLE);
-                    rcv_list.setVisibility(View.GONE);
-                    return;
-                }else {
-
-                    for (ReceiptMasterList loMaster : receiptMasterLists){
-
-                        //add list based on status initialized
-                        if (laStatus.contains(loMaster.getCTranStat())){
-                            filteredList.add(loMaster);
-                        }
-                    }
-
-                    if (filteredList.size() < 1){
-
+                    if (receiptMasterLists == null){
                         layout_no_record.setVisibility(View.VISIBLE);
                         rcv_list.setVisibility(View.GONE);
-                        return;
-                    }
-                    layout_no_record.setVisibility(View.GONE);
-                    rcv_list.setVisibility(View.VISIBLE);
-                }
+                    }else {
 
-                loAdapter = new Adapter_Issued_Receipts(
-                        filteredList,
-                        new Adapter_Issued_Receipts.OnSelectItem() {
+                        List<String> laParents = new ArrayList<>();
+                        HashMap<String, List<ReceiptMasterList>> laReceipts = new HashMap<>();
+                        for (ReceiptMasterList loMaster : receiptMasterLists){
+
+                            //add list based on status initialized
+                            if (laStatus.contains(loMaster.getCTranStat())){
+
+                                //get source description
+                                EProjectMaster loProj = mViewModel.GetProjectInfo(loMaster.getSSourceNo());
+                                String lsSourceDescr;
+                                if (loProj == null){
+                                    lsSourceDescr = loMaster.getSSourceNo();
+                                }else {
+                                    lsSourceDescr = loProj.getSProjctNm();
+                                }
+
+                                //add as group parent if not yet added
+                                if (!laParents.contains(lsSourceDescr)) laParents.add(lsSourceDescr);
+
+                                //initialize new map list if not yet added
+                                if (!laReceipts.containsKey(lsSourceDescr)) laReceipts.put(lsSourceDescr, new ArrayList<>());
+                                laReceipts.get(lsSourceDescr).add(loMaster);
+                            }
+                        }
+
+                        if (laReceipts.size() < 1){
+
+                            layout_no_record.setVisibility(View.VISIBLE);
+                            rcv_list.setVisibility(View.GONE);
+                            return;
+                        }
+
+                        loAdapter = new Adapter_Issued_Receipts(requireActivity(), laParents, laReceipts, new Adapter_Issued_Receipts.OnSelectItem() {
                             @Override
-                            public void OnSelec(ReceiptMasterList loItem) {
+                            public void OnSelect(ReceiptMasterList loItem) {
 
                                 FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
                                 Fragment loFragment = new Fragment();
@@ -164,19 +182,97 @@ public class Fragment_Issued_Receipts extends Fragment {
                                         loFragment.setArguments(loBundle);
                                         break;
                                 }
-                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                                 loTransaction.addToBackStack(lsStackIDxx);
                                 loTransaction.commit();
 
                             }
-                        }
-                );
-                loAdapter.GetFilter().InitStatus(laStatus);
+                        });
 
-                rcv_list.setAdapter(loAdapter);
-                rcv_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-            }
-        });
+                        rcv_list.setAdapter(loAdapter);
+                        layout_no_record.setVisibility(View.GONE);
+                        rcv_list.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+
+        }else {
+
+            mViewModel.GetReceiptMembers(lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<ReceiptMasterList>>() {
+                @Override
+                public void onChanged(List<ReceiptMasterList> receiptMasterLists) {
+
+                    if (receiptMasterLists == null){
+                        layout_no_record.setVisibility(View.VISIBLE);
+                        rcv_list.setVisibility(View.GONE);
+                    }else {
+
+                        List<String> laParents = new ArrayList<>();
+                        HashMap<String, List<ReceiptMasterList>> laReceipts = new HashMap<>();
+                        for (ReceiptMasterList loMaster : receiptMasterLists){
+
+                            //add list based on status initialized
+                            if (laStatus.contains(loMaster.getCTranStat())){
+
+                                //add as group parent if not yet added
+                                if (!laParents.contains(loMaster.getSSourceNo())) laParents.add(loMaster.getSSourceNo());
+
+                                //initialize new map list if not yet added
+                                if (!laReceipts.containsKey(loMaster.getSSourceNo())) laReceipts.put(loMaster.getSSourceNo(), new ArrayList<>());
+                                laReceipts.get(loMaster.getSSourceNo()).add(loMaster);
+                            }
+                        }
+
+                        if (laReceipts.size() < 1){
+
+                            layout_no_record.setVisibility(View.VISIBLE);
+                            rcv_list.setVisibility(View.GONE);
+                            return;
+                        }
+
+                        loAdapter = new Adapter_Issued_Receipts(requireActivity(), laParents, laReceipts, new Adapter_Issued_Receipts.OnSelectItem() {
+                            @Override
+                            public void OnSelect(ReceiptMasterList loItem) {
+
+                                FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                                Fragment loFragment = new Fragment();
+                                Bundle loBundle = new Bundle();
+
+                                switch (lsStackIDxx){
+
+                                    case "issued_receipt":
+
+                                        loFragment = new Fragment_Receipt();
+                                        loBundle.putString("member_id", loItem.getSMemberID());
+                                        loBundle.putString("transaction_id", loItem.getSTransNox());
+
+                                        loFragment.setArguments(loBundle);
+                                        break;
+
+                                    case "receipt_confirm":
+
+                                        loFragment = new Fragment_Receipt_Detail();
+                                        loBundle.putString("member_id", loItem.getSMemberID());
+                                        loBundle.putString("transaction_id", loItem.getSTransNox());
+
+                                        loFragment.setArguments(loBundle);
+                                        break;
+                                }
+                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
+                                loTransaction.addToBackStack(lsStackIDxx);
+                                loTransaction.commit();
+
+                            }
+                        });
+
+                        rcv_list.setAdapter(loAdapter);
+                        layout_no_record.setVisibility(View.GONE);
+                        rcv_list.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+
+        }
     }
 
     private void DownloadList(){
@@ -203,14 +299,12 @@ public class Fragment_Issued_Receipts extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if (loAdapter == null) return;
-
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
                 loMenu.getMenuInflater().inflate(R.menu.menu_filter_receipts, loMenu.getMenu());
 
                 //show status filter for viewing history only, not for voiding
-                loMenu.getMenu().findItem(R.id.action_by_category).setVisible(lsStackIDxx.equalsIgnoreCase("issued_receipt"));
+                loMenu.getMenu().findItem(R.id.action_by_category).setVisible((lsStackIDxx.equalsIgnoreCase("issued_receipt")));
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -270,37 +364,51 @@ public class Fragment_Issued_Receipts extends Fragment {
                                 }
                             });
                             loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_all){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = lsStackIDxx.equalsIgnoreCase("issued_receipt") ? List.of("0", "1", "3", "4") : List.of("1");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_for_open){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("0");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_confirmed){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("1");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_cancelled){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("3");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_void){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("4");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }
@@ -322,8 +430,24 @@ public class Fragment_Issued_Receipts extends Fragment {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
                 if (loAdapter == null) return;
-                loAdapter.GetFilter().filter(charSequence.toString());
+                loAdapter.Filter(charSequence.toString());
             }
+        });
+
+        tab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                lnTabSelected = tab.getPosition();
+                rcv_list.setAdapter((ExpandableListAdapter) null);
+
+                InitDataReceiver();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
 
     }

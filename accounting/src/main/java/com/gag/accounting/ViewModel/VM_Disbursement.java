@@ -23,6 +23,7 @@ import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Room.Entities.EReceiptDetail;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,10 +58,6 @@ public class VM_Disbursement extends AndroidViewModel {
         return poDisbursement.GetUserID();
     }
 
-    public String GetLodgeID(){
-        return poDisbursement.GetLodgeID();
-    }
-
     public String GetCurrentDate(){
         return poDisbursement.GetCurrentDate();
     }
@@ -75,6 +72,14 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public String GetCountedDate(int fnCount, int fnDateIndex, boolean fbIsAdd){
         return poDisbursement.GetCountedDate(fnCount, fnDateIndex, fbIsAdd);
+    }
+
+    public EProjectMaster GetProjectInfo(String fsProjCd){
+        return poProjects.GetProjectInfo(fsProjCd);
+    }
+
+    public ELodgeInfo GetLodgeInfo(String fsLodgeID){
+        return poFunds.GetLodgeInfo(fsLodgeID);
     }
 
     public List<DISBURSEMENT_CONSTANTS> GetSources(){
@@ -309,16 +314,37 @@ public class VM_Disbursement extends AndroidViewModel {
     public void DownloadDisbursementList(String fsDfromxx, String fsDtoxx, List<String> laStatus, VM_Receipts.OnDownload foCallback){
 
         foCallback.OnLoad();
-        poDisbursement.DownloadDisbursementList(fsDfromxx, fsDtoxx, laStatus).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poDisbursement.DownloadDisbursementList(fsDfromxx, fsDtoxx, laStatus).thenCompose(result -> {
 
-                if (!aBoolean){
-                    foCallback.OnFinished(poDisbursement.getMessage());
-                    return;
+            if (result instanceof Boolean){
+                return CompletableFuture.completedFuture(false);
+            } else if (result instanceof List) {
+
+                List<EDisbursement> details = (List<EDisbursement>) result;
+                if (details.size() > 0){
+
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+                    for (EDisbursement loReceipt : details) {
+
+                        //download each information for source project
+                        if (loReceipt.getSSourceCD().equalsIgnoreCase("PROJ")){
+                            chain = poProjects.DownloadProjectInfo(loReceipt.getSSourceNo());
+                        }
+                    }
+                    return chain;
+                }else {
+                    return CompletableFuture.completedFuture(false);
                 }
-                foCallback.OnFinished("Successfully downloaded disbursement");
             }
+            return CompletableFuture.completedFuture(false);
+
+        }).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFinished("Failed to download disbursements");
+                return;
+            }
+            foCallback.OnFinished("Successfully download disbursements");
         });
     }
 

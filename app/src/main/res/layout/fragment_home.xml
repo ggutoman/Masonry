@@ -43,7 +43,8 @@
                     style="@style/Text_Header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Welcome,"/>
+                    android:text="Welcome,"
+                    android:alpha="0.6"/>
 
                 <com.google.android.material.textview.MaterialTextView
                     style="@style/Text_Header"
@@ -53,16 +54,21 @@
                     android:text="User"/>
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/mtv_lodge"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"/>
-
-                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/mtv_year"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="N/A"/>
+                    android:text="N/A"
+                    android:textSize="13sp"
+                    android:alpha="0.6"
+                    android:layout_marginTop="10dp"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_lodge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="N/A"
+                    android:textSize="13sp"
+                    android:alpha="0.6"/>
 
             </LinearLayout>
 

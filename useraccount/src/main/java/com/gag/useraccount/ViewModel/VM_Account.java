@@ -20,6 +20,12 @@ public class VM_Account extends AndroidViewModel {
         void onError(String fsError);
     }
 
+    public interface OnVerifyMobile {
+        void onLoad();
+        void onSuccess(String fsOTP);
+        void onError(String fsError);
+    }
+
     public VM_Account(@NonNull Application application) {
         super(application);
 
@@ -139,5 +145,37 @@ public class VM_Account extends AndroidViewModel {
                     return null;
                 });
 
+    }
+
+    public void VerifyMobile(String fsMobile, OnVerifyMobile foCallback){
+
+        foCallback.onLoad();
+        poAccount.VerifyMobile(fsMobile).thenAccept(o -> {
+
+            if (o instanceof Boolean){
+                foCallback.onError(!((Boolean) o) ? poAccount.getMessage() : "Failed to verify mobile number");
+            }else if (o instanceof String){
+
+                if (((String) o).isEmpty()){
+                    foCallback.onError("Failed to verify mobile number");
+                }else {
+                    foCallback.onSuccess((String) o);
+                }
+            }
+        });
+    }
+
+    public void ChangePassword(String fsMobile, String fsPassword, OnSubmit foCallback){
+
+        foCallback.onLoad();
+        poAccount.ChangePassword(fsMobile, fsPassword).thenAccept(o -> {
+
+            if (!o){
+                foCallback.onError(poAccount.getMessage());
+            }else {
+                foCallback.onSuccess();
+            }
+
+        });
     }
 }

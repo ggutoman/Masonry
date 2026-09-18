@@ -271,6 +271,7 @@ class UserAccount(instance : Context) {
         return future
 
     }
+
     @SuppressLint("MissingPermission")
     fun UpdateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
 
@@ -332,6 +333,138 @@ class UserAccount(instance : Context) {
                                     poMemberInfo.SaveMemberInfo(it)
                                     poUserInfo.SaveUserInfo(poUser)
                                 }
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun VerifyMobile(fsMobile : String): CompletableFuture<Any> {
+
+        val future = CompletableFuture<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        put("sMobileNmbr", fsMobile)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_VERIFY_MOBILE.fsURL,
+                        loParams
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                //return generated otp
+                                val resultData = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                                resultData.GetPayload()
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun ChangePassword(fsMobile : String, fsPassw : String): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val lsEncrPass: String = encryptObj.EncryptHex(fsPassw)
+                    if (lsEncrPass.isEmpty()) {
+                        message = "Could not generate passkey"
+                        false
+                    }
+
+                    val loParams = JSONObject().apply {
+                        put("sMobileNmbr", fsMobile)
+                        put("sPasswrd", lsEncrPass)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CHANGE_PASSWORD.fsURL,
+                        loParams
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
                                 true
                             }
 

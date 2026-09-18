@@ -54,10 +54,6 @@ class Disbursement(instance : Context) {
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
         .getOrNull(1) ?: ""
 
-    fun GetLodgeID() : String = TextFormatter()
-        .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
-        .getOrNull(0) ?: ""
-
     fun GetCurrentDate() : String = dateRepository.GetCurrentDate()
 
     fun GetCurrentDateTime() : String = dateRepository.GetCurrentDateTime()
@@ -169,9 +165,9 @@ class Disbursement(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadDisbursementList(fDfromxx : String, fDtoxx : String, faStatus : List<String>) : CompletableFuture<Boolean>{
+    fun DownloadDisbursementList(fDfromxx : String, fDtoxx : String, faStatus : List<String>) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -199,7 +195,8 @@ class Disbursement(instance : Context) {
                             //save disbursement list
                             resultData.GetPayload().forEach { loDisbursement -> poDisbursement.SaveDisbursement(loDisbursement) }
 
-                            true
+                            //return list
+                            resultData.GetPayload()
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

@@ -10,8 +10,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,6 +17,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -29,16 +29,16 @@ import com.gag.accounting.ViewModel.VM_Disbursement;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
-
-import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.Room.Entities.EDisbursement;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Fragment_Disbursement_History extends Fragment {
@@ -52,8 +52,10 @@ public class Fragment_Disbursement_History extends Fragment {
     private MaterialTextView mtv_title;
     private ImageButton btn_filter;
     private TextInputEditText tie_search;
-    private RecyclerView rcv_list;
+    private TabLayout tab_layout;
+    private ExpandableListView rcv_list;
 
+    private int lnTabSelected = 0;
     private String lsStackIDxx, lsDfrom, lsDto, lsLodgeIDxx;
     private List<String> laStatus;
 
@@ -78,7 +80,7 @@ public class Fragment_Disbursement_History extends Fragment {
         }
         laStatus = lsStackIDxx.equalsIgnoreCase("disbursement_list") ? List.of("0", "1", "2", "3", "4") : List.of("2");
 
-        lsDfrom = mViewModel.GetCountedDate(7, 1, false);
+        lsDfrom = mViewModel.GetCountedDate(1, 1, true);
         lsDto = mViewModel.GetCurrentDate();
 
         lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
@@ -100,6 +102,7 @@ public class Fragment_Disbursement_History extends Fragment {
         layout_no_record = view.findViewById(R.id.layout_no_record);
         btn_filter = view.findViewById(R.id.btn_filter);
         tie_search = view.findViewById(R.id.tie_search);
+        tab_layout = view.findViewById(R.id.tab_layout);
         rcv_list = view.findViewById(R.id.rcv_list);
     }
 
@@ -109,23 +112,39 @@ public class Fragment_Disbursement_History extends Fragment {
             @Override
             public void onChanged(List<EDisbursement> eDisbursementList) {
 
-                List<EDisbursement> filteredList = new ArrayList<>();
-
                 if (eDisbursementList == null){
                     layout_no_record.setVisibility(View.VISIBLE);
                     rcv_list.setVisibility(View.GONE);
-                    return;
                 }else {
+
+                    List<String> laParents = new ArrayList<>();
+                    HashMap<String, List<EDisbursement>> laDisb = new HashMap<>();
 
                     for (EDisbursement loMaster : eDisbursementList){
 
                         //add list based on status initialized
                         if (laStatus.contains(loMaster.getCTranStat())){
-                            filteredList.add(loMaster);
+
+                            String lsSource= loMaster.getSPayeeNme().toUpperCase();
+                            if (lnTabSelected > 0){
+
+                                if (loMaster.getSSourceCD().equalsIgnoreCase("PROJ")){
+                                    lsSource = mViewModel.GetProjectInfo(loMaster.getSSourceNo()) == null ? loMaster.getSSourceNo() : mViewModel.GetProjectInfo(loMaster.getSSourceNo()).getSProjctNm();
+                                }else{
+                                    lsSource = mViewModel.GetLodgeInfo(loMaster.getSSourceNo()) == null ? loMaster.getSSourceNo() : mViewModel.GetLodgeInfo(loMaster.getSSourceNo()).getSLodgeNme();
+                                }
+                            }
+
+                            //add as group parent if not yet added
+                            if (!laParents.contains(lsSource)) laParents.add(lsSource);
+
+                            //initialize new map list if not yet added
+                            if (!laDisb.containsKey(lsSource)) laDisb.put(lsSource, new ArrayList<>());
+                            laDisb.get(lsSource).add(loMaster);
                         }
                     }
 
-                    if (filteredList.size() < 1){
+                    if (laDisb.size() < 1){
 
                         layout_no_record.setVisibility(View.VISIBLE);
                         rcv_list.setVisibility(View.GONE);
@@ -133,51 +152,45 @@ public class Fragment_Disbursement_History extends Fragment {
                     }
                     layout_no_record.setVisibility(View.GONE);
                     rcv_list.setVisibility(View.VISIBLE);
-                }
 
-                loAdapter = new Adapter_Disbursement_List(
-                        filteredList,
-                        new Adapter_Disbursement_List.OnSelectItem() {
-                            @Override
-                            public void OnSelec(EDisbursement loItem) {
+                    loAdapter = new Adapter_Disbursement_List(requireActivity(), laParents, laDisb, new Adapter_Disbursement_List.OnSelectItem() {
+                        @Override
+                        public void OnSelec(EDisbursement loItem) {
 
-                                FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                            FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
 
-                                Fragment loFragment = new Fragment();
-                                Bundle loBundle = new Bundle();
+                            Fragment loFragment = new Fragment();
+                            Bundle loBundle = new Bundle();
 
-                                switch (lsStackIDxx){
+                            switch (lsStackIDxx){
 
-                                    case "disbursement_list":
+                                case "disbursement_list":
 
-                                        loFragment = new Fragment_Disbursement();
+                                    loFragment = new Fragment_Disbursement();
 
-                                        loBundle.putString("transaction_id", loItem.getSTransNox());
-                                        loBundle.putString("lodge_id", lsLodgeIDxx);
-                                        loFragment.setArguments(loBundle);
-                                        break;
+                                    loBundle.putString("transaction_id", loItem.getSTransNox());
+                                    loBundle.putString("lodge_id", lsLodgeIDxx);
+                                    loFragment.setArguments(loBundle);
+                                    break;
 
-                                    case "disbursement_confirm":
+                                case "disbursement_confirm":
 
-                                        loFragment = new Fragment_Disbursement_Detail();
+                                    loFragment = new Fragment_Disbursement_Detail();
 
-                                        loBundle.putString("transaction_id", loItem.getSTransNox());
-                                        loBundle.putString("lodge_id", lsLodgeIDxx);
-                                        loFragment.setArguments(loBundle);
-                                        break;
-                                }
-
-                                loTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment))
-                                        .addToBackStack(lsStackIDxx);
-                                loTransaction.commit();
-
+                                    loBundle.putString("transaction_id", loItem.getSTransNox());
+                                    loBundle.putString("lodge_id", lsLodgeIDxx);
+                                    loFragment.setArguments(loBundle);
+                                    break;
                             }
-                        }
-                );
-                loAdapter.GetFilter().InitStatus(laStatus);
 
-                rcv_list.setAdapter(loAdapter);
-                rcv_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+                            loTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment)
+                                    .addToBackStack(lsStackIDxx);
+                            loTransaction.commit();
+
+                        }
+                    });
+                    rcv_list.setAdapter(loAdapter);
+                }
             }
         });
     }
@@ -205,8 +218,6 @@ public class Fragment_Disbursement_History extends Fragment {
         btn_filter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (loAdapter == null) return;
 
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
@@ -277,45 +288,66 @@ public class Fragment_Disbursement_History extends Fragment {
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_all){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("0", "1", "2", "3", "4", "5");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_for_open){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("0");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_confirmed){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("1");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_release){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("2");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_cancelled){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("3");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_void){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("4");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }else if (menuItem.getItemId() == R.id.action_item_completed){
+
+                            if (loAdapter == null) return true;
+
                             laStatus = List.of("5");
-                            loAdapter.GetFilter().InitStatus(laStatus);
-                            loAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+                            loAdapter.InitStatus(laStatus);
+                            loAdapter.Filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
 
                             return true;
                         }
@@ -324,6 +356,22 @@ public class Fragment_Disbursement_History extends Fragment {
                 });
 
             }
+        });
+
+        tab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                lnTabSelected = tab.getPosition();
+                rcv_list.setAdapter((ExpandableListAdapter) null);
+
+                InitDataReceiver();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
 
         tie_search.addTextChangedListener(new TextWatcher() {
@@ -337,7 +385,7 @@ public class Fragment_Disbursement_History extends Fragment {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
                 if (loAdapter == null) return;
-                loAdapter.GetFilter().filter(charSequence.toString());
+                loAdapter.Filter(charSequence.toString());
             }
         });
     }

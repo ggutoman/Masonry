@@ -25,6 +25,7 @@ import com.gag.accounting.Dialog.Dialog_Project_Entry;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -57,6 +58,7 @@ public class Fragment_Project extends Fragment {
     private int lnSelectStatus = -1, lnSelectDetail = -1, lnSelectType = -1;
     private ProjectDetail loSelectDetail;
 
+    private MaterialCardView mcv_ids;
     private ConstraintLayout layout_tools;
     private TextInputLayout til_proj_type, til_proj_status;
     private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount;
@@ -114,6 +116,7 @@ public class Fragment_Project extends Fragment {
         mtv_totalcontri = view.findViewById(R.id.mtv_totalcontri);
         mtv_totaldisb = view.findViewById(R.id.mtv_totaldisb);
 
+        mcv_ids = view.findViewById(R.id.mcv_ids);
         layout_tools = view.findViewById(R.id.layout_tools);
         til_proj_type = view.findViewById(R.id.til_proj_type);
         til_proj_status = view.findViewById(R.id.til_proj_status);
@@ -196,7 +199,7 @@ public class Fragment_Project extends Fragment {
                     loMaster = new EProjectMaster(
                             lsTransNox,
                             "",
-                            "0",
+                            "1",
                             lsYearID,
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDate(),
@@ -210,9 +213,13 @@ public class Fragment_Project extends Fragment {
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
+
+                    mcv_ids.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
                 }else {
                     loMaster = eProjectMaster;
+
+                    mcv_ids.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 

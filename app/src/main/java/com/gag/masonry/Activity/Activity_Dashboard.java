@@ -78,7 +78,21 @@ public class Activity_Dashboard extends AppCompatActivity {
         list_menus = findViewById(R.id.list_menus);
 
         InitAdapter();
-        InitView("000"); //default to home
+//        InitView("000"); //default to home
+
+        //default home as main screen
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        Fragment loFragment = new Fragment_Home();
+        Bundle loArgs = new Bundle();
+
+        loArgs.putInt("user_level", lnUsrLvl);
+        loFragment.setArguments(loArgs);
+
+        fragmentTransaction.add(R.id.layout_container, new Fragment_Child_Container().newInstance("home", loFragment));
+        fragmentTransaction.addToBackStack("home");
+        fragmentTransaction.commit();
 
     }
 
@@ -120,7 +134,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance("generate_report", new Fragment_Report_List()));
+                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Report_List());
                         fragmentTransaction.addToBackStack("generate_report");
                         fragmentTransaction.commit();
                         break;
@@ -164,7 +178,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                             public void OnNegative(@NotNull AlertDialog poDialog) {
                                 poDialog.dismiss();
 
-                                Fragment current = getSupportFragmentManager().findFragmentById(R.id.layout_container);
+                                Fragment current = getSupportFragmentManager().findFragmentById(org.gag.appdriver.R.id.frame_child);
                                 if (current != null) {
                                     getSupportFragmentManager()
                                             .beginTransaction()
@@ -228,22 +242,22 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loFragment.setArguments(loArgs);
 
                 lsStackId = "home";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "026": //account info
                 loFragment = new Fragment_UserInfo();
                 lsStackId = "view_account";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "005": //create member
                 loFragment = new Fragment_Member();
                 lsStackId = "create_member";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "006": //assign officer
                 loFragment = new Fragment_Assign_Officer();
                 lsStackId = "assign_officer";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "008": //project entry
                 loFragment = new Fragment_Project();
@@ -251,29 +265,15 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loFragment.setArguments(loArgs);
 
                 lsStackId = "project_entry";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "009", "010", "011": //project history
+            case "010": //project history
                 loFragment = new Fragment_Lodge_Calendar_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                if (fsItemID.equalsIgnoreCase("009")){
-                    lsStackId = "project_confirm";
-                }else if (fsItemID.equalsIgnoreCase("010")){
-                    lsStackId = "project_information";
-                }else {
-                    lsStackId = "project_summary";
-                }
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
-                break;
-            case "016": //lodge fund summary information
-                loFragment = new Fragment_Lodge_Fund();
-                loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
-                loFragment.setArguments(loArgs);
-
-                lsStackId = "lodge_fund_information";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                lsStackId = "project_information";
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "018", "007": //receipt entry, view members
                 loFragment = new Fragment_Member_List();
@@ -283,15 +283,15 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loFragment.setArguments(loArgs);
 
                 lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_entry" : "view_members";
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "019", "020": //confirm receipts or list of receipts
                 loFragment = new Fragment_Issued_Receipts();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("019") ? "receipt_confirm" : "issued_receipt";
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
+                lsStackId = fsItemID.equalsIgnoreCase("020") ? "receipt_confirm" : "issued_receipt";
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "022": //create disbursement
                 loFragment = new Fragment_Disbursement();
@@ -299,15 +299,15 @@ public class Activity_Dashboard extends AppCompatActivity {
                 loFragment.setArguments(loArgs);
 
                 lsStackId= "disbursement_entry";
-                fragmentTransaction.replace(R.id.layout_container, loFragment);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             case "023", "024": //view & confirm disbursements
                 loFragment = new Fragment_Disbursement_History();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("023") ? "disbursement_confirm" : "disbursement_list";
-                fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackId, loFragment));
+                lsStackId = fsItemID.equalsIgnoreCase("024") ? "disbursement_confirm" : "disbursement_list";
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             default:
                 poMessage.ShowMessage(1, "Feature under maintenance. Thankyou for understanding.", "Okay", "", new Message_Dialog.OnDialogClick() {

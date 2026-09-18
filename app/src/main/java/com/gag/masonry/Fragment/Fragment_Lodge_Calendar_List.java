@@ -144,7 +144,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                         //initialize fragment properties
                         loFragment.setArguments(loBundle);
-                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                         fragmentTransaction.addToBackStack(lsStackIDxx);
                         fragmentTransaction.commit();
 

@@ -1,6 +1,7 @@
 package com.gag.useraccount.Fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -56,7 +57,7 @@ import java.util.List;
 public class Fragment_Member extends Fragment{
 
     private Message_Dialog poMessage;
-    private LoadDialog poDialog;
+    private LoadDialog poLoad;
     private VM_Member mviewModel;
 
     private MaterialAutoCompleteTextView
@@ -114,11 +115,11 @@ public class Fragment_Member extends Fragment{
 
         mviewModel = new ViewModelProvider(this).get(VM_Member.class);
         poMessage = new Message_Dialog(requireActivity());
-        poDialog = new LoadDialog(requireActivity());
+        poLoad = new LoadDialog(requireActivity());
         poDialogAddMember = new Dialog_Add_Member_Info(requireActivity(), mviewModel, getViewLifecycleOwner());
 
         poMessage.InitDialog();
-        poDialog.InitDialog();
+        poLoad.InitDialog();
 
         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (count > 0) {
@@ -1121,12 +1122,12 @@ public class Fragment_Member extends Fragment{
                         mviewModel.SubmitParameters(loMemberInfo, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
                             @Override
                             public void OnLoad() {
-                                poDialog.ShowDialog("Submitting your information. Please wait . .");
+                                poLoad.ShowDialog("Submitting your information. Please wait . .");
                             }
 
                             @Override
                             public void OnSuccess() {
-                                poDialog.DismissDialog();
+                                poLoad.DismissDialog();
 
                                 poMessage.ShowMessage(2, "Member information has been saved successfully. Do you want to send ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                     @Override
@@ -1139,6 +1140,8 @@ public class Fragment_Member extends Fragment{
                                     public void OnNegative(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
 
+                                        poLoad.ShowDialog("Sending message. Please wait . . .");
+
                                         //find the primary and active contact number of the member
                                         laContactParams
                                                 .stream()
@@ -1149,15 +1152,25 @@ public class Fragment_Member extends Fragment{
                                                     if (loMemberInfo == null) return;
 
                                                     //compose message for the member's ALSM ID
-                                                    String lsMessage = "KGA " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                                    String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
                                                             "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
                                                             "Please do not share your registration ID for Masonry Application";
 
                                                     new SMSApp(requireActivity(), new OnSMSStatus() {
                                                         @Override
                                                         public void OnResult(String fsResult) {
-                                                            Toast.makeText(requireActivity(), fsResult, Toast.LENGTH_SHORT).show();
-                                                            FinishTask();
+
+                                                            poLoad.DismissDialog();
+                                                            poMessage.ShowMessage(0, fsResult, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                                                @Override
+                                                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                                    poDialog.dismiss();
+                                                                    FinishTask();
+                                                                }
+
+                                                                @Override
+                                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                                            });
                                                         }
                                                     }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
                                                 });
@@ -1168,7 +1181,7 @@ public class Fragment_Member extends Fragment{
 
                             @Override
                             public void OnFailed(String fsMesssage) {
-                                poDialog.DismissDialog();
+                                poLoad.DismissDialog();
 
                                 poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
@@ -1234,9 +1247,14 @@ public class Fragment_Member extends Fragment{
         mviewModel.ClearContacts();
         mviewModel.ClearEmails();
 
-        requireActivity()
-                .getSupportFragmentManager()
-                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        Activity activity = getActivity();
+        if (activity != null) {
+
+            requireActivity()
+                    .getSupportFragmentManager()
+                    .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        }
 
     }
 }

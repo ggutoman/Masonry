@@ -26,7 +26,7 @@ public class Activity_Login extends AppCompatActivity {
     private LoadDialog poDialog;
 
     private MaterialButton btn_login;
-    private MaterialTextView mtv_signup;
+    private MaterialTextView mtv_signup, mtv_forgot;
     private TextInputEditText tie_password, tie_username;
 
     @Override
@@ -52,6 +52,7 @@ public class Activity_Login extends AppCompatActivity {
         tie_username = findViewById(R.id.tie_username);
         tie_password = findViewById(R.id.tie_password);
         mtv_signup = findViewById(R.id.mtv_signup);
+        mtv_forgot = findViewById(R.id.mtv_forgot);
     }
 
     private void InitListener(){
@@ -63,6 +64,17 @@ public class Activity_Login extends AppCompatActivity {
                         new Intent(
             Activity_Login.this, Activity_Account.class
                          ));
+            }
+        });
+
+        mtv_forgot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startActivity(
+                        new Intent(
+                                Activity_Login.this, Activity_Forgot_Password.class
+                        ));
             }
         });
 

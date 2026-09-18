@@ -5,7 +5,8 @@
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="25dp">
 
         <LinearLayout
             android:id="@+id/layout_trans"
@@ -16,19 +17,19 @@
             app:layout_constraintWidth_percent="0.5">
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/Text_Header"
-                android:id="@+id/mtv_src_nme"
+                android:id="@+id/mtv_or"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="N/A"/>
+                android:text="N/A"
+                android:textSize="13sp"/>
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/Text_Header"
                 android:id="@+id/mtv_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="N/A"
-                android:textSize="13dp"
+                android:textSize="13sp"
+                android:layout_marginTop="5dp"
                 android:alpha="0.7"/>
 
         </LinearLayout>
@@ -43,21 +44,10 @@
             app:layout_constraintWidth_percent="0.5">
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/Text_Header"
                 android:id="@+id/mtv_src_amount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="0.00"
-                android:gravity="end"/>
-
-            <com.google.android.material.textview.MaterialTextView
-                style="@style/Text_Header"
-                android:id="@+id/mtv_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="1900-00-00"
-                android:textSize="13sp"
-                android:alpha="0.7"
                 android:gravity="end"/>
 
         </LinearLayout>

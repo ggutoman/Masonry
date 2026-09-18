@@ -35,7 +35,8 @@ interface DReceipt {
     @Query("SELECT " +
                         "a.sTransNox sTransNox, " +
                         "a.sMemberID sMemberID, " +
-                        "(b.sFrstName || ' ' || b.sLastName) sMemberNme, " +
+                        "a.sMemberID sSourceCd, " +
+                        "(b.sFrstName || ' ' || b.sLastName) sSourceNo, " +
                         "a.dTransact dTransact, " +
                         "a.cPaymForm cPaymForm, " +
                         "a.sORNoxxxx sORNoxxxx, " +
@@ -53,6 +54,42 @@ interface DReceipt {
                     "BETWEEN " +
                         ":fDfrom " +
                     "AND " +
-                        ":fDto")
-    fun ObserveReceiptMasterList(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>>
+                        ":fDto " +
+                    "GROUP BY " +
+                        "a.sTransNox")
+    fun ObserveReceiptMembers(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>>
+
+    @Query("SELECT " +
+                        "a.sTransNox sTransNox, " +
+                        "a.sMemberID sMemberID, " +
+                        "b.sSourceCd sSourceCd, " +
+                        "b.sSourceNo sSourceNo, " +
+                        "a.dTransact dTransact, " +
+                        "a.cPaymForm cPaymForm, " +
+                        "a.sORNoxxxx sORNoxxxx, " +
+                        "a.cSendStat cSendStat, " +
+                        "a.cTranStat cTranStat, " +
+                        "SUM(b.nAmtPaidx) nTotlPaid " +
+                    "FROM " +
+                        "Receipts_Master a " +
+                    "JOIN " +
+                        "Receipts_Detail b " +
+                    "ON " +
+                        "a.sTransNox = b.sTransNox " +
+                    "JOIN " +
+                        "Member_Info c " +
+                    "ON " +
+                        "a.sMemberID = c.sMemberID " +
+                    "WHERE " +
+                        "b.sSourceCD = :fsSourceCd " +
+                    "AND " +
+                        "a.dTransact " +
+                    "BETWEEN " +
+                        ":fDfrom " +
+                    "AND " +
+                        ":fDto " +
+                    "GROUP BY " +
+                        "a.sTransNox, b.sSourceCD, b.sSourceNo"
+        )
+    fun ObserveReceiptSources(fsSourceCd : String, fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>>
 }

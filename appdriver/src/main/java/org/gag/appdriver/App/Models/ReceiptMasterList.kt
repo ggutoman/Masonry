@@ -3,7 +3,8 @@ package org.gag.appdriver.App.Models
 data class ReceiptMasterList(
     val sTransNox : String,
     val sMemberID : String,
-    val sMemberNme : String,
+    val sSourceCd : String,
+    val sSourceNo : String,
     val dTransact : String,
     val cPaymForm : String,
     val sORNoxxxx : String,
