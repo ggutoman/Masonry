@@ -11,8 +11,11 @@ import org.gag.appdriver.App.Core.Annual
 import org.gag.appdriver.App.Core.Dashboard
 import org.gag.appdriver.App.Core.Funds
 import org.gag.appdriver.App.Core.Lodge
+import org.gag.appdriver.App.Core.Projects
 import org.gag.appdriver.App.Core.UserAccount
+import org.gag.appdriver.Constants.DATE_CONSTANTS
 import org.gag.appdriver.Libraries.DateUtil.DateRepository
+import org.gag.appdriver.Room.Entities.EProjectMaster
 import java.util.concurrent.CompletableFuture
 
 class DataSyncService : Service(){
@@ -55,7 +58,10 @@ class DataSyncService : Service(){
                                 val poDashboard = Dashboard(applicationContext)
                                 val poAccount = UserAccount(applicationContext)
                                 val poAnnual = Annual(applicationContext)
+                                val poProject = Projects(applicationContext)
                                 val poFunds = Funds(applicationContext)
+
+                                val poDate = DateRepository()
 
                                 //download lodge information
                                 DownloadLodgeInfo().thenAccept { lodgeSuccess ->
@@ -83,8 +89,6 @@ class DataSyncService : Service(){
                                                         return@thenAccept
                                                     }else{
 
-                                                        val poDate : DateRepository = DateRepository()
-
                                                         //sync other data
                                                         val laSyncData = listOf(
                                                             poFunds.SaveFundTurnover(),
@@ -92,6 +96,8 @@ class DataSyncService : Service(){
                                                             poDashboard.DownloadProvinceInfo(),
                                                             poDashboard.DownloadTownInfo(),
                                                             poAccount.DownloadUserObjects(),
+                                                            poAccount.DownloadUserNotifs(),
+                                                            poAccount.CreateReminders(),
                                                             poAccount.DownloadMemberList(),
                                                             poAccount.DownloadOfficerList(poDate.GetCurrentDate())
                                                         )
@@ -116,7 +122,6 @@ class DataSyncService : Service(){
                                                                     println("Sync Data: Task $idx success")
                                                                 }
                                                             }
-                                                            stopSelf(startId)
 
                                                         }.exceptionally { throwable ->
                                                             throwable.printStackTrace()
@@ -134,6 +139,60 @@ class DataSyncService : Service(){
                                                         stopSelf(startId)
                                                         return@thenAccept
                                                     }else{
+
+                                                        val laSaveData = listOf(
+                                                            poAnnual.SaveAnnualDue(result, memberId.toString()),
+                                                            poProject.DownloadProjectMembers(memberId.toString())
+                                                        )
+
+                                                        //execute task list
+                                                        CompletableFuture.allOf(*laSaveData.toTypedArray()).thenAccept {
+
+                                                            //print each indexed error
+                                                            laSaveData.forEachIndexed { idx, future ->
+
+                                                                val result = future.get()
+                                                                if (result is Boolean){
+
+                                                                    if (!result) {
+                                                                        val errorMsg = when (idx) {
+                                                                            0 -> poAnnual.message
+                                                                            1 -> poProject.message
+                                                                            else -> "No message found"
+                                                                        }.takeIf { it.isNotEmpty() } ?: "No message returned"
+
+                                                                        println("Save $idx Error $errorMsg")
+                                                                    }else{
+                                                                        println("Save $idx success")
+                                                                    }
+
+                                                                }else if (result is List<*>){
+
+                                                                    if (result.size > 0){
+
+                                                                        result.forEach {  project->
+
+                                                                            val item : EProjectMaster = project as EProjectMaster
+                                                                            val target_date = poDate.ConvertStringDate(item.dDueDatex,DATE_CONSTANTS.DATE_FORMAT.fsDescript)
+                                                                            val current_date = poDate.ConvertStringDate(poDate.GetCurrentDate(),DATE_CONSTANTS.DATE_FORMAT.fsDescript)
+
+                                                                            //update project status as completed, if target date is today and current status is on going
+                                                                            if (item.cTranStat == "1" && target_date?.after(current_date) == true){
+
+                                                                                item.cTranStat = "2"
+                                                                                poProject.UpdateProjectStatus(item)
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        }.exceptionally { throwable ->
+                                                            throwable.printStackTrace()
+                                                            stopSelf(startId)
+
+                                                            null
+                                                        }
 
                                                         //save annual due
                                                         poAnnual.SaveAnnualDue(result, memberId.toString()).thenAccept { isSuccess->

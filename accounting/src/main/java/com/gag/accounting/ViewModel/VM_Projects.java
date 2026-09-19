@@ -341,15 +341,19 @@ public class VM_Projects extends AndroidViewModel {
     public void DownloadDashboardledges(String fsMemberID, OnTransaction foCallback){
 
         foCallback.OnLoad();
-        poProjects.DownloadProjectMembers(fsMemberID).thenAccept(new Consumer<Boolean>() {
+        poProjects.DownloadProjectMembers(fsMemberID).thenAccept(new Consumer<Object>() {
             @Override
-            public void accept(Boolean aBoolean) {
+            public void accept(Object result) {
 
-                if (!aBoolean){
-                    foCallback.OnFailed(poProjects.getMessage());
-                    return;
+                if (result instanceof Boolean){
+                    foCallback.OnFailed(!(Boolean) result ? poProjects.message : "Failed to download projects");
+                } else if (result instanceof List) {
+                    if (((List<EProjectMaster>) result).size() < 1){
+                        foCallback.OnFailed("No project list found");
+                    }else {
+                        foCallback.OnSuccess();
+                    }
                 }
-                foCallback.OnSuccess();
             }
         });
 

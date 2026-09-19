@@ -250,15 +250,19 @@ public class VM_Receipts extends AndroidViewModel {
     public void DownloadMemberPledges(String fsMemberID, OnDownload foCallback){
 
         foCallback.OnLoad();
-        poProjects.DownloadProjectMembers(fsMemberID).thenAccept(new Consumer<Boolean>() {
+        poProjects.DownloadProjectMembers(fsMemberID).thenAccept(new Consumer<Object>() {
             @Override
-            public void accept(Boolean aBoolean) {
+            public void accept(Object result) {
 
-                if (!aBoolean){
-                    foCallback.OnFinished(poProjects.getMessage());
-                    return;
+                if (result instanceof Boolean){
+                    foCallback.OnFinished(!(Boolean) result ? poProjects.message : "Failed to download projects");
+                } else if (result instanceof List) {
+                    if (((List<EProjectMaster>) result).size() < 1){
+                        foCallback.OnFinished("No project list found");
+                    }else {
+                        foCallback.OnFinished("Member projects successfully downloaded");
+                    }
                 }
-                foCallback.OnFinished("Successfully downloaded projects");
             }
         });
 

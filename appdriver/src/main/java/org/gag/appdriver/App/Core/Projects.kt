@@ -524,9 +524,9 @@ class Projects(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadProjectMembers(fsMemberID : String) : CompletableFuture<Boolean>{
+    fun DownloadProjectMembers(fsMemberID : String) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -556,7 +556,7 @@ class Projects(instance : Context) {
                             loProjects.detail.forEach { loItem -> poProjects.SaveDetail(loItem) }
                             loProjects.master.forEach { loItem -> poProjects.SaveMaster(loItem) }
 
-                            true
+                            loProjects.master
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

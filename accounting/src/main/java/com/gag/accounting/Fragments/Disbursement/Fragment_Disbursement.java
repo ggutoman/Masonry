@@ -445,8 +445,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
 
                 loSelectAttachment = eDisbursementAttachments.get(eDisbursementAttachments.size() - 1);
 
-                Log.d("Image", String.valueOf(eDisbursementAttachments.size()));
-
                 //display selected attachment, always last item
                 auto_attachment_transaction.setText(loSelectAttachment.getSFileName(), false);
                 mtv_fileloc.setText(loSelectAttachment.getSFinFleNm());

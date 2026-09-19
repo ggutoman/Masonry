@@ -208,7 +208,7 @@ public class Fragment_Project extends Fragment {
                             "0.00",
                             "0.00",
                             "0.00",
-                            "0",
+                            "1",
                             mViewModel.GetUserID() == null ? "" : mViewModel.GetUserID(),
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()

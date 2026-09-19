@@ -11,6 +11,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import org.gag.appdriver.App.Core.Dashboard;
 import org.gag.appdriver.App.Core.Lodge;
 import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerHistory;
 import org.gag.appdriver.App.Models.OfficerInfo;
@@ -20,6 +21,7 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
+import org.gag.appdriver.Room.Entities.ESysNotifs;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 
@@ -77,6 +79,10 @@ public class VM_Main extends AndroidViewModel {
         return poLodge.GetLodgeID();
     }
 
+    public LiveData<List<LodgeCalendarList>> GetLodgeCalendarList(String fsDfrom, String fsDto){
+        return poLodge.GetLodgeCalendarList(poLodge.GetLodgeID(), fsDfrom, fsDto);
+    }
+
     public LiveData<EUserInfo> ObserveUserInfo(){
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
@@ -115,6 +121,10 @@ public class VM_Main extends AndroidViewModel {
 
     public LiveData<List<EUserObjects>> GetUserObjects(Integer fnUsrLevel){
         return poDashboard.GetUserObjects(fnUsrLevel);
+    }
+
+    public LiveData<List<ESysNotifs>> GetNotifications(String fsRcvr){
+        return poAccount.ObserveUnreadNotifs(fsRcvr);
     }
 
     public String GetCurrentDate(){
@@ -216,7 +226,9 @@ public class VM_Main extends AndroidViewModel {
                         poLodge.DownloadLodgeInfo(),
                         poDashboard.DownloadPositionInfo(),
                         poDashboard.DownloadProvinceInfo(),
-                        poDashboard.DownloadTownInfo()
+                        poDashboard.DownloadTownInfo(),
+                        poAccount.DownloadUserNotifs(),
+                        poAccount.CreateReminders()
                 )
         );
 
@@ -258,6 +270,14 @@ public class VM_Main extends AndroidViewModel {
         }).exceptionally(throwable -> {
             foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
             return null;
+        });
+    }
+
+    public void TagNotifRead(ESysNotifs foNotif, OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+        poAccount.ReadUserNotifs(foNotif).thenAccept(aBoolean -> {
+            foCallback.OnFinished(!aBoolean ? poAccount.getMessage() : "Successfully tagged");
         });
     }
 

@@ -4,7 +4,7 @@ enum class API_CONSTANTS(val fsURL : String){
 
     /**ACCOUNTS**/
 //    URL_BASE_SERVER("https://restgk.guanzongroup.com.ph/masonry/"),
-    URL_BASE_SERVER("http://192.165.10.72/Masonry/app/"),
+    URL_BASE_SERVER("http://192.165.10.94/Masonry/app/"),
     URL_LOGIN_ACCOUNT("accounts/sign_in.php"),
     URL_CREATE_ACCOUNT("accounts/sign_up.php"),
     URL_VERIFY_MOBILE("accounts/verify_mobile_account.php"),
@@ -12,6 +12,11 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_UPDATE_USER("accounts/user_credential_update.php"),
     URL_CHANGE_PASSWORD("accounts/change_password.php"),
     URL_ANDROID_OBJECTS("accounts/android_objects.php"),
+
+    /**NOTIFICATIONS**/
+    URL_DOWNLOAD_NOTIFS("notifications/user_notifications.php"),
+    URL_READ_NOTIFS("notifications/read_notifications.php"),
+    URL_CREATE_REMINDERS("notifications/user_reminders.php"),
 
     /**MEMBER**/
     URL_CREATE_MEMBER("member/save_member_info.php"),

@@ -57,6 +57,9 @@ class Disclosure_Dialog(instance : Context) {
 
             icon_status.setImageResource(fnIcon) //error by default
 
+            btn_positive.visibility = if(fsPosText.isNullOrEmpty()) View.GONE else View.VISIBLE
+            btn_negative.visibility = if(fsNegative.isNullOrEmpty()) View.GONE else View.VISIBLE
+
             btn_positive.text = fsPosText
             btn_negative.text = fsNegative
             mtv_message.text = fsMessage
