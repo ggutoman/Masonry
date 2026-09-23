@@ -12,6 +12,9 @@ interface DSysReports {
     @Upsert
     fun SaveReport(eReports : EReports)
 
+    @Query("DELETE FROM Sys_Reports")
+    fun Clear()
+
     @Query("SELECT a.* " +
             "FROM " +
                 "Sys_Reports a " +

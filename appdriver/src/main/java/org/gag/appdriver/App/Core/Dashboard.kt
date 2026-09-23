@@ -137,6 +137,15 @@ class Dashboard(loInstance : Context) {
         poLodgeInfo.DeleteLodge()
         poLodgeCalendar.DeleteLodgeCalendar()
 
+        poDBMember.DeleteMember()
+        poDBMemberAddress.DeletMemberAddress()
+        poDBMemberContact.DeleteMemberContact()
+        poDBMemberEmail.DeleteMemberEmail()
+
+        poOfficers.DeleteOfficers()
+        poOfficerHistory.DeleteOfficerHistory()
+
+        ML_DBF.getDatabase(loContext).GetFundMaster().DeleteFunds()
         poFunds.DeleteFunds()
         poLedger.DeleteLedger()
 
@@ -152,13 +161,9 @@ class Dashboard(loInstance : Context) {
         poDisbursement.DeleteDisbursements()
         poDisbursement.DeleteAttachments()
 
-        poDBMember.DeleteMember()
-        poDBMemberAddress.DeletMemberAddress()
-        poDBMemberContact.DeleteMemberContact()
-        poDBMemberEmail.DeleteMemberEmail()
+        ML_DBF.getDatabase(loContext).GetReportObjects().Clear()
+        ML_DBF.getDatabase(loContext).GetNotifs().Clear()
 
-        poOfficers.DeleteOfficers()
-        poOfficerHistory.DeleteOfficerHistory()
     }
 
     @SuppressLint("MissingPermission")

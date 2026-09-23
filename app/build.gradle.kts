@@ -21,7 +21,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -64,9 +65,9 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    implementation("org.xerial:sqlite-jdbc:3.45.1.0") {
-        exclude(group = "com.intellij", module = "annotations")
-    }
+//    implementation("org.xerial:sqlite-jdbc:3.45.1.0") {
+//        exclude(group = "com.intellij", module = "annotations")
+//    }
 
 
     implementation(project(":useraccount"))
