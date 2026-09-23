@@ -12,5 +12,8 @@ data class MemberDashboardInfo(
     val sTitleDsc : String?,
     val cMmbrStat : String?,
     val dMembrshp : String?,
-    val cCvilStat : String?
+    val cCvilStat : String?,
+    val dInitiatn : String?,
+    val dPassed : String?,
+    val dRaising : String?
 )

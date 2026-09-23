@@ -36,6 +36,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ReceiptDetail;
+import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -197,7 +198,7 @@ public class Fragment_Receipt extends Fragment {
                 lnSelectPaym = Integer.parseInt(loReceipt.getCPaymForm());
 
                 //display master values
-                tie_transaction_no.setText(loReceipt.getSTransNox());
+                tie_transaction_no.setText(loReceipt.getSORNoxxxx());
                 tie_dtransact.setText(loReceipt.getDTransact());
 
                 switch (loReceipt.getCTranStat()){
@@ -238,43 +239,15 @@ public class Fragment_Receipt extends Fragment {
 
                             if (loDetail.getSSourceCD().equalsIgnoreCase("PROJ")){
 
-                                mViewModel.GetProjects(lsMemberID).observe(getViewLifecycleOwner(), new Observer<List<MemberPledges>>() {
-                                    @Override
-                                    public void onChanged(List<MemberPledges> memberPledges) {
-
-                                        //initialize source description for project
-                                        if (memberPledges == null || memberPledges.size() < 1){
-
-                                            mViewModel.AddReceiptDetail(
-                                                    loDetail.getSTransNox(),
-                                                    loDetail.getSSourceCD(),
-                                                    loDetail.getSSourceNo(),
-                                                    loDetail.getNEntryNox(),
-                                                    "", //no description found
-                                                    loDetail.getNAmtPaidx()
-                                            );
-
-                                        }else {
-
-                                            memberPledges
-                                                    .stream()
-                                                    .filter(item -> item.getSProjctCd().equalsIgnoreCase(loDetail.getSSourceNo()))
-                                                    .findAny()
-                                                    .ifPresent(result -> {
-
-                                                        mViewModel.AddReceiptDetail(
-                                                                loDetail.getSTransNox(),
-                                                                loDetail.getSSourceCD(),
-                                                                loDetail.getSSourceNo(),
-                                                                loDetail.getNEntryNox(),
-                                                                result.getSProjctNm(),
-                                                                loDetail.getNAmtPaidx()
-                                                        );
-
-                                                    });
-                                        }
-                                    }
-                                });
+                                EProjectMaster loProj = mViewModel.GetProjectMaster(loDetail.getSSourceNo());
+                                mViewModel.AddReceiptDetail(
+                                        loDetail.getSTransNox(),
+                                        loDetail.getSSourceCD(),
+                                        loDetail.getSSourceNo(),
+                                        loDetail.getNEntryNox(),
+                                        loProj == null || loProj.getSProjctCd().isEmpty() ? "" : loProj.getSProjctNm(),
+                                        loDetail.getNAmtPaidx()
+                                );
 
                             }else if (loDetail.getSSourceCD().equalsIgnoreCase("DUES")){
 
@@ -358,7 +331,11 @@ public class Fragment_Receipt extends Fragment {
                                 .stream()
                                 .filter(receiptDetail -> receiptDetail.getSSourceCD().equalsIgnoreCase(s))
                                 .reduce((first, second) -> second)
-                                .ifPresent(receiptDetail -> auto_source_transaction.setText(receiptDetail.getSSourceDscrpt(), false));
+                                .ifPresent(receiptDetail -> {
+
+                                    auto_source_transaction.setText(receiptDetail.getSSourceDscrpt(), false);
+                                    tie_paid_amount.setText(receiptDetail.getNAmtPaidx());
+                                });
                     }
                 });
 

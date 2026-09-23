@@ -178,4 +178,17 @@ public class VM_Account extends AndroidViewModel {
 
         });
     }
+
+    public void SendSms(String fsContact, String fsMessage, OnSubmit foCallback){
+
+        foCallback.onLoad();
+        poAccount.SendSMS(fsContact, fsMessage).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.onError(poAccount.getMessage());
+                return;
+            }
+            foCallback.onSuccess();
+        });
+    }
 }

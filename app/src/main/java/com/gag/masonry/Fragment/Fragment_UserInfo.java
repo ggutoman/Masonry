@@ -44,13 +44,14 @@ public class Fragment_UserInfo extends Fragment {
 
     private VM_Main mViewModel;
     private HashMap<String, ArrayList<String>> laMemberInfoOthers;
+    private MemberDashboardInfo loMember;
 
     //User Information
     private ShapeableImageView siv_status;
     private MaterialTextView mtv_name, mtv_glpid;
 
     // Member Information card
-    private MaterialTextView mtv_lodge, mtv_status, mtv_membership;
+    private MaterialTextView mtv_lodge, mtv_status, mtv_membership, mtv_initiatn, mtv_passed, mtv_raised;
 
     //Officer Information
     private MaterialCardView card_officer;
@@ -91,6 +92,9 @@ public class Fragment_UserInfo extends Fragment {
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
         mtv_status = view.findViewById(R.id.mtv_status);
         mtv_membership = view.findViewById(R.id.mtv_membership);
+        mtv_initiatn = view.findViewById(R.id.mtv_initiatn);
+        mtv_passed = view.findViewById(R.id.mtv_passed);
+        mtv_raised = view.findViewById(R.id.mtv_raised);
 
         //Officer Information
         mtv_label_officer = view.findViewById(R.id.mtv_label_officer);
@@ -139,9 +143,6 @@ public class Fragment_UserInfo extends Fragment {
                         siv_status.setImageResource(org.gag.appdriver.R.drawable.baseline_suspended);
                         break;
                 }
-
-                //hide edit of membership if user level
-                //if (eUserInfo.getNUserLevl() < 2) btn_edit_member.setVisibility(View.GONE);
             }
         });
 
@@ -152,19 +153,24 @@ public class Fragment_UserInfo extends Fragment {
 
                 if (memberDashboardInfo == null) return;
 
+                loMember = memberDashboardInfo;
+
                 List<MEMBER_CONSTANTS> GetMemberStatus = List.of(MEMBER_CONSTANTS.STATUS_REGULAR_MEMBER, MEMBER_CONSTANTS.STATUS_LIFE_MEMBER, MEMBER_CONSTANTS.STATUS_DUAL_MEMBER, MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER);
                 List<MEMBER_CONSTANTS> GetMemberCivil = List.of(MEMBER_CONSTANTS.STATUS_SINGLE, MEMBER_CONSTANTS.STATUS_MARRIED, MEMBER_CONSTANTS.STATUS_WIDOWED, MEMBER_CONSTANTS.STATUS_SEPARATED);
 
-                mtv_lodge.setText(memberDashboardInfo.getSLodgeNme());
-                mtv_status.setText(GetMemberStatus.get(Integer.parseInt(memberDashboardInfo.getCMmbrStat())).getFsDescr());
-                mtv_membership.setText(mViewModel.GetFormattedDate(memberDashboardInfo.getDMembrshp(), "MMMM d, yyyy"));
+                mtv_lodge.setText(loMember.getSLodgeNme());
+                mtv_status.setText(GetMemberStatus.get(Integer.parseInt(loMember.getCMmbrStat())).getFsDescr());
+                mtv_membership.setText(loMember.getDMembrshp() == null || loMember.getDMembrshp().isEmpty() ? "N/A" : mViewModel.GetFormattedDate(loMember.getDMembrshp(), "MMMM d, yyyy"));
+                mtv_initiatn.setText(loMember.getDInitiatn() == null || loMember.getDInitiatn().isEmpty() ? "N/A" : mViewModel.GetFormattedDate(loMember.getDInitiatn(), "MMMM d, yyyy"));
+                mtv_passed.setText(loMember.getDPassed() == null || loMember.getDPassed().isEmpty() ? "N/A" : mViewModel.GetFormattedDate(loMember.getDPassed(), "MMMM d, yyyy"));
+                mtv_raised.setText(loMember.getDRaising() == null || loMember.getDRaising().isEmpty() ? "N/A" : mViewModel.GetFormattedDate(loMember.getDRaising(), "MMMM d, yyyy"));
 
-                mtv_firstname.setText(memberDashboardInfo.getSFrstName());
-                mtv_lastname.setText(memberDashboardInfo.getSLastName());
-                mtv_middlename.setText((memberDashboardInfo.getSMiddName() == null || memberDashboardInfo.getSMiddName().isEmpty()) ? "N/A" : memberDashboardInfo.getSMiddName());
-                mtv_suffix.setText((memberDashboardInfo.getSSuffixNm()  == null || memberDashboardInfo.getSSuffixNm().isEmpty()) ? "N/A" : memberDashboardInfo.getSSuffixNm());
-                mtv_birthdate.setText(mViewModel.GetFormattedDate(memberDashboardInfo.getDBirthDte(), "MMMM d, yyyy"));
-                mtv_civilstatus.setText(GetMemberCivil.get(Integer.parseInt(memberDashboardInfo.getCCvilStat())).getFsDescr());
+                mtv_firstname.setText(loMember.getSFrstName());
+                mtv_lastname.setText(loMember.getSLastName());
+                mtv_middlename.setText((loMember.getSMiddName() == null || loMember.getSMiddName().isEmpty()) ? "N/A" : loMember.getSMiddName());
+                mtv_suffix.setText((loMember.getSSuffixNm()  == null || loMember.getSSuffixNm().isEmpty()) ? "N/A" : loMember.getSSuffixNm());
+                mtv_birthdate.setText(loMember.getDBirthDte() == null || loMember.getDBirthDte().isEmpty() ? "N/A" : mViewModel.GetFormattedDate(loMember.getDBirthDte(), "MMMM d, yyyy"));
+                mtv_civilstatus.setText(GetMemberCivil.get(Integer.parseInt(loMember.getCCvilStat())).getFsDescr());
 
                 laMemberInfoOthers = new HashMap<>();
 
@@ -270,7 +276,6 @@ public class Fragment_UserInfo extends Fragment {
                                 for (Map.Entry<String, ArrayList<String>> loMap : stringArrayListHashMap.entrySet()){
                                     loChildMap.put(loMap.getKey(), new ArrayList<>(loMap.getValue()));
                                 }
-
                                 rcv_list.setAdapter(new Adapter_MemberInfoList(requireActivity(), new ArrayList<>(parentList), loChildMap));
                             }
                         });
@@ -316,13 +321,18 @@ public class Fragment_UserInfo extends Fragment {
             @Override
             public void onClick(View view) {
 
+                if (loMember == null){
+                    Toast.makeText(requireActivity(), "Member information not intialized properly!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Fragment_Member loFragMem = new Fragment_Member();
 
                 Bundle loArgs = new Bundle();
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                loArgs.putString("fsGLPIDxx", mtv_glpid.getText().toString());
+                loArgs.putString("fsGLPIDxx", loMember.getSGLPIDNoX());
                 loFragMem.setArguments(loArgs);
 
                 fragmentTransaction.replace(R.id.layout_container, loFragMem);
@@ -336,16 +346,21 @@ public class Fragment_UserInfo extends Fragment {
             @Override
             public void onClick(View view) {
 
+                if (loMember == null){
+                    Toast.makeText(requireActivity(), "Member information not intialized properly!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Fragment_Officer_history loFragHistory = new Fragment_Officer_history();
 
                 Bundle loArgs = new Bundle();
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                loArgs.putString("fsGLPIDxx", mtv_glpid.getText().toString());
+                loArgs.putString("member_id", loMember.getSMemberID());
                 loFragHistory.setArguments(loArgs);
 
-                fragmentTransaction.replace(R.id.layout_container, loFragHistory);
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragHistory);
                 fragmentTransaction.addToBackStack("view_officer_history");
                 fragmentTransaction.commit();
             }

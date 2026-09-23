@@ -80,7 +80,7 @@ public class Fragment_Disbursement_History extends Fragment {
         }
         laStatus = lsStackIDxx.equalsIgnoreCase("disbursement_list") ? List.of("0", "1", "2", "3", "4") : List.of("2");
 
-        lsDfrom = mViewModel.GetCountedDate(1, 1, true);
+        lsDfrom = mViewModel.GetCountedDate(1, 0, false);
         lsDto = mViewModel.GetCurrentDate();
 
         lsLodgeIDxx = getArguments() == null || getArguments().getString("lodge_id") == null ? "" : getArguments().getString("lodge_id");
@@ -91,7 +91,7 @@ public class Fragment_Disbursement_History extends Fragment {
 
         DownloadList();
 
-        mtv_title.setText(lsStackIDxx.equalsIgnoreCase("disbursement_list") ? "Voucher List" : "Released Funds");
+        mtv_title.setText(lsStackIDxx.equalsIgnoreCase("disbursement_list") ? "List of Payments" : "Released Payments");
 
         return view;
     }

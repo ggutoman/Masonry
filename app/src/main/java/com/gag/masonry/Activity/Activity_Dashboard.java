@@ -25,6 +25,7 @@ import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
 import com.gag.masonry.Fragment.Fragment_Home;
 import com.gag.masonry.Fragment.Fragment_Lodge_Calendar_List;
 import com.gag.masonry.Fragment.Fragment_Member_List;
+import com.gag.masonry.Fragment.Fragment_Officer_history;
 import com.gag.masonry.Fragment.Fragment_UserInfo;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
@@ -78,7 +79,6 @@ public class Activity_Dashboard extends AppCompatActivity {
         list_menus = findViewById(R.id.list_menus);
 
         InitAdapter();
-//        InitView("000"); //default to home
 
         //default home as main screen
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -126,7 +126,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                     case "001", "002", "003", "004": //Member, Accounting, Projects, Settings
                         CollapseGroup(fnPosition);
                         break;
-                    case "025": //reports
+                    case "023": //reports
 
                         //close drawer
                         main_drawer.closeDrawer(GravityCompat.START);
@@ -138,7 +138,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         fragmentTransaction.addToBackStack("generate_report");
                         fragmentTransaction.commit();
                         break;
-                    case "027": //Sync Data
+                    case "025": //Sync Data
                         poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -167,7 +167,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                         });
                         break;
 
-                    case "028": //Logout
+                    case "026": //Logout
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -244,7 +244,7 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "home";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "026": //account info
+            case "024": //account info
                 loFragment = new Fragment_UserInfo();
                 lsStackId = "view_account";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
@@ -259,7 +259,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "assign_officer";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "008": //project entry
+            case "008":
+                loFragment = new Fragment_Officer_history();
+                lsStackId = "view_officer_history";
+                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
+                break;
+            case "009": //project entry
                 loFragment = new Fragment_Project();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -275,25 +280,30 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId = "project_information";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "018", "007": //receipt entry, view members
+            case "016", "007": //receipt entry, view members
                 loFragment = new Fragment_Member_List();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loArgs.putString("user_id", lsGLPID);
                 loArgs.putInt("user_level", lnUsrLvl);
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("018") ? "receipt_entry" : "view_members";
+                if (fsItemID.equalsIgnoreCase("016")){
+                    lsStackId = "receipt_entry";
+                }else if (fsItemID.equalsIgnoreCase("007")){
+                    lsStackId = "view_members";
+                }
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
+
                 break;
-            case "019", "020": //confirm receipts or list of receipts
+            case "018", "017": //confirm receipts or list of receipts
                 loFragment = new Fragment_Issued_Receipts();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("020") ? "receipt_confirm" : "issued_receipt";
+                lsStackId = fsItemID.equalsIgnoreCase("017") ? "receipt_confirm" : "issued_receipt";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "022": //create disbursement
+            case "020": //create disbursement
                 loFragment = new Fragment_Disbursement();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
@@ -301,12 +311,12 @@ public class Activity_Dashboard extends AppCompatActivity {
                 lsStackId= "disbursement_entry";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
-            case "023", "024": //view & confirm disbursements
+            case "021", "022": //view & confirm disbursements
                 loFragment = new Fragment_Disbursement_History();
                 loArgs.putString("lodge_id", mViewmodel.GetLodgeId());
                 loFragment.setArguments(loArgs);
 
-                lsStackId = fsItemID.equalsIgnoreCase("024") ? "disbursement_confirm" : "disbursement_list";
+                lsStackId = fsItemID.equalsIgnoreCase("021") ? "disbursement_confirm" : "disbursement_list";
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                 break;
             default:

@@ -14,18 +14,18 @@
         android:text="N/A"
         android:alpha="0.8"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.8"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/mtv_view"
+        android:id="@+id/mtv_dtransact"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Hide"
-        android:gravity="center"
-        android:alpha="0.75"
-        app:layout_constraintTop_toTopOf="@+id/mtv_name"
-        app:layout_constraintBottom_toBottomOf="@+id/mtv_name"
-        app:layout_constraintStart_toEndOf="@+id/mtv_name"
+        android:layout_marginStart="10dp"
+        android:text="N/A"
+        android:textSize="13sp"
+        android:alpha="0.7"
+        app:layout_constraintTop_toBottomOf="@+id/mtv_name"
+        app:layout_constraintStart_toStartOf="@+id/mtv_name"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <ExpandableListView
@@ -34,6 +34,7 @@
         android:layout_height="wrap_content"
         android:groupIndicator="@null"
         android:divider="@null"
+        android:visibility="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mtv_name"/>

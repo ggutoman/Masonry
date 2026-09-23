@@ -13,8 +13,6 @@ data class EOfficerHistory(
     var sYearIDxx: String,
     var sMemberID: String,
     var sPositnCd: String,
-    var cOldStatx: String,
-    var cNewStatx: String,
     var sRemarksx: String?,
     var sModified: String,
     var dModified: String,

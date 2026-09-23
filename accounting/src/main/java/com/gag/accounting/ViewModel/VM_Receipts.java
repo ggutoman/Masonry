@@ -75,6 +75,10 @@ public class VM_Receipts extends AndroidViewModel {
         poProjects = new Projects(application);
     }
 
+    public void SelectType(String fsType){
+        GetSelectedType.setValue(fsType);
+    }
+
     public String GetUserID(){
         return poReceipt.GetUserID();
     }
@@ -99,6 +103,10 @@ public class VM_Receipts extends AndroidViewModel {
         return poReceipt.GetCountedDate(fnCount, fnDateIndex, fbIsAdd);
     }
 
+    public LiveData<String> ObserveSelectType(){
+        return GetSelectedType;
+    }
+
     public List<RECEIPT_CONSTANTS> GetSources(){
         return List.of(RECEIPT_CONSTANTS.RECEIPT_ANNUAL, RECEIPT_CONSTANTS.RECEIPT_PROJECT, RECEIPT_CONSTANTS.RECEIPT_BANK, RECEIPT_CONSTANTS.RECEIPT_OTHERS);
     }
@@ -107,16 +115,12 @@ public class VM_Receipts extends AndroidViewModel {
         return List.of("Cash", "Check", "Others");
     }
 
+    public EProjectMaster GetProjectMaster(String fsProj){
+        return poProjects.GetProjectInfo(fsProj);
+    }
+
     public LiveData<EReceiptMaster> ObserveReceiptMaster(String fsTransNox){
         return poReceipt.ObserveReceiptMaster(fsTransNox);
-    }
-
-    public void SelectType(String fsType){
-        GetSelectedType.setValue(fsType);
-    }
-
-    public LiveData<String> ObserveSelectType(){
-        return GetSelectedType;
     }
 
     public LiveData<List<EReceiptDetail>> ObserveReceiptDetail(String fsTransNox){

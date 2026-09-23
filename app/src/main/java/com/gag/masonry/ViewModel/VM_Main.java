@@ -21,6 +21,7 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
+import org.gag.appdriver.Room.Entities.EPosition;
 import org.gag.appdriver.Room.Entities.ESysNotifs;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Room.Entities.EUserObjects;
@@ -127,16 +128,12 @@ public class VM_Main extends AndroidViewModel {
         return poAccount.ObserveUnreadNotifs(fsRcvr);
     }
 
+    public LiveData<List<EPosition>> GetPositions(){
+        return poDashboard.GetPositions();
+    }
+
     public String GetCurrentDate(){
         return poDate.GetCurrentDate();
-    }
-
-    public String GetFirstQuarter(){
-        return poDate.GetCountedDate(4, 0, false);
-    }
-
-    public String GetFormattedDate(Long flDate){
-        return poDate.FormatLongDate(flDate);
     }
 
     public String GetFormattedDate(String fsDate, String fsFormat){
@@ -254,15 +251,15 @@ public class VM_Main extends AndroidViewModel {
         });
     }
 
-    public void DownloadOfficerHistory(String fsMemberID, String fdFrom, String fDto, OnDownloadData foCallback){
+    public void DownloadOfficerHistory(String fsMemberID, String fsYear, OnDownloadData foCallback){
 
         foCallback.OnDownload();
-        poAccount.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerHistory(fsMemberID, fsYear).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
                 if (!aBoolean){
-                    foCallback.OnFinished(poDashboard.getMessage());
+                    foCallback.OnFinished(poAccount.getMessage());
                 }else {
                     foCallback.OnFinished("Successfully downloaded officer history");
                 }

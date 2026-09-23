@@ -35,6 +35,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
@@ -73,6 +74,7 @@ public class Fragment_Member extends Fragment{
             btn_add_email;
 
     private MaterialButton btn_create, btn_save_address, btn_save_contact, btn_save_email;
+    private MaterialTextView mtv_resend;
 
     private TextInputEditText tie_lastname,
             tie_firstname,
@@ -179,6 +181,8 @@ public class Fragment_Member extends Fragment{
         auto_email = view.findViewById(R.id.auto_email);
         auto_civil = view.findViewById(R.id.auto_civil);
 
+        mtv_resend = view.findViewById(R.id.mtv_resend);
+
         tie_birthdate = view.findViewById(R.id.tie_birthdate);
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
@@ -212,6 +216,9 @@ public class Fragment_Member extends Fragment{
     private void initDataReceiver() {
 
         if (getArguments() == null){
+
+            tie_glpid.setVisibility(View.GONE);
+            mtv_resend.setVisibility(View.GONE);
             btn_create.setText("Create Member");
         }else {
 
@@ -234,6 +241,8 @@ public class Fragment_Member extends Fragment{
                 });
                 return;
             }
+            tie_glpid.setVisibility(View.VISIBLE);
+            mtv_resend.setVisibility(View.VISIBLE);
             btn_create.setText("Update Member");
             tie_glpid.setText(getArguments().getString("fsGLPIDxx"));
         }
@@ -730,7 +739,7 @@ public class Fragment_Member extends Fragment{
                 if (loSelectContact == null) return;
 
                 //show save button, if text changes
-                if (!charSequence.toString().equalsIgnoreCase(loSelectContact.getSRemarksx())){
+                if (!charSequence.toString().equalsIgnoreCase(loSelectContact.getSRemarksx() == null ? "" : loSelectContact.getSRemarksx())){
                     //show if gone
                     if (btn_save_contact.getVisibility() == View.GONE) btn_save_contact.setVisibility(View.VISIBLE);
                 }else {
@@ -1127,9 +1136,63 @@ public class Fragment_Member extends Fragment{
 
                             @Override
                             public void OnSuccess() {
-                                poLoad.DismissDialog();
 
-                                poMessage.ShowMessage(2, "Member information has been saved successfully. Do you want to send ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                String ls_receiver = "";
+                                for (EMemberContactInfo contactInfo : laContactParams){
+                                    if (contactInfo.getCRecdStat().equalsIgnoreCase("1")){
+                                        ls_receiver = contactInfo.getSContctNo();
+                                        break;
+                                    }
+                                }
+
+                                if (!ls_receiver.isEmpty()){
+
+                                    //compose message for the member's ALSM ID
+                                    String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                            "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
+                                            "Please do not share your registration ID for Masonry Application";
+
+                                    mviewModel.SendSms(ls_receiver, lsMessage, new VM_Member.OnSubmit() {
+                                        @Override
+                                        public void OnLoad() {}
+
+                                        @Override
+                                        public void OnSuccess() {
+                                            poLoad.DismissDialog();
+
+                                            poMessage.ShowMessage(0, "Member information has been saved successfully.", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                                @Override
+                                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                    poDialog.dismiss();
+                                                    FinishTask();
+                                                }
+
+                                                @Override
+                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                            });
+                                        }
+
+                                        @Override
+                                        public void OnFailed(String fsMesssage) {
+                                            poLoad.DismissDialog();
+
+                                            poMessage.ShowMessage(0, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                                @Override
+                                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                    poDialog.dismiss();
+                                                    FinishTask();
+                                                }
+
+                                                @Override
+                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                            });
+                                        }
+                                    });
+                                    return;
+                                }
+
+                                poLoad.DismissDialog();
+                                poMessage.ShowMessage(0, "Member information has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
@@ -1137,46 +1200,9 @@ public class Fragment_Member extends Fragment{
                                     }
 
                                     @Override
-                                    public void OnNegative(@NotNull AlertDialog poDialog) {
-                                        poDialog.dismiss();
-
-                                        poLoad.ShowDialog("Sending message. Please wait . . .");
-
-                                        //find the primary and active contact number of the member
-                                        laContactParams
-                                                .stream()
-                                                .filter(eMemberContactInfo -> eMemberContactInfo.getCRecdStat().equalsIgnoreCase("1"))
-                                                .findAny()
-                                                .ifPresent(eMemberContactInfo -> {
-
-                                                    if (loMemberInfo == null) return;
-
-                                                    //compose message for the member's ALSM ID
-                                                    String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
-                                                            "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
-                                                            "Please do not share your registration ID for Masonry Application";
-
-                                                    new SMSApp(requireActivity(), new OnSMSStatus() {
-                                                        @Override
-                                                        public void OnResult(String fsResult) {
-
-                                                            poLoad.DismissDialog();
-                                                            poMessage.ShowMessage(0, fsResult, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                                                @Override
-                                                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                                    poDialog.dismiss();
-                                                                    FinishTask();
-                                                                }
-
-                                                                @Override
-                                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                                            });
-                                                        }
-                                                    }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
-                                                });
-
-                                    }
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
                                 });
+
                             }
 
                             @Override
@@ -1187,8 +1213,6 @@ public class Fragment_Member extends Fragment{
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
-
-                                        //retrieve saved entries upon error, if exists
                                         initDataReceiver();
                                     }
 
@@ -1198,6 +1222,101 @@ public class Fragment_Member extends Fragment{
                             }
                         });
 
+                    }
+                });
+
+            }
+        });
+
+        mtv_resend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                poMessage.ShowMessage(2, " Do you want to resend ALSM ID to the member?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+
+                        String ls_receiver = "";
+                        for (EMemberContactInfo loContact: paramContact) {
+
+                            if (loContact.getCRecdStat().equalsIgnoreCase("1")) {
+                                ls_receiver = loContact.getSContctNo();
+                                break;
+                            }
+                        }
+
+                        if (!ls_receiver.isEmpty()){
+
+                            //compose message for the member's ALSM ID
+                            String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                    "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
+                                    "Please do not share your registration ID for Masonry Application";
+
+                            mviewModel.SendSms(ls_receiver, lsMessage, new VM_Member.OnSubmit() {
+                                @Override
+                                public void OnLoad() {
+                                    poLoad.ShowDialog("Sending ALSM ID to member. Please wait . . .");
+                                }
+
+                                @Override
+                                public void OnSuccess() {
+                                    poLoad.DismissDialog();
+
+                                    poMessage.ShowMessage(0, "ALSM ID has been sent successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                        @Override
+                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                    });
+                                }
+
+                                @Override
+                                public void OnFailed(String fsMesssage) {
+                                    poLoad.DismissDialog();
+
+                                    poMessage.ShowMessage(0, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                        @Override
+                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                                            poDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                    });
+                                }
+                            });
+
+                            /** BACKUP FOR SMS SENDER **/
+//                            new SMSApp(requireActivity(), new OnSMSStatus() {
+//                                @Override
+//                                public void OnResult(String fsResult) {
+//
+//                                    poLoad.DismissDialog();
+//                                    poMessage.ShowMessage(0, fsResult, "Okay", "", new Message_Dialog.OnDialogClick() {
+//                                        @Override
+//                                        public void OnPositive(@NotNull AlertDialog poDialog) {
+//                                            poDialog.dismiss();
+//                                            FinishTask();
+//                                        }
+//
+//                                        @Override
+//                                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+//                                    });
+//                                }
+//                            }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
+
+                        }else {
+
+                        }
                     }
                 });
 

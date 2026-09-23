@@ -53,11 +53,11 @@ public class Activity_Forgot_Password extends AppCompatActivity {
 
     private String lsOTP;
 
+    private MaterialToolbar toolbar;
     private TextInputEditText tie_number, tie_password, tie_verifypassword;
     private MaterialButton btn_forgot, btn_verify;
     private ImageButton btn_close;
     private MaterialCardView mcv_otp;
-    private LinearLayout layout_otp;
     private MaterialTextView mtv_passwordError, mtv_verifyError, mtv_resend;
     private TextInputEditText tie_cd1, tie_cd2, tie_cd3, tie_cd4, tie_cd5, tie_cd6;
 
@@ -76,6 +76,10 @@ public class Activity_Forgot_Password extends AppCompatActivity {
 
         InitWidgets();
         InitListener();
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Forgot Password");
     }
 
     @Override
@@ -89,6 +93,8 @@ public class Activity_Forgot_Password extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void InitWidgets(){
+
+        toolbar = findViewById(R.id.toolbar);
 
         tie_number = findViewById(R.id.tie_number);
         tie_password = findViewById(R.id.tie_password);
@@ -108,9 +114,6 @@ public class Activity_Forgot_Password extends AppCompatActivity {
         btn_verify = findViewById(R.id.btn_verify);
 
         mcv_otp = findViewById(R.id.mcv_otp);
-
-        layout_otp = findViewById(R.id.layout_otp);
-
         mtv_resend = findViewById(R.id.mtv_resend);
 
     }
@@ -157,7 +160,6 @@ public class Activity_Forgot_Password extends AppCompatActivity {
                         });
                 return;
             }
-
             VerifyAccount();
         });
 
@@ -335,12 +337,10 @@ public class Activity_Forgot_Password extends AppCompatActivity {
                 poLoading.DismissDialog();
 
                 lsOTP = fsOTP;
-
                 poMessage.ShowMessage(0, "OTP will be sent to your mobile number. Please enter verification code to apply the changes", "Okay", "", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
                         poDialog.dismiss();
-
                         SendOTP(lsOTP, tie_number.getText().toString());
                     }
 
@@ -383,12 +383,38 @@ public class Activity_Forgot_Password extends AppCompatActivity {
                 "Here is your OTP " + fsOTP + ".\n" +
                 "Please enter this code on Masonry application to verify changes on your account";
 
-        new SMSApp(Activity_Forgot_Password.this, new OnSMSStatus() {
+        mviewModel.SendSms(fsMobile, lsMessage, new VM_Account.OnSubmit() {
             @Override
-            public void OnResult(String fsResult) {
-                Toast.makeText(Activity_Forgot_Password.this, fsResult, Toast.LENGTH_LONG).show();
+            public void onLoad() {
+                Toast.makeText(Activity_Forgot_Password.this, "Sending OTP. Please wait . . .", Toast.LENGTH_SHORT).show();
             }
-        }).SendSms(fsMobile, lsMessage);
+
+            @Override
+            public void onSuccess() {
+                Toast.makeText(Activity_Forgot_Password.this, "OTP has been sent successfully", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String fsError) {
+
+                poMessage.ShowMessage(1, fsError, "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+            }
+        });
+
+//        new SMSApp(Activity_Forgot_Password.this, new OnSMSStatus() {
+//            @Override
+//            public void OnResult(String fsResult) {
+//                Toast.makeText(Activity_Forgot_Password.this, fsResult, Toast.LENGTH_LONG).show();
+//            }
+//        }).SendSms(fsMobile, lsMessage);
     }
 
 }

@@ -165,6 +165,9 @@ public class Fragment_Project extends Fragment {
                 laTypes
         ));
 
+        //reset details
+        mViewModel.ClearDetail();
+
         //get current masonic year id
         mViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
             @Override
@@ -287,13 +290,19 @@ public class Fragment_Project extends Fragment {
                 auto_lodge_member.setAdapter(loProjectDetailAdapter);
 
                 double ldbl_pledge = 0.00, ldbl_paid = 0.00;
-                for (ProjectDetail loDetail : eProjectDetails){
+                for (ProjectDetail loDetail : laDetails){
                     ldbl_pledge += Double.parseDouble(loDetail.getNPledgexx());
                 }
-                lnSelectDetail = eProjectDetails.size() - 1;
-
                 mtv_totalpledge.setText(String.valueOf(ldbl_pledge));
                 mtv_totalcontri.setText(String.valueOf(ldbl_paid));
+
+                if (laDetails.size() < 1) return;
+
+                lnSelectDetail = eProjectDetails.size() - 1;
+
+                auto_lodge_member.setText(laDetails.get(lnSelectDetail).getSMemberNme());
+                tie_pledge_date.setText(laDetails.get(lnSelectDetail).getDPledgexx());
+                tie_pledge_amount.setText(laDetails.get(lnSelectDetail).getNPledgexx());
             }
         });
     }

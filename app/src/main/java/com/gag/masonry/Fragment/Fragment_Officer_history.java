@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -14,27 +13,35 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
 import com.gag.masonry.Adapter.Officer_History_Adapter;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.OfficerHistory;
+import org.gag.appdriver.Room.Entities.EPosition;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Fragment_Officer_history extends Fragment {
@@ -44,10 +51,14 @@ public class Fragment_Officer_history extends Fragment {
     private Message_Dialog poMessage;
     private Officer_History_Adapter loAdapter;
 
-    private String lsQuery;
-    private String lsdFrom, lsDto;
+    private PopupMenu loMenu;
+    private SubMenu loSubPosMenu;
+    private List<String> laPositions = new ArrayList<>();
+
+    private String lsQuery, lsYear;
 
     private ConstraintLayout layout_no_record;
+    private MaterialTextView mtv_title, mtv_subtitle;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
     private RecyclerView rcv_officer_list;
@@ -66,8 +77,7 @@ public class Fragment_Officer_history extends Fragment {
         poDialog.InitDialog();
         poMessage.InitDialog();
 
-        lsdFrom = mViewmodel.GetFirstQuarter();
-        lsDto = mViewmodel.GetCurrentDate();
+        lsYear = mViewmodel.GetFormattedDate(mViewmodel.GetCurrentDate(), "yyyy");
 
         DownloadList();
 
@@ -75,38 +85,44 @@ public class Fragment_Officer_history extends Fragment {
         InitListener();
         InitDataReceiver();
 
+        loMenu = new PopupMenu(requireContext(), btn_filter);
+        loMenu.getMenuInflater().inflate(R.menu.menu_filter_officer_history, loMenu.getMenu());
+
+        //sub menu for positions
+        loSubPosMenu = loMenu.getMenu().addSubMenu(Menu.NONE, 101, Menu.NONE, "By Position");
+        loSubPosMenu.add(101, 102, Menu.NONE, "ALL");
+
         return view;
     }
 
     private void InitViews(View view){
 
         layout_no_record = view.findViewById(R.id.layout_no_record);
+        mtv_title = view.findViewById(R.id.mtv_title);
+        mtv_subtitle = view.findViewById(R.id.mtv_subtitle);
         tie_search = view.findViewById(R.id.tie_search);
         btn_filter = view.findViewById(R.id.btn_filter);
         rcv_officer_list = view.findViewById(R.id.rcv_officer_list);
     }
 
     private String GetBaseQuery() {
-        return " (a.dTransact BETWEEN '" + lsdFrom + "' AND '" + lsDto + "') ";
+        return " c.nYearxxxx= '" + lsYear + "' ";
     }
 
     private void InitDataReceiver(){
 
         lsQuery = GetBaseQuery();
 
-        //if glp id is passed, add to condition to filter only one officer information
-        String lsMemberID;
-        if (getArguments() == null || getArguments().getString("fsGLPIDxx").isEmpty()){
+        //filter by status
+        if (laPositions.size() > 0) lsQuery += "AND d.sPositnDs IN (" + String.join(",", laPositions) + ") ";
 
-            mViewmodel.FilterOfficerHistory(" ");
+        //filter by name or id
+        if (getArguments() == null || getArguments().getString("member_id").isEmpty()){
+            if (!(tie_search.getText() == null || tie_search.getText().toString().isEmpty())) lsQuery += " AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + tie_search.getText().toString() + "%' ";
         }else {
-            lsMemberID = getArguments().getString("fsGLPIDxx");
-
-            //initialize default filter with member id
-            lsQuery += " AND (b.sGLPIDNoX= '" + lsMemberID + "') ";
-
-            mViewmodel.FilterOfficerHistory(" AND (b.sGLPIDNoX= '" + lsMemberID + "') ");
+            lsQuery += " AND (b.sMemberID= '" + getArguments().getString("member_id") + "') ";
         }
+        mViewmodel.FilterOfficerHistory(lsQuery);
 
         mViewmodel.FilterHistory().observe(getViewLifecycleOwner(), new Observer<String>() {
             @SuppressLint("NotifyDataSetChanged")
@@ -115,7 +131,13 @@ public class Fragment_Officer_history extends Fragment {
 
                 if (s.isEmpty()) return;
 
-                List<OfficerHistory> laHistory = mViewmodel.SearchOfficerHistory(lsQuery + s);
+                List<OfficerHistory> laHistory = mViewmodel.SearchOfficerHistory(s);
+
+                mtv_title.setText(getArguments() == null || getArguments().getString("member_id").isEmpty() ?
+                        "Officer History" : laHistory.size() > 0 ? laHistory.get(0).getSMemberNme() : "N/A"
+                );
+                mtv_subtitle.setText("(M.Y " + lsYear + " - M.Y " + (Integer.parseInt(lsYear) + 1) + ")");
+
                 if (laHistory == null || laHistory.size() < 1){
                     layout_no_record.setVisibility(View.VISIBLE);
                     rcv_officer_list.setVisibility(View.GONE);
@@ -124,12 +146,24 @@ public class Fragment_Officer_history extends Fragment {
                 layout_no_record.setVisibility(View.GONE);
                 rcv_officer_list.setVisibility(View.VISIBLE);
 
-                loAdapter = new Officer_History_Adapter(laHistory);
-
+                loAdapter = new Officer_History_Adapter(laHistory, !(getArguments() == null || getArguments().getString("member_id").isEmpty()));
                 loAdapter.notifyDataSetChanged();
 
                 rcv_officer_list.setAdapter(loAdapter);
                 rcv_officer_list.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+            }
+        });
+
+        mViewmodel.GetPositions().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
+            @Override
+            public void onChanged(List<EPosition> ePositions) {
+
+                if (ePositions == null || ePositions.size() < 1) return;
+
+                int parentID = 103;
+                for (EPosition loPosition : ePositions) {
+                    loSubPosMenu.add(parentID, parentID++, Menu.NONE, loPosition.getSPositnDs());
+                }
             }
         });
     }
@@ -146,13 +180,7 @@ public class Fragment_Officer_history extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                //if empty search, query with default filter
-                if (charSequence.length() < 1){
-                    mViewmodel.SearchOfficerHistory(lsQuery);
-                }else {
-                    mViewmodel.FilterOfficerHistory(" AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + charSequence.toString() + "%' ");
-                }
+                InitDataReceiver();
             }
         });
 
@@ -160,11 +188,20 @@ public class Fragment_Officer_history extends Fragment {
             @Override
             public void onClick(View view) {
 
-
                 //initialize pop up object, menu object holder
-                PopupMenu loMenu = new PopupMenu(requireContext(), view);
-                loMenu.getMenuInflater().inflate(R.menu.menu_filter_officer_history, loMenu.getMenu());
                 loMenu.show();
+
+                //initialize year picker custom
+                NumberPicker yearPicker = new NumberPicker(requireContext());
+                yearPicker.setMinValue(Integer.parseInt(mViewmodel.GetFormattedDate(mViewmodel.GetCurrentDate(), "yyyy")));
+                yearPicker.setMaxValue(9999);
+                yearPicker.setValue(Calendar.getInstance().get(Calendar.YEAR));
+
+                LinearLayout layout = new LinearLayout(requireContext());
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(yearPicker);
+
+                String lsNmeFilter = " AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + tie_search.getText().toString() + "%' ";
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -172,58 +209,63 @@ public class Fragment_Officer_history extends Fragment {
 
                         if (menuItem.getItemId() == R.id.action_item_filter){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
+                            new MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Select Year")
+                                    .setView(layout)
+                                    .setPositiveButton("OK", (dialog, which) -> {
 
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
-                                @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
+                                        lsYear = String.valueOf(yearPicker.getValue());
+                                        InitDataReceiver();
+                                    })
+                                    .setNegativeButton("Cancel", null)
+                                    .show();
 
-                                    //set date range parameters for downloading history
-                                    lsdFrom = mViewmodel.GetFormattedDate(selection.first);
-                                    lsDto = mViewmodel.GetFormattedDate(selection.second);
-
-                                    InitDataReceiver();
-                                }
-                            });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
                             return true;
 
                         }else if (menuItem.getItemId() == R.id.action_item_download){
 
-                            MaterialDatePicker.Builder<Pair<Long, Long>> loBuilder = MaterialDatePicker.Builder.dateRangePicker();
-                            loBuilder.setTitleText("Select Date Range");
+                            new MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Select Year")
+                                    .setView(layout)
+                                    .setPositiveButton("OK", (dialog, which) -> {
 
-                            MaterialDatePicker<Pair<Long, Long>> loPicker = loBuilder.build();
-                            loPicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Pair<Long, Long>>() {
-                                @Override
-                                public void onPositiveButtonClick(Pair<Long, Long> selection) {
+                                        lsYear = String.valueOf(yearPicker.getValue());
+                                        poMessage.ShowMessage(2,  "Do you want download officer records for the year " + lsYear + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                            @Override
+                                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                poDialog.dismiss();
+                                            }
 
-                                    //set date range parameters for downloading history
-                                    lsdFrom = mViewmodel.GetFormattedDate(selection.first);
-                                    lsDto = mViewmodel.GetFormattedDate(selection.second);
+                                            @Override
+                                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                                poDialog.dismiss();
 
-                                    poMessage.ShowMessage(2,  "Do you want download list of member entries within " + lsdFrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
-                                        @Override
-                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void OnNegative(@NotNull AlertDialog poDialog) {
-                                            poDialog.dismiss();
-
-                                            //download data from server with date to get
-                                            DownloadList();
-                                        }
-                                    });
-                                }
-                            });
-                            loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+                                                //download data from server with date to get
+                                                DownloadList();
+                                            }
+                                        });
+                                    })
+                                    .setNegativeButton("Cancel", null)
+                                    .show();
 
                             return true;
 
+                        } else if (menuItem.getItemId() == 102){ //all positions
+
+                            laPositions.clear();
+                            for (int i = 0; i < loSubPosMenu.size(); i++){
+                                laPositions.add("'"+ loSubPosMenu.getItem(i).getTitle().toString() + "'");
+                            }
+                            InitDataReceiver();
+
+                            return true;
+                        }else {
+                            if (!(menuItem.getItemId() == 101 || menuItem.getItemId() == R.id.action_by_date)){
+                                laPositions.clear();
+                                laPositions.add("'"+ menuItem.getTitle().toString()  + "'");
+
+                                InitDataReceiver();
+                            }
                         }
                         return false;
                     }
@@ -235,13 +277,13 @@ public class Fragment_Officer_history extends Fragment {
     private void DownloadList(){
 
         String lsMemberID;
-        if (getArguments() == null || getArguments().getString("fsGLPIDxx").isEmpty()){
+        if (getArguments() == null || getArguments().getString("member_id").isEmpty()){
             lsMemberID = "";
         }else {
-            lsMemberID = getArguments().getString("fsGLPIDxx");
+            lsMemberID = getArguments().getString("member_id");
         }
 
-        mViewmodel.DownloadOfficerHistory(lsMemberID, lsdFrom, lsDto, new VM_Main.OnDownloadData() {
+        mViewmodel.DownloadOfficerHistory(lsMemberID, lsYear, new VM_Main.OnDownloadData() {
             @Override
             public void OnDownload() {
                 poDialog.ShowDialog("Downloading history. Plaese wait . .");
@@ -251,6 +293,8 @@ public class Fragment_Officer_history extends Fragment {
             public void OnFinished(String fsMessage) {
                 poDialog.DismissDialog();
                 Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+
+                InitDataReceiver();
             }
         });
 

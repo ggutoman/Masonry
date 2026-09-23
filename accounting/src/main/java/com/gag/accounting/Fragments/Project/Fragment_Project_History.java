@@ -209,7 +209,7 @@ public class Fragment_Project_History extends Fragment {
                                 loProject.setArguments(loBundle);
 
                                 //add to child container, as bridge to initiate another fragment after call
-                                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loProject));
+                                fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loProject);
                                 fragmentTransaction.addToBackStack(lsStackIDxx);
 
                                 fragmentTransaction.commit();

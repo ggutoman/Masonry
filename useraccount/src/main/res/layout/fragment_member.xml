@@ -69,13 +69,14 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/mtv_resend"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="auto-generated"
-                    android:layout_marginHorizontal="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:text="Resend ALSM ID"
                     android:gravity="end"
-                    android:alpha="0.7"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginBottom="10dp"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/TextInputStyle"

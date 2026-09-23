@@ -85,7 +85,7 @@ public class Fragment_Issued_Receipts extends Fragment {
 
         laStatus = lsStackIDxx.equalsIgnoreCase("issued_receipt") ? List.of("0", "1", "3", "4") : List.of("1");
 
-        lsDfrom = mViewModel.GetCountedDate(1, 1, false);
+        lsDfrom = mViewModel.GetCountedDate(1, 0, false);
         lsDto = mViewModel.GetCurrentDate();
 
         InitViews(view);

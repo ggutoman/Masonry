@@ -414,6 +414,81 @@
                         app:layout_constraintStart_toEndOf="@+id/mtv_label_membership"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
+                    <!-- Date Initiation -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_initiatn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Date of Initiation:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_membership"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_initiatn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_initiatn"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_initiatn"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Date Passed -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_passed"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Date of Passing:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_initiatn"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_passed"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_passed"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_passed"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <!-- Date Raising -->
+                    <com.google.android.material.textview.MaterialTextView
+                        style="@style/Text_Header"
+                        android:id="@+id/mtv_label_raised"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Date of Raising:"
+                        android:gravity="end"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintTop_toBottomOf="@+id/mtv_label_passed"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintWidth_percent="0.35"/>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mtv_raised"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"
+                        android:paddingVertical="2dp"
+                        android:paddingHorizontal="5dp"
+                        app:layout_constraintBaseline_toBaselineOf="@id/mtv_label_raised"
+                        app:layout_constraintStart_toEndOf="@+id/mtv_label_raised"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>

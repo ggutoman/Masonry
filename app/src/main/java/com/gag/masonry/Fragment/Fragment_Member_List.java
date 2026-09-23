@@ -186,7 +186,6 @@ public class Fragment_Member_List extends Fragment {
                                                     break;
 
                                                 case "receipt_entry":
-
                                                     loFragment = new Fragment_Receipt();
                                                     loBundle.putString("member_id", foMember.getSMemberID());
 
@@ -242,6 +241,13 @@ public class Fragment_Member_List extends Fragment {
                                                     loFragment.setArguments(loBundle);
                                                     break;
 
+                                                case "view_officer_history":
+                                                    loFragment = new Fragment_Officer_history();
+                                                    loBundle.putString("member_id", poItem.getSMemberID());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+
                                                 case "receipt_entry":
 
                                                     loFragment = new Fragment_Receipt();
@@ -251,7 +257,7 @@ public class Fragment_Member_List extends Fragment {
                                                     break;
                                             }
                                             //add to child container, as bridge to initiate another fragment after call
-                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                                             fragmentTransaction.addToBackStack(lsStackIDxx);
                                             fragmentTransaction.commit();
 
@@ -274,7 +280,7 @@ public class Fragment_Member_List extends Fragment {
 
         if (tab_layout.getSelectedTabPosition() == 0){
 
-            mviewModel.DownloadMembers(new VM_Member.OnDownload() {
+            mviewModel.DownloadMembers(lsDfrom,lsDto, new VM_Member.OnDownload() {
                 @Override
                 public void Loading() {
                     poLoad.ShowDialog("Downloading members. Please wait . .");

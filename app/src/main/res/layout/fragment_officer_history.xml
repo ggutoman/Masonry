@@ -13,10 +13,21 @@
 
         <com.google.android.material.textview.MaterialTextView
             style="@style/Text_Title"
+            android:id="@+id/mtv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="Officer History"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:alpha="0.7"/>
 
         <View
             android:layout_width="match_parent"
@@ -43,7 +54,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
-                    android:hint="Search Name"/>
+                    android:hint="Search Item"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

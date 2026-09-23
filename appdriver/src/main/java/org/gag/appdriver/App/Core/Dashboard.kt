@@ -46,6 +46,7 @@ import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
@@ -99,8 +100,6 @@ class Dashboard(loInstance : Context) {
                                 "c.nYearxxxx, " +
                                 "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
                                 "a.dTransact," +
-                                "a.cOldStatx," +
-                                "a.cNewStatx," +
                                 "d.sPositnDs " +
                                 "FROM Officer_History a " +
                                 "JOIN Member_Info b ON a.sMemberID = b.sMemberID " +
@@ -125,6 +124,10 @@ class Dashboard(loInstance : Context) {
     }
 
     fun GetUserObjects(fnUserLvl : Int) : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(fnUserLvl)
+
+    fun GetPositions() : LiveData<List<EPosition>>{
+        return poPositionInfo.ObserverPositionList()
+    }
 
     fun ClearMemberData(){
 

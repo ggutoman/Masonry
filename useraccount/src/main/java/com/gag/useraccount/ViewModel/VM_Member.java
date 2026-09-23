@@ -304,10 +304,10 @@ public class VM_Member extends AndroidViewModel {
         return laType;
     }
 
-    public void DownloadMembers(OnDownload foCallback){
+    public void DownloadMembers(String fsDfromxx, String fsDToxx, OnDownload foCallback){
 
         foCallback.Loading();
-        poAccount.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadMemberList(fsDfromxx, fsDToxx).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
@@ -451,6 +451,19 @@ public class VM_Member extends AndroidViewModel {
                     return null;
                 });
 
+    }
+
+    public void SendSms(String fsContact, String fsMessage, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+        poAccount.SendSMS(fsContact, fsMessage).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFailed(poAccount.getMessage());
+                return;
+            }
+            foCallback.OnSuccess();
+        });
     }
 
     public void AssignOfficer(EOfficer foOfficer, String fsYear, String fsRemarksx, VM_Account.OnSubmit foCallback){
