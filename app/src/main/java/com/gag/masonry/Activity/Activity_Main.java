@@ -196,26 +196,26 @@ public class Activity_Main extends AppCompatActivity {
                                         startService(loService);
                                     }
 
+                                    mviewModel.GetUserObjects(eUserInfo.getNUserLevl()).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
+                                        @Override
+                                        public void onChanged(List<EUserObjects> eUserObjects) {
+
+                                            if (eUserObjects == null || eUserObjects.size() < 1) return;
+
+                                            //proceed to account dashboard
+                                            Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
+                                            loIntent.putExtra("user_id", memberDashboardInfo.getSMemberID());
+                                            loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
+
+                                            poLogout.launch(loIntent);
+                                        }
+                                    });
+
                                 }catch (Exception ex){
                                     ex.printStackTrace();
                                 }
-                            }
-                        });
-
-                        mviewModel.GetUserObjects(eUserInfo.getNUserLevl()).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
-                            @Override
-                            public void onChanged(List<EUserObjects> eUserObjects) {
-
-                                if (eUserObjects == null || eUserObjects.size() < 1) return;
-
-                                //proceed to account dashboard
-                                Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
-                                loIntent.putExtra("user_id", eUserInfo.getSGLPIDNoX());
-                                loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
-
-                                poLogout.launch(loIntent);
                             }
                         });
                     }

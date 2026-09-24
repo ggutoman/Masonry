@@ -74,7 +74,7 @@ public class Fragment_Member extends Fragment{
             btn_add_email;
 
     private MaterialButton btn_create, btn_save_address, btn_save_contact, btn_save_email;
-    private MaterialTextView mtv_resend;
+    private MaterialTextView mtv_generate, mtv_resend, mtv_alsm;
 
     private TextInputEditText tie_lastname,
             tie_firstname,
@@ -84,6 +84,7 @@ public class Fragment_Member extends Fragment{
             tie_glpid,
             tie_address,
             tie_remarks,
+            tie_dMbr,
             tie_intn,
             tie_passing,
             tie_raising,
@@ -138,40 +139,6 @@ public class Fragment_Member extends Fragment{
 
     }
 
-    private boolean isMemberDataValid(){
-
-        if (lnSelectStatus < 0){
-            Toast.makeText(requireActivity(), "Please select account status", Toast.LENGTH_SHORT).show();
-            auto_status.requestFocus();
-            return false;
-        }else if (tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter lastname", Toast.LENGTH_SHORT).show();
-            tie_lastname.requestFocus();
-            return false;
-        }else if (tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty()){
-            Toast.makeText(requireActivity(), "Please enter firstname", Toast.LENGTH_SHORT).show();
-            tie_firstname.requestFocus();
-            return false;
-        }else if (lnSelectCivil < 0){
-            Toast.makeText(requireActivity(), "Please select civil status", Toast.LENGTH_SHORT).show();
-            auto_civil.requestFocus();
-            return false;
-        }else if (paramTownProvince.size() < 1){
-            Toast.makeText(requireActivity(), "Please enter atleast one address", Toast.LENGTH_SHORT).show();
-            auto_civil.requestFocus();
-            return false;
-        }else if (paramContact.size() < 1){
-            Toast.makeText(requireActivity(), "Please enter atleast one contact", Toast.LENGTH_SHORT).show();
-            auto_civil.requestFocus();
-            return false;
-        }else if (paramEmail.size() < 1){
-            Toast.makeText(requireActivity(), "Please enter atleast one email", Toast.LENGTH_SHORT).show();
-            auto_civil.requestFocus();
-            return false;
-        }
-        return true;
-    }
-
     private void initViews(View view) {
 
         tie_glpid = view.findViewById(R.id.tie_glpid);
@@ -181,12 +148,15 @@ public class Fragment_Member extends Fragment{
         auto_email = view.findViewById(R.id.auto_email);
         auto_civil = view.findViewById(R.id.auto_civil);
 
+        mtv_alsm = view.findViewById(R.id.mtv_alsm);
+        mtv_generate = view.findViewById(R.id.mtv_generate);
         mtv_resend = view.findViewById(R.id.mtv_resend);
 
         tie_birthdate = view.findViewById(R.id.tie_birthdate);
         tie_address = view.findViewById(R.id.tie_address);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
+        tie_dMbr = view.findViewById(R.id.tie_dMbr);
         tie_intn = view.findViewById(R.id.tie_intn);
         tie_passing = view.findViewById(R.id.tie_passing);
         tie_raising = view.findViewById(R.id.tie_raising);
@@ -215,38 +185,6 @@ public class Fragment_Member extends Fragment{
 
     private void initDataReceiver() {
 
-        if (getArguments() == null){
-
-            tie_glpid.setVisibility(View.GONE);
-            mtv_resend.setVisibility(View.GONE);
-            btn_create.setText("Create Member");
-        }else {
-
-            if (getArguments().getString("fsGLPIDxx") == null || getArguments().getString("fsGLPIDxx").isEmpty()){
-
-                poMessage.ShowMessage(1, "Could not verify member ID", "Okay", "", new Message_Dialog.OnDialogClick() {
-                    @Override
-                    public void OnPositive(@NotNull AlertDialog poDialog) {
-                        poDialog.dismiss();
-
-                        requireActivity()
-                                .getSupportFragmentManager()
-                                .beginTransaction()
-                                .remove(Fragment_Member.this)
-                                .commit();
-                    }
-
-                    @Override
-                    public void OnNegative(@NotNull AlertDialog poDialog) {}
-                });
-                return;
-            }
-            tie_glpid.setVisibility(View.VISIBLE);
-            mtv_resend.setVisibility(View.VISIBLE);
-            btn_create.setText("Update Member");
-            tie_glpid.setText(getArguments().getString("fsGLPIDxx"));
-        }
-
         auto_status.setAdapter(
                 new ArrayAdapter<>(
                         requireActivity(),
@@ -261,52 +199,71 @@ public class Fragment_Member extends Fragment{
                         mviewModel.GetCivilStatus()
                 ));
 
-        //get member information via glpid, this is to restore the new entry if error occured or to update the member
-        mviewModel.GetMemberGLPID(tie_glpid.getText().toString()).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
+        mtv_resend.setVisibility(lsStackIDxx.equalsIgnoreCase("create_member") ? View.GONE : View.VISIBLE);
+        btn_create.setText(lsStackIDxx.equalsIgnoreCase("create_member") ? "Create Member" : "Update Member");
+
+        //if viewing of member data, check id to load if initialized properly
+        if (lsStackIDxx.equalsIgnoreCase("view_members")){
+
+            if (getArguments() == null || !getArguments().containsKey("fsGLPIDxx")){
+
+                poMessage.ShowMessage(1, "ALSM ID is not initialized properly", "Okay", "", new Message_Dialog.OnDialogClick() {
+                    @Override
+                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                        poDialog.dismiss();
+                        requireActivity().getSupportFragmentManager().popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    }
+
+                    @Override
+                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                });
+                return;
+            }
+        }
+
+        //load member information
+        mviewModel.ObserveMemberInfo(getArguments() == null ? "" : getArguments().getString("fsGLPIDxx")).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
-                //do not proceed if member information is not found
                 if (eMemberInfo == null){
 
-                    //if member information is not found via argument's passed GLPID (update member only), validate and return
-                    if (getArguments() != null){
+                    loMemberInfo = new EMemberInfo(
+                            "",
+                            mviewModel.GetLodgeID(),
+                            "",
+                            null,
+                            null,
+                            null,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "0",
+                            null,
+                            "0",
+                            mviewModel.GetCurrentDate(),
+                            null,
+                            null,
+                            lnSelectStatus != 1 ? "0" : "1"
+                    );
 
-                        poMessage.ShowMessage(1, "Could not load member information", "Okay", "", new Message_Dialog.OnDialogClick() {
-                            @Override
-                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
-
-                                requireActivity()
-                                        .getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .remove(Fragment_Member.this)
-                                        .commit();
-                            }
-
-                            @Override
-                            public void OnNegative(@NotNull AlertDialog poDialog) {}
-                        });
-                        return;
-                    }
-                    return;
+                }else {
+                    loMemberInfo = eMemberInfo;
                 }
 
-                if (getArguments() != null){
-
-                    mviewModel.DownloadMemberInfo(eMemberInfo.getSMemberID(), new VM_Member.OnDownload() {
-                        @Override
-                        public void Loading() {
-                            Toast.makeText(requireActivity(), "Downloading member information...", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void Finished(String fsMessage) {
-                            Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                loMemberInfo = eMemberInfo;
+                //initialize member name and birthdate
+                tie_glpid.setText(loMemberInfo.getSGLPIDNoX());
+                tie_lastname.setText(loMemberInfo.getSLastName());
+                tie_firstname.setText(loMemberInfo.getSFrstName());
+                tie_middlename.setText(loMemberInfo.getSMiddName());
+                tie_suffix.setText(loMemberInfo.getSSuffixNm());
+                tie_birthdate.setText(loMemberInfo.getDBirthDte());
+                tie_dMbr.setText(loMemberInfo.getDMembrshp());
+                tie_intn.setText(loMemberInfo.getDInitiatn());
+                tie_passing.setText(loMemberInfo.getDPassedxx());
+                tie_raising.setText(loMemberInfo.getDRaisingX());
+                tie_suspend.setText(loMemberInfo.getDSuspendx());
 
                 //initialize address, and email with exisitng list
                 mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<TownProvince>>() {
@@ -369,17 +326,6 @@ public class Fragment_Member extends Fragment{
                         }
                     }
                 });
-
-                //initialize member name and birthdate
-                tie_lastname.setText(loMemberInfo.getSLastName());
-                tie_firstname.setText(loMemberInfo.getSFrstName());
-                tie_middlename.setText(loMemberInfo.getSMiddName());
-                tie_suffix.setText(loMemberInfo.getSSuffixNm());
-                tie_birthdate.setText(loMemberInfo.getDBirthDte());
-                tie_intn.setText(loMemberInfo.getDInitiatn());
-                tie_passing.setText(loMemberInfo.getDPassedxx());
-                tie_raising.setText(loMemberInfo.getDRaisingX());
-                tie_suspend.setText(loMemberInfo.getDSuspendx());
 
                 auto_status.setText(mviewModel.GetAccountStatus().get(Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())), false);
                 lnSelectStatus = Integer.parseInt(loMemberInfo.getCMmbrStat());
@@ -467,6 +413,37 @@ public class Fragment_Member extends Fragment{
     }
 
     private void initListeners() {
+
+        tie_glpid.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                mtv_alsm.setVisibility(charSequence.toString().equalsIgnoreCase(loMemberInfo.getSGLPIDNoX()) ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        tie_dMbr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Calendar loCalendar = Calendar.getInstance();
+
+                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                        tie_dMbr.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    }
+                }, loCalendar.get(Calendar.YEAR),
+                        loCalendar.get(Calendar.MONTH),
+                        loCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show();
+            }
+        });
 
         tie_intn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -696,7 +673,6 @@ public class Fragment_Member extends Fragment{
         });
 
         /*MEMBER CONTACT LISTENER*/
-
         auto_contact.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -893,6 +869,7 @@ public class Fragment_Member extends Fragment{
             }
         });
 
+        /*SAVE LISTENERS*/
         btn_create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -937,66 +914,27 @@ public class Fragment_Member extends Fragment{
 
                         poConfirmDialog.dismiss();
 
-                        String lsFrstNme= tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty() ? "" : tie_firstname.getText().toString();
-                        String lsMiddNme= tie_middlename.getText() == null || tie_middlename.getText().toString().isEmpty() ? "" : tie_middlename.getText().toString();
-                        String lsLastNme= tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString();
-                        String lsSuffix= tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString();
+                        //member information
+                        loMemberInfo.setDMembrshp(tie_dMbr.getText() == null ? "" : tie_dMbr.getText().toString());
+                        loMemberInfo.setDInitiatn(tie_intn.getText() == null ? "" : tie_intn.getText().toString());
+                        loMemberInfo.setDPassedxx(tie_passing.getText() == null ? "" : tie_passing.getText().toString());
+                        loMemberInfo.setDRaisingX(tie_raising.getText() == null ? "" : tie_raising.getText().toString());
+                        loMemberInfo.setDMembrshp(tie_dMbr.getText() == null ? "" : tie_dMbr.getText().toString());
+                        loMemberInfo.setCMmbrStat(String.valueOf(lnSelectStatus));
 
-                        //if member info is not existing, create a new one
-                        if (loMemberInfo == null || loMemberInfo.getSMemberID().isEmpty()){
-
-                            loMemberInfo = new EMemberInfo(
-                                    "",
-                                    mviewModel.GetLodgeID(),
-                                    tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(),
-                                    tie_intn.getText() == null ? "" : tie_intn.getText().toString(),
-                                    tie_passing.getText() == null ? "" : tie_passing.getText().toString(),
-                                    tie_raising.getText() == null ? "" : tie_raising.getText().toString(),
-                                    lsLastNme,
-                                    lsFrstNme,
-                                    lsMiddNme,
-                                    lsSuffix,
-                                    String.valueOf(lnSelectCivil),
-                                    tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString(),
-                                    String.valueOf(lnSelectStatus),
-                                    mviewModel.GetCurrentDate(),
-                                    tie_suspend.getText() == null ? "" : tie_suspend.getText().toString(),
-                                    null,
-                                    lnSelectStatus != 1 ? "0" : "1"
-                            );
-                        }else {
-
-                            //if member status has changed
-                            if (lnSelectStatus != Integer.parseInt(loMemberInfo.getCMmbrStat() == null ? "0" : loMemberInfo.getCMmbrStat())){
-
-                                if (lnSelectStatus > 1){ //update suspend date, if status is suspended
-                                    loMemberInfo.setDSuspendx(mviewModel.GetCurrentDate());
-                                }else { //remove suspend date
-                                    loMemberInfo.setDSuspendx(null);
-                                }
-                            }
-
-                            loMemberInfo.setSLodgeIDx(mviewModel.GetLodgeID());
-                            loMemberInfo.setDInitiatn(tie_intn.getText() == null ? "" : tie_intn.getText().toString());
-                            loMemberInfo.setDPassedxx(tie_passing.getText() == null ? "" : tie_passing.getText().toString());
-                            loMemberInfo.setDRaisingX(tie_raising.getText() == null ? "" : tie_raising.getText().toString());
-                            loMemberInfo.setDSuspendx(tie_suspend.getText() == null ? "" : tie_suspend.getText().toString());
-                            loMemberInfo.setSLastName(lsLastNme);
-                            loMemberInfo.setSFrstName(lsFrstNme);
-                            loMemberInfo.setSMiddName(lsMiddNme);
-                            loMemberInfo.setSSuffixNm(lsSuffix);
-                            loMemberInfo.setCCvilStat(String.valueOf(lnSelectCivil));
-                            loMemberInfo.setDBirthDte(tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString());
-                            loMemberInfo.setCMmbrStat(String.valueOf(lnSelectStatus));
-                            loMemberInfo.setCRecdStat(String.valueOf(lnSelectStatus));
-                        }
+                        //personal information
+                        loMemberInfo.setSLastName(tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty() ? "" : tie_lastname.getText().toString());
+                        loMemberInfo.setSFrstName(tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty() ? "" : tie_firstname.getText().toString());
+                        loMemberInfo.setSMiddName(tie_middlename.getText() == null || tie_middlename.getText().toString().isEmpty() ? "" : tie_middlename.getText().toString());
+                        loMemberInfo.setSSuffixNm(tie_suffix.getText() == null || tie_suffix.getText().toString().isEmpty() ? "" : tie_suffix.getText().toString());
+                        loMemberInfo.setCCvilStat(String.valueOf(lnSelectCivil));
+                        loMemberInfo.setDBirthDte(tie_birthdate.getText() == null ? "1900-00-00" : tie_birthdate.getText().toString());
 
                         int hasActive = 0;
                         int hasHomeAddr = 0;
 
                         List<EMemberAddress> laAddressParams = new ArrayList<>();
                         for (TownProvince townProvince : paramTownProvince){
-                            Log.d("Address added ", townProvince.getPsTownProvNme());
 
                             String lsAddress;
                             if (townProvince.getPsAddrsIDx() == null || townProvince.getPsAddrsIDx().isEmpty()){
@@ -1059,7 +997,6 @@ public class Fragment_Member extends Fragment{
 
                         List<EMemberContactInfo> laContactParams = new ArrayList<>();
                         for (EMemberContactInfo contactInfo : paramContact){
-                            Log.d("Contacts added ", contactInfo.getSContctNo());
 
                             laContactParams.add(
                                     new EMemberContactInfo(
@@ -1097,7 +1034,6 @@ public class Fragment_Member extends Fragment{
 
                         List<EMemberEmailInfo> laEmailParams = new ArrayList<>();
                         for (EMemberEmailInfo eMemberEmailInfo : paramEmail){
-                            Log.d("Emails added ", eMemberEmailInfo.getSEmailAdd());
 
                             laEmailParams.add(
                                     new EMemberEmailInfo(
@@ -1131,78 +1067,81 @@ public class Fragment_Member extends Fragment{
                         mviewModel.SubmitParameters(loMemberInfo, laAddressParams, laContactParams, laEmailParams, new VM_Member.OnSubmit() {
                             @Override
                             public void OnLoad() {
-                                poLoad.ShowDialog("Submitting your information. Please wait . .");
+                                poLoad.ShowDialog("Saving member information. Please wait . .");
                             }
 
                             @Override
                             public void OnSuccess() {
-
-                                String ls_receiver = "";
-                                for (EMemberContactInfo contactInfo : laContactParams){
-                                    if (contactInfo.getCRecdStat().equalsIgnoreCase("1")){
-                                        ls_receiver = contactInfo.getSContctNo();
-                                        break;
-                                    }
-                                }
-
-                                if (!ls_receiver.isEmpty()){
-
-                                    //compose message for the member's ALSM ID
-                                    String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
-                                            "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
-                                            "Please do not share your registration ID for Masonry Application";
-
-                                    mviewModel.SendSms(ls_receiver, lsMessage, new VM_Member.OnSubmit() {
-                                        @Override
-                                        public void OnLoad() {}
-
-                                        @Override
-                                        public void OnSuccess() {
-                                            poLoad.DismissDialog();
-
-                                            poMessage.ShowMessage(0, "Member information has been saved successfully.", "Okay", "", new Message_Dialog.OnDialogClick() {
-                                                @Override
-                                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                    poDialog.dismiss();
-                                                    FinishTask();
-                                                }
-
-                                                @Override
-                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                            });
-                                        }
-
-                                        @Override
-                                        public void OnFailed(String fsMesssage) {
-                                            poLoad.DismissDialog();
-
-                                            poMessage.ShowMessage(0, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
-                                                @Override
-                                                public void OnPositive(@NotNull AlertDialog poDialog) {
-                                                    poDialog.dismiss();
-                                                    FinishTask();
-                                                }
-
-                                                @Override
-                                                public void OnNegative(@NotNull AlertDialog poDialog) {}
-                                            });
-                                        }
-                                    });
-                                    return;
-                                }
-
                                 poLoad.DismissDialog();
+
                                 poMessage.ShowMessage(0, "Member information has been saved successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
+
+                                        /* send ALSM ID only to new member's primary contact number after saving member */
+                                        if (lsStackIDxx.equalsIgnoreCase("create_member")){
+
+                                            String ls_receiver = "";
+                                            for (EMemberContactInfo contactInfo : laContactParams){
+                                                if (contactInfo.getCRecdStat().equalsIgnoreCase("1")){
+                                                    ls_receiver = contactInfo.getSContctNo();
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!ls_receiver.isEmpty()){
+
+                                                //compose message for the member's ALSM ID
+                                                String lsMessage = "Kay Gandang Araw, " + loMemberInfo.getSFrstName() + "!\n\n" +
+                                                        "Here is your ALSM ID " + loMemberInfo.getSGLPIDNoX() + "\n" +
+                                                        "Please do not share your registration ID for Masonry Application";
+
+                                                mviewModel.SendSms(ls_receiver, lsMessage, new VM_Member.OnSubmit() {
+                                                    @Override
+                                                    public void OnLoad() {
+                                                        poLoad.ShowDialog("Sending ALSM ID to member. Please wait . . .");
+                                                    }
+
+                                                    @Override
+                                                    public void OnSuccess() {
+                                                        poLoad.DismissDialog();
+                                                        poMessage.ShowMessage(0, "Member information has been saved successfully.", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                                            @Override
+                                                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                                poDialog.dismiss();
+                                                                FinishTask();
+                                                            }
+
+                                                            @Override
+                                                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                                        });
+                                                    }
+
+                                                    @Override
+                                                    public void OnFailed(String fsMesssage) {
+                                                        poLoad.DismissDialog();
+                                                        poMessage.ShowMessage(0, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                                            @Override
+                                                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                                                poDialog.dismiss();
+                                                                FinishTask();
+                                                            }
+
+                                                            @Override
+                                                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                            return;
+                                        }
                                         FinishTask();
                                     }
 
                                     @Override
                                     public void OnNegative(@NotNull AlertDialog poDialog) {}
                                 });
-
                             }
 
                             @Override
@@ -1213,7 +1152,7 @@ public class Fragment_Member extends Fragment{
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
-                                        initDataReceiver();
+                                        FinishTask();
                                     }
 
                                     @Override
@@ -1225,6 +1164,44 @@ public class Fragment_Member extends Fragment{
                     }
                 });
 
+            }
+        });
+
+        mtv_generate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mviewModel.GenerateALSMID("", new VM_Member.OnGetALSMID() {
+                    @Override
+                    public void onLoad() {
+                        poLoad.ShowDialog("Generating ID. Please wait . . .");
+                    }
+
+                    @Override
+                    public void onSuccess(String fsID) {
+                        poLoad.DismissDialog();
+                        Toast.makeText(requireActivity(), "ALSM ID generated successfully", Toast.LENGTH_SHORT).show();
+
+                        loMemberInfo.setSGLPIDNoX(fsID);
+                        tie_glpid.setText(loMemberInfo.getSGLPIDNoX());
+                    }
+
+                    @Override
+                    public void onError(String fsError) {
+                        poLoad.DismissDialog();
+
+                        poMessage.ShowMessage(1, fsError, "Okay", "", new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                                tie_glpid.setText(loMemberInfo.getSGLPIDNoX());
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {}
+                        });
+                    }
+                });
             }
         });
 
@@ -1295,25 +1272,6 @@ public class Fragment_Member extends Fragment{
                                 }
                             });
 
-                            /** BACKUP FOR SMS SENDER **/
-//                            new SMSApp(requireActivity(), new OnSMSStatus() {
-//                                @Override
-//                                public void OnResult(String fsResult) {
-//
-//                                    poLoad.DismissDialog();
-//                                    poMessage.ShowMessage(0, fsResult, "Okay", "", new Message_Dialog.OnDialogClick() {
-//                                        @Override
-//                                        public void OnPositive(@NotNull AlertDialog poDialog) {
-//                                            poDialog.dismiss();
-//                                            FinishTask();
-//                                        }
-//
-//                                        @Override
-//                                        public void OnNegative(@NotNull AlertDialog poDialog) {}
-//                                    });
-//                                }
-//                            }).SendSms(eMemberContactInfo.getSContctNo(), lsMessage);
-
                         }else {
 
                         }
@@ -1322,6 +1280,83 @@ public class Fragment_Member extends Fragment{
 
             }
         });
+
+        mtv_alsm.setOnClickListener(view -> {
+
+            mviewModel.GenerateALSMID(tie_glpid.getText() == null ? "" : tie_glpid.getText().toString(), new VM_Member.OnGetALSMID() {
+                @Override
+                public void onLoad() {
+                    poLoad.ShowDialog("Verifying ALSM ID. Please wait . . .");
+                }
+
+                @Override
+                public void onSuccess(String fsID) {
+                    poLoad.DismissDialog();
+                    Toast.makeText(requireActivity(), "ALSM ID successfully assigned", Toast.LENGTH_SHORT).show();
+
+                    loMemberInfo.setSGLPIDNoX(fsID);
+                    tie_glpid.setText(loMemberInfo.getSGLPIDNoX());
+                }
+
+                @Override
+                public void onError(String fsError) {
+                    poLoad.DismissDialog();
+
+                    poMessage.ShowMessage(1, fsError, "Okay", "", new Message_Dialog.OnDialogClick() {
+                        @Override
+                        public void OnPositive(@NotNull AlertDialog poDialog) {
+                            poDialog.dismiss();
+                            tie_glpid.setText(loMemberInfo.getSGLPIDNoX());
+                        }
+
+                        @Override
+                        public void OnNegative(@NotNull AlertDialog poDialog) {}
+                    });
+                }
+            });
+        });
+    }
+
+    private boolean isMemberDataValid(){
+
+        if (tie_glpid.getText() == null || tie_glpid.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please enter ALSM ID", Toast.LENGTH_SHORT).show();
+            auto_status.requestFocus();
+            return false;
+        }else if (tie_dMbr.getText() == null || tie_dMbr.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please select date of membership", Toast.LENGTH_SHORT).show();
+            auto_status.requestFocus();
+            return false;
+        }else if (lnSelectStatus < 0){
+            Toast.makeText(requireActivity(), "Please select account status", Toast.LENGTH_SHORT).show();
+            auto_status.requestFocus();
+            return false;
+        }else if (tie_lastname.getText() == null || tie_lastname.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please enter lastname", Toast.LENGTH_SHORT).show();
+            tie_lastname.requestFocus();
+            return false;
+        }else if (tie_firstname.getText() == null || tie_firstname.getText().toString().isEmpty()){
+            Toast.makeText(requireActivity(), "Please enter firstname", Toast.LENGTH_SHORT).show();
+            tie_firstname.requestFocus();
+            return false;
+        }else if (lnSelectCivil < 0){
+            Toast.makeText(requireActivity(), "Please select civil status", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramTownProvince.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one address", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramContact.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one contact", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }else if (paramEmail.size() < 1){
+            Toast.makeText(requireActivity(), "Please enter atleast one email", Toast.LENGTH_SHORT).show();
+            auto_civil.requestFocus();
+            return false;
+        }
+        return true;
     }
 
     private void ClearFields(List<View> fields, boolean clearAdapter) {

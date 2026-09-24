@@ -130,7 +130,7 @@ public class Fragment_Member_List extends Fragment {
 
     private void InitDataReceiver(){
 
-        mviewModel.GetMemberGLPID(lsGLPIDxx).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
+        mviewModel.ObserveMemberInfo(lsGLPIDxx).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
@@ -180,7 +180,7 @@ public class Fragment_Member_List extends Fragment {
                                                     if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
 
                                                     loFragment = new Fragment_Member();
-                                                    loBundle.putString("fsGLPIDxx", foMember.getSGLPIDNoX());
+                                                    loBundle.putString("fsGLPIDxx", foMember.getSMemberID());
 
                                                     loFragment.setArguments(loBundle);
                                                     break;

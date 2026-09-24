@@ -336,7 +336,7 @@ public class Fragment_UserInfo extends Fragment {
                 loFragMem.setArguments(loArgs);
 
                 fragmentTransaction.replace(R.id.layout_container, loFragMem);
-                fragmentTransaction.addToBackStack("create_member");
+                fragmentTransaction.addToBackStack("view_members");
                 fragmentTransaction.commit();
 
             }

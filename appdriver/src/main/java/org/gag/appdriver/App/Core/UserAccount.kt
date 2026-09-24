@@ -96,7 +96,7 @@ class UserAccount(instance : Context) {
 
     fun GetSession() : AppConfig = session
 
-    fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo> = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
+    fun ObserveMemberInfo(fsMemberID : String) : LiveData<EMemberInfo> = poMemberInfo.ObserveMemberInfo(fsMemberID)
 
     fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.ObserveUserInfo()
 
@@ -379,6 +379,72 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
+    fun GenerateALSMID(fsIDxx : String): CompletableFuture<Any> {
+
+        val future = CompletableFuture<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val params = JSONObject()
+                    if (fsIDxx.isNotEmpty()) params.put("alsm_id", fsIDxx)
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_ALSM_ID.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                //return generated otp
+                                val resultData = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                                resultData.GetPayload()
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
     fun VerifyMobile(fsMobile : String): CompletableFuture<Any> {
 
         val future = CompletableFuture<Any>()
@@ -582,9 +648,7 @@ class UserAccount(instance : Context) {
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
-
                 }else{
-
                     httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_USER.fsURL,
                         JSONObject(),
@@ -1427,7 +1491,6 @@ class UserAccount(instance : Context) {
             val result : Any = try {
 
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
-
                     message = "No internet connection"
                     false
 

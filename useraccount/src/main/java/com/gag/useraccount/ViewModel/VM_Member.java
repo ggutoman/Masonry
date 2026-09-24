@@ -47,6 +47,12 @@ public class VM_Member extends AndroidViewModel {
         void Finished(String fsMessage);
     }
 
+    public interface OnGetALSMID {
+        void onLoad();
+        void onSuccess(String fsID);
+        void onError(String fsError);
+    }
+
     public VM_Member(@NonNull Application application) {
         super(application);
 
@@ -227,8 +233,8 @@ public class VM_Member extends AndroidViewModel {
         return laEmail;
     }
 
-    public LiveData<EMemberInfo> GetMemberGLPID(String fsGLPIDxx){
-        return poAccount.GetMemberGLPID(fsGLPIDxx);
+    public LiveData<EMemberInfo> ObserveMemberInfo(String fsMemberID){
+        return poAccount.ObserveMemberInfo(fsMemberID);
     }
 
     public LiveData<List<TownProvince>> GetMemberAddress(String fsMemberID){
@@ -279,31 +285,6 @@ public class VM_Member extends AndroidViewModel {
         return laAccount;
     }
 
-    public List<String> GetOfficerTypes(){
-
-        List<String> laType = new ArrayList<>();
-        Collections.addAll(laType,
-                MEMBER_CONSTANTS.STATUS_ELECTED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_APPOINTED.getFsDescr()
-        );
-        return laType;
-    }
-
-    public List<String> GetOfficerStatus(){
-
-        List<String> laType = new ArrayList<>();
-        Collections.addAll(laType,
-                MEMBER_CONSTANTS.STATUS_OFFICER_SUSPENDED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_ACTIVE.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_REASSIGN.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_REMOVED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_RESIGNED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_DECEASE.getFsDescr()
-
-        );
-        return laType;
-    }
-
     public void DownloadMembers(String fsDfromxx, String fsDToxx, OnDownload foCallback){
 
         foCallback.Loading();
@@ -339,42 +320,6 @@ public class VM_Member extends AndroidViewModel {
         }).exceptionally(throwable -> {
             foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
             return null;
-        });
-    }
-
-    public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
-
-        foCallback.Loading();
-
-        //store all threads into hash set, to execute one by one and avoid memory leakage
-        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
-                List.of(
-                        poAccount.DownloadMemberAddress(fsMemberIDxx),
-                        poAccount.DownloadMemberContact(fsMemberIDxx),
-                        poAccount.DownloadMemberEmail(fsMemberIDxx)
-                )
-        );
-
-        //initialize task result holder
-        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
-        for (CompletableFuture<Boolean> task : laTasks){
-
-            poResult = poResult.thenCompose(aBoolean -> {
-                if (!aBoolean) return CompletableFuture.completedFuture(false);
-                return task;
-            });
-        }
-
-        //get the result
-        poResult.thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-                if (!aBoolean){
-                    foCallback.Finished("Failed to download member information:\n\n" + poAccount.getMessage());
-                    return;
-                }
-                foCallback.Finished("Successfully downloaded member information");
-            }
         });
     }
 
@@ -490,6 +435,31 @@ public class VM_Member extends AndroidViewModel {
             public Void apply(Throwable throwable) {
                 foCallback.onError(throwable.getMessage());
                 return null;
+            }
+        });
+    }
+
+    public void GenerateALSMID(String fsIDxx, OnGetALSMID foCallback){
+
+        foCallback.onLoad();
+        poAccount.GenerateALSMID(fsIDxx).thenAccept(o -> {
+
+            if (o instanceof Boolean){
+
+                if (!(Boolean) o){
+                    foCallback.onError(poAccount.getMessage());
+                }else {
+                    foCallback.onError("Failed to generate ALSM ID");
+                }
+            }else if (o instanceof String){
+
+                if (((String) o).isEmpty()){
+                    foCallback.onError("Failed to generate ALSM ID");
+                }else {
+                    foCallback.onSuccess((String) o);
+                }
+            }else{
+                foCallback.onError("Failed to generate ALSM ID");
             }
         });
     }

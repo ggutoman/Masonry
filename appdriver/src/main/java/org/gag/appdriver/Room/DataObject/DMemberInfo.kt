@@ -35,8 +35,8 @@ interface DMemberInfo {
     @Query("SELECT * FROM Member_Info WHERE sMemberID= :fsMemberID")
     fun GetMemberInfo(fsMemberID : String): EMemberInfo
 
-    @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX= :fsGLPIDxx")
-    fun GetMemberInfoByGLPID(fsGLPIDxx : String): LiveData<EMemberInfo>
+    @Query("SELECT * FROM Member_Info WHERE sMemberID= :fsMemberID")
+    fun ObserveMemberInfo(fsMemberID : String): LiveData<EMemberInfo>
 
     @Query("DELETE FROM Member_Info")
     fun DeleteMember()
