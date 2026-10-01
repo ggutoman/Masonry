@@ -7,5 +7,6 @@ data class OfficerHistory(
     val nYearxxxx : String,
     val sMemberNme : String,
     val dTransact : String,
-    val sPositnDs : String
+    val sPositnDs : String,
+    val sAssgnBy : String
 )

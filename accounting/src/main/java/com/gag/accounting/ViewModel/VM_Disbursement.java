@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Core.Projects;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.App.Models.LodgeInfo;
@@ -24,6 +25,7 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import java.util.function.Consumer;
 
 public class VM_Disbursement extends AndroidViewModel {
 
+    private final UserAccount poUser;
     private final Disbursement poDisbursement;
     private final Funds poFunds;
     private final Projects poProjects;
@@ -49,6 +52,7 @@ public class VM_Disbursement extends AndroidViewModel {
     public VM_Disbursement(@NonNull Application application) {
         super(application);
 
+        poUser = new UserAccount(application);
         poDisbursement = new Disbursement(application);
         poFunds = new Funds(application);
         poProjects = new Projects(application);
@@ -112,6 +116,10 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public LiveData<List<EDisbursementAttachment>> GetAttachments(String fsTransNox){
         return poDisbursement.GetAttachments(fsTransNox);
+    }
+
+    public EUserObjects GetPermissions(String fsIDxx){
+        return poUser.GetObjectPermission(fsIDxx);
     }
 
     public void SelectType(String fsType){
@@ -271,20 +279,23 @@ public class VM_Disbursement extends AndroidViewModel {
 
             //save attachments
             CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
-            for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
+            if ((faAttachments == null ? 0 : faAttachments.size()) > 0){
 
-                loAttachment.setSSourceNo(lsSourceno);
+                for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
 
-                //bind the result after each thread runs
-                chain = chain.thenCompose(ok -> {
+                    loAttachment.setSSourceNo(lsSourceno);
 
-                    //continue saving attachment if previous is success
-                    if (ok) poDisbursement.SaveAttachment(loAttachment);
-                    return CompletableFuture.completedFuture(ok);
-                });
+                    //bind the result after each thread runs
+                    chain = chain.thenCompose(ok -> {
+
+                        //continue saving attachment if previous is success
+                        if (ok) poDisbursement.SaveAttachment(loAttachment);
+                        return CompletableFuture.completedFuture(ok);
+                    });
+                }
             }
 
-            chain = chain.thenCompose(aBoolean -> {
+            return chain.thenCompose(aBoolean -> {
 
                 if (aBoolean){
 
@@ -294,8 +305,6 @@ public class VM_Disbursement extends AndroidViewModel {
                 }
                 return CompletableFuture.completedFuture(aBoolean);
             });
-
-            return chain;
 
         })
         .thenAccept(allOk -> {

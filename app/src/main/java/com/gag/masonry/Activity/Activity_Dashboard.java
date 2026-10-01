@@ -18,7 +18,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement;
 import com.gag.accounting.Fragments.Disbursement.Fragment_Disbursement_History;
-import com.gag.accounting.Fragments.Fund.Fragment_Lodge_Fund;
 import com.gag.accounting.Fragments.Project.Fragment_Project;
 import com.gag.accounting.Fragments.Receipt.Fragment_Issued_Receipts;
 import com.gag.masonry.Adapter.Adapter_Drawer_Expandable;
@@ -36,6 +35,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Fragments.Fragment_Report_List;
+import org.gag.appdriver.App.Service.DataSyncService;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
@@ -49,7 +49,7 @@ public class Activity_Dashboard extends AppCompatActivity {
     private LoadDialog poLoading;
     private VM_Main mViewmodel;
 
-    private String lsGLPID;
+    private String lsGLPID, lsUserIDxx;
     private int lnUsrLvl;
 
     private DrawerLayout main_drawer;
@@ -67,7 +67,8 @@ public class Activity_Dashboard extends AppCompatActivity {
         poLoading = new LoadDialog(this);
         mViewmodel = new ViewModelProvider(Activity_Dashboard.this).get(VM_Main.class);
 
-        lsGLPID = getIntent().hasExtra("user_id") ? getIntent().getStringExtra("user_id") : "";
+        lsUserIDxx = getIntent().hasExtra("user_id") ? getIntent().getStringExtra("user_id") : "";
+        lsGLPID = getIntent().hasExtra("member_id") ? getIntent().getStringExtra("member_id") : "";
         lnUsrLvl = getIntent().hasExtra("user_level") ? getIntent().getIntExtra("user_level", 0) : 0;
 
         poMessage.InitDialog();
@@ -150,19 +151,17 @@ public class Activity_Dashboard extends AppCompatActivity {
                                 poDialog.dismiss();
 
                                 //re download parameters
-                                mViewmodel.DownloadParameters(new VM_Main.OnDownloadData() {
-                                    @Override
-                                    public void OnDownload() {
-                                        poLoading.ShowDialog("Downloading data. Please wait . . .");
-                                    }
+                                //start syncing user data
+                                Intent loService = new Intent(Activity_Dashboard.this, DataSyncService.class);
+                                loService.setAction("LOGIN_ACTION");
+                                loService.putExtra("user_id", lsUserIDxx);
+                                loService.putExtra("member_id", lsGLPID);
 
-                                    @Override
-                                    public void OnFinished(String fsMessage) {
-                                        poLoading.DismissDialog();
-                                        Log.d("sYNC dATA", fsMessage);
-                                        Toast.makeText(Activity_Dashboard.this, fsMessage, Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                                //restart service
+                                stopService(loService);
+
+                                Toast.makeText(Activity_Dashboard.this, "Sync service started . . .", Toast.LENGTH_SHORT).show();
+                                startService(loService);
                             }
                         });
                         break;

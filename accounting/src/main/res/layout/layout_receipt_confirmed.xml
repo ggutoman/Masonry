@@ -155,7 +155,7 @@
             android:id="@+id/mtv_remarks"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Remarks"
+            android:text="Additional Information"
             android:textStyle="bold"
             android:alpha="0.7"
             app:layout_constraintStart_toStartOf="parent"

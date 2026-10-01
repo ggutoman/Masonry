@@ -91,7 +91,7 @@ public class Fragment_Report_List extends Fragment {
         btn_filter = view.findViewById(R.id.btn_filter);
         rcv_report_list = view.findViewById(R.id.rcv_attachment_list);
 
-        mtv_title.setText("Reports");
+        mtv_title.setText("List of Reports");
         mtv_no_record.setText("No reports found");
 
         rcv_report_list.setPadding(25, 0, 0, 0);

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">ALSM Portal</string>
-    <string name="version_name">ALSM v1.0</string>
-    <string name="company_name">Pangasinan Chapter</string>
+    <string name="version_name">ALSM Portal v2.8.0</string>
+    <string name="version_number">V8</string>
     <string name="signup_help">Create Account ?</string>
     <string name="forgot_help">Forgot Password ?</string>
     <string name="open_drawer">Open Menu</string>

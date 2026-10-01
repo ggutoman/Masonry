@@ -34,6 +34,7 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -197,6 +198,12 @@ public class Fragment_Project_History extends Fragment {
                         loAdapter = new Adapter_Project_List(requireContext(), laList, false, new Adapter_Project_List.OnSelectProject() {
                             @Override
                             public void OnSelect(EProjectMaster loProj) {
+
+                                EUserObjects loPermission = mViewModel.GetPermission("009");
+                                if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")){
+                                    Toast.makeText(requireActivity(), "Account is not allowed to modify projects", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
 
                                 FragmentTransaction fragmentTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
 

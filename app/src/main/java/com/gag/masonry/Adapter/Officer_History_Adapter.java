@@ -8,6 +8,7 @@ import android.widget.ExpandableListView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gag.masonry.R;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.OfficerHistory;
@@ -71,6 +72,7 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
     @Override
     public void onBindViewHolder(@NonNull VH_Officer_History holder, int position) {
 
+        holder.mtv_assignee.setVisibility(isByMember ? View.VISIBLE : View.GONE);
         holder.mtv_dtransact.setVisibility(isByMember ? View.VISIBLE : View.GONE);
         holder.mtv_name.setVisibility(isByMember ? View.VISIBLE : View.GONE);
         holder.rcv_details.setVisibility(isByMember ? View.GONE : View.VISIBLE);
@@ -96,7 +98,8 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
             });
         }else{
             holder.mtv_name.setText(laOfficerHistory.get(position).getSPositnDs());
-            holder.mtv_dtransact.setText("Ended on " + poDate.FormatDate(laOfficerHistory.get(position).getDTransact(), "MMMM d, yyyy"));
+            holder.mtv_assignee.setText("Edited By " + laOfficerHistory.get(position).getSAssgnBy());
+            holder.mtv_dtransact.setText("Changed on " + poDate.FormatDate(laOfficerHistory.get(position).getDTransact(), "MMMM d, yyyy"));
         }
     }
 
@@ -134,6 +137,7 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
     public static class VH_Officer_History extends RecyclerView.ViewHolder{
 
         private final MaterialTextView mtv_name;
+        private final MaterialTextView mtv_assignee;
         private final MaterialTextView mtv_dtransact;
         private final ExpandableListView rcv_details;
 
@@ -141,6 +145,7 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
             super(itemView);
 
             mtv_name = itemView.findViewById(com.gag.masonry.R.id.mtv_name);
+            mtv_assignee = itemView.findViewById(R.id.mtv_assignee);
             mtv_dtransact = itemView.findViewById(com.gag.masonry.R.id.mtv_dtransact);
             rcv_details = itemView.findViewById(com.gag.masonry.R.id.rcv_details);
         }

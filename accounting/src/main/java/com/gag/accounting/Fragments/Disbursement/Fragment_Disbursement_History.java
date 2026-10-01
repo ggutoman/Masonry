@@ -33,6 +33,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.Room.Entities.EDisbursement;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -158,9 +159,14 @@ public class Fragment_Disbursement_History extends Fragment {
                         public void OnSelec(EDisbursement loItem) {
 
                             FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
-
                             Fragment loFragment = new Fragment();
                             Bundle loBundle = new Bundle();
+
+                            EUserObjects loPermission = mViewModel.GetPermissions(lsStackIDxx.equalsIgnoreCase("disbursement_list") ? "020" : "021");
+                            if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")){
+                                Toast.makeText(requireActivity(), "Account is not allowed to modify disbursements", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
 
                             switch (lsStackIDxx){
 

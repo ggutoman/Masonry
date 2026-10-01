@@ -35,6 +35,7 @@ import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
@@ -50,6 +51,7 @@ import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.ESysNotifs
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -77,6 +79,7 @@ class UserAccount(instance : Context) {
     val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+    val poPermission : DObjectPermission = ML_DBF.getDatabase(loInstance)?.GetPermissions() as DObjectPermission
 
     fun GetLodgeID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -130,11 +133,13 @@ class UserAccount(instance : Context) {
 
     fun ObserveOfficerInfo(fsMemberIDx : String, fsYearIDxx : String) : LiveData<EOfficer> = poOfficer.ObserveOfficeInfo(fsMemberIDx, fsYearIDxx)
 
-    fun ObserveCurrentRole(fsMemberIDx : String) : LiveData<OfficerInfo> = poOfficer.ObserveCurrentRole(fsMemberIDx)
+    fun ObserveCurrentRole() : LiveData<OfficerInfo> = poOfficer.ObserveCurrentRole(GetUserID(), dateObj.FormatDate(dateObj.GetCurrentDate(), "yyyy"))
 
     fun ObserveUnreadNotifs(fsRcvr : String) : LiveData<List<ESysNotifs>>{
         return poUserNotifs.GetUnreadNotifs(fsRcvr)
     }
+
+    fun GetObjectPermission(fsObjIDxx : String) : EUserObjects = poUserObjects.GetObjectPermission(GetUserID(), fsObjIDxx, dateObj.FormatDate(dateObj.GetCurrentDate(), "yyyy"))
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -664,6 +669,8 @@ class UserAccount(instance : Context) {
 
                                 poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
                                 poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
+                                poOfficer.SaveOfficer(resultData.GetPayload().officer_info)
+                                poPosition.SavePosition(resultData.GetPayload().position_info)
 
                                 true
                             }
@@ -730,7 +737,8 @@ class UserAccount(instance : Context) {
                                 val resultData =
                                     Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
 
-                                resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
+                                resultData.GetPayload().menu.forEach { loItem -> poUserObjects.SaveObjects(loItem) }
+                                resultData.GetPayload().permission.forEach { loItem -> poPermission.SavePermission(loItem) }
                                 true
                             }
 

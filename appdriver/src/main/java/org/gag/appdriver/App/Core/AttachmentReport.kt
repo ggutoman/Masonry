@@ -15,11 +15,13 @@ import org.gag.appdriver.App.DataModels.DownloadKey
 import org.gag.appdriver.App.DataModels.DownloadReportObjects
 import org.gag.appdriver.Constants.API_CONSTANTS
 import org.gag.appdriver.Constants.FILE_CONSTANTS
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.File.FileHelper
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
 import org.gag.appdriver.Libraries.TextLibrary.TextFormatter
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DSysReports
 import org.gag.appdriver.Room.Entities.EReports
 import org.gag.appdriver.Room.ML_DBF
@@ -35,11 +37,13 @@ class AttachmentReport(loInstance : Context) {
     val session : AppConfig = AppConfig(loInstance)
     val encryptObj : HashRepository = HashRepository()
     val httpInstance : KTORepository = KTORepository(loInstance)
+    val poDate : DateRepository = DateRepository()
 
     val poTextFormatter : TextFormatter = TextFormatter()
     val poFile : FileHelper = FileHelper(loInstance)
 
     val poReports : DSysReports = ML_DBF.getDatabase(loInstance).GetReportObjects() as DSysReports
+    val poPermissions : DObjectPermission = ML_DBF.getDatabase(loInstance).GetPermissions() as DObjectPermission
 
     fun GetMessage() : String = message
 
@@ -123,7 +127,7 @@ class AttachmentReport(loInstance : Context) {
     }
 
     fun GetObjects() : LiveData<List<EReports>>{
-        return poReports.GetReports(GetUserID())
+        return poReports.GetReports(GetUserID(), poDate.FormatDate(poDate.GetCurrentDate(), "yyyy"))
     }
 
     @SuppressLint("MissingPermission")
@@ -153,8 +157,12 @@ class AttachmentReport(loInstance : Context) {
                             val resultData =
                                 Json.Default.decodeFromString<DownloadReportObjects>(result.data.body())
 
-                            resultData.GetPayload().forEach { loItem ->
+                            resultData.GetPayload().attachment.forEach { loItem ->
                                 poReports.SaveReport(loItem)
+                            }
+
+                            resultData.GetPayload().permission.forEach { loItem ->
+                                poPermissions.SavePermission(loItem)
                             }
                             true
                         }

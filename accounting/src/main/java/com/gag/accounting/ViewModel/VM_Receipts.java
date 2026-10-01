@@ -13,6 +13,7 @@ import org.gag.appdriver.App.Core.Annual;
 import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Core.Projects;
 import org.gag.appdriver.App.Core.Receipts;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.App.Models.LodgeInfo;
@@ -27,6 +28,7 @@ import org.gag.appdriver.Room.Entities.EProjectDetail;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
 import org.gag.appdriver.Room.Entities.EReceiptDetail;
 import org.gag.appdriver.Room.Entities.EReceiptMaster;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import java.util.function.Consumer;
 
 public class VM_Receipts extends AndroidViewModel {
 
+    private final UserAccount poUser;
     private final Receipts poReceipt;
     private final Annual poAnnuals;
     private final Projects poProjects;
@@ -70,6 +73,7 @@ public class VM_Receipts extends AndroidViewModel {
     public VM_Receipts(@NonNull Application application) {
         super(application);
 
+        poUser = new UserAccount(application);
         poReceipt = new Receipts(application);
         poAnnuals = new Annual(application);
         poProjects = new Projects(application);
@@ -153,6 +157,10 @@ public class VM_Receipts extends AndroidViewModel {
 
     public LiveData<List<ReceiptMasterList>> GetReceiptSources(String fsSourceCd, String fDfrom, String fDto){
         return poReceipt.ObserveReceiptSources(fsSourceCd, fDfrom, fDto);
+    }
+
+    public EUserObjects GetPermissions(String fsIDxx){
+        return poUser.GetObjectPermission(fsIDxx);
     }
 
     public void CreateFileFromView(View layoutView, String fileNme, OnShareFile foCallback){

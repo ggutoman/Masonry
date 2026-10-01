@@ -134,32 +134,6 @@ public class Activity_Forgot_Password extends AppCompatActivity {
         SetupOtpFields();
 
         btn_forgot.setOnClickListener(view -> {
-
-            //if permission is not granted, redirect user to app settings and manually allow the permission before submitting
-            if (Activity_Forgot_Password.this.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-
-                Disclosure_Dialog poDisclosure = new Disclosure_Dialog(Activity_Forgot_Password.this);
-                poDisclosure.InitDialog();
-
-                poDisclosure.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo,
-                        "SMS permission is required. Please allow before saving your entry", "Deny", "Accept", new Disclosure_Dialog.OnDialogClick() {
-                            @Override
-                            public void OnPositive(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
-                            }
-
-                            @Override
-                            public void OnNegative(@NotNull AlertDialog poDialog) {
-                                poDialog.dismiss();
-
-                                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                intent.setData(Uri.parse("package:" + Activity_Forgot_Password.this.getPackageName()));
-                                startActivity(intent);
-
-                            }
-                        });
-                return;
-            }
             VerifyAccount();
         });
 
@@ -379,9 +353,9 @@ public class Activity_Forgot_Password extends AppCompatActivity {
         }
 
         //send generated random number
-        String lsMessage = "Kay Gandang Araw!\n\n" +
-                "Here is your OTP " + fsOTP + ".\n" +
-                "Please enter this code on Masonry application to verify changes on your account";
+        String lsMessage = "Good day Bro! \n\n" +
+                "Your OTP is " + fsOTP + ".\n" +
+                "Please enter this code on ALSM Portal application to change password.";
 
         mviewModel.SendSms(fsMobile, lsMessage, new VM_Account.OnSubmit() {
             @Override

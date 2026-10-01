@@ -19,6 +19,7 @@ import org.gag.appdriver.App.Models.OfficerHistory
 import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
@@ -34,6 +35,7 @@ import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
@@ -60,6 +62,7 @@ class Dashboard(loInstance : Context) {
     val loContext : Context = loInstance
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poEncrypt : HashRepository = HashRepository()
+    val poDate : DateRepository = DateRepository()
 
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
@@ -81,6 +84,11 @@ class Dashboard(loInstance : Context) {
     val poReceipts: DReceipt = ML_DBF.getDatabase(loInstance)?.GetReceipt() as DReceipt
     val poDisbursement: DDisbursement = ML_DBF.getDatabase(loInstance)?.GetDisbursement() as DDisbursement
     val poMenus : DUserObjects = ML_DBF.getDatabase(loInstance)?.GetUserObjects() as DUserObjects
+    val poPermissions : DObjectPermission = ML_DBF.getDatabase(loInstance)?.GetPermissions() as DObjectPermission
+
+    fun GetUserID() : String = TextFormatter()
+        .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":")
+        .getOrNull(1) ?: ""
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -100,7 +108,8 @@ class Dashboard(loInstance : Context) {
                                 "c.nYearxxxx, " +
                                 "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
                                 "a.dTransact," +
-                                "d.sPositnDs " +
+                                "d.sPositnDs, " +
+                                "a.sAssgnBy " +
                                 "FROM Officer_History a " +
                                 "JOIN Member_Info b ON a.sMemberID = b.sMemberID " +
                                 "JOIN Lodge_Calendar c ON a.sYearIDxx = c.sYearIDxx " +
@@ -123,7 +132,7 @@ class Dashboard(loInstance : Context) {
         return poDBMemberEmail.GetMemberEmail(fsMemberID)
     }
 
-    fun GetUserObjects(fnUserLvl : Int) : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(fnUserLvl)
+    fun GetUserObjects() : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(GetUserID(), poDate.FormatDate(poDate.GetCurrentDate(), "yyyy"))
 
     fun GetPositions() : LiveData<List<EPosition>>{
         return poPositionInfo.ObserverPositionList()
@@ -163,6 +172,8 @@ class Dashboard(loInstance : Context) {
 
         ML_DBF.getDatabase(loContext).GetReportObjects().Clear()
         ML_DBF.getDatabase(loContext).GetNotifs().Clear()
+
+        poPermissions.Clear();
 
     }
 

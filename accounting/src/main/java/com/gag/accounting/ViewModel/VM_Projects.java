@@ -7,13 +7,16 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.gag.appdriver.App.Core.Projects;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberPledges;
 import org.gag.appdriver.App.Models.ProjectDetail;
 import org.gag.appdriver.Constants.PROJECT_CONSTANTS;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EObjectPermissions;
 import org.gag.appdriver.Room.Entities.EProjectDetail;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,6 +26,7 @@ import java.util.function.Consumer;
 
 public class VM_Projects extends AndroidViewModel {
 
+    private final UserAccount poUser;
     private final Projects poProjects;
     private final MutableLiveData<List<ProjectDetail>> GetProjectDetail = new MutableLiveData<>();
 
@@ -40,6 +44,7 @@ public class VM_Projects extends AndroidViewModel {
     public VM_Projects(@NonNull Application application) {
         super(application);
 
+        poUser = new UserAccount(application);
         poProjects = new Projects(application);
     }
 
@@ -103,8 +108,8 @@ public class VM_Projects extends AndroidViewModel {
         return poProjects.GetProjectList(fsYearIDxx, fsDfrom, fsDto);
     }
 
-    public LiveData<List<MemberPledges>> GetMemberPledges(String fsMemberIDxx, String fsDfrom, String fsDto){
-        return poProjects.GetMemberPledges(fsMemberIDxx, fsDfrom, fsDto);
+    public EUserObjects GetPermission(String fsIDxx){
+        return poUser.GetObjectPermission(fsIDxx);
     }
 
     public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fnEntryNox, String fdPledge, String fnPledge){

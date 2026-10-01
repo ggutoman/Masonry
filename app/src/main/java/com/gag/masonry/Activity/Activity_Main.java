@@ -145,10 +145,6 @@ public class Activity_Main extends AppCompatActivity {
             laPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            laPermissions.add(Manifest.permission.SEND_SMS);
-        }
-
         poPermissions.launch(laPermissions.toArray(new String[0]));
     }
 
@@ -196,7 +192,7 @@ public class Activity_Main extends AppCompatActivity {
                                         startService(loService);
                                     }
 
-                                    mviewModel.GetUserObjects(eUserInfo.getNUserLevl()).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
+                                    mviewModel.GetUserObjects().observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
                                         @Override
                                         public void onChanged(List<EUserObjects> eUserObjects) {
 
@@ -206,7 +202,8 @@ public class Activity_Main extends AppCompatActivity {
                                             Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
                                             loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
-                                            loIntent.putExtra("user_id", memberDashboardInfo.getSMemberID());
+                                            loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
+                                            loIntent.putExtra("member_id", memberDashboardInfo.getSMemberID());
                                             loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
 
                                             poLogout.launch(loIntent);
@@ -221,6 +218,7 @@ public class Activity_Main extends AppCompatActivity {
                     }
                 });
             }
+
 
             @Override
             public void isLoginNeeded() {

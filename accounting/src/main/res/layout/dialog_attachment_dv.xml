@@ -58,7 +58,7 @@
             style="@style/TextInputStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Remarks">
+            android:hint="Additional Information (Optional)">
 
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/TextInputTextAreaStyle"

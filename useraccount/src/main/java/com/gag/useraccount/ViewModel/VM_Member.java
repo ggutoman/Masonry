@@ -18,6 +18,7 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EPosition;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -237,6 +238,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveMemberInfo(fsMemberID);
     }
 
+    public LiveData<OfficerInfo> ObserveCurrentRole(){
+        return poAccount.ObserveCurrentRole();
+    }
+
     public LiveData<List<TownProvince>> GetMemberAddress(String fsMemberID){
         return poAccount.GetMemberAddress(fsMemberID);
     }
@@ -261,6 +266,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveOfficerInfo(fsMemberIDxx, fsYearIDxx);
     }
 
+    public EUserObjects GetObjectPermissions(String fsObhIDxx){
+        return poAccount.GetObjectPermission(fsObhIDxx);
+    }
+
     public List<String> GetCivilStatus(){
 
         List<String> laCivil = new ArrayList<>();
@@ -283,6 +292,42 @@ public class VM_Member extends AndroidViewModel {
                 MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr()
         );
         return laAccount;
+    }
+
+    public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
+
+        foCallback.Loading();
+
+        //store all threads into hash set, to execute one by one and avoid memory leakage
+        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
+                List.of(
+                        poAccount.DownloadMemberAddress(fsMemberIDxx),
+                        poAccount.DownloadMemberContact(fsMemberIDxx),
+                        poAccount.DownloadMemberEmail(fsMemberIDxx)
+                )
+        );
+
+        //initialize task result holder
+        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
+        for (CompletableFuture<Boolean> task : laTasks){
+
+            poResult = poResult.thenCompose(aBoolean -> {
+                if (!aBoolean) return CompletableFuture.completedFuture(false);
+                return task;
+            });
+        }
+
+        //get the result
+        poResult.thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+                if (!aBoolean){
+                    foCallback.Finished("Failed to download member information:\n\n" + poAccount.getMessage());
+                    return;
+                }
+                foCallback.Finished("Successfully downloaded member information");
+            }
+        });
     }
 
     public void DownloadMembers(String fsDfromxx, String fsDToxx, OnDownload foCallback){

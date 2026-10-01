@@ -32,6 +32,7 @@ import com.gag.masonry.ViewModel.VM_Main;
 import com.gag.masonry.Adapter.Officer_History_Adapter;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.OfficerHistory;
@@ -59,6 +60,7 @@ public class Fragment_Officer_history extends Fragment {
 
     private ConstraintLayout layout_no_record;
     private MaterialTextView mtv_title, mtv_subtitle;
+    private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
     private RecyclerView rcv_officer_list;
@@ -100,6 +102,7 @@ public class Fragment_Officer_history extends Fragment {
         layout_no_record = view.findViewById(R.id.layout_no_record);
         mtv_title = view.findViewById(R.id.mtv_title);
         mtv_subtitle = view.findViewById(R.id.mtv_subtitle);
+        til_search = view.findViewById(R.id.til_search);
         tie_search = view.findViewById(R.id.tie_search);
         btn_filter = view.findViewById(R.id.btn_filter);
         rcv_officer_list = view.findViewById(R.id.rcv_officer_list);
@@ -113,14 +116,14 @@ public class Fragment_Officer_history extends Fragment {
 
         lsQuery = GetBaseQuery();
 
-        //filter by status
+
         if (laPositions.size() > 0) lsQuery += "AND d.sPositnDs IN (" + String.join(",", laPositions) + ") ";
 
-        //filter by name or id
         if (getArguments() == null || getArguments().getString("member_id").isEmpty()){
             if (!(tie_search.getText() == null || tie_search.getText().toString().isEmpty())) lsQuery += " AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + tie_search.getText().toString() + "%' ";
         }else {
             lsQuery += " AND (b.sMemberID= '" + getArguments().getString("member_id") + "') ";
+            til_search.setEnabled(false);
         }
         mViewmodel.FilterOfficerHistory(lsQuery);
 
@@ -131,13 +134,10 @@ public class Fragment_Officer_history extends Fragment {
 
                 if (s.isEmpty()) return;
 
-                List<OfficerHistory> laHistory = mViewmodel.SearchOfficerHistory(s);
-
-                mtv_title.setText(getArguments() == null || getArguments().getString("member_id").isEmpty() ?
-                        "Officer History" : laHistory.size() > 0 ? laHistory.get(0).getSMemberNme() : "N/A"
-                );
+                mtv_title.setText(getArguments() == null || getArguments().getString("member_name").isEmpty() ? "Officer History" : getArguments().getString("member_name"));
                 mtv_subtitle.setText("(M.Y " + lsYear + " - M.Y " + (Integer.parseInt(lsYear) + 1) + ")");
 
+                List<OfficerHistory> laHistory = mViewmodel.SearchOfficerHistory(s);
                 if (laHistory == null || laHistory.size() < 1){
                     layout_no_record.setVisibility(View.VISIBLE);
                     rcv_officer_list.setVisibility(View.GONE);
@@ -159,6 +159,9 @@ public class Fragment_Officer_history extends Fragment {
             public void onChanged(List<EPosition> ePositions) {
 
                 if (ePositions == null || ePositions.size() < 1) return;
+
+                loSubPosMenu.clear();
+                loSubPosMenu.add(101, 102, Menu.NONE, "ALL");
 
                 int parentID = 103;
                 for (EPosition loPosition : ePositions) {
@@ -200,8 +203,6 @@ public class Fragment_Officer_history extends Fragment {
                 LinearLayout layout = new LinearLayout(requireContext());
                 layout.setOrientation(LinearLayout.VERTICAL);
                 layout.addView(yearPicker);
-
-                String lsNmeFilter = " AND (b.sFrstName || ' ' || b.sLastName) LIKE '%" + tie_search.getText().toString() + "%' ";
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override

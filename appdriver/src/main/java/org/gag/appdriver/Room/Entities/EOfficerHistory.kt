@@ -14,6 +14,7 @@ data class EOfficerHistory(
     var sMemberID: String,
     var sPositnCd: String,
     var sRemarksx: String?,
+    var sAssgnBy: String?,
     var sModified: String,
     var dModified: String,
     var dTimeStmp: String?

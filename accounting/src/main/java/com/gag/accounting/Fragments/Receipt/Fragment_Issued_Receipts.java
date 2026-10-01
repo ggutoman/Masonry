@@ -37,6 +37,7 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.ReceiptMasterList;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -162,6 +163,12 @@ public class Fragment_Issued_Receipts extends Fragment {
                                 Fragment loFragment = new Fragment();
                                 Bundle loBundle = new Bundle();
 
+                                EUserObjects loPermission = mViewModel.GetPermissions(lsStackIDxx.equalsIgnoreCase("issued_receipt") ? "016" : "017");
+                                if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")){
+                                    Toast.makeText(requireActivity(), "Account is not allowed to modify collections", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
                                 switch (lsStackIDxx){
 
                                     case "issued_receipt":
@@ -237,6 +244,12 @@ public class Fragment_Issued_Receipts extends Fragment {
                                 FragmentTransaction loTransaction = requireActivity().getSupportFragmentManager().beginTransaction();
                                 Fragment loFragment = new Fragment();
                                 Bundle loBundle = new Bundle();
+
+                                EUserObjects loPermission = mViewModel.GetPermissions(lsStackIDxx.equalsIgnoreCase("issued_receipt") ? "016" : "017");
+                                if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")){
+                                    Toast.makeText(requireActivity(), "Account is not allowed to modify collections", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
 
                                 switch (lsStackIDxx){
 

@@ -81,12 +81,14 @@ public class OfficerHistoryExpandableAdapter extends BaseExpandableListAdapter {
         }
 
         MaterialTextView mtv_position = convertView.findViewById(R.id.mtv_position);
+        MaterialTextView mtv_editor = convertView.findViewById(R.id.mtv_editor);
         MaterialTextView mtv_dtransact = convertView.findViewById(R.id.mtv_dtransact);
 
         OfficerHistory history = Objects.requireNonNull(roleMap.get(memberNames.get(groupPosition))).get(childPosition);
 
         mtv_position.setText(history.getSPositnDs());
-        mtv_dtransact.setText("Ended on " + poDate.FormatDate(history.getDTransact(), "MMMM d, yyyy"));
+        mtv_editor.setText("Edited By " + history.getSAssgnBy());
+        mtv_dtransact.setText("Changed on " + poDate.FormatDate(history.getDTransact(), "MMMM d, yyyy"));
 
         return convertView;
     }

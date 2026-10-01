@@ -280,7 +280,7 @@ public class Fragment_UserInfo extends Fragment {
                             }
                         });
 
-                        mViewModel.ObserveCurrentRole(memberDashboardInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<OfficerInfo>() {
+                        mViewModel.ObserveCurrentRole().observe(getViewLifecycleOwner(), new Observer<OfficerInfo>() {
                             @Override
                             public void onChanged(OfficerInfo eOfficer) {
 
@@ -358,6 +358,7 @@ public class Fragment_UserInfo extends Fragment {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                 loArgs.putString("member_id", loMember.getSMemberID());
+                loArgs.putString("member_name", loMember.getSFrstName() +" "+ loMember.getSLastName());
                 loFragHistory.setArguments(loArgs);
 
                 fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragHistory);

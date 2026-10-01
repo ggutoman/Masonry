@@ -35,15 +35,33 @@
                 android:layout_marginVertical="10dp"
                 android:background="@android:color/darker_gray"/>
 
-            <com.google.android.material.textview.MaterialTextView
-                style="@style/Text_Header"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Member Details"
-                android:paddingVertical="20dp"
-                android:paddingHorizontal="10dp"
-                android:layout_margin="5dp"
-                android:background="@color/material_text_background"/>
+                android:background="@color/material_text_background">
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/Text_Header"
+                    android:id="@+id/mtv_member_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Member Details"
+                    android:padding="20dp"
+                    app:layout_constraintWidth_percent="0.8"/>
+
+                <ImageButton
+                    style="@style/Text_Header"
+                    android:id="@+id/btn_download"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_download"
+                    android:paddingVertical="20dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@+id/mtv_member_label"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/layout_member"
@@ -509,7 +527,7 @@
                         android:id="@+id/til_remarks"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="Remarks"
+                        android:hint="Additional Information (Optional)"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/til_contact">

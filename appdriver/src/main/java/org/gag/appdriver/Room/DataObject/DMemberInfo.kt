@@ -14,7 +14,7 @@ interface DMemberInfo {
     fun SaveMemberInfo(poMember: EMemberInfo)
 
     @Query("SELECT a.sGLPIDNoX, a.sLastName, a.sFrstName, a.sMiddName, a.sSuffixNm, a.dBirthDte, a.sMemberID, b.sLodgeNme, a.cMmbrStat, a.dMembrshp," +
-                    "a.cCvilStat, a.dInitiatn, a.dPassedxx, a.dRaisingX " +
+                    "a.cCvilStat, a.dInitiatn, a.dPassedxx, a.dRaisingX, c.sPositnCd " +
                     "FROM Member_Info a LEFT JOIN Lodge_Info b ON (a.sLodgeIDx = b.sLodgeIDx) LEFT JOIN Position_Info c ON (a.sPositnCd = c.sPositnCd) " +
                     "WHERE sGLPIDNoX= (" +
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
