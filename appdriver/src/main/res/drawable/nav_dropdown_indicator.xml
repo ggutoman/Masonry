@@ -11,6 +11,6 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_nav_dropdown" android:state_empty="true"/>
+    <item android:drawable="@drawable/ic_nav_dropdown"/>
     <item android:drawable="@drawable/ic_nav_dropdown_collapse" android:state_expanded="true"/>
 </selector>

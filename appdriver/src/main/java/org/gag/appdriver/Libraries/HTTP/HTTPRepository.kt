@@ -37,15 +37,15 @@ class KTORepository(instance : Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun GetInstance(): HttpClient = HttpClient{
 
-        install(Logging){
-            level = LogLevel.ALL
-        }
-
         install(HttpTimeout) {
             connectTimeoutMillis = 30_000L      // 30 seconds
             requestTimeoutMillis = 1_800_000L   // 30 minutes
             socketTimeoutMillis = 300_000L      // 5 minutes
         }
+
+//        install(Logging){
+//            level = LogLevel.ALL
+//        }
 
         //http response property
         install(ContentNegotiation){
@@ -99,23 +99,6 @@ class KTORepository(instance : Context) {
             }
         }
 
-    }
-
-    @SuppressLint("NewApi")
-    suspend fun CheckServerConnection(ipServer: String): OnRequest<HttpResponse>{
-
-        val httpObj = GetInstance()
-
-        try {
-
-            val httpResponse: HttpResponse = httpObj.post(ipServer)
-            return OnRequest.onSuccess(httpResponse)
-
-        }catch (e: Exception){
-            return OnRequest.onError(e.message)
-        }finally {
-            httpObj.close()
-        }
     }
 
     @SuppressLint("NewApi")

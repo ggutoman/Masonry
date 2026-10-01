@@ -2,19 +2,20 @@ package org.gag.appdriver.App.DataModels
 
 import kotlinx.serialization.Serializable
 import org.gag.appdriver.App.Models.AnnualMemberInfo
+import org.gag.appdriver.App.Models.ReportObjects
 import org.gag.appdriver.Room.Entities.EReports
 
 @Serializable
 data class DownloadReportObjects(
     private val result: String,
-    private val payload: List<EReports>
+    private val payload: ReportObjects
 ) {
 
     fun GetResult(): String{
         return result
     }
 
-    fun GetPayload(): List<EReports>{
+    fun GetPayload(): ReportObjects{
         return payload
     }
 }

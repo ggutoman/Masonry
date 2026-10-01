@@ -13,4 +13,10 @@
         android:layout_height="wrap_content"
         android:text="@string/version_name"/>
 
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/Text_Footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/version_number"/>
+
 </LinearLayout>

@@ -25,9 +25,8 @@ interface DOfficerHistory {
             "c.nYearxxxx, " +
             "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
             "a.dTransact," +
-            "a.cOldStatx," +
-            "a.cNewStatx," +
-            "d.sPositnDs " +
+            "d.sPositnDs," +
+            "a.sAssgnBy " +
             "FROM Officer_History a " +
             "JOIN Member_Info b ON a.sMemberID = b.sMemberID " +
             "JOIN Lodge_Calendar c ON a.sYearIDxx = c.sYearIDxx " +

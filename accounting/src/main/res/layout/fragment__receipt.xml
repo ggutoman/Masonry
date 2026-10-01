@@ -20,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Receipt Information"/>
+            android:text="Receipt Information"
+            android:visibility="gone"/>
 
         <View
             android:layout_width="match_parent"
@@ -45,11 +46,13 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/mcv_ids"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:cardElevation="6dp"
                         app:cardUseCompatPadding="true"
-                        app:cardCornerRadius="10dp">
+                        app:cardCornerRadius="10dp"
+                        android:visibility="gone">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -57,25 +60,19 @@
                             android:orientation="vertical"
                             android:padding="5dp">
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="0.6dp"
-                                android:background="@android:color/darker_gray"
-                                android:layout_marginBottom="10dp"/>
-
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="The following fields are auto generated"
-                                android:textSize="13sp"
-                                android:alpha="0.7"
-                                android:layout_margin="10dp"/>
+                                android:padding="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:background="@android:color/darker_gray"/>
 
                             <com.google.android.material.textfield.TextInputLayout
                                 style="@style/TextInputStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Collection ID">
+                                android:hint="Receipt No">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/tie_transaction_no"
@@ -92,7 +89,7 @@
                                 android:id="@+id/til_dtransact"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Date of Entry">
+                                android:hint="Dated On">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/TextInputStyle.Edittext"
@@ -121,7 +118,8 @@
                         android:id="@+id/layout_tools"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="15dp"
                         android:visibility="gone">
 
                         <com.google.android.material.textview.MaterialTextView
@@ -129,7 +127,7 @@
                             android:id="@+id/btn_download"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Download"
+                            android:text="Download Information"
                             android:alpha="0.75"
                             android:textColor="?attr/colorPrimary"
                             android:gravity="start"
@@ -184,8 +182,7 @@
                                     android:id="@+id/auto_lodge_member"
                                     style="@style/TextInputStyle.Edittext"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:enabled="false" />
+                                    android:layout_height="wrap_content"/>
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -194,7 +191,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="Collection Number"
-                                android:enabled="false">
+                                android:enabled="false"
+                                android:visibility="gone">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/TextInputStyle.Edittext"
@@ -212,6 +210,7 @@
                                 android:textSize="13sp"
                                 android:alpha="0.7"
                                 android:gravity="end"
+                                android:visibility="gone"
                                 android:layout_marginHorizontal="10dp"/>
 
                             <com.google.android.material.textfield.TextInputLayout
@@ -235,7 +234,7 @@
                                 android:id="@+id/til_remarks"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Remarks">
+                                android:hint="Additional Information (Optional)">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/TextInputTextAreaStyle"
@@ -258,7 +257,7 @@
                                     <com.google.android.material.textview.MaterialTextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:text="Primary Details"
+                                        android:text="Details"
                                         android:background="@android:color/darker_gray"
                                         android:padding="10dp"
                                         android:layout_marginTop="20dp"

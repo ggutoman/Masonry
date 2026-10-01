@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import org.gag.appdriver.App.Core.Disbursement;
 import org.gag.appdriver.App.Core.Funds;
 import org.gag.appdriver.App.Core.Projects;
+import org.gag.appdriver.App.Core.UserAccount;
 import org.gag.appdriver.App.Models.AnnualMembers;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.App.Models.LodgeInfo;
@@ -23,6 +24,8 @@ import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EProjectMaster;
+import org.gag.appdriver.Room.Entities.EReceiptDetail;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ import java.util.function.Consumer;
 
 public class VM_Disbursement extends AndroidViewModel {
 
+    private final UserAccount poUser;
     private final Disbursement poDisbursement;
     private final Funds poFunds;
     private final Projects poProjects;
@@ -48,6 +52,7 @@ public class VM_Disbursement extends AndroidViewModel {
     public VM_Disbursement(@NonNull Application application) {
         super(application);
 
+        poUser = new UserAccount(application);
         poDisbursement = new Disbursement(application);
         poFunds = new Funds(application);
         poProjects = new Projects(application);
@@ -55,10 +60,6 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public String GetUserID(){
         return poDisbursement.GetUserID();
-    }
-
-    public String GetLodgeID(){
-        return poDisbursement.GetLodgeID();
     }
 
     public String GetCurrentDate(){
@@ -75,6 +76,14 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public String GetCountedDate(int fnCount, int fnDateIndex, boolean fbIsAdd){
         return poDisbursement.GetCountedDate(fnCount, fnDateIndex, fbIsAdd);
+    }
+
+    public EProjectMaster GetProjectInfo(String fsProjCd){
+        return poProjects.GetProjectInfo(fsProjCd);
+    }
+
+    public ELodgeInfo GetLodgeInfo(String fsLodgeID){
+        return poFunds.GetLodgeInfo(fsLodgeID);
     }
 
     public List<DISBURSEMENT_CONSTANTS> GetSources(){
@@ -107,6 +116,10 @@ public class VM_Disbursement extends AndroidViewModel {
 
     public LiveData<List<EDisbursementAttachment>> GetAttachments(String fsTransNox){
         return poDisbursement.GetAttachments(fsTransNox);
+    }
+
+    public EUserObjects GetPermissions(String fsIDxx){
+        return poUser.GetObjectPermission(fsIDxx);
     }
 
     public void SelectType(String fsType){
@@ -266,20 +279,23 @@ public class VM_Disbursement extends AndroidViewModel {
 
             //save attachments
             CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
-            for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
+            if ((faAttachments == null ? 0 : faAttachments.size()) > 0){
 
-                loAttachment.setSSourceNo(lsSourceno);
+                for (EDisbursementAttachment loAttachment : new HashSet<>(faAttachments)) {
 
-                //bind the result after each thread runs
-                chain = chain.thenCompose(ok -> {
+                    loAttachment.setSSourceNo(lsSourceno);
 
-                    //continue saving attachment if previous is success
-                    if (ok) poDisbursement.SaveAttachment(loAttachment);
-                    return CompletableFuture.completedFuture(ok);
-                });
+                    //bind the result after each thread runs
+                    chain = chain.thenCompose(ok -> {
+
+                        //continue saving attachment if previous is success
+                        if (ok) poDisbursement.SaveAttachment(loAttachment);
+                        return CompletableFuture.completedFuture(ok);
+                    });
+                }
             }
 
-            chain = chain.thenCompose(aBoolean -> {
+            return chain.thenCompose(aBoolean -> {
 
                 if (aBoolean){
 
@@ -289,8 +305,6 @@ public class VM_Disbursement extends AndroidViewModel {
                 }
                 return CompletableFuture.completedFuture(aBoolean);
             });
-
-            return chain;
 
         })
         .thenAccept(allOk -> {
@@ -309,16 +323,37 @@ public class VM_Disbursement extends AndroidViewModel {
     public void DownloadDisbursementList(String fsDfromxx, String fsDtoxx, List<String> laStatus, VM_Receipts.OnDownload foCallback){
 
         foCallback.OnLoad();
-        poDisbursement.DownloadDisbursementList(fsDfromxx, fsDtoxx, laStatus).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
+        poDisbursement.DownloadDisbursementList(fsDfromxx, fsDtoxx, laStatus).thenCompose(result -> {
 
-                if (!aBoolean){
-                    foCallback.OnFinished(poDisbursement.getMessage());
-                    return;
+            if (result instanceof Boolean){
+                return CompletableFuture.completedFuture(false);
+            } else if (result instanceof List) {
+
+                List<EDisbursement> details = (List<EDisbursement>) result;
+                if (details.size() > 0){
+
+                    CompletableFuture<Boolean> chain = CompletableFuture.completedFuture(true);
+                    for (EDisbursement loReceipt : details) {
+
+                        //download each information for source project
+                        if (loReceipt.getSSourceCD().equalsIgnoreCase("PROJ")){
+                            chain = poProjects.DownloadProjectInfo(loReceipt.getSSourceNo());
+                        }
+                    }
+                    return chain;
+                }else {
+                    return CompletableFuture.completedFuture(false);
                 }
-                foCallback.OnFinished("Successfully downloaded disbursement");
             }
+            return CompletableFuture.completedFuture(false);
+
+        }).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFinished("Failed to download disbursements");
+                return;
+            }
+            foCallback.OnFinished("Successfully download disbursements");
         });
     }
 

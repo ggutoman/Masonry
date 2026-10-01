@@ -18,6 +18,7 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EPosition;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,12 @@ public class VM_Member extends AndroidViewModel {
     public interface OnDownload{
         void Loading();
         void Finished(String fsMessage);
+    }
+
+    public interface OnGetALSMID {
+        void onLoad();
+        void onSuccess(String fsID);
+        void onError(String fsError);
     }
 
     public VM_Member(@NonNull Application application) {
@@ -227,8 +234,12 @@ public class VM_Member extends AndroidViewModel {
         return laEmail;
     }
 
-    public LiveData<EMemberInfo> GetMemberGLPID(String fsGLPIDxx){
-        return poAccount.GetMemberGLPID(fsGLPIDxx);
+    public LiveData<EMemberInfo> ObserveMemberInfo(String fsMemberID){
+        return poAccount.ObserveMemberInfo(fsMemberID);
+    }
+
+    public LiveData<OfficerInfo> ObserveCurrentRole(){
+        return poAccount.ObserveCurrentRole();
     }
 
     public LiveData<List<TownProvince>> GetMemberAddress(String fsMemberID){
@@ -255,6 +266,10 @@ public class VM_Member extends AndroidViewModel {
         return poAccount.ObserveOfficerInfo(fsMemberIDxx, fsYearIDxx);
     }
 
+    public EUserObjects GetObjectPermissions(String fsObhIDxx){
+        return poAccount.GetObjectPermission(fsObhIDxx);
+    }
+
     public List<String> GetCivilStatus(){
 
         List<String> laCivil = new ArrayList<>();
@@ -277,69 +292,6 @@ public class VM_Member extends AndroidViewModel {
                 MEMBER_CONSTANTS.STATUS_DECEASED_MEMBER.getFsDescr()
         );
         return laAccount;
-    }
-
-    public List<String> GetOfficerTypes(){
-
-        List<String> laType = new ArrayList<>();
-        Collections.addAll(laType,
-                MEMBER_CONSTANTS.STATUS_ELECTED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_APPOINTED.getFsDescr()
-        );
-        return laType;
-    }
-
-    public List<String> GetOfficerStatus(){
-
-        List<String> laType = new ArrayList<>();
-        Collections.addAll(laType,
-                MEMBER_CONSTANTS.STATUS_OFFICER_SUSPENDED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_ACTIVE.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_REASSIGN.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_REMOVED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_RESIGNED.getFsDescr(),
-                MEMBER_CONSTANTS.STATUS_OFFICER_DECEASE.getFsDescr()
-
-        );
-        return laType;
-    }
-
-    public void DownloadMembers(OnDownload foCallback){
-
-        foCallback.Loading();
-        poAccount.DownloadMemberList().thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.Finished(poAccount.getMessage());
-                }else {
-                    foCallback.Finished("Successfully downloaded member list");
-                }
-            }
-        }).exceptionally(throwable -> {
-            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
-            return null;
-        });
-    }
-
-    public void DownloadOfficers(String fsYear, OnDownload foCallback){
-
-        foCallback.Loading();
-        poAccount.DownloadOfficerList(fsYear).thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-
-                if (!aBoolean){
-                    foCallback.Finished(poAccount.getMessage());
-                }else {
-                    foCallback.Finished("Successfully downloaded officer list");
-                }
-            }
-        }).exceptionally(throwable -> {
-            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
-            return null;
-        });
     }
 
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
@@ -375,6 +327,44 @@ public class VM_Member extends AndroidViewModel {
                 }
                 foCallback.Finished("Successfully downloaded member information");
             }
+        });
+    }
+
+    public void DownloadMembers(String fsDfromxx, String fsDToxx, OnDownload foCallback){
+
+        foCallback.Loading();
+        poAccount.DownloadMemberList(fsDfromxx, fsDToxx).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.Finished(poAccount.getMessage());
+                }else {
+                    foCallback.Finished("Successfully downloaded member list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
+        });
+    }
+
+    public void DownloadOfficers(String fsYear, OnDownload foCallback){
+
+        foCallback.Loading();
+        poAccount.DownloadOfficerList(fsYear).thenAccept(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+                if (!aBoolean){
+                    foCallback.Finished(poAccount.getMessage());
+                }else {
+                    foCallback.Finished("Successfully downloaded officer list");
+                }
+            }
+        }).exceptionally(throwable -> {
+            foCallback.Finished("Could not make request at this moment:\n\n" + throwable.getMessage());
+            return null;
         });
     }
 
@@ -453,6 +443,19 @@ public class VM_Member extends AndroidViewModel {
 
     }
 
+    public void SendSms(String fsContact, String fsMessage, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+        poAccount.SendSMS(fsContact, fsMessage).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFailed(poAccount.getMessage());
+                return;
+            }
+            foCallback.OnSuccess();
+        });
+    }
+
     public void AssignOfficer(EOfficer foOfficer, String fsYear, String fsRemarksx, VM_Account.OnSubmit foCallback){
 
         foCallback.onLoad();
@@ -477,6 +480,31 @@ public class VM_Member extends AndroidViewModel {
             public Void apply(Throwable throwable) {
                 foCallback.onError(throwable.getMessage());
                 return null;
+            }
+        });
+    }
+
+    public void GenerateALSMID(String fsIDxx, OnGetALSMID foCallback){
+
+        foCallback.onLoad();
+        poAccount.GenerateALSMID(fsIDxx).thenAccept(o -> {
+
+            if (o instanceof Boolean){
+
+                if (!(Boolean) o){
+                    foCallback.onError(poAccount.getMessage());
+                }else {
+                    foCallback.onError("Failed to generate ALSM ID");
+                }
+            }else if (o instanceof String){
+
+                if (((String) o).isEmpty()){
+                    foCallback.onError("Failed to generate ALSM ID");
+                }else {
+                    foCallback.onSuccess((String) o);
+                }
+            }else{
+                foCallback.onError("Failed to generate ALSM ID");
             }
         });
     }

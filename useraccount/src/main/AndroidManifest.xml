@@ -8,6 +8,9 @@
         <activity
             android:name=".Activity.Activity_Login"
             android:exported="false" />
+        <activity
+            android:name=".Activity.Activity_Forgot_Password"
+            android:exported="false" />
     </application>
 
 </manifest>

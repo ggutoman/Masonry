@@ -118,8 +118,8 @@ public class Activity_Account extends AppCompatActivity {
         mtv_verifyError = findViewById(R.id.mtv_verifyError);
 
         setSupportActionBar(toolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Create Account");
 
         //allow changes on update mode
         if (IsUpdate){

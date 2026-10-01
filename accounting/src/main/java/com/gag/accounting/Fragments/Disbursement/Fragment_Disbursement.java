@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -43,6 +44,7 @@ import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Disbursement;
 import com.gag.accounting.ViewModel.VM_Receipts;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -91,6 +93,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private TextInputLayout til_source_type, til_source_no;
     private TextInputEditText tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, tie_voucher, tie_amount, tie_doctitle, tie_remarks;
     private MaterialAutoCompleteTextView auto_source_type, auto_source_no, auto_attachment_transaction;
+    private MaterialCardView mcv_ids;
     private ConstraintLayout layout_tools;
     private MaterialButton btn_save;
     private ImageButton btn_attachment;
@@ -188,6 +191,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         mtv_fileloc = view.findViewById(R.id.mtv_fileloc);
         tie_remarks = view.findViewById(R.id.tie_remarks);
 
+        mcv_ids = view.findViewById(R.id.mcv_ids);
         layout_tools = view.findViewById(R.id.layout_tools);
 
         btn_save_attachment = view.findViewById(R.id.btn_save_attachment);
@@ -229,6 +233,9 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 mViewModel.GetSources()
         ));
 
+        //clears caches from previous attachments for new record
+        mViewModel.ClearAttachments();
+
         mViewModel.GetDisbursement(lsTransNox).observe(getViewLifecycleOwner(), new Observer<EDisbursement>() {
             @Override
             public void onChanged(EDisbursement eDisbursement) {
@@ -253,13 +260,16 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                             mViewModel.GetCurrentDate()
                     );
 
+                    mcv_ids.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
                 }else {
                     loDisbursement = eDisbursement;
+
+                    mcv_ids.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
-                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, auto_source_no, tie_amount, tie_doctitle, tie_remarks, mtv_status_attachment), true);
+                ClearFields(List.of(tie_transaction_no, tie_dtransact, tie_payee, tie_particulars, auto_source_no, tie_amount, tie_doctitle, tie_remarks, auto_attachment_transaction, mtv_fileloc, mtv_status_attachment), true);
 
                 tie_transaction_no.setText(loDisbursement.getSTransNox());
                 tie_dtransact.setText(loDisbursement.getDTransact());
@@ -295,9 +305,8 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 btn_save.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
-                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, til_source_no, tie_amount, tie_doctitle, tie_remarks, img_file, btn_attachment), loDisbursement.getCTranStat().equals("0"));
-
-                til_source_no.setEnabled(loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ"));
+                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, tie_amount, tie_doctitle, tie_remarks, img_file, btn_attachment), loDisbursement.getCTranStat().equals("0"));
+                til_source_no.setEnabled(loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ") && loDisbursement.getCTranStat().equals("0"));
 
                 //load source type on selection
                 for (DISBURSEMENT_CONSTANTS loSrcTypes : mViewModel.GetSources()){
@@ -328,12 +337,9 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                     @Override
                     public void onChanged(List<EDisbursementAttachment> eDisbursementAttachments) {
 
-                        if (eDisbursementAttachments == null) return;
+                        if (eDisbursementAttachments == null || eDisbursementAttachments.size() < 1) return;
 
-                        //clear adapter
-                        ClearFields(List.of(auto_attachment_transaction, mtv_fileloc, mtv_status_attachment), true);
-
-                        //clear list of attachment first
+                        ClearFields(List.of(tie_doctitle, tie_remarks, auto_attachment_transaction, mtv_fileloc, mtv_status_attachment), true);
                         mViewModel.ClearAttachments();
 
                         //reload attachments
@@ -377,7 +383,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                                 //select transaction if matched the entry source no
                                 if (loProject.getSProjctCd().equalsIgnoreCase(loDisbursement.getSSourceNo())){
                                     loSelectTransaction = loDisb;
-                                    auto_source_no.setText(loSelectTransaction.getSSourceNo(), false);
+                                    auto_source_no.setText(loSelectTransaction.getSSourceNme(), false);
                                 }
                             }
 
@@ -408,6 +414,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                                     lodgeFundMasterList.getSLodgeIDx(),
                                     lodgeFundMasterList.getNBalancex()
                             );
+                            auto_source_no.setText(loSelectTransaction.getSSourceNme(), false);
                         }
                     });
                 }
@@ -418,7 +425,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             @Override
             public void onChanged(List<EDisbursementAttachment> eDisbursementAttachments) {
 
-                if (eDisbursementAttachments == null) return;
+                if (eDisbursementAttachments == null || eDisbursementAttachments.size() < 1) return;
 
                 //initialize attachment
                 laAttachments = eDisbursementAttachments;
@@ -435,6 +442,15 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                         eDisbursementAttachments
                 );
                 auto_attachment_transaction.setAdapter(loAdapterAttachment);
+
+                loSelectAttachment = eDisbursementAttachments.get(eDisbursementAttachments.size() - 1);
+
+                //display selected attachment, always last item
+                auto_attachment_transaction.setText(loSelectAttachment.getSFileName(), false);
+                mtv_fileloc.setText(loSelectAttachment.getSFinFleNm());
+                mtv_status_attachment.setText(loSelectAttachment.getCRecdStat().equalsIgnoreCase("0") ? "Pending" : "Uploaded");
+                tie_doctitle.setText(loSelectAttachment.getSDocTitle());
+                tie_remarks.setText(loSelectAttachment.getSRemarksx());
             }
         });
     }

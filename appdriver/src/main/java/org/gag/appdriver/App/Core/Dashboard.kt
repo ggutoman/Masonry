@@ -19,6 +19,7 @@ import org.gag.appdriver.App.Models.OfficerHistory
 import org.gag.appdriver.App.Models.OfficerInfo
 import org.gag.appdriver.App.Models.TownProvince
 import org.gag.appdriver.Constants.API_CONSTANTS
+import org.gag.appdriver.Libraries.DateUtil.DateRepository
 import org.gag.appdriver.Libraries.Encryption.HashRepository
 import org.gag.appdriver.Libraries.HTTP.KTORepository
 import org.gag.appdriver.Libraries.Preferences.AppConfig
@@ -34,6 +35,7 @@ import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
@@ -46,6 +48,7 @@ import org.gag.appdriver.Room.DataObject.DUserObjects
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EPosition
 import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
@@ -59,6 +62,7 @@ class Dashboard(loInstance : Context) {
     val loContext : Context = loInstance
     val httpInstance : KTORepository = KTORepository(loInstance)
     val poEncrypt : HashRepository = HashRepository()
+    val poDate : DateRepository = DateRepository()
 
     val poDBUser : DUserInfo = ML_DBF.getDatabase(loInstance)?.GetUserDao() as DUserInfo
     val poDBMember : DMemberInfo = ML_DBF.getDatabase(loInstance)?.GetMemberDao() as DMemberInfo
@@ -80,6 +84,11 @@ class Dashboard(loInstance : Context) {
     val poReceipts: DReceipt = ML_DBF.getDatabase(loInstance)?.GetReceipt() as DReceipt
     val poDisbursement: DDisbursement = ML_DBF.getDatabase(loInstance)?.GetDisbursement() as DDisbursement
     val poMenus : DUserObjects = ML_DBF.getDatabase(loInstance)?.GetUserObjects() as DUserObjects
+    val poPermissions : DObjectPermission = ML_DBF.getDatabase(loInstance)?.GetPermissions() as DObjectPermission
+
+    fun GetUserID() : String = TextFormatter()
+        .ExtractFromCharacter(poEncrypt.DecryptHex(session.getokenID()), ":")
+        .getOrNull(1) ?: ""
 
     fun ObserverMemberInfoByUserID() : LiveData<MemberDashboardInfo> {
 
@@ -99,9 +108,8 @@ class Dashboard(loInstance : Context) {
                                 "c.nYearxxxx, " +
                                 "(b.sFrstName || ' ' || b.sLastName) sMemberNme," +
                                 "a.dTransact," +
-                                "a.cOldStatx," +
-                                "a.cNewStatx," +
-                                "d.sPositnDs " +
+                                "d.sPositnDs, " +
+                                "a.sAssgnBy " +
                                 "FROM Officer_History a " +
                                 "JOIN Member_Info b ON a.sMemberID = b.sMemberID " +
                                 "JOIN Lodge_Calendar c ON a.sYearIDxx = c.sYearIDxx " +
@@ -124,7 +132,11 @@ class Dashboard(loInstance : Context) {
         return poDBMemberEmail.GetMemberEmail(fsMemberID)
     }
 
-    fun GetUserObjects(fnUserLvl : Int) : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(fnUserLvl)
+    fun GetUserObjects() : LiveData<List<EUserObjects>> = poMenus.GetUserObjects(GetUserID(), poDate.FormatDate(poDate.GetCurrentDate(), "yyyy"))
+
+    fun GetPositions() : LiveData<List<EPosition>>{
+        return poPositionInfo.ObserverPositionList()
+    }
 
     fun ClearMemberData(){
 
@@ -134,6 +146,15 @@ class Dashboard(loInstance : Context) {
         poLodgeInfo.DeleteLodge()
         poLodgeCalendar.DeleteLodgeCalendar()
 
+        poDBMember.DeleteMember()
+        poDBMemberAddress.DeletMemberAddress()
+        poDBMemberContact.DeleteMemberContact()
+        poDBMemberEmail.DeleteMemberEmail()
+
+        poOfficers.DeleteOfficers()
+        poOfficerHistory.DeleteOfficerHistory()
+
+        ML_DBF.getDatabase(loContext).GetFundMaster().DeleteFunds()
         poFunds.DeleteFunds()
         poLedger.DeleteLedger()
 
@@ -149,13 +170,11 @@ class Dashboard(loInstance : Context) {
         poDisbursement.DeleteDisbursements()
         poDisbursement.DeleteAttachments()
 
-        poDBMember.DeleteMember()
-        poDBMemberAddress.DeletMemberAddress()
-        poDBMemberContact.DeleteMemberContact()
-        poDBMemberEmail.DeleteMemberEmail()
+        ML_DBF.getDatabase(loContext).GetReportObjects().Clear()
+        ML_DBF.getDatabase(loContext).GetNotifs().Clear()
 
-        poOfficers.DeleteOfficers()
-        poOfficerHistory.DeleteOfficerHistory()
+        poPermissions.Clear();
+
     }
 
     @SuppressLint("MissingPermission")

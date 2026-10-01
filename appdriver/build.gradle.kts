@@ -77,6 +77,7 @@ dependencies {
 
     // Logging (optional)
     implementation("io.ktor:ktor-client-logging:2.3.8")
+    implementation("org.slf4j:slf4j-android:1.7.36")
 
     // ROOM DEPENDENCY
     val room_version = "2.6.1"

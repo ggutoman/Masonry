@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:elevation="10dp"
-    app:cardUseCompatPadding="true"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -63,6 +61,24 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By Member"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By Project"/>
+
+        </com.google.android.material.tabs.TabLayout>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_no_record"
             android:layout_width="match_parent"
@@ -94,11 +110,13 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+        <ExpandableListView
             android:id="@+id/rcv_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp"
+            android:divider="@null"
+            android:dividerHeight="0dp"
             android:visibility="gone"/>
 
     </LinearLayout>

@@ -12,17 +12,44 @@ interface DSysReports {
     @Upsert
     fun SaveReport(eReports : EReports)
 
-    @Query("SELECT a.* " +
-            "FROM " +
-                "Sys_Reports a " +
-            "WHERE " +
-            "(SELECT " +
-                    "nUserLevl & a.nRightsxx " +
-            "FROM " +
-                    "User_Info " +
-            "WHERE " +
-                   "sUserIDxx = :fsUserIDxx) > 1")
-    fun GetReports(fsUserIDxx : String) : LiveData<List<EReports>>
+    @Query("DELETE FROM Sys_Reports")
+    fun Clear()
+
+    @Query("SELECT " +
+                        "e.*  " +
+                    "FROM " +
+                        "Member_Info a " +
+                    "JOIN " +
+                        "User_Info b " +
+                    "ON " +
+                        "a.sGLPIDNoX = b.sGLPIDNoX " +
+                    "JOIN " +
+                        "Officer_Info c " +
+                    "ON " +
+                        "a.sMemberID = c.sMemberID " +
+                    "join  " +
+                        "Object_Permissions d  " +
+                    "ON " +
+                        "d.owner_id = c.sPositnCd " +
+                    "OR " +
+                        "d.owner_id = c.sMemberID " +
+                    "JOIN " +
+                        " Sys_Reports e " +
+                    "ON " +
+                        "e.idxx = d.object_id " +
+                    "JOIN " +
+                        "Lodge_Calendar f " +
+                    "ON " +
+                        "c.sYearIDxx = f.sYearIDxx " +
+                    "AND " +
+                        "f.nYearxxxx= :fnYearxx " +
+                    "WHERE " +
+                        "b.sUserIDxx = :fsUserIDxx " +
+                    "AND " +
+                        "d.cRecdStat= '1' " +
+                    "AND " +
+                        "e.cRecdStat= '1'")
+    fun GetReports(fsUserIDxx : String, fnYearxx : String) : LiveData<List<EReports>>
 
     @Query("SELECT * FROM Sys_Reports WHERE idxx = :fsIDxx")
     fun GetReportInfo(fsIDxx: String) : LiveData<EReports>

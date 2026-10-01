@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:elevation="10dp"
-    app:cardUseCompatPadding="true"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -20,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="Voucher List"/>
+            android:text="Payment List"/>
 
         <View
             android:layout_width="match_parent"
@@ -32,7 +30,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:padding="20dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_search"
@@ -62,6 +60,24 @@
                 app:layout_constraintTop_toTopOf="@+id/til_search" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By Payee"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By Project"/>
+
+        </com.google.android.material.tabs.TabLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_no_record"
@@ -94,11 +110,13 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+        <ExpandableListView
             android:id="@+id/rcv_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp"
+            android:divider="@null"
+            android:dividerHeight="0dp"
             android:visibility="gone"/>
 
     </LinearLayout>

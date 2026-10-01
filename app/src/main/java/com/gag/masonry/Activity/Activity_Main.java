@@ -124,18 +124,25 @@ public class Activity_Main extends AppCompatActivity {
 
         if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
-        }else if (checkSelfPermission(Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+        if (checkSelfPermission(Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.CHANGE_NETWORK_STATE);
-        }else if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        if (checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.INTERNET);
-        }else if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.CAMERA);
-        }else if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }else if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             laPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }else if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            laPermissions.add(Manifest.permission.SEND_SMS);
         }
 
         poPermissions.launch(laPermissions.toArray(new String[0]));
@@ -185,31 +192,33 @@ public class Activity_Main extends AppCompatActivity {
                                         startService(loService);
                                     }
 
+                                    mviewModel.GetUserObjects().observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
+                                        @Override
+                                        public void onChanged(List<EUserObjects> eUserObjects) {
+
+                                            if (eUserObjects == null || eUserObjects.size() < 1) return;
+
+                                            //proceed to account dashboard
+                                            Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
+                                            loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
+                                            loIntent.putExtra("user_id", eUserInfo.getSUserIDxx());
+                                            loIntent.putExtra("member_id", memberDashboardInfo.getSMemberID());
+                                            loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
+
+                                            poLogout.launch(loIntent);
+                                        }
+                                    });
+
                                 }catch (Exception ex){
                                     ex.printStackTrace();
                                 }
                             }
                         });
-
-                        mviewModel.GetUserObjects(eUserInfo.getNUserLevl()).observe(Activity_Main.this, new Observer<List<EUserObjects>>() {
-                            @Override
-                            public void onChanged(List<EUserObjects> eUserObjects) {
-
-                                if (eUserObjects == null || eUserObjects.size() < 1) return;
-
-                                //proceed to account dashboard
-                                Intent loIntent = new Intent(Activity_Main.this, Activity_Dashboard.class);
-                                loIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                loIntent.putParcelableArrayListExtra("parent_key", new ArrayList<>(eUserObjects));
-                                loIntent.putExtra("user_id", eUserInfo.getSGLPIDNoX());
-                                loIntent.putExtra("user_level", eUserInfo.getNUserLevl());
-
-                                poLogout.launch(loIntent);
-                            }
-                        });
                     }
                 });
             }
+
 
             @Override
             public void isLoginNeeded() {

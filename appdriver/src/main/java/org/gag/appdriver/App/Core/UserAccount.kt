@@ -16,6 +16,7 @@ import org.gag.appdriver.App.DataModels.DownloadMemberContact
 import org.gag.appdriver.App.DataModels.DownloadMemberEmail
 import org.gag.appdriver.App.DataModels.DownloadMemberID
 import org.gag.appdriver.App.DataModels.DownloadMemberList
+import org.gag.appdriver.App.DataModels.DownloadNotifs
 import org.gag.appdriver.App.DataModels.DownloadOfficerHistory
 import org.gag.appdriver.App.DataModels.DownloadOfficerList
 import org.gag.appdriver.App.DataModels.DownloadUserInfo
@@ -34,9 +35,11 @@ import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
+import org.gag.appdriver.Room.DataObject.DSysNotif
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
 import org.gag.appdriver.Room.DataObject.DUserObjects
@@ -46,7 +49,9 @@ import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
 import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EPosition
+import org.gag.appdriver.Room.Entities.ESysNotifs
 import org.gag.appdriver.Room.Entities.EUserInfo
+import org.gag.appdriver.Room.Entities.EUserObjects
 import org.gag.appdriver.Room.ML_DBF
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -63,6 +68,8 @@ class UserAccount(instance : Context) {
 
     val poUserInfo : DUserInfo = ML_DBF.getDatabase(instance).GetUserDao()
     val poUserObjects : DUserObjects = ML_DBF.getDatabase(instance).GetUserObjects()
+    val poUserNotifs : DSysNotif = ML_DBF.getDatabase(instance).GetNotifs()
+
     val poMemberInfo : DMemberInfo = ML_DBF.getDatabase(instance).GetMemberDao()
     val poTownInfo : DTownInfo = ML_DBF.getDatabase(loInstance)?.GetTownCity() as DTownInfo
     val poMemberAddress : DMemberAddress = ML_DBF.getDatabase(loInstance)?.GetMemberAddress() as DMemberAddress
@@ -72,6 +79,7 @@ class UserAccount(instance : Context) {
     val poPosition : DPositionInfo = ML_DBF.getDatabase(loInstance)?.GetPosition() as DPositionInfo
     val poOfficer: DOfficer = ML_DBF.getDatabase(loInstance)?.GetOfficer() as DOfficer
     val poOfficerHistory : DOfficerHistory = ML_DBF.getDatabase(loInstance)?.GetOfficerHistory() as DOfficerHistory
+    val poPermission : DObjectPermission = ML_DBF.getDatabase(loInstance)?.GetPermissions() as DObjectPermission
 
     fun GetLodgeID() : String = TextFormatter()
         .ExtractFromCharacter(encryptObj.DecryptHex(session.getokenID()), ":")
@@ -91,7 +99,7 @@ class UserAccount(instance : Context) {
 
     fun GetSession() : AppConfig = session
 
-    fun GetMemberGLPID(fsGLPIDxx : String) : LiveData<EMemberInfo> = poMemberInfo.GetMemberInfoByGLPID(fsGLPIDxx)
+    fun ObserveMemberInfo(fsMemberID : String) : LiveData<EMemberInfo> = poMemberInfo.ObserveMemberInfo(fsMemberID)
 
     fun GetUserInfo() : LiveData<EUserInfo> = poUserInfo.ObserveUserInfo()
 
@@ -125,7 +133,13 @@ class UserAccount(instance : Context) {
 
     fun ObserveOfficerInfo(fsMemberIDx : String, fsYearIDxx : String) : LiveData<EOfficer> = poOfficer.ObserveOfficeInfo(fsMemberIDx, fsYearIDxx)
 
-    fun ObserveCurrentRole(fsMemberIDx : String) : LiveData<OfficerInfo> = poOfficer.ObserveCurrentRole(fsMemberIDx)
+    fun ObserveCurrentRole() : LiveData<OfficerInfo> = poOfficer.ObserveCurrentRole(GetUserID(), dateObj.FormatDate(dateObj.GetCurrentDate(), "yyyy"))
+
+    fun ObserveUnreadNotifs(fsRcvr : String) : LiveData<List<ESysNotifs>>{
+        return poUserNotifs.GetUnreadNotifs(fsRcvr)
+    }
+
+    fun GetObjectPermission(fsObjIDxx : String) : EUserObjects = poUserObjects.GetObjectPermission(GetUserID(), fsObjIDxx, dateObj.FormatDate(dateObj.GetCurrentDate(), "yyyy"))
 
     @SuppressLint("MissingPermission")
     fun LoginUser(fsID: String, fsPass: String): CompletableFuture<Boolean> {
@@ -271,6 +285,7 @@ class UserAccount(instance : Context) {
         return future
 
     }
+
     @SuppressLint("MissingPermission")
     fun UpdateUser(poUser : EUserInfo): CompletableFuture<Boolean> {
 
@@ -369,7 +384,138 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadUserInfo(): CompletableFuture<Boolean> {
+    fun GenerateALSMID(fsIDxx : String): CompletableFuture<Any> {
+
+        val future = CompletableFuture<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val params = JSONObject()
+                    if (fsIDxx.isNotEmpty()) params.put("alsm_id", fsIDxx)
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_ALSM_ID.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                //return generated otp
+                                val resultData = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                                resultData.GetPayload()
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun VerifyMobile(fsMobile : String): CompletableFuture<Any> {
+
+        val future = CompletableFuture<Any>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        put("sMobileNmbr", fsMobile)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_VERIFY_MOBILE.fsURL,
+                        loParams
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                //return generated otp
+                                val resultData = Json.Default.decodeFromString<DownloadKey>(result.data.body())
+                                resultData.GetPayload()
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun ChangePassword(fsMobile : String, fsPassw : String): CompletableFuture<Boolean> {
+
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -381,6 +527,133 @@ class UserAccount(instance : Context) {
 
                 }else{
 
+                    val lsEncrPass: String = encryptObj.EncryptHex(fsPassw)
+                    if (lsEncrPass.isEmpty()) {
+                        message = "Could not generate passkey"
+                        false
+                    }
+
+                    val loParams = JSONObject().apply {
+                        put("sMobileNmbr", fsMobile)
+                        put("sPasswrd", lsEncrPass)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CHANGE_PASSWORD.fsURL,
+                        loParams
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun SendSMS(fsMobile : String, fsMessagex : String): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        put("sMobileNo", fsMobile)
+                        put("sMessagex", fsMessagex)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_SEND_SMS.fsURL,
+                        loParams
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadUserInfo(): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+                }else{
                     httpInstance.makeRequest(
                         API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_USER.fsURL,
                         JSONObject(),
@@ -396,6 +669,8 @@ class UserAccount(instance : Context) {
 
                                 poUserInfo.SaveUserInfo(resultData.GetPayload().user_info)
                                 poMemberInfo.SaveMemberInfo(resultData.GetPayload().member_info)
+                                poOfficer.SaveOfficer(resultData.GetPayload().officer_info)
+                                poPosition.SavePosition(resultData.GetPayload().position_info)
 
                                 true
                             }
@@ -462,7 +737,8 @@ class UserAccount(instance : Context) {
                                 val resultData =
                                     Json.Default.decodeFromString<DownloadUserObjects>(result.data.body())
 
-                                resultData.GetPayload().forEach { loItem -> poUserObjects.SaveObjects(loItem) }
+                                resultData.GetPayload().menu.forEach { loItem -> poUserObjects.SaveObjects(loItem) }
+                                resultData.GetPayload().permission.forEach { loItem -> poPermission.SavePermission(loItem) }
                                 true
                             }
 
@@ -502,21 +778,20 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadMemberList(): CompletableFuture<Boolean> {
+    fun DownloadUserNotifs(): CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
 
-            val  result = try {
+            val result = try {
 
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
                     message = "No internet connection"
                     false
 
                 }else{
-
                     httpInstance.makeRequest(
-                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_DOWNLOAD_NOTIFS.fsURL,
                         JSONObject(),
                         mapOf(
                             "access-token" to session.getokenID()
@@ -526,12 +801,10 @@ class UserAccount(instance : Context) {
                             is KTORepository.OnRequest.onSuccess -> {
 
                                 val resultData =
-                                    Json.Default.decodeFromString<DownloadMemberList>(result.data.body())
+                                    Json.Default.decodeFromString<DownloadNotifs>(result.data.body())
 
-                                resultData.GetPayload().forEach { loItem ->
-                                    poMemberInfo.SaveMemberInfo(loItem)
-                                }
-
+                                poUserNotifs.Clear()
+                                resultData.GetPayload().forEach { loItem -> poUserNotifs.SaveNotif(loItem) }
                                 true
                             }
 
@@ -556,6 +829,218 @@ class UserAccount(instance : Context) {
                     }
                 }
             } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+
+
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun ReadUserNotifs(foNotif : ESysNotifs): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val params = JSONObject().apply {
+                        put("sTransNox", foNotif.sTransNox)
+                        put("sMemberID", foNotif.sRcvrIDxx)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_READ_NOTIFS.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                foNotif.cReadxxxx= "1"
+                                foNotif.dReadxxxx= dateObj.GetCurrentDate()
+                                foNotif.dModified= dateObj.GetCurrentDateTime()
+
+                                poUserNotifs.SaveNotif(foNotif)
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+
+
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun CreateReminders(): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_CREATE_REMINDERS.fsURL,
+                        JSONObject(),
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadNotifs>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem -> poUserNotifs.SaveNotif(loItem) }
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+
+
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun DownloadMemberList(fsDfromxx : String, fsDToxx : String): CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val  result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val params = JSONObject().apply {
+                        put("dFromxx", fsDfromxx)
+                        put("dToxx", fsDToxx)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_GET_MEMBERS.fsURL,
+                        params,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+
+                                val resultData =
+                                    Json.Default.decodeFromString<DownloadMemberList>(result.data.body())
+
+                                resultData.GetPayload().forEach { loItem ->
+                                    poMemberInfo.SaveMemberInfo(loItem)
+                                }
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                println(result.exception.toString())
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                println(ex.message)
                 message =  "Could not make request at this moment:\n\n ${ex.message}"
                 false
             }
@@ -644,7 +1129,7 @@ class UserAccount(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadOfficerHistory(fsMemberIDx : String, fdFromxx : String, fsDto : String) : CompletableFuture<Boolean> {
+    fun DownloadOfficerHistory(fsMemberIDx : String, fsYear : String) : CompletableFuture<Boolean> {
 
         val future = CompletableFuture<Boolean>()
         CoroutineScope(Dispatchers.IO).launch {
@@ -658,9 +1143,7 @@ class UserAccount(instance : Context) {
                 }else{
 
                     val params : JSONObject = JSONObject().also {
-                        it.put("dFromxx", fdFromxx)
-                        it.put("dToxx", fsDto)
-
+                        it.put("nYear", fsYear)
                         if (fsMemberIDx.isNotEmpty()) it.put("sGLPIDNoX", fsMemberIDx)
                     }
 
@@ -680,7 +1163,6 @@ class UserAccount(instance : Context) {
                                 resultData.GetPayload().forEach { loItem ->
                                     poOfficerHistory.SaveOfficerHistory(loItem)
                                 }
-
                                 true
                             }
 
@@ -1017,7 +1499,6 @@ class UserAccount(instance : Context) {
             val result : Any = try {
 
                 if (!httpInstance.checkDeviceConnection(loInstance)) {
-
                     message = "No internet connection"
                     false
 

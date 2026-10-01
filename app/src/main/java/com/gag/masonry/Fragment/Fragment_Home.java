@@ -7,30 +7,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.gag.accounting.Adapter.Project.Adapter_Project_Members;
-import com.gag.accounting.ViewModel.VM_Annual;
-import com.gag.accounting.ViewModel.VM_Projects;
 import com.gag.masonry.R;
 import com.gag.masonry.ViewModel.VM_Main;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.textview.MaterialTextView;
 
-import org.gag.appdriver.App.Adapters.Adapter_Annual_Member_Info;
-import org.gag.appdriver.App.Models.AnnualSummary;
+import org.gag.appdriver.App.Adapters.Adapter_Notification;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
-import org.gag.appdriver.App.Models.MemberPledges;
+import org.gag.appdriver.Room.Entities.ESysNotifs;
+import org.gag.appdriver.Utilities.Disclosure_Dialog;
+import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,23 +39,20 @@ import java.util.List;
 public class Fragment_Home extends Fragment {
 
     private VM_Main mviewModel;
-    private VM_Annual mAnnualViewModel;
-    private VM_Projects mProjectsViewModel;
     private Message_Dialog poMessage;
+    private LoadDialog poLoad;
+
+    private OnBackPressedCallback backCallback;
 
     private MaterialTextView mtv_username, mtv_lodge, mtv_year;
 
-    private Adapter_Annual_Member_Info loAnualAdapter;
-    private Adapter_Project_Members loProjAdapter;
-
-    private ConstraintLayout layout_no_record_pledge;
-    private MaterialTextView btn_download;
-    private RecyclerView rcv_pledges;
+    private ConstraintLayout layout_no_record;
+    private RecyclerView rcv_record;
     private BottomNavigationView bar_menu;
 
     private int bottomBarSelect = 0;
 
-    private String lsDfrom, lsDto, lsMemberId;
+    private String lsMemberId, lsDfrom, lsDto;
 
     @Nullable
     @Override
@@ -65,11 +62,10 @@ public class Fragment_Home extends Fragment {
 
         mviewModel = new ViewModelProvider(requireActivity()).get(VM_Main.class);
         poMessage = new Message_Dialog(requireActivity());
-
-        mAnnualViewModel = new ViewModelProvider(requireActivity()).get(VM_Annual.class);
-        mProjectsViewModel = new ViewModelProvider(requireActivity()).get(VM_Projects.class);
+        poLoad = new LoadDialog(requireActivity());
 
         poMessage.InitDialog();
+        poLoad.InitDialog();
 
         String lsCurrentYear = mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy");
 
@@ -88,7 +84,43 @@ public class Fragment_Home extends Fragment {
         InitData();
         InitListeners();
 
+        backCallback = new OnBackPressedCallback(false) { // start disabled
+            @Override
+            public void handleOnBackPressed() {
+                poMessage.ShowMessage(2,
+                        "You're about to exit the application. Continue?",
+                        "No", "Yes",
+                        new Message_Dialog.OnDialogClick() {
+                            @Override
+                            public void OnPositive(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                            }
+
+                            @Override
+                            public void OnNegative(@NotNull AlertDialog poDialog) {
+                                poDialog.dismiss();
+                                requireActivity().finishAffinity();
+                            }
+                        });
+            }
+        };
+
+        requireActivity().getOnBackPressedDispatcher()
+                .addCallback(getViewLifecycleOwner(), backCallback);
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (backCallback != null) backCallback.setEnabled(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (backCallback != null) backCallback.setEnabled(false);
     }
 
     private void InitViews(View view){
@@ -98,14 +130,11 @@ public class Fragment_Home extends Fragment {
         mtv_year = view.findViewById(R.id.mtv_year);
 
         bar_menu = view.findViewById(R.id.bar_menu);
-        btn_download = view.findViewById(R.id.btn_download);
-        rcv_pledges = view.findViewById(R.id.rcv_pledges);
-        layout_no_record_pledge = view.findViewById(R.id.layout_no_record_pledge);
+        rcv_record = view.findViewById(R.id.rcv_record);
+        layout_no_record = view.findViewById(R.id.layout_no_record);
     }
 
     private void InitData(){
-
-        /** DISPLAY HEADER **/
 
         mviewModel.ObserveMemberInfo().observe(getViewLifecycleOwner(), new Observer<MemberDashboardInfo>() {
             @Override
@@ -127,10 +156,73 @@ public class Fragment_Home extends Fragment {
 
                 mtv_username.setText(fullName);
                 mtv_lodge.setText(eMemberInfo.getSLodgeNme());
+
+                if (lsMemberId == null || lsMemberId.isEmpty()) return;
+
+                mviewModel.GetNotifications(lsMemberId).observe(getViewLifecycleOwner(), new Observer<List<ESysNotifs>>() {
+                    @Override
+                    public void onChanged(List<ESysNotifs> eSysNotifs) {
+
+                        if (eSysNotifs == null || eSysNotifs.size() < 1){
+                            layout_no_record.setVisibility(View.VISIBLE);
+                            rcv_record.setVisibility(View.GONE);
+                            return;
+                        }
+
+                        List<ESysNotifs> laNotifs = new ArrayList<>();
+                        for (ESysNotifs notif : eSysNotifs){
+
+                            if (bottomBarSelect > 0){
+                                if (notif.getSSourcexx().equalsIgnoreCase("PROJ") || notif.getSSourcexx().equalsIgnoreCase("PLDG")) laNotifs.add(notif);
+                            }else{
+                                if (notif.getSSourcexx().equalsIgnoreCase("MBR") || notif.getSSourcexx().equalsIgnoreCase("DUES")) laNotifs.add(notif);
+                            }
+
+                        }
+
+                        layout_no_record.setVisibility(laNotifs.size() > 0 ? View.GONE : View.VISIBLE);
+                        rcv_record.setVisibility(laNotifs.size() > 0 ? View.VISIBLE : View.GONE);
+
+                        rcv_record.setAdapter(new Adapter_Notification(laNotifs, new Adapter_Notification.OnAction() {
+                            @Override
+                            public void OnViewDetails(ESysNotifs notif) {
+
+                                Disclosure_Dialog loDialog = new Disclosure_Dialog(requireActivity());
+                                loDialog.InitDialog();
+
+                                //load content of notification
+                                loDialog.ShowDisclosure(org.gag.appdriver.R.drawable.masonry_logo, notif.getSMessagex(), "Close", "", new Disclosure_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+
+                                        //after viewing, update notification as read
+                                        mviewModel.TagNotifRead(notif, new VM_Main.OnDownloadData() {
+                                            @Override
+                                            public void OnDownload() {
+                                                Toast.makeText(requireActivity(), "Tagging notification as read. Please wait . . .", Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void OnFinished(String fsMessage) {
+                                                poLoad.DismissDialog();
+                                                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
+                        }));
+                        rcv_record.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
+                    }
+                });
             }
         });
 
-        mProjectsViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
+        mviewModel.GetLodgeCalendarList(lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
             @Override
             public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
 
@@ -142,7 +234,7 @@ public class Fragment_Home extends Fragment {
                 for (LodgeCalendarList calendars : lodgeCalendarLists){
 
                     if (calendars.getNYearxxxx().equalsIgnoreCase(mviewModel.GetFormattedDate(mviewModel.GetCurrentDate(), "yyyy"))){
-                        mtv_year.setText("M.Y " + calendars.getNYearxxxx());
+                        mtv_year.setText("(M.Y " + calendars.getNYearxxxx() + " - " + String.valueOf(Integer.parseInt(calendars.getNYearxxxx()) + 1) + ")");
                         mtv_year.setVisibility(View.VISIBLE);
                         break;
                     }
@@ -150,107 +242,6 @@ public class Fragment_Home extends Fragment {
             }
         });
 
-        /** DISPLAY MEMBER DUES && PLEDGER **/
-
-        //first bar, annual dues
-        if (bottomBarSelect == 0){
-
-            mAnnualViewModel.GetAnnualMemberInfo().observe(getViewLifecycleOwner(), new Observer<List<AnnualSummary>>() {
-                @Override
-                public void onChanged(List<AnnualSummary> annualMembers) {
-
-                    if (annualMembers == null || annualMembers.size() < 1){
-
-                        layout_no_record_pledge.setVisibility(View.VISIBLE);
-                        rcv_pledges.setVisibility(View.GONE);
-
-                        return;
-                    }
-
-                    //display only with amount
-                    List<AnnualSummary> laDues = new ArrayList<>();
-                    for (AnnualSummary dues : annualMembers){
-
-                        if (dues.getNTotalTrans() > 0.00){
-                            laDues.add(dues);
-                        }
-                    }
-
-                    boolean isShowDues = laDues.size() > 0;
-                    if (!isShowDues) Toast.makeText(requireActivity(), "No annual dues found for the member", Toast.LENGTH_SHORT).show();
-
-                    layout_no_record_pledge.setVisibility(isShowDues ? View.GONE : View.VISIBLE);
-                    rcv_pledges.setVisibility(isShowDues ? View.VISIBLE : View.GONE);
-
-                    loAnualAdapter = new Adapter_Annual_Member_Info(annualMembers);
-                    rcv_pledges.setAdapter(loAnualAdapter);
-                    rcv_pledges.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-                }
-            });
-
-        } else if (bottomBarSelect == 1){
-
-            mProjectsViewModel.GetMemberPledges(lsMemberId, lsDfrom, lsDto).observe(getViewLifecycleOwner(), new Observer<List<MemberPledges>>() {
-                @Override
-                public void onChanged(List<MemberPledges> memberPledges) {
-
-                    if (memberPledges == null || memberPledges.size() < 1){
-
-                        layout_no_record_pledge.setVisibility(View.VISIBLE);
-                        rcv_pledges.setVisibility(View.GONE);
-                        return;
-                    }
-                    layout_no_record_pledge.setVisibility(View.GONE);
-                    rcv_pledges.setVisibility(View.VISIBLE);
-
-                    loProjAdapter = new Adapter_Project_Members(requireActivity(), memberPledges);
-                    rcv_pledges.setAdapter(loProjAdapter);
-                    rcv_pledges.setLayoutManager(new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false));
-                }
-            });
-        }
-    }
-
-    private void DownloadMemberDues(){
-
-        mAnnualViewModel.DownloadAnnualMembers(new VM_Annual.OnTransaction() {
-            @Override
-            public void OnLoad() {
-                Toast.makeText(requireActivity(), "Downloading Annual Dues . .", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void OnSuccess() {
-                InitData();
-            }
-
-            @Override
-            public void OnFailed(String fsMessage) {
-                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-                InitData();
-            }
-        });
-    }
-
-    private void DownloadMemberPledge(){
-
-        mProjectsViewModel.DownloadDashboardledges(lsMemberId, new VM_Projects.OnTransaction() {
-            @Override
-            public void OnLoad() {
-                Toast.makeText(requireActivity(), "Downloading Member Pledges . .", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void OnSuccess() {
-                InitData();
-            }
-
-            @Override
-            public void OnFailed(String fsMessage) {
-                Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_SHORT).show();
-                InitData();
-            }
-        });
     }
 
     private void InitListeners(){
@@ -260,8 +251,8 @@ public class Fragment_Home extends Fragment {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
                 //reset display
-                layout_no_record_pledge.setVisibility(View.VISIBLE);
-                rcv_pledges.setVisibility(View.GONE);
+                layout_no_record.setVisibility(View.VISIBLE);
+                rcv_record.setVisibility(View.GONE);
 
                 if (item.getItemId() == com.gag.accounting.R.id.action_item_dues) {
                     bottomBarSelect = 0;
@@ -274,18 +265,6 @@ public class Fragment_Home extends Fragment {
                 }
 
                 return false;
-            }
-        });
-
-        btn_download.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (bottomBarSelect == 0){
-                    DownloadMemberDues();
-                }else if (bottomBarSelect == 1){
-                    DownloadMemberPledge();
-                }
             }
         });
     }

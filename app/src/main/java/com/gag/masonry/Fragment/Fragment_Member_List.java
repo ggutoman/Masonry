@@ -32,7 +32,6 @@ import com.gag.useraccount.Fragments.Fragment_Assign_Officer;
 import com.gag.useraccount.Fragments.Fragment_Member;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
@@ -40,10 +39,10 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Adapters.Adapter_Member_List;
-import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +63,7 @@ public class Fragment_Member_List extends Fragment {
 
     private TabLayout tab_layout;
     private ConstraintLayout layout_no_record;
-    private MaterialTextView mtv_no_record, mtv_lodge;
+    private MaterialTextView mtv_no_record, mtv_lodge, mtv_year;
     private TextInputLayout til_search;
     private TextInputEditText tie_search;
     private ImageButton btn_filter;
@@ -108,6 +107,8 @@ public class Fragment_Member_List extends Fragment {
         InitDataReceiver();
         InitListener();
 
+        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
+
         DownloadOfficerList();
 
         return view;
@@ -117,6 +118,7 @@ public class Fragment_Member_List extends Fragment {
 
         mtv_lodge = view.findViewById(R.id.mtv_lodge);
         tab_layout = view.findViewById(R.id.tab_layout);
+        mtv_year = view.findViewById(R.id.mtv_year);
         layout_no_record = view.findViewById(R.id.layout_no_record);
         mtv_no_record = view.findViewById(R.id.mtv_no_record);
         btn_filter= view.findViewById(R.id.btn_filter);
@@ -127,7 +129,7 @@ public class Fragment_Member_List extends Fragment {
 
     private void InitDataReceiver(){
 
-        mviewModel.GetMemberGLPID(lsGLPIDxx).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
+        mviewModel.ObserveMemberInfo(lsGLPIDxx).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
             @Override
             public void onChanged(EMemberInfo eMemberInfo) {
 
@@ -169,21 +171,24 @@ public class Fragment_Member_List extends Fragment {
                                             Fragment loFragment = new Fragment();
                                             Bundle loBundle = new Bundle();
 
+                                            EUserObjects loPermission = mviewModel.GetObjectPermissions(lsStackIDxx.equalsIgnoreCase("view_members") ? "005" : "016");
+                                            String lsError = lsStackIDxx.equalsIgnoreCase("view_members") ? "modify member's data" : "create receipts";
+
+                                            if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")) {
+                                                Toast.makeText(requireActivity(), "Account is not allowed to " + lsError, Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+
                                             switch (lsStackIDxx){
 
                                                 case "view_members":
-
-                                                    //do not allow viewing and editing of member details for users with acc level (1)
-                                                    if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
-
                                                     loFragment = new Fragment_Member();
-                                                    loBundle.putString("fsGLPIDxx", foMember.getSGLPIDNoX());
+                                                    loBundle.putString("fsGLPIDxx", foMember.getSMemberID());
 
                                                     loFragment.setArguments(loBundle);
                                                     break;
 
                                                 case "receipt_entry":
-
                                                     loFragment = new Fragment_Receipt();
                                                     loBundle.putString("member_id", foMember.getSMemberID());
 
@@ -191,7 +196,7 @@ public class Fragment_Member_List extends Fragment {
                                                     break;
                                             }
                                             //add to child container, as bridge to initiate another fragment after call
-                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                                             fragmentTransaction.addToBackStack(lsStackIDxx);
                                             fragmentTransaction.commit();
                                         }
@@ -201,6 +206,7 @@ public class Fragment_Member_List extends Fragment {
 
                                 }
                             });
+
                         }else {
 
                             mviewModel.ObserveOfficerList(eMemberInfo.getSMemberID(), lsYear).observe(getViewLifecycleOwner(), new Observer<List<OfficerInfo>>() {
@@ -225,12 +231,15 @@ public class Fragment_Member_List extends Fragment {
                                             Fragment loFragment = new Fragment();
                                             Bundle loBundle = new Bundle();
 
+                                            EUserObjects loPermission = null;
+                                            String lsError = "";
+
                                             switch (lsStackIDxx){
 
                                                 case "view_members":
 
-                                                    //do not allow viewing and editing of member details for users with acc level (1)
-                                                    if (getArguments() == null || getArguments().getInt("user_level") < 2) return;
+                                                    lsError = "modify member's data";
+                                                    loPermission = mviewModel.GetObjectPermissions("005");
 
                                                     loFragment = new Fragment_Assign_Officer();
                                                     loBundle.putString("fsYearID", poItem.getSYearIDxx());
@@ -239,7 +248,21 @@ public class Fragment_Member_List extends Fragment {
                                                     loFragment.setArguments(loBundle);
                                                     break;
 
+                                                case "view_officer_history":
+
+                                                    lsError = "view officer's history";
+                                                    loPermission = mviewModel.GetObjectPermissions("008");
+
+                                                    loFragment = new Fragment_Officer_history();
+                                                    loBundle.putString("member_id", poItem.getSMemberID());
+
+                                                    loFragment.setArguments(loBundle);
+                                                    break;
+
                                                 case "receipt_entry":
+
+                                                    lsError = "create receipts";
+                                                    loPermission = mviewModel.GetObjectPermissions("016");
 
                                                     loFragment = new Fragment_Receipt();
                                                     loBundle.putString("member_id", poItem.getSMemberID());
@@ -247,8 +270,14 @@ public class Fragment_Member_List extends Fragment {
                                                     loFragment.setArguments(loBundle);
                                                     break;
                                             }
+
+                                            if (loPermission == null || !loPermission.getCRecdStat().equalsIgnoreCase("1")) {
+                                                Toast.makeText(requireActivity(), "Account is not allowed to " + lsError, Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+
                                             //add to child container, as bridge to initiate another fragment after call
-                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                                            fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                                             fragmentTransaction.addToBackStack(lsStackIDxx);
                                             fragmentTransaction.commit();
 
@@ -271,7 +300,7 @@ public class Fragment_Member_List extends Fragment {
 
         if (tab_layout.getSelectedTabPosition() == 0){
 
-            mviewModel.DownloadMembers(new VM_Member.OnDownload() {
+            mviewModel.DownloadMembers(lsDfrom,lsDto, new VM_Member.OnDownload() {
                 @Override
                 public void Loading() {
                     poLoad.ShowDialog("Downloading members. Please wait . .");
@@ -319,7 +348,9 @@ public class Fragment_Member_List extends Fragment {
                 lsDfrom = mviewModel.GetFormattedDate(selection.first);
                 lsDto = mviewModel.GetFormattedDate(selection.second);
 
-
+                //display year filtered
+                String lStartYear = mviewModel.GetFormattedDate(lsDfrom, "yyyy");
+                String lsEndYear = mviewModel.GetFormattedDate(lsDfrom, "yyyy");
 
                 if (isDownload){
 
@@ -332,11 +363,14 @@ public class Fragment_Member_List extends Fragment {
                         @Override
                         public void OnNegative(@NotNull AlertDialog poDialog) {
                             poDialog.dismiss();
+
+                            mtv_year.setText("(M.Y " + lStartYear + " - " + String.valueOf(Integer.parseInt(lsEndYear) + 1) + ")");
                             DownloadOfficerList();
                         }
                     });
                     return;
                 }
+                mtv_year.setText("(M.Y " + lStartYear + " - " + String.valueOf(Integer.parseInt(lsEndYear) + 1) + ")");
                 InitDataReceiver();
 
             });
@@ -370,11 +404,14 @@ public class Fragment_Member_List extends Fragment {
                                 @Override
                                 public void OnNegative(@NotNull AlertDialog poDialog) {
                                     poDialog.dismiss();
+
+                                    mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
                                     DownloadOfficerList();
                                 }
                             });
                             return;
                         }
+                        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
                         InitDataReceiver();
 
                     })

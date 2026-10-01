@@ -11,6 +11,7 @@ import com.gag.useraccount.ViewModel.VM_Member;
 import org.gag.appdriver.App.Core.Dashboard;
 import org.gag.appdriver.App.Core.Lodge;
 import org.gag.appdriver.App.Core.UserAccount;
+import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.MemberDashboardInfo;
 import org.gag.appdriver.App.Models.OfficerHistory;
 import org.gag.appdriver.App.Models.OfficerInfo;
@@ -20,6 +21,8 @@ import org.gag.appdriver.Libraries.DeviceInfo.DeviceInfo;
 import org.gag.appdriver.Libraries.Preferences.AppConfig;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
+import org.gag.appdriver.Room.Entities.EPosition;
+import org.gag.appdriver.Room.Entities.ESysNotifs;
 import org.gag.appdriver.Room.Entities.EUserInfo;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 
@@ -77,6 +80,10 @@ public class VM_Main extends AndroidViewModel {
         return poLodge.GetLodgeID();
     }
 
+    public LiveData<List<LodgeCalendarList>> GetLodgeCalendarList(String fsDfrom, String fsDto){
+        return poLodge.GetLodgeCalendarList(poLodge.GetLodgeID(), fsDfrom, fsDto);
+    }
+
     public LiveData<EUserInfo> ObserveUserInfo(){
         return poDashboard.getPoDBUser().ObserveUserInfo();
     }
@@ -109,24 +116,24 @@ public class VM_Main extends AndroidViewModel {
         return laMemberInfoOthers;
     }
 
-    public LiveData<OfficerInfo> ObserveCurrentRole(String fsMemberID){
-        return poAccount.ObserveCurrentRole(fsMemberID);
+    public LiveData<OfficerInfo> ObserveCurrentRole(){
+        return poAccount.ObserveCurrentRole();
     }
 
-    public LiveData<List<EUserObjects>> GetUserObjects(Integer fnUsrLevel){
-        return poDashboard.GetUserObjects(fnUsrLevel);
+    public LiveData<List<EUserObjects>> GetUserObjects(){
+        return poDashboard.GetUserObjects();
+    }
+
+    public LiveData<List<ESysNotifs>> GetNotifications(String fsRcvr){
+        return poAccount.ObserveUnreadNotifs(fsRcvr);
+    }
+
+    public LiveData<List<EPosition>> GetPositions(){
+        return poDashboard.GetPositions();
     }
 
     public String GetCurrentDate(){
         return poDate.GetCurrentDate();
-    }
-
-    public String GetFirstQuarter(){
-        return poDate.GetCountedDate(4, 0, false);
-    }
-
-    public String GetFormattedDate(Long flDate){
-        return poDate.FormatLongDate(flDate);
     }
 
     public String GetFormattedDate(String fsDate, String fsFormat){
@@ -205,52 +212,15 @@ public class VM_Main extends AndroidViewModel {
         });
     }
 
-    public void DownloadParameters(OnDownloadData foCallback){
+    public void DownloadOfficerHistory(String fsMemberID, String fsYear, OnDownloadData foCallback){
 
         foCallback.OnDownload();
-
-        //store all threads into hash set, to execute one by one and avoid memory leakage
-        HashSet<CompletableFuture<Boolean>> laTasks = new HashSet<>(
-                List.of(
-                        poAccount.DownloadUserInfo(),
-                        poLodge.DownloadLodgeInfo(),
-                        poDashboard.DownloadPositionInfo(),
-                        poDashboard.DownloadProvinceInfo(),
-                        poDashboard.DownloadTownInfo()
-                )
-        );
-
-        //initialize task result holder
-        CompletableFuture<Boolean> poResult = CompletableFuture.completedFuture(true);;
-        for (CompletableFuture<Boolean> task : laTasks){
-
-            poResult = poResult.thenCompose(aBoolean -> {
-                if (!aBoolean) return CompletableFuture.completedFuture(false);
-                return task;
-            });
-        }
-
-        //get the result
-        poResult.thenAccept(new Consumer<Boolean>() {
-            @Override
-            public void accept(Boolean aBoolean) {
-                if (!aBoolean){
-                    foCallback.OnFinished(poDashboard.getMessage());
-                }
-                foCallback.OnFinished("Successfully downloaded data");
-            }
-        });
-    }
-
-    public void DownloadOfficerHistory(String fsMemberID, String fdFrom, String fDto, OnDownloadData foCallback){
-
-        foCallback.OnDownload();
-        poAccount.DownloadOfficerHistory(fsMemberID, fdFrom, fDto).thenAccept(new Consumer<Boolean>() {
+        poAccount.DownloadOfficerHistory(fsMemberID, fsYear).thenAccept(new Consumer<Boolean>() {
             @Override
             public void accept(Boolean aBoolean) {
 
                 if (!aBoolean){
-                    foCallback.OnFinished(poDashboard.getMessage());
+                    foCallback.OnFinished(poAccount.getMessage());
                 }else {
                     foCallback.OnFinished("Successfully downloaded officer history");
                 }
@@ -258,6 +228,14 @@ public class VM_Main extends AndroidViewModel {
         }).exceptionally(throwable -> {
             foCallback.OnFinished("Could not make request at this moment:\n\n" + throwable.getMessage());
             return null;
+        });
+    }
+
+    public void TagNotifRead(ESysNotifs foNotif, OnDownloadData foCallback){
+
+        foCallback.OnDownload();
+        poAccount.ReadUserNotifs(foNotif).thenAccept(aBoolean -> {
+            foCallback.OnFinished(!aBoolean ? poAccount.getMessage() : "Successfully tagged");
         });
     }
 

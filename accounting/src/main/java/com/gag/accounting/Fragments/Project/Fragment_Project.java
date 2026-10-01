@@ -25,6 +25,7 @@ import com.gag.accounting.Dialog.Dialog_Project_Entry;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -57,6 +58,7 @@ public class Fragment_Project extends Fragment {
     private int lnSelectStatus = -1, lnSelectDetail = -1, lnSelectType = -1;
     private ProjectDetail loSelectDetail;
 
+    private MaterialCardView mcv_ids;
     private ConstraintLayout layout_tools;
     private TextInputLayout til_proj_type, til_proj_status;
     private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount;
@@ -114,6 +116,7 @@ public class Fragment_Project extends Fragment {
         mtv_totalcontri = view.findViewById(R.id.mtv_totalcontri);
         mtv_totaldisb = view.findViewById(R.id.mtv_totaldisb);
 
+        mcv_ids = view.findViewById(R.id.mcv_ids);
         layout_tools = view.findViewById(R.id.layout_tools);
         til_proj_type = view.findViewById(R.id.til_proj_type);
         til_proj_status = view.findViewById(R.id.til_proj_status);
@@ -162,6 +165,9 @@ public class Fragment_Project extends Fragment {
                 laTypes
         ));
 
+        //reset details
+        mViewModel.ClearDetail();
+
         //get current masonic year id
         mViewModel.GetLodgeCalendarList().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
             @Override
@@ -196,7 +202,7 @@ public class Fragment_Project extends Fragment {
                     loMaster = new EProjectMaster(
                             lsTransNox,
                             "",
-                            "0",
+                            "1",
                             lsYearID,
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDate(),
@@ -205,14 +211,18 @@ public class Fragment_Project extends Fragment {
                             "0.00",
                             "0.00",
                             "0.00",
-                            "0",
+                            "1",
                             mViewModel.GetUserID() == null ? "" : mViewModel.GetUserID(),
                             mViewModel.GetCurrentDate(),
                             mViewModel.GetCurrentDateTime()
                     );
+
+                    mcv_ids.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
                 }else {
                     loMaster = eProjectMaster;
+
+                    mcv_ids.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
                 }
 
@@ -280,13 +290,19 @@ public class Fragment_Project extends Fragment {
                 auto_lodge_member.setAdapter(loProjectDetailAdapter);
 
                 double ldbl_pledge = 0.00, ldbl_paid = 0.00;
-                for (ProjectDetail loDetail : eProjectDetails){
+                for (ProjectDetail loDetail : laDetails){
                     ldbl_pledge += Double.parseDouble(loDetail.getNPledgexx());
                 }
-                lnSelectDetail = eProjectDetails.size() - 1;
-
                 mtv_totalpledge.setText(String.valueOf(ldbl_pledge));
                 mtv_totalcontri.setText(String.valueOf(ldbl_paid));
+
+                if (laDetails.size() < 1) return;
+
+                lnSelectDetail = eProjectDetails.size() - 1;
+
+                auto_lodge_member.setText(laDetails.get(lnSelectDetail).getSMemberNme());
+                tie_pledge_date.setText(laDetails.get(lnSelectDetail).getDPledgexx());
+                tie_pledge_amount.setText(laDetails.get(lnSelectDetail).getNPledgexx());
             }
         });
     }

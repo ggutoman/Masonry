@@ -13,13 +13,13 @@
         android:orientation="vertical">
 
         <com.google.android.material.textview.MaterialTextView
-            style="@style/Text_Title"
             android:id="@+id/mtv_title"
+            style="@style/Text_Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:background="?attr/colorPrimary"
-            android:text="Voucher Information"/>
+            android:padding="10dp"
+            android:text="Payment Information" />
 
         <View
             android:layout_width="match_parent"
@@ -93,7 +93,7 @@
                                 android:id="@+id/mtv_voucher_no_label"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="Voucher Number"
+                                android:text="Payment Number"
                                 android:alpha="0.7"
                                 android:layout_marginTop="5dp"
                                 app:layout_constraintTop_toBottomOf="@+id/mtv_voucher_amt"

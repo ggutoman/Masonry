@@ -100,7 +100,9 @@ class Receipts(instance : Context) {
 
     fun ObserveProjectReceipts(fsMemberIDxx: String) : LiveData<List<MemberPledges>> = poProjects.GetMemberPledges(fsMemberIDxx)
 
-    fun ObserveReceiptMasterList(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>> = poReceipt.ObserveReceiptMasterList(fDfrom, fDto)
+    fun ObserveReceiptMembers(fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>> = poReceipt.ObserveReceiptMembers(fDfrom, fDto)
+
+    fun ObserveReceiptSources(fsSourceCd : String, fDfrom : String, fDto : String) : LiveData<List<ReceiptMasterList>> = poReceipt.ObserveReceiptSources(fsSourceCd, fDfrom, fDto)
 
     fun CreateFileFromView(layoutView : View, fileNme : String) : CompletableFuture<FileResult>{
 
@@ -134,9 +136,9 @@ class Receipts(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadReceipt(fsTransNox : String) : CompletableFuture<Boolean>{
+    fun DownloadReceipt(fsTransNox : String) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -170,7 +172,8 @@ class Receipts(instance : Context) {
                             loReceipt.detail.forEach { loItem ->
                                 poReceipt.SaveReceiptDetail(loItem)
                             }
-                            true
+
+                            loReceipt.detail
                         }
 
                         is KTORepository.OnRequest.onFailed -> {
@@ -205,9 +208,9 @@ class Receipts(instance : Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun DownloadReceiptList(fDfromxx : String, fDToxx : String, faTranStat : List<String>) : CompletableFuture<Boolean>{
+    fun DownloadReceiptList(fDfromxx : String, fDToxx : String, faTranStat : List<String>) : CompletableFuture<Any>{
 
-        val future = CompletableFuture<Boolean>()
+        val future = CompletableFuture<Any>()
 
         CoroutineScope(Dispatchers.IO).launch {
             val result = try {
@@ -246,7 +249,8 @@ class Receipts(instance : Context) {
 
                             //clear and save detail
                             loReceipt.detail.forEach { loItem -> poReceipt.SaveReceiptDetail(loItem) }
-                            true
+
+                            loReceipt.detail
                         }
 
                         is KTORepository.OnRequest.onFailed -> {

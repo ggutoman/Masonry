@@ -125,17 +125,12 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                         Bundle loBundle = new Bundle();
 
                         switch (lsStackIDxx){
-
-                            //open project history
-                            case "project_confirm", "project_information":
+                            case "project_confirm", "project_information": //open project history
                                 loFragment = new Fragment_Project_History();
                                 loBundle.putString("lodge_id", poItem.getSLodgeIDx());
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
                                 break;
-
-                            //open lodge calendar project summary
-                            case "project_summary":
-
+                            case "project_summary": //open lodge calendar project summary
                                 loFragment = new Fragment_Project_Summary();
                                 loBundle.putString("lodge_id", poItem.getSLodgeIDx());
                                 loBundle.putString("year_id", poItem.getSYearIDxx());
@@ -144,7 +139,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
 
                         //initialize fragment properties
                         loFragment.setArguments(loBundle);
-                        fragmentTransaction.replace(R.id.layout_container, new Fragment_Child_Container().newInstance(lsStackIDxx, loFragment));
+                        fragmentTransaction.replace(org.gag.appdriver.R.id.frame_child, loFragment);
                         fragmentTransaction.addToBackStack(lsStackIDxx);
                         fragmentTransaction.commit();
 

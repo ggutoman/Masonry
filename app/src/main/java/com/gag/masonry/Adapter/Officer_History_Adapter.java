@@ -1,59 +1,58 @@
 package com.gag.masonry.Adapter;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
-import android.widget.Filter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gag.masonry.R;
 import com.google.android.material.textview.MaterialTextView;
 
 import org.gag.appdriver.App.Models.OfficerHistory;
-import org.gag.appdriver.R;
-import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_History_Adapter.VH_Officer_History> {
 
+    private final DateRepository poDate;
     private final List<OfficerHistory> laOfficerHistory;
+    private final List<OfficerHistory> laOfficerHistoryFiltered;
+    private final Boolean isByMember;
+
     private final List<String> laNmes = new ArrayList<>();
+    private final HashMap<String, List<OfficerHistory>> loMapHistory = new HashMap<>();
 
-    private final HashMap<String, HashMap<String, List<OfficerHistory>>> loMapHistory = new HashMap<>();
+    public Officer_History_Adapter(List<OfficerHistory> faOfficerHistory, Boolean isByMember){
 
-    public Officer_History_Adapter(List<OfficerHistory> faOfficerHistory){
-
+        this.poDate = new DateRepository();
         this.laOfficerHistory = faOfficerHistory;
+        this.laOfficerHistoryFiltered = laOfficerHistory;
+        this.isByMember = isByMember;
 
-        Set<String> addedMemberIds = new HashSet<>();
+        if (!this.isByMember){
 
-        //group record by member id
-        for (OfficerHistory loItem : laOfficerHistory) {
+            //group record by member id
+            for (OfficerHistory loItem : laOfficerHistoryFiltered) {
 
-            String memberId = loItem.getSMemberID();
-            String memberName = loItem.getSMemberNme();
-            String yearId = loItem.getNYearxxxx();
+                String memberName = loItem.getSMemberNme();
 
-            // only add if member ID not in set
-            if (!addedMemberIds.contains(memberId)) {
-                laNmes.add(memberName);
-                addedMemberIds.add(memberId);
+                // only add if member name not in set
+                if (!laNmes.contains(memberName)) {
+                    laNmes.add(memberName);
+                }
+
+                //map history detail if member name is not in set
+                if (!loMapHistory.containsKey(memberName)) loMapHistory.put(loItem.getSMemberNme(), new ArrayList<>());
+                Objects.requireNonNull(loMapHistory.get(loItem.getSMemberNme())).add(loItem);
             }
-
-            //map history detail if member id and year id is not in set
-            loMapHistory
-                    .computeIfAbsent(memberId, k -> new HashMap<>())
-                    .computeIfAbsent(yearId, k -> new ArrayList<>())
-                    .add(loItem);
         }
     }
 
@@ -73,46 +72,41 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
     @Override
     public void onBindViewHolder(@NonNull VH_Officer_History holder, int position) {
 
-        String memberId = laOfficerHistory.get(position).getSMemberID();
-        String memberName = laOfficerHistory.get(position).getSMemberNme();
+        holder.mtv_assignee.setVisibility(isByMember ? View.VISIBLE : View.GONE);
+        holder.mtv_dtransact.setVisibility(isByMember ? View.VISIBLE : View.GONE);
+        holder.mtv_name.setVisibility(isByMember ? View.VISIBLE : View.GONE);
+        holder.rcv_details.setVisibility(isByMember ? View.GONE : View.VISIBLE);
 
-        holder.mtv_name.setText(memberName);
-        holder.mtv_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        if (!isByMember){
 
-                if (holder.mtv_view.getText().toString().equalsIgnoreCase("show")){
-                    holder.rcv_details.setVisibility(View.VISIBLE);
-                    holder.mtv_view.setText("Hide");
-                }else{
-                    holder.rcv_details.setVisibility(View.GONE);
-                    holder.mtv_view.setText("Show");
-                }
-            }
-        });
+            List<String> groups = Collections.singletonList(laNmes.get(position));
+            HashMap<String, List<OfficerHistory>> map = new HashMap<>();
+            map.put(laNmes.get(position), loMapHistory.get(laNmes.get(position)));
 
-        // Get the year map for this member
-        HashMap<String, List<OfficerHistory>> yearMap = loMapHistory.get(memberId);
+            // Create expandable adapter (must extend BaseExpandableListAdapter)
+            OfficerHistoryExpandableAdapter expandableAdapter =
+                    new OfficerHistoryExpandableAdapter(groups, map);
 
-        // Create expandable adapter (must extend BaseExpandableListAdapter)
-        OfficerHistoryExpandableAdapter expandableAdapter =
-                new OfficerHistoryExpandableAdapter(memberName, yearMap);
+            holder.rcv_details.setAdapter(expandableAdapter);
 
-        holder.rcv_details.setAdapter(expandableAdapter);
+            holder.rcv_details.setOnGroupExpandListener(groupPosition -> {
+                setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
+            });
 
-        holder.rcv_details.setOnGroupExpandListener(groupPosition -> {
-            setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
-        });
-
-        holder.rcv_details.setOnGroupCollapseListener(groupPosition -> {
-            setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
-        });
+            holder.rcv_details.setOnGroupCollapseListener(groupPosition -> {
+                setListViewHeightBasedOnChildren(holder.rcv_details, expandableAdapter);
+            });
+        }else{
+            holder.mtv_name.setText(laOfficerHistory.get(position).getSPositnDs());
+            holder.mtv_assignee.setText("Edited By " + laOfficerHistory.get(position).getSAssgnBy());
+            holder.mtv_dtransact.setText("Changed on " + poDate.FormatDate(laOfficerHistory.get(position).getDTransact(), "MMMM d, yyyy"));
+        }
     }
 
 
     @Override
     public int getItemCount() {
-        return laNmes.size();
+        return isByMember ? laOfficerHistory.size() : laNmes.size();
     }
 
     public static void setListViewHeightBasedOnChildren(ExpandableListView listView, OfficerHistoryExpandableAdapter adapter) {
@@ -134,21 +128,25 @@ public class Officer_History_Adapter extends RecyclerView.Adapter<Officer_Histor
         }
 
         ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight; // walang + divider
+        params.height = totalHeight;
+
         listView.setLayoutParams(params);
         listView.requestLayout();
     }
 
     public static class VH_Officer_History extends RecyclerView.ViewHolder{
 
-        private MaterialTextView mtv_name, mtv_view;
-        private ExpandableListView rcv_details;
+        private final MaterialTextView mtv_name;
+        private final MaterialTextView mtv_assignee;
+        private final MaterialTextView mtv_dtransact;
+        private final ExpandableListView rcv_details;
 
         public VH_Officer_History(@NonNull View itemView) {
             super(itemView);
 
             mtv_name = itemView.findViewById(com.gag.masonry.R.id.mtv_name);
-            mtv_view = itemView.findViewById(com.gag.masonry.R.id.mtv_view);
+            mtv_assignee = itemView.findViewById(R.id.mtv_assignee);
+            mtv_dtransact = itemView.findViewById(com.gag.masonry.R.id.mtv_dtransact);
             rcv_details = itemView.findViewById(com.gag.masonry.R.id.rcv_details);
         }
     }

@@ -16,12 +16,14 @@ import org.gag.appdriver.Room.DataObject.DMemberAddress
 import org.gag.appdriver.Room.DataObject.DMemberContact
 import org.gag.appdriver.Room.DataObject.DMemberEmailInfo
 import org.gag.appdriver.Room.DataObject.DMemberInfo
+import org.gag.appdriver.Room.DataObject.DObjectPermission
 import org.gag.appdriver.Room.DataObject.DOfficer
 import org.gag.appdriver.Room.DataObject.DOfficerHistory
 import org.gag.appdriver.Room.DataObject.DPositionInfo
 import org.gag.appdriver.Room.DataObject.DProjects
 import org.gag.appdriver.Room.DataObject.DProvinceInfo
 import org.gag.appdriver.Room.DataObject.DReceipt
+import org.gag.appdriver.Room.DataObject.DSysNotif
 import org.gag.appdriver.Room.DataObject.DSysReports
 import org.gag.appdriver.Room.DataObject.DTownInfo
 import org.gag.appdriver.Room.DataObject.DUserInfo
@@ -40,6 +42,7 @@ import org.gag.appdriver.Room.Entities.EMemberAddress
 import org.gag.appdriver.Room.Entities.EMemberContactInfo
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo
 import org.gag.appdriver.Room.Entities.EMemberInfo
+import org.gag.appdriver.Room.Entities.EObjectPermissions
 import org.gag.appdriver.Room.Entities.EOfficer
 import org.gag.appdriver.Room.Entities.EOfficerHistory
 import org.gag.appdriver.Room.Entities.EPosition
@@ -48,6 +51,7 @@ import org.gag.appdriver.Room.Entities.EProjectMaster
 import org.gag.appdriver.Room.Entities.EReceiptDetail
 import org.gag.appdriver.Room.Entities.EReceiptMaster
 import org.gag.appdriver.Room.Entities.EReports
+import org.gag.appdriver.Room.Entities.ESysNotifs
 import org.gag.appdriver.Room.Entities.ETownCity
 import org.gag.appdriver.Room.Entities.EUserInfo
 import org.gag.appdriver.Room.Entities.EUserObjects
@@ -78,7 +82,9 @@ import org.gag.appdriver.Room.Entities.EUserObjects
         EDisbursement::class,
         EDisbursementAttachment::class,
         EUserObjects::class,
-        EReports::class
+        EReports::class,
+        ESysNotifs::class,
+        EObjectPermissions::class
     ],
     version = 1,
     exportSchema = false
@@ -107,6 +113,8 @@ abstract class ML_DBF: RoomDatabase() {
     abstract fun GetDisbursement() : DDisbursement
     abstract fun GetUserObjects() : DUserObjects
     abstract fun GetReportObjects() : DSysReports
+    abstract fun GetNotifs() : DSysNotif
+    abstract fun GetPermissions() : DObjectPermission
 
     companion object {
 

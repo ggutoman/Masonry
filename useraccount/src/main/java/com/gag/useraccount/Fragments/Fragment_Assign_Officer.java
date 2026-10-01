@@ -1,6 +1,10 @@
 package com.gag.useraccount.Fragments;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,6 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.gag.appdriver.App.Adapters.MemberAdapter;
 import org.gag.appdriver.App.Adapters.PositionAdapter;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
+import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
 import org.gag.appdriver.Room.Entities.EOfficer;
 import org.gag.appdriver.Room.Entities.EPosition;
@@ -35,6 +40,7 @@ import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Fragment_Assign_Officer extends Fragment {
@@ -48,6 +54,7 @@ public class Fragment_Assign_Officer extends Fragment {
     private MemberAdapter loMemberAdapter;
     private PositionAdapter loPositionAdapter;
 
+    private OfficerInfo loCurrentOfficer;
     private EOfficer loOfficer;
     private EMemberInfo loSelectMember;
     private EPosition loSelectPosition;
@@ -95,11 +102,9 @@ public class Fragment_Assign_Officer extends Fragment {
 
     private void InitDataReceiver(){
 
-        //initialize defualt values
         lsSelectMember = getArguments() == null || !getArguments().containsKey("fsMemberID") ? "" : getArguments().getString("fsMemberID");
         lsSelectCalendar = getArguments() == null || !getArguments().containsKey("fsYearID") ? "" : getArguments().getString("fsYearID");
 
-        /** 1.GET OFFICER INFORMATION **/
         mViewmodel.ObserveOfficerInfo(lsSelectMember, lsSelectCalendar).observe(getViewLifecycleOwner(), new Observer<EOfficer>() {
             @Override
             public void onChanged(EOfficer eOfficer) {
@@ -130,7 +135,6 @@ public class Fragment_Assign_Officer extends Fragment {
                     loOfficer = eOfficer;
                 }
 
-                /** 2.GET MASONIC CALENDAR INFORMATION **/
                 mViewmodel.GetLodgeCalendar().observe(getViewLifecycleOwner(), new Observer<List<LodgeCalendarList>>() {
                     @Override
                     public void onChanged(List<LodgeCalendarList> lodgeCalendarLists) {
@@ -147,7 +151,6 @@ public class Fragment_Assign_Officer extends Fragment {
                     }
                 });
 
-                /** 3.GET MEMBER/S INFORMATION **/
                 mViewmodel.ObserverMemberList().observe(getViewLifecycleOwner(), new Observer<List<EMemberInfo>>() {
                     @SuppressLint("SetTextI18n")
                     @Override
@@ -178,14 +181,22 @@ public class Fragment_Assign_Officer extends Fragment {
                     }
                 });
 
-                /** 4.GET POSITION LIST INFORMATION **/
                 mViewmodel.ObserverPositionList().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
                     @Override
                     public void onChanged(List<EPosition> ePositions) {
 
                         if (ePositions == null) return;
 
-                        loPositionAdapter = new PositionAdapter(requireActivity(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, ePositions);
+                        List<EPosition> laPositions = new ArrayList<>();
+                        for (EPosition loPosition : ePositions){
+
+                            //do not include in choices the regular member & admin position.
+                            if (!(loPosition.getSPositnCd().equalsIgnoreCase("P016") || loPosition.getSPositnCd().equalsIgnoreCase("P000"))){
+                                laPositions.add(loPosition);
+                            }
+                        }
+
+                        loPositionAdapter = new PositionAdapter(requireActivity(), androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, laPositions);
                         auto_position.setAdapter(loPositionAdapter);
 
                         if (loOfficer == null) return;
@@ -200,6 +211,16 @@ public class Fragment_Assign_Officer extends Fragment {
                                 });
                     }
                 });
+            }
+        });
+
+        mViewmodel.ObserveCurrentRole().observe(getViewLifecycleOwner(), new Observer<OfficerInfo>() {
+            @Override
+            public void onChanged(OfficerInfo officerInfo) {
+
+                if (officerInfo == null) return;
+
+                loCurrentOfficer = officerInfo;
             }
         });
     }
@@ -314,13 +335,41 @@ public class Fragment_Assign_Officer extends Fragment {
                             public void onSuccess() {
                                 poLoading.DismissDialog();
 
-                                poMessage.ShowMessage(0, "Officer is assigned successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                boolean isNeedLogout;
+                                if (loCurrentOfficer == null || !loCurrentOfficer.getSPositnCd().equalsIgnoreCase(loSelectPosition.getSPositnCd())){
+                                    isNeedLogout = false;
+                                }else {
+                                    isNeedLogout = true;
+                                }
+
+                                poMessage.ShowMessage(0, isNeedLogout ? "You have transferred your position successfully.\nApplication will now be restarted" : "Officer is assigned successfully", "Okay", "", new Message_Dialog.OnDialogClick() {
                                     @Override
                                     public void OnPositive(@NotNull AlertDialog poDialog) {
                                         poDialog.dismiss();
 
-                                        requireActivity().getSupportFragmentManager()
-                                                .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                        //notify user that app will logout after update, to refresh the data loaded for user
+                                        if (!isNeedLogout){
+
+                                            requireActivity().getSupportFragmentManager()
+                                                    .popBackStack(lsStackIDxx, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                        }else{
+
+                                            Intent intent = requireActivity()
+                                                    .getPackageManager()
+                                                    .getLaunchIntentForPackage(requireActivity().getPackageName());
+
+                                            if (intent != null) {
+                                                intent.addFlags(
+                                                        Intent.FLAG_ACTIVITY_NEW_TASK |
+                                                                Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                );
+
+                                                startActivity(intent);
+
+                                                requireActivity().finishAffinity();
+                                                Runtime.getRuntime().exit(0);
+                                            }
+                                        }
                                     }
 
                                     @Override
