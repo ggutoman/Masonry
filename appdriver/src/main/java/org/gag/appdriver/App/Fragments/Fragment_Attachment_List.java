@@ -452,7 +452,6 @@ public class Fragment_Attachment_List extends Fragment implements OnSwipeListene
 
                 //show only menus for generating report and downloading attachments
                 loMenu.getMenu().findItem(R.id.action_by_generate).setVisible(lsStackIDxx.equalsIgnoreCase("generate_report"));
-
                 loMenu.show();
 
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
