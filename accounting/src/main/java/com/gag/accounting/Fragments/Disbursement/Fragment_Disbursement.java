@@ -20,10 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -43,15 +40,13 @@ import com.gag.accounting.Dialog.Dialog_DV_Attachment;
 import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Disbursement;
 import com.gag.accounting.ViewModel.VM_Receipts;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
-import org.gag.appdriver.App.Core.GestureListener;
-import org.gag.appdriver.App.Interface.OnSwipeListener;
 import org.gag.appdriver.App.Models.DisbursementDetail;
 import org.gag.appdriver.App.Models.LodgeFundMasterList;
 import org.gag.appdriver.Constants.DISBURSEMENT_CONSTANTS;
@@ -67,7 +62,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
+public class Fragment_Disbursement extends Fragment{
 
     private VM_Disbursement mViewModel;
     private LoadDialog poLoad;
@@ -85,7 +80,8 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private File loAttached;
 
     private View view_image;
-    private ShapeableImageView img_file;
+    private MaterialCardView mcv_info, card_close;
+    private PhotoView img_file;
     private MaterialTextView mtv_filenme, mtv_filepth;
     private ImageButton btn_transaction;
 
@@ -97,8 +93,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private ConstraintLayout layout_tools;
     private MaterialButton btn_save;
     private ImageButton btn_attachment;
-
-    private GestureDetector gestureDetector;
 
     private final ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
 
@@ -137,8 +131,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         poLoad = new LoadDialog(requireActivity());
         poMessage = new Message_Dialog(requireActivity());
 
-        gestureDetector = new GestureDetector(requireContext(), new GestureListener(this));
-
         int count = requireActivity().getSupportFragmentManager().getBackStackEntryCount();
         if (count > 0) {
 
@@ -161,9 +153,12 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         return view;
     }
 
+    @SuppressLint("CutPasteId")
     private void InitViews(View view){
 
         view_image = view.findViewById(R.id.view_image);
+        mcv_info = view_image.findViewById(org.gag.appdriver.R.id.mcv_info);
+        card_close = view_image.findViewById(org.gag.appdriver.R.id.card_close);
         img_file = view_image.findViewById(org.gag.appdriver.R.id.img_file);
         mtv_filenme = view_image.findViewById(org.gag.appdriver.R.id.mtv_filenme);
         mtv_filepth = view_image.findViewById(org.gag.appdriver.R.id.mtv_filepth);
@@ -221,7 +216,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
     private void AllowFields(List<View> fields, boolean isAllowed) {
 
         for (View view : fields) {
-
             view.setEnabled(isAllowed);
         }
     }
@@ -305,7 +299,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 btn_save.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
                 btn_download_sources.setVisibility(loDisbursement.getCTranStat().equalsIgnoreCase("0") ? View.VISIBLE : View.GONE);
 
-                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, tie_amount, tie_doctitle, tie_remarks, img_file, btn_attachment), loDisbursement.getCTranStat().equals("0"));
+                AllowFields(List.of(tie_payee, tie_particulars, til_source_type, tie_amount, tie_doctitle, tie_remarks, btn_attachment), loDisbursement.getCTranStat().equals("0"));
                 til_source_no.setEnabled(loDisbursement.getSSourceCD().equalsIgnoreCase("PROJ") && loDisbursement.getCTranStat().equals("0"));
 
                 //load source type on selection
@@ -629,6 +623,7 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void InitListener(){
 
         auto_source_type.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -719,6 +714,21 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             }
         });
 
+        img_file.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mcv_info.setVisibility(mcv_info.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+                card_close.setVisibility(card_close.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        card_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ShowAttachment(false);
+            }
+        });
+
         btn_download_sources.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -745,15 +755,6 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
                 }
 
                 ShowAttachment(true);
-            }
-        });
-
-        view_image.setOnTouchListener(new View.OnTouchListener() {
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                return gestureDetector.onTouchEvent(motionEvent);
             }
         });
 
@@ -926,18 +927,4 @@ public class Fragment_Disbursement extends Fragment implements OnSwipeListener {
             }
         });
     }
-
-    @Override
-    public void OnSwipeUp() {}
-
-    @Override
-    public void OnSwipeDown() {
-        ShowAttachment(false);
-    }
-
-    @Override
-    public void OnSwipeLeft() {}
-
-    @Override
-    public void OnSwipeRight() {}
 }
