@@ -7,6 +7,10 @@ android {
     namespace = "com.gag.masonry"
     compileSdk = 36
 
+    buildFeatures{
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.gag.masonry"
         minSdk = 24

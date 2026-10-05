@@ -1,11 +1,15 @@
 package com.gag.masonry.ViewModel;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.gag.masonry.BuildConfig;
 import com.gag.useraccount.ViewModel.VM_Member;
 
 import org.gag.appdriver.App.Core.Dashboard;
@@ -35,6 +39,8 @@ import java.util.function.Consumer;
 
 public class VM_Main extends AndroidViewModel {
 
+    private final Context loApp;
+
     private final AppConfig poConfig;
     private final DeviceInfo poDevice;
     private final DateRepository poDate;
@@ -59,6 +65,8 @@ public class VM_Main extends AndroidViewModel {
 
     public VM_Main(@NonNull Application application) {
         super(application);
+
+        loApp = application;
 
         poConfig = new AppConfig(application);
         poDevice = new DeviceInfo(application);
@@ -149,6 +157,7 @@ public class VM_Main extends AndroidViewModel {
 
             poConfig.isInitialize("1");
             poConfig.setProductID("MSNRY_APP");
+            poConfig.setProductVersion(String.valueOf(BuildConfig.VERSION_CODE));
             poConfig.setDeviceID(poDevice.GetAndroidID());
         }
 

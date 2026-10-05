@@ -153,6 +153,9 @@ class UserAccount(instance : Context) {
                 } else {
                     val loParams = JSONObject().apply {
                         put("sUserName", fsID)
+                        put("version", session.getProductVersion())
+                        put("product_id", session.getProductID())
+                        put("device_id", session.getDeviceID())
                     }
 
                     val lsEncrPass = encryptObj.EncryptHex(fsPass)
@@ -160,6 +163,7 @@ class UserAccount(instance : Context) {
                         message = "Could not generate passkey"
                         false
                     } else {
+
                         loParams.put("sPassword", lsEncrPass)
 
                         when (val response = httpInstance.makeRequest(
@@ -168,6 +172,7 @@ class UserAccount(instance : Context) {
                             mapOf()
                         )) {
                             is KTORepository.OnRequest.onSuccess -> {
+
                                 val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
                                 val sTokenIDxx = resultData.GetPayload()
 
