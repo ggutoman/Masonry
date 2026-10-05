@@ -1,15 +1,10 @@
 package com.gag.useraccount.Fragments;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,20 +35,18 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
-import org.gag.appdriver.App.Core.SMSApp;
-import org.gag.appdriver.App.Interface.OnSMSStatus;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Fragment_Member extends Fragment{
 
@@ -777,13 +770,62 @@ public class Fragment_Member extends Fragment{
                     @Override
                     public void OnContact(String lsContactNo, String lsRemarks, String lsActive) {
 
-                        mviewModel.AddMemberContact(
-                                "",
-                                "",
-                                lsContactNo,
-                                lsRemarks,
-                                lsActive
-                        );
+                        //do not allow same contact
+                        AtomicBoolean hasContact = new AtomicBoolean(false);
+                        paramContact.forEach(eMemberContactInfo -> {
+                            if (eMemberContactInfo.getSContctNo().equalsIgnoreCase(lsContactNo)){
+                                hasContact.set(true);
+                            }
+                        });
+
+                        if (hasContact.get()){
+                            poMessage.ShowMessage(1, "Contact number already exists", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        mviewModel.VerifyContact(lsContactNo, new VM_Member.OnSubmit() {
+                            @Override
+                            public void OnLoad() {
+                                poLoad.ShowDialog("Verifying contact. Please wait . . .");
+                            }
+
+                            @Override
+                            public void OnSuccess() {
+                                poLoad.DismissDialog();
+
+                                mviewModel.AddMemberContact(
+                                        "",
+                                        "",
+                                        lsContactNo,
+                                        lsRemarks,
+                                        lsActive
+                                );
+
+                            }
+
+                            @Override
+                            public void OnFailed(String fsMesssage) {
+                                poLoad.DismissDialog();
+
+                                poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
+                        });
                     }
                 });
 
@@ -864,12 +906,60 @@ public class Fragment_Member extends Fragment{
                     @Override
                     public void OnEmail(String lsEmail, String lsActive) {
 
-                        mviewModel.AddMemberEmail(
-                                "",
-                                "",
-                                lsEmail,
-                                lsActive
-                        );
+                        //do not allow same email
+                        AtomicBoolean hasEmail = new AtomicBoolean(false);
+                        paramEmail.forEach(eMemberEmailInfo -> {
+                            if (eMemberEmailInfo.getSEmailAdd().equalsIgnoreCase(lsEmail)){
+                                hasEmail.set(true);
+                            }
+                        });
+
+                        if (hasEmail.get()){
+                            poMessage.ShowMessage(1, "Email address already exists", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        mviewModel.VerifyEmail(lsEmail, new VM_Member.OnSubmit() {
+                            @Override
+                            public void OnLoad() {
+                                poLoad.ShowDialog("Verifying email. Please wait . . .");
+                            }
+
+                            @Override
+                            public void OnSuccess() {
+                                poLoad.DismissDialog();
+
+                                mviewModel.AddMemberEmail(
+                                        "",
+                                        "",
+                                        lsEmail,
+                                        lsActive
+                                );
+                            }
+
+                            @Override
+                            public void OnFailed(String fsMesssage) {
+                                poLoad.DismissDialog();
+
+                                poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
+                        });
                     }
                 });
 

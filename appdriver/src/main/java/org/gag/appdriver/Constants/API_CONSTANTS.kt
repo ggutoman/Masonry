@@ -33,6 +33,8 @@ enum class API_CONSTANTS(val fsURL : String){
     URL_GET_OFFICERS("member/officers_list.php"),
     URL_GET_OFFICER_HISTORY("member/officer_history.php"),
     URL_GET_ALSM_ID("member/generate_alsm_id.php"),
+    URL_VERIFY_MEMBER_CONTACT("member/verify_contact.php"),
+    URL_VERIFY_MEMBER_EMAIL("member/verify_email.php"),
 
     /**PARAMETERS**/
     URL_GET_LODGE("parameters/lodge_info.php"),

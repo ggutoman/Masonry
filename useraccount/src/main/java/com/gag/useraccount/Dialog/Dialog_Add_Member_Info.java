@@ -112,42 +112,6 @@ public class Dialog_Add_Member_Info{
         btn_cancel = view.findViewById(R.id.btn_cancel);
     }
 
-    public void ShowSponsor(boolean isNew, String fsSponsor, OnSponsor foSponsor){
-
-        ClearFields(new ArrayList<>(List.of(tie_sponsor)), false);
-
-        layout_sponsor.setVisibility(View.VISIBLE);
-        layoutAddress.setVisibility(View.GONE);
-        layoutContact.setVisibility(View.GONE);
-        layoutEmail.setVisibility(View.GONE);
-
-        tie_sponsor.setText(fsSponsor);
-
-        if (!isNew){
-            btn_add.setText("UPDATE");
-        }else {
-            btn_add.setText("ADD");
-        }
-
-        btn_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (tie_sponsor.getText() == null || tie_sponsor.getText().toString().isEmpty()){
-                    Toast.makeText(loInstance, "Please enter sponsor name", Toast.LENGTH_SHORT).show();
-                    tie_sponsor.requestFocus();
-                    return;
-                }
-
-                foSponsor.OnSubmit(tie_sponsor.getText().toString());
-                poDialog.dismiss();
-            }
-        });
-
-        btn_cancel.setOnClickListener(view1 -> poDialog.dismiss());
-        poDialog.show();
-    }
-
     public void ShowAddress(OnAddress foCallback){
 
         ClearFields(new ArrayList<>(List.of(auto_town, tie_address, chkHome, chkActive)), true);
