@@ -28,6 +28,9 @@ interface DOfficer {
             "JOIN  Position_Info d ON (a.sPositnCd = d.sPositnCd) " +
             "WHERE (a.sMemberID != :fsMemberIDx) " +
             "AND b.nYearxxxx = :fsYear " +
+            "AND d.sPositnCd " +
+            "NOT IN " +
+            "('P016', 'P000')" +
             "GROUP BY " +
             "a.sMemberID " +
             "ORDER BY " +

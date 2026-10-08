@@ -90,7 +90,7 @@ public class Fragment_Member_List extends Fragment {
         int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         //initialize default range of date to display for the whole year
-        lsDfrom = mviewModel.GetFormattedDate(lsYear + "-01-01", "yyyy-MM-dd");
+        lsDfrom = mviewModel.GetFormattedDate("1900" + "-01-01", "yyyy-MM-dd");
         lsDto =  mviewModel.GetFormattedDate(lsYear + "-12-" + String.valueOf(maxDay), "yyyy-MM-dd");
 
         poLoad.InitDialog();

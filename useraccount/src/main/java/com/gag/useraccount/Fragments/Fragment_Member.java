@@ -28,6 +28,8 @@ import com.gag.useraccount.Dialog.Dialog_Add_Member_Info;
 import com.gag.useraccount.R;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
@@ -102,6 +104,10 @@ public class Fragment_Member extends Fragment{
     private TownProvince loSelectAddress;
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
+
+    private interface OnDate{
+        void OnSelect(String fsDate);
+    }
 
     private int lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
 
@@ -441,17 +447,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Membership", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_dMbr.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_dMbr.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -459,17 +460,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Initiation", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_intn.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_intn.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -477,17 +473,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Passing", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_passing.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_passing.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -495,17 +486,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Raising", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_raising.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_raising.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -513,17 +499,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Birthdate", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_birthdate.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_birthdate.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -1452,6 +1433,24 @@ public class Fragment_Member extends Fragment{
             return false;
         }
         return true;
+    }
+
+    private void ShowDatePicker(String fsTitle, OnDate foCallback){
+
+        MaterialDatePicker<Long> picker = MaterialDatePicker.Builder
+                .datePicker()
+                .setTitleText(fsTitle)
+                .build();
+
+        picker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<>() {
+            @Override
+            public void onPositiveButtonClick(Long selection) {
+                foCallback.OnSelect(mviewModel.GetFormattedDate(selection));
+            }
+        });
+
+        picker.show(getParentFragmentManager(), "DATE_PICKER");
+
     }
 
     private void ClearFields(List<View> fields, boolean clearAdapter) {

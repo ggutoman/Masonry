@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -140,7 +141,11 @@ public class Activity_Dashboard extends AppCompatActivity {
                         fragmentTransaction.commit();
                         break;
                     case "025": //Sync Data
-                        poMessage.ShowMessage(2, "Do you want to re-download data for the app?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+
+                        //close drawer
+                        main_drawer.closeDrawer(GravityCompat.START);
+
+                        poMessage.ShowMessage(2, "Syncing data will download important resources for your application. Continue?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
                                 poDialog.dismiss();
@@ -167,6 +172,10 @@ public class Activity_Dashboard extends AppCompatActivity {
                         break;
 
                     case "026": //Logout
+
+                        //close drawer
+                        main_drawer.closeDrawer(GravityCompat.START);
+
                         poMessage.ShowMessage(2, "Confirm Logout?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                             @Override
                             public void OnPositive(@NotNull AlertDialog poDialog) {
