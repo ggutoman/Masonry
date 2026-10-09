@@ -116,21 +116,17 @@ public class Fragment_Project_History extends Fragment {
         mViewModel.DownloadProjects(getArguments().getString("year_id") == null ? "" : getArguments().getString("year_id"), lsDfrom, lsDto, new VM_Projects.OnTransaction() {
             @Override
             public void OnLoad() {
-                poLoading.ShowDialog("Downloading projects. Please wait . .");
+                Toast.makeText(requireActivity(), "Downlooading project lists . . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void OnSuccess() {
-                poLoading.DismissDialog();
-
                 Toast.makeText(requireActivity(), "Projects downloaded successfully", Toast.LENGTH_SHORT).show();
                 InitDataReceiver();
             }
 
             @Override
             public void OnFailed(String fsMessage) {
-                poLoading.DismissDialog();
-
                 poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -263,6 +259,8 @@ public class Fragment_Project_History extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+                if (loAdapter == null) return;
+
                 loAdapter.GetFilter().filter(charSequence == null ? "" : charSequence);
                 loAdapter.GetFilter().InitTypes(laType);
                 loAdapter.GetFilter().InitStatus(laStatus);
@@ -273,8 +271,6 @@ public class Fragment_Project_History extends Fragment {
         btn_filter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (loAdapter == null) return;
 
                 //initialize pop up object, menu object holder
                 PopupMenu loMenu = new PopupMenu(requireContext(), view);
@@ -321,7 +317,7 @@ public class Fragment_Project_History extends Fragment {
                                     lsDfrom = mViewModel.GetFormatLongDate(selection.first);
                                     lsDto = mViewModel.GetFormatLongDate(selection.second);
 
-                                    poMessage.ShowMessage(2, "Do you want download list of fund entries within " + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                    poMessage.ShowMessage(2, "Download list of projects within " + lsDfrom + " to " + lsDto + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                         @Override
                                         public void OnPositive(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();

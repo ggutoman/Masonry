@@ -158,6 +158,9 @@ public class Adapter_Issued_Receipts extends BaseExpandableListAdapter {
                 mtv_status.setText("Confirmed");
                 break;
             case "2":
+                mtv_status.setText("Void");
+                break;
+            case "3":
                 mtv_status.setText("Cancelled");
                 break;
         }

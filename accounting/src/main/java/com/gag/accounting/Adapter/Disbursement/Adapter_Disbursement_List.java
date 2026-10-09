@@ -121,7 +121,7 @@ public class Adapter_Disbursement_List extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int i) {
-        return paDisbFiltered.size();
+        return Objects.requireNonNull(paDisbFiltered.get(paParentListFiltered.get(i))).size();
     }
 
     @Override

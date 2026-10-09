@@ -146,13 +146,12 @@ public class Adapter_Member_List extends RecyclerView.Adapter<Adapter_Member_Lis
                         filterSearch.add(loMember);
                     }
                 }
-
                 laMembersFiltered = filterSearch;
             }
 
             laMembersFiltered = laMembersFiltered.stream()
-                    .filter(loMember -> laStatus.contains(loMember.getCMmbrStat()))
-                    .collect(Collectors.toList());
+                                    .filter(loMember -> laStatus.contains(loMember.getCMmbrStat()))
+                                    .collect(Collectors.toList());
 
             FilterResults loResults = new FilterResults();
             loResults.values = laMembersFiltered;

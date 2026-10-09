@@ -52,4 +52,17 @@
 
     </item>
 
+    <item
+        android:id="@+id/action_by_position"
+        android:orderInCategory="100"
+        android:title="By Position"
+        app:showAsAction="never"
+        android:visible="false">
+
+        <menu>
+            <!-- Dynamic items will be added here -->
+        </menu>
+
+    </item>
+
 </menu>
