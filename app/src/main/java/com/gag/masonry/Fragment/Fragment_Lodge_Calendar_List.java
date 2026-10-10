@@ -32,7 +32,6 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.gag.appdriver.App.Adapters.LodgeCalendarListAdapter;
-import org.gag.appdriver.App.Fragments.Fragment_Child_Container;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.ViewModels.VM_Lodge;
 import org.gag.appdriver.Utilities.LoadDialog;
@@ -157,21 +156,17 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
         mviewModel.DownloadLodgeCalendars(lsdFrom, lsdTo, new VM_Lodge.OnDownload() {
             @Override
             public void OnLoad() {
-                poLoad.ShowDialog("Downloading lodge calendars. Please wait . .");
+                Toast.makeText(requireActivity(), "Downloading masonic years for the lodge. Please wait . .", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void OnSuccess() {
-                poLoad.DismissDialog();
-
+                Toast.makeText(requireActivity(), "Masonic years downloaded successfully", Toast.LENGTH_SHORT).show();
                 InitDataReceiver();
-                Toast.makeText(requireActivity(), "Lodge calendars downloaded successfully", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void OnError(String fsMessage) {
-                poLoad.DismissDialog();
-
                 poMessage.ShowMessage(1, fsMessage, "Okay", "", new Message_Dialog.OnDialogClick() {
                     @Override
                     public void OnPositive(@NotNull AlertDialog poDialog) {
@@ -235,7 +230,7 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                     lsdFrom = mviewModel.GetFormattedDate(selection.first);
                                     lsdTo = mviewModel.GetFormattedDate(selection.second);
 
-                                    poMessage.ShowMessage(2,  "Do you want download list of lodge calendars within " + lsdFrom + " to " + lsdTo + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
+                                    poMessage.ShowMessage(2,  "Download masonic years within " + lsdFrom + " to " + lsdTo + " ?", "No", "Yes", new Message_Dialog.OnDialogClick() {
                                         @Override
                                         public void OnPositive(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
@@ -244,14 +239,12 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
                                         @Override
                                         public void OnNegative(@NotNull AlertDialog poDialog) {
                                             poDialog.dismiss();
-
                                             DownloadList();
                                         }
                                     });
                                 }
                             });
                             loPicker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
-
                             return true;
 
                         }
@@ -272,7 +265,6 @@ public class Fragment_Lodge_Calendar_List extends Fragment {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
                 if (loAdapter == null) return;
-
                 loAdapter.GetFilter().filter(charSequence.toString());
             }
         });

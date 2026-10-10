@@ -15,8 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -42,11 +45,13 @@ import org.gag.appdriver.App.Adapters.Adapter_Member_List;
 import org.gag.appdriver.App.Models.LodgeCalendarList;
 import org.gag.appdriver.App.Models.OfficerInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
+import org.gag.appdriver.Room.Entities.EPosition;
 import org.gag.appdriver.Room.Entities.EUserObjects;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -58,6 +63,10 @@ public class Fragment_Member_List extends Fragment {
     private Message_Dialog poMessage;
 
     private String lsStackIDxx, lsGLPIDxx, lsDfrom, lsDto, lsYear;
+
+    private PopupMenu loMenu;
+    private SubMenu loSubPosMenu;
+    private List<String> laPositions = new ArrayList<>();
 
     private Adapter_Officer_List loOfficerAdapter;
 
@@ -90,7 +99,7 @@ public class Fragment_Member_List extends Fragment {
         int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         //initialize default range of date to display for the whole year
-        lsDfrom = mviewModel.GetFormattedDate(lsYear + "-01-01", "yyyy-MM-dd");
+        lsDfrom = mviewModel.GetFormattedDate("1900" + "-01-01", "yyyy-MM-dd");
         lsDto =  mviewModel.GetFormattedDate(lsYear + "-12-" + String.valueOf(maxDay), "yyyy-MM-dd");
 
         poLoad.InitDialog();
@@ -104,10 +113,15 @@ public class Fragment_Member_List extends Fragment {
         }
 
         InitViews(view);
+
+        //initialize pop up object based on user level
+        loMenu = new PopupMenu(requireContext(), btn_filter);
+        loMenu.getMenuInflater().inflate(R.menu.menu_filter_home, loMenu.getMenu());
+
+        loSubPosMenu = loMenu.getMenu().findItem(R.id.action_by_position).getSubMenu();
+
         InitDataReceiver();
         InitListener();
-
-        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
 
         DownloadOfficerList();
 
@@ -128,6 +142,8 @@ public class Fragment_Member_List extends Fragment {
     }
 
     private void InitDataReceiver(){
+
+        mtv_year.setText("(M.Y " + lsYear + " - " + String.valueOf(Integer.parseInt(lsYear) + 1) + ")");
 
         mviewModel.ObserveMemberInfo(lsGLPIDxx).observe(getViewLifecycleOwner(), new Observer<EMemberInfo>() {
             @Override
@@ -294,6 +310,25 @@ public class Fragment_Member_List extends Fragment {
                 });
             }
         });
+
+        mviewModel.ObserverPositionList().observe(getViewLifecycleOwner(), new Observer<List<EPosition>>() {
+            @Override
+            public void onChanged(List<EPosition> ePositions) {
+
+                if (ePositions == null || ePositions.size() < 1) return;
+
+                loSubPosMenu.clear();
+                loSubPosMenu.add(101, 102, Menu.NONE, "ALL");
+
+                int parentID = 103;
+                for (EPosition loPosition : ePositions) {
+                    if (!(loPosition.getSPositnCd().equalsIgnoreCase("P000") || loPosition.getSPositnCd().equalsIgnoreCase("P016"))){
+                        laPositions.add(loPosition.getSPositnDs());
+                        loSubPosMenu.add(parentID, parentID++, Menu.NONE, loPosition.getSPositnDs());
+                    }
+                }
+            }
+        });
     }
 
     private void DownloadOfficerList(){
@@ -455,18 +490,15 @@ public class Fragment_Member_List extends Fragment {
             @Override
             public void onClick(View view) {
 
-
-                //initialize pop up object based on user level
-                PopupMenu loMenu = new PopupMenu(requireContext(), view);
-                loMenu.getMenuInflater().inflate(R.menu.menu_filter_home, loMenu.getMenu());
-
                 if (tab_layout.getSelectedTabPosition() == 0){ //members tab
                     loMenu.getMenu().findItem (R.id.action_by_status).setVisible(true);
+                    loMenu.getMenu().findItem(R.id.action_by_position).setVisible(false);
                 }else {
                     loMenu.getMenu().findItem (R.id.action_by_status).setVisible(false);
+                    loMenu.getMenu().findItem(R.id.action_by_position).setVisible(true);
                 }
-                loMenu.show();
 
+                loMenu.show();
                 loMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
@@ -494,8 +526,17 @@ public class Fragment_Member_List extends Fragment {
                         }else if (menuItem.getItemId() == R.id.action_item_deceased){
                             InitFilterStatus(3);
                             return true;
+                        }else if (menuItem.getItemId() == 102){ //ALL
+                            InitFilterPosition("");
+                            return true;
+                        }else{ //SELECTED POSITION
+
+                            if (!(menuItem.getItemId() == R.id.action_by_position || menuItem.getItemId() == R.id.action_by_date)){
+                                InitFilterPosition(menuItem.getTitle().toString());
+                                return true;
+                            }
+                            return false;
                         }
-                        return false;
                     }
                 });
 
@@ -525,36 +566,36 @@ public class Fragment_Member_List extends Fragment {
 
     private void InitFilterStatus(int status){
 
-        if (tab_layout.getSelectedTabPosition() == 0){
+        if (loMemberAdaoter == null) return;
 
-            if (loMemberAdaoter == null) return;
-
-            List<String> filterStat;
-            if (status < 0){
-                filterStat = List.of("0", "1", "2", "3", "4");
-            }else {
-                filterStat = List.of(String.valueOf(status));
-            }
-
-            loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-            loMemberAdaoter.GetFilter().InitStatus(filterStat);
-            loMemberAdaoter.notifyDataSetChanged();
-
+        List<String> filterStat;
+        if (status < 0){
+            filterStat = List.of("0", "1", "2", "3", "4");
         }else {
-
-            if (loOfficerAdapter == null) return;
-
-            List<String> filterStat;
-            if (status < 0){
-                filterStat = List.of("0", "1", "2", "3", "4", "5");
-            }else {
-                filterStat = List.of(String.valueOf(status));
-            }
-
-            loOfficerAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
-            loOfficerAdapter.GetFilter().InitStatus(filterStat);
-            loOfficerAdapter.notifyDataSetChanged();
+            filterStat = List.of(String.valueOf(status));
         }
+
+        loMemberAdaoter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+        loMemberAdaoter.GetFilter().InitStatus(filterStat);
+        loMemberAdaoter.notifyDataSetChanged();
+
+    }
+
+    private void InitFilterPosition(String fsPositn){
+
+        if (loOfficerAdapter == null) return;
+
+        List<String> filterPos;
+        if (fsPositn.isEmpty()){
+            filterPos = laPositions;
+        }else {
+            filterPos = List.of(String.valueOf(fsPositn));
+        }
+
+        loOfficerAdapter.GetFilter().filter(tie_search.getText() == null ? "" : tie_search.getText().toString());
+        loOfficerAdapter.GetFilter().InitPosition(filterPos);
+        loOfficerAdapter.notifyDataSetChanged();
+
     }
 
 }

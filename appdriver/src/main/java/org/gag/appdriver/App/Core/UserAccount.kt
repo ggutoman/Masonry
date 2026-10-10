@@ -153,6 +153,9 @@ class UserAccount(instance : Context) {
                 } else {
                     val loParams = JSONObject().apply {
                         put("sUserName", fsID)
+                        put("version", session.getProductVersion())
+                        put("product_id", session.getProductID())
+                        put("device_id", session.getDeviceID())
                     }
 
                     val lsEncrPass = encryptObj.EncryptHex(fsPass)
@@ -160,6 +163,7 @@ class UserAccount(instance : Context) {
                         message = "Could not generate passkey"
                         false
                     } else {
+
                         loParams.put("sPassword", lsEncrPass)
 
                         when (val response = httpInstance.makeRequest(
@@ -168,6 +172,7 @@ class UserAccount(instance : Context) {
                             mapOf()
                         )) {
                             is KTORepository.OnRequest.onSuccess -> {
+
                                 val resultData = Json.Default.decodeFromString<DownloadKey>(response.data.body())
                                 val sTokenIDxx = resultData.GetPayload()
 
@@ -1898,6 +1903,134 @@ class UserAccount(instance : Context) {
         }
         return future
 
+    }
+
+    @SuppressLint("MissingPermission")
+    fun VerifyContact(fsContact: String)  : CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        put("sContctNo", fsContact)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_VERIFY_MEMBER_CONTACT.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
+    }
+
+    @SuppressLint("MissingPermission")
+    fun VerifyEmail(fsEmail: String)  : CompletableFuture<Boolean> {
+
+        val future = CompletableFuture<Boolean>()
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = try {
+
+                if (!httpInstance.checkDeviceConnection(loInstance)) {
+                    message = "No internet connection"
+                    false
+
+                }else{
+
+                    val loParams = JSONObject().apply {
+                        put("sEmailAdd", fsEmail)
+                    }
+
+                    httpInstance.makeRequest(
+                        API_CONSTANTS.URL_BASE_SERVER.fsURL + API_CONSTANTS.URL_VERIFY_MEMBER_EMAIL.fsURL,
+                        loParams,
+                        mapOf(
+                            "access-token" to session.getokenID()
+                        )
+                    ).let { result ->
+
+                        when (result) {
+                            is KTORepository.OnRequest.onSuccess -> {
+                                true
+                            }
+
+                            is KTORepository.OnRequest.onFailed -> {
+                                val errorData =
+                                    Json.Default.decodeFromString<DownloadError>(result.data.body())
+                                message = errorData.GetPayload().message
+                                false
+                            }
+
+                            is KTORepository.OnRequest.onError<*> -> {
+                                message =  "Could not make request at this moment:\n\n ${result.exception.toString()}"
+                                false
+                            }
+
+                            else -> {
+                                message = "Invalid transaction. Could not proceed"
+                                false
+                            }
+                        }
+                    }
+
+                }
+            } catch (ex: Exception) {
+                message =  "Could not make request at this moment:\n\n ${ex.message}"
+                false
+            }
+
+            //Complete the future on the main thread
+            withContext(Dispatchers.Main) {
+                future.complete(result)
+            }
+        }
+        return future
     }
 
 }

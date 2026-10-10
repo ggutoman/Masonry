@@ -17,6 +17,7 @@ class AppConfig(instance : Context) {
     val IS_LOGIN : String = "cLoggedIn"
     val LOG_DATE : String = "sLogDate"
     val PRODUCT_ID : String = "sPrdctID"
+    val PRODUCT_VERSION : String = "sPrdctVrsn"
     val DEVICE_ID : String = "sDvcID"
     val TOKEN_ID : String = "sTknID"
 
@@ -50,6 +51,14 @@ class AppConfig(instance : Context) {
 
     fun getProductID() : String{
         return sharedPref.getString(PRODUCT_ID, "MSNRY_APP").toString()
+    }
+
+    fun setProductVersion(fsVal : String){
+        sharedPref.edit(commit = true) { putString(PRODUCT_VERSION, fsVal) }
+    }
+
+    fun getProductVersion() : String{
+        return sharedPref.getString(PRODUCT_VERSION, "0").toString()
     }
 
     fun setDeviceID(fsVal : String){

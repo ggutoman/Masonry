@@ -1,15 +1,10 @@
 package com.gag.useraccount.Fragments;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +28,8 @@ import com.gag.useraccount.Dialog.Dialog_Add_Member_Info;
 import com.gag.useraccount.R;
 import com.gag.useraccount.ViewModel.VM_Member;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
@@ -40,20 +37,18 @@ import com.google.android.material.textview.MaterialTextView;
 import org.gag.appdriver.App.Adapters.MemberAddressAdapter;
 import org.gag.appdriver.App.Adapters.MemberContactAdapter;
 import org.gag.appdriver.App.Adapters.MemberEmailAdapter;
-import org.gag.appdriver.App.Core.SMSApp;
-import org.gag.appdriver.App.Interface.OnSMSStatus;
 import org.gag.appdriver.App.Models.TownProvince;
 import org.gag.appdriver.Room.Entities.EMemberAddress;
 import org.gag.appdriver.Room.Entities.EMemberContactInfo;
 import org.gag.appdriver.Room.Entities.EMemberEmailInfo;
 import org.gag.appdriver.Room.Entities.EMemberInfo;
-import org.gag.appdriver.Utilities.Disclosure_Dialog;
 import org.gag.appdriver.Utilities.LoadDialog;
 import org.gag.appdriver.Utilities.Message_Dialog;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Fragment_Member extends Fragment{
 
@@ -109,6 +104,10 @@ public class Fragment_Member extends Fragment{
     private TownProvince loSelectAddress;
     private EMemberContactInfo loSelectContact;
     private EMemberEmailInfo loSelectEmail;
+
+    private interface OnDate{
+        void OnSelect(String fsDate);
+    }
 
     private int lnSelectCivil = -1, lnSelectStatus = -1, lnSelectAddress = -1, lnSelectContact = -1, lnSelectEmail = -1;
 
@@ -448,17 +447,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Membership", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_dMbr.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_dMbr.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -466,17 +460,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Initiation", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_intn.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_intn.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -484,17 +473,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Passing", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_passing.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_passing.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -502,17 +486,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Raising", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_raising.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_raising.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -520,17 +499,12 @@ public class Fragment_Member extends Fragment{
             @Override
             public void onClick(View view) {
 
-                Calendar loCalendar = Calendar.getInstance();
-
-                new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+                ShowDatePicker("Select Date of Birthdate", new OnDate() {
                     @Override
-                    public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        tie_birthdate.setText(i + "-" + (i1 + 1) + "-" + i2);
+                    public void OnSelect(String fsDate) {
+                        tie_birthdate.setText(fsDate);
                     }
-                }, loCalendar.get(Calendar.YEAR),
-                        loCalendar.get(Calendar.MONTH),
-                        loCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show();
+                });
             }
         });
 
@@ -777,13 +751,62 @@ public class Fragment_Member extends Fragment{
                     @Override
                     public void OnContact(String lsContactNo, String lsRemarks, String lsActive) {
 
-                        mviewModel.AddMemberContact(
-                                "",
-                                "",
-                                lsContactNo,
-                                lsRemarks,
-                                lsActive
-                        );
+                        //do not allow same contact
+                        AtomicBoolean hasContact = new AtomicBoolean(false);
+                        paramContact.forEach(eMemberContactInfo -> {
+                            if (eMemberContactInfo.getSContctNo().equalsIgnoreCase(lsContactNo)){
+                                hasContact.set(true);
+                            }
+                        });
+
+                        if (hasContact.get()){
+                            poMessage.ShowMessage(1, "Contact number already exists", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        mviewModel.VerifyContact(lsContactNo, new VM_Member.OnSubmit() {
+                            @Override
+                            public void OnLoad() {
+                                poLoad.ShowDialog("Verifying contact. Please wait . . .");
+                            }
+
+                            @Override
+                            public void OnSuccess() {
+                                poLoad.DismissDialog();
+
+                                mviewModel.AddMemberContact(
+                                        "",
+                                        "",
+                                        lsContactNo,
+                                        lsRemarks,
+                                        lsActive
+                                );
+
+                            }
+
+                            @Override
+                            public void OnFailed(String fsMesssage) {
+                                poLoad.DismissDialog();
+
+                                poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
+                        });
                     }
                 });
 
@@ -864,12 +887,60 @@ public class Fragment_Member extends Fragment{
                     @Override
                     public void OnEmail(String lsEmail, String lsActive) {
 
-                        mviewModel.AddMemberEmail(
-                                "",
-                                "",
-                                lsEmail,
-                                lsActive
-                        );
+                        //do not allow same email
+                        AtomicBoolean hasEmail = new AtomicBoolean(false);
+                        paramEmail.forEach(eMemberEmailInfo -> {
+                            if (eMemberEmailInfo.getSEmailAdd().equalsIgnoreCase(lsEmail)){
+                                hasEmail.set(true);
+                            }
+                        });
+
+                        if (hasEmail.get()){
+                            poMessage.ShowMessage(1, "Email address already exists", "Okay", "", new Message_Dialog.OnDialogClick() {
+                                @Override
+                                public void OnPositive(@NotNull AlertDialog poDialog) {
+                                    poDialog.dismiss();
+                                }
+
+                                @Override
+                                public void OnNegative(@NotNull AlertDialog poDialog) {}
+                            });
+                            return;
+                        }
+
+                        mviewModel.VerifyEmail(lsEmail, new VM_Member.OnSubmit() {
+                            @Override
+                            public void OnLoad() {
+                                poLoad.ShowDialog("Verifying email. Please wait . . .");
+                            }
+
+                            @Override
+                            public void OnSuccess() {
+                                poLoad.DismissDialog();
+
+                                mviewModel.AddMemberEmail(
+                                        "",
+                                        "",
+                                        lsEmail,
+                                        lsActive
+                                );
+                            }
+
+                            @Override
+                            public void OnFailed(String fsMesssage) {
+                                poLoad.DismissDialog();
+
+                                poMessage.ShowMessage(1, fsMesssage, "Okay", "", new Message_Dialog.OnDialogClick() {
+                                    @Override
+                                    public void OnPositive(@NotNull AlertDialog poDialog) {
+                                        poDialog.dismiss();
+                                    }
+
+                                    @Override
+                                    public void OnNegative(@NotNull AlertDialog poDialog) {}
+                                });
+                            }
+                        });
                     }
                 });
 
@@ -1362,6 +1433,24 @@ public class Fragment_Member extends Fragment{
             return false;
         }
         return true;
+    }
+
+    private void ShowDatePicker(String fsTitle, OnDate foCallback){
+
+        MaterialDatePicker<Long> picker = MaterialDatePicker.Builder
+                .datePicker()
+                .setTitleText(fsTitle)
+                .build();
+
+        picker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<>() {
+            @Override
+            public void onPositiveButtonClick(Long selection) {
+                foCallback.OnSelect(mviewModel.GetFormattedDate(selection));
+            }
+        });
+
+        picker.show(getParentFragmentManager(), "DATE_PICKER");
+
     }
 
     private void ClearFields(List<View> fields, boolean clearAdapter) {

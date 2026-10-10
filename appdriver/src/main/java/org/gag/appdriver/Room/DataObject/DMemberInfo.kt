@@ -20,7 +20,7 @@ interface DMemberInfo {
                     "SELECT sGLPIDNoX FROM User_Info WHERE sUserIDxx= :fsUserIDx)")
     fun ObserveMemberInfoByUserID(fsUserIDx : String): LiveData<MemberDashboardInfo>
 
-    @Query("SELECT * FROM Member_Info WHERE sMemberID != :fsMemberID AND dMembrshp BETWEEN :fsDateFrom AND :fsDateTo ORDER BY dMembrshp DESC, sGLPIDNoX ASC")
+    @Query("SELECT * FROM Member_Info WHERE dMembrshp BETWEEN :fsDateFrom AND :fsDateTo AND sMemberID NOT IN ('M2026093000001', 'M20260603000001', :fsMemberID) ORDER BY dMembrshp DESC, sGLPIDNoX ASC")
     fun ObserveMemberListByFilter(fsMemberID: String, fsDateFrom : String, fsDateTo : String): LiveData<List<EMemberInfo>>
 
     @Query("SELECT * FROM Member_Info WHERE sGLPIDNoX != " +

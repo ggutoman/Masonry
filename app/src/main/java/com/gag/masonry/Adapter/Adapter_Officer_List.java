@@ -81,10 +81,10 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
     public class Adapter_OfficerList_Filter extends Filter{
 
         private final Adapter_Officer_List loAdapter;
-        private List<String> laStatus = new ArrayList<>(List.of("0", "1", "2", "3", "4", "5"));
+        private List<String> laPositn = new ArrayList<>();
 
-        public void InitStatus(List<String> faStatus){
-            laStatus = faStatus;
+        public void InitPosition(List<String> faPositn){
+            laPositn = faPositn;
         }
 
         public Adapter_OfficerList_Filter(Adapter_Officer_List foAdapter){
@@ -110,9 +110,14 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
                         filterSearch.add(loOfficer);
                     }
                 }
-
                 laOfficersFiltered = filterSearch;
             }
+
+            //second filter, via position selected
+            laOfficersFiltered = laOfficersFiltered
+                                    .stream()
+                                    .filter(officerInfo -> laPositn.contains(officerInfo.getSPositionNme()))
+                                    .collect(Collectors.toList());
 
             FilterResults loResults = new FilterResults();
             loResults.values = laOfficersFiltered;

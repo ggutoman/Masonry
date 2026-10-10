@@ -7,12 +7,16 @@ android {
     namespace = "com.gag.masonry"
     compileSdk = 36
 
+    buildFeatures{
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.gag.masonry"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8
-        versionName = "ALSM Portal v2.8.0"
+        versionCode = 11
+        versionName = "ALSM Portal v2.11.0"
 
         vectorDrawables.useSupportLibrary = true
 

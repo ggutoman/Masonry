@@ -294,6 +294,32 @@ public class VM_Member extends AndroidViewModel {
         return laAccount;
     }
 
+    public void VerifyContact(String fsContact, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+        poAccount.VerifyContact(fsContact).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFailed(poAccount.getMessage());
+                return;
+            }
+            foCallback.OnSuccess();
+        });
+    }
+
+    public void VerifyEmail(String fsEmail, OnSubmit foCallback){
+
+        foCallback.OnLoad();
+        poAccount.VerifyEmail(fsEmail).thenAccept(aBoolean -> {
+
+            if (!aBoolean){
+                foCallback.OnFailed(poAccount.getMessage());
+                return;
+            }
+            foCallback.OnSuccess();
+        });
+    }
+
     public void DownloadMemberInfo(String fsMemberIDxx, OnDownload foCallback){
 
         foCallback.Loading();
