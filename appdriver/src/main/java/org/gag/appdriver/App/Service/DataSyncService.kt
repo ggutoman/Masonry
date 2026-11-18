@@ -92,7 +92,7 @@ class DataSyncService : Service(){
                                                         //current date
                                                         val current_year = poDate.FormatDate(poDate.GetCurrentDate(), "yyyy")
 
-                                                        val start_date = poDate.FormatDate(current_year + "-01-01",DATE_CONSTANTS.DATE_FORMAT.fsDescript)
+                                                        val start_date = poDate.FormatDate("1900-01-01",DATE_CONSTANTS.DATE_FORMAT.fsDescript)
                                                         val end_date = poDate.FormatDate(current_year + "-12-31", DATE_CONSTANTS.DATE_FORMAT.fsDescript)
 
                                                         //sync other data
@@ -107,6 +107,7 @@ class DataSyncService : Service(){
                                                             poAccount.DownloadMemberList(start_date, end_date),
                                                             poAccount.DownloadOfficerList(poDate.GetCurrentDate())
                                                         )
+
 
                                                         //execute task list
                                                         CompletableFuture.allOf(*laSyncData.toTypedArray()).thenAccept {
