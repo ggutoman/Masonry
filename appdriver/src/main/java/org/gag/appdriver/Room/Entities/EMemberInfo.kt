@@ -22,5 +22,7 @@ data class EMemberInfo(
     var dMembrshp: String?,
     var dSuspendx: String?,
     var sPositnCd: String?,
-    var cRecdStat: String?
+    var cRecdStat: String?,
+    var sModified: String?,
+    var dModified: String?
 )

@@ -89,6 +89,9 @@ public class Fragment_Member extends Fragment{
 
     private ImageButton btn_download;
 
+    private View view_modify;
+    private MaterialTextView mtv_edit, mtv_editdt;
+
     private Dialog_Add_Member_Info poDialogAddMember;
     private MemberAddressAdapter MemberAddressAdapter;
     private MemberContactAdapter MemberContactAdapter;
@@ -183,6 +186,10 @@ public class Fragment_Member extends Fragment{
         tie_suffix = view.findViewById(R.id.tie_suffix);
         tie_glpid = view.findViewById(R.id.tie_glpid);
 
+        view_modify = view.findViewById(R.id.view_modify);
+        mtv_edit = view_modify.findViewById(org.gag.appdriver.R.id.mtv_edit);
+        mtv_editdt = view_modify.findViewById(org.gag.appdriver.R.id.mtv_editdt);
+
     }
 
     private void initDataReceiver() {
@@ -247,8 +254,12 @@ public class Fragment_Member extends Fragment{
                             mviewModel.GetCurrentDate(),
                             null,
                             null,
-                            lnSelectStatus != 1 ? "0" : "1"
+                            lnSelectStatus != 1 ? "0" : "1",
+                            "N/A",
+                            mviewModel.GetCurrentDate()
                     );
+
+                    view_modify.setVisibility(View.GONE);
                     btn_download.setVisibility(View.GONE);
 
                 }else {
@@ -265,6 +276,8 @@ public class Fragment_Member extends Fragment{
                             Toast.makeText(requireActivity(), fsMessage, Toast.LENGTH_LONG).show();
                         }
                     });
+
+                    view_modify.setVisibility(View.VISIBLE);
                     btn_download.setVisibility(View.VISIBLE);
                 }
 
@@ -280,6 +293,9 @@ public class Fragment_Member extends Fragment{
                 tie_passing.setText(loMemberInfo.getDPassedxx());
                 tie_raising.setText(loMemberInfo.getDRaisingX());
                 tie_suspend.setText(loMemberInfo.getDSuspendx());
+
+                mtv_edit.setText(loMemberInfo.getSModified() == null ? "N/A" : loMemberInfo.getSModified());
+                mtv_editdt.setText(loMemberInfo.getDModified() == null ? "1900-00-00 00:00:00" : loMemberInfo.getDModified());
 
                 //initialize address, and email with exisitng list
                 mviewModel.GetMemberAddress(loMemberInfo.getSMemberID()).observe(getViewLifecycleOwner(), new Observer<List<TownProvince>>() {

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import org.gag.appdriver.Room.DataObject.DAnnualDetail
 import org.gag.appdriver.Room.DataObject.DAnnualMaster
 import org.gag.appdriver.Room.DataObject.DDisbursement
@@ -87,7 +89,7 @@ import org.gag.appdriver.Room.Entities.EUserObjects
         EObjectPermissions::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class ML_DBF: RoomDatabase() {
 
@@ -121,6 +123,7 @@ abstract class ML_DBF: RoomDatabase() {
         @Volatile
         private var instance: ML_DBF? = null
 
+        /** ROOM DB INITIALIZATION **/
         fun getDatabase(context: Context): ML_DBF {
             return instance ?: synchronized(this) {
                 val newInstance = Room.databaseBuilder(
@@ -128,11 +131,37 @@ abstract class ML_DBF: RoomDatabase() {
                     ML_DBF::class.java,
                     "Masonry_DB"
                 )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2)
                     .allowMainThreadQueries()
                     .build()
                 instance = newInstance
                 newInstance
+            }
+        }
+
+        /** MIGRATION SETUP **/
+
+        private fun SupportSQLiteDatabase.columnExists(table: String, column: String): Boolean {
+            query("PRAGMA table_info(`$table`)").use { cursor ->
+                val nameIndex = cursor.getColumnIndex("name")
+                while (cursor.moveToNext()) {
+                    if (cursor.getString(nameIndex).equals(column, ignoreCase = true)) return true
+                }
+            }
+            return false
+        }
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+
+                if (!db.columnExists("Member_Info", "sModified")) {
+                    db.execSQL("ALTER TABLE `Member_Info` ADD COLUMN `sModified` TEXT")
+                }
+
+                if (!db.columnExists("Member_Info", "dModified")) {
+                    db.execSQL("ALTER TABLE `Member_Info` ADD COLUMN `dModified` TEXT")
+                }
+
             }
         }
     }

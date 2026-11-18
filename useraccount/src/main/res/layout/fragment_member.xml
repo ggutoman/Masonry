@@ -235,8 +235,7 @@
                         style="@style/DropdownStyleTheme"
                         android:id="@+id/auto_status"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="dsadsa"/>
+                        android:layout_height="wrap_content"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -635,6 +634,11 @@
                         app:layout_constraintEnd_toEndOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <include
+                    android:id="@+id/view_modify"
+                    android:visibility="gone"
+                    layout="@layout/layout_modify"/>
 
             </LinearLayout>
 
