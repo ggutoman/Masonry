@@ -112,7 +112,7 @@ public class VM_Projects extends AndroidViewModel {
         return poUser.GetObjectPermission(fsIDxx);
     }
 
-    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fnEntryNox, String fdPledge, String fnPledge){
+    public boolean AddProjectDetail(String fsTransNox, String fsMemberID, String fsMemberNme, String fnEntryNox, String fdPledge, String fnPledge, String fnAmt){
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
         if (currentList == null) {
@@ -141,7 +141,7 @@ public class VM_Projects extends AndroidViewModel {
                 fdPledge,
                 fnPledge,
                 "",
-                "0.00"
+                fnAmt
         );
         currentList.add(loProject);
 
@@ -150,7 +150,7 @@ public class VM_Projects extends AndroidViewModel {
         return true;
     }
 
-    public boolean ReplaceProjectDetail(int fnIndex, String fsMemberID, String fdPledge, String fnPledge){
+    public boolean ReplaceProjectDetail(int fnIndex, String fsMemberID, String fdPledge, String fnPledge, String fnAmt){
 
         List<ProjectDetail> currentList = GetProjectDetail.getValue();
         if (currentList == null) return false;
@@ -180,7 +180,7 @@ public class VM_Projects extends AndroidViewModel {
                 fdPledge,
                 fnPledge,
                 "",
-                "0.00"
+                fnAmt
         );
         currentList.set(fnIndex, loItem);
 

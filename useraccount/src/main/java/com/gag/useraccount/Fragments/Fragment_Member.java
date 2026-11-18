@@ -294,7 +294,7 @@ public class Fragment_Member extends Fragment{
                 tie_raising.setText(loMemberInfo.getDRaisingX());
                 tie_suspend.setText(loMemberInfo.getDSuspendx());
 
-                mtv_edit.setText(loMemberInfo.getSModified() == null ? "N/A" : loMemberInfo.getSModified());
+                mtv_edit.setText(loMemberInfo.getSModified() == null ? "N/A" : loMemberInfo.getSModified().toUpperCase());
                 mtv_editdt.setText(loMemberInfo.getDModified() == null ? "1900-00-00 00:00:00" : loMemberInfo.getDModified());
 
                 //initialize address, and email with exisitng list

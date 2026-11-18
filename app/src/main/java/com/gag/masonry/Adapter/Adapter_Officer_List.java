@@ -62,7 +62,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
 
         holder.mtv_name.setText(loOfficer.getSMemberNme());
         holder.mtv_position.setText(loOfficer.getSPositionNme());
-        holder.mtv_term.setText(loOfficer.getNYearxxxx());
+        holder.mtv_assign_by.setText(loOfficer.getSModified().isEmpty() ? "N/A" : loOfficer.getSModified().toUpperCase());
 
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,7 +141,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
         private ShapeableImageView btn_icone;
         private final MaterialTextView mtv_name;
         private final MaterialTextView mtv_position;
-        private final MaterialTextView mtv_term;
+        private final MaterialTextView mtv_assign_by;
 
         public Adapter_Member_List_Holder(@NonNull View itemView) {
             super(itemView);
@@ -150,7 +150,7 @@ public class Adapter_Officer_List extends RecyclerView.Adapter<Adapter_Officer_L
             btn_icone = itemView.findViewById(R.id.btn_icon);
             mtv_name = itemView.findViewById(R.id.mtv_name);
             mtv_position = itemView.findViewById(R.id.mtv_position);
-            mtv_term = itemView.findViewById(R.id.mtv_term);
+            mtv_assign_by = itemView.findViewById(R.id.mtv_assign_by);
         }
     }
 }

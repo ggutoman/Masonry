@@ -61,11 +61,14 @@ public class Fragment_Project extends Fragment {
     private MaterialCardView mcv_ids;
     private ConstraintLayout layout_tools;
     private TextInputLayout til_proj_type, til_proj_status;
-    private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount;
+    private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount, tie_paid_amount;
     private MaterialAutoCompleteTextView auto_proj_type, auto_lodge_member, auto_proj_status;
     private MaterialTextView btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb;
     private ImageButton btn_add_detail;
     private MaterialButton btn_save;
+
+    private View view_modify;
+    private MaterialTextView mtv_edit, mtv_editdt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -126,9 +129,14 @@ public class Fragment_Project extends Fragment {
         auto_proj_status = view.findViewById(R.id.auto_proj_status);
         tie_pledge_date = view.findViewById(R.id.tie_pledge_date);
         tie_pledge_amount = view.findViewById(R.id.tie_pledge_amount);
+        tie_paid_amount = view.findViewById(R.id.tie_paid_amount);
         btn_save = view.findViewById(R.id.btn_save);
         btn_add_detail = view.findViewById(R.id.btn_add_detail);
         btn_save_detail = view.findViewById(R.id.btn_save_detail);
+
+        view_modify = view.findViewById(R.id.view_modify);
+        mtv_edit = view_modify.findViewById(org.gag.appdriver.R.id.mtv_edit);
+        mtv_editdt = view_modify.findViewById(org.gag.appdriver.R.id.mtv_editdt);
     }
 
     private void AllowFields(boolean fisAllowed){
@@ -219,11 +227,13 @@ public class Fragment_Project extends Fragment {
 
                     mcv_ids.setVisibility(View.GONE);
                     layout_tools.setVisibility(View.GONE);
+                    view_modify.setVisibility(View.GONE);
                 }else {
                     loMaster = eProjectMaster;
 
                     mcv_ids.setVisibility(View.VISIBLE);
                     layout_tools.setVisibility(View.VISIBLE);
+                    view_modify.setVisibility(View.VISIBLE);
                 }
 
                 //allow button objects based on status
@@ -251,6 +261,9 @@ public class Fragment_Project extends Fragment {
                 tie_due.setText(loMaster.getDDueDatex());
                 tie_remarks.setText(loMaster.getSRemarksx());
                 mtv_totaldisb.setText(loMaster.getNDisbTotl());
+
+                mtv_edit.setText(loMaster.getSModified() == null ? "N/A" : loMaster.getSModified().toUpperCase());
+                mtv_editdt.setText(loMaster.getDModified() == null ? "1900-00-00 00:00:00" : loMaster.getDModified().toUpperCase());
             }
         });
 
@@ -270,7 +283,8 @@ public class Fragment_Project extends Fragment {
                             loItem.getSMemberNme(),
                             loItem.getNEntryNox(),
                             loItem.getDPledgexx(),
-                            loItem.getNPledgexx()
+                            loItem.getNPledgexx(),
+                            loItem.getNAmtPaidxx()
                     );
                 }
             }
@@ -394,6 +408,7 @@ public class Fragment_Project extends Fragment {
                 auto_lodge_member.setText(loSelectDetail.getSMemberNme());
                 tie_pledge_date.setText(loSelectDetail.getDPledgexx());
                 tie_pledge_amount.setText(loSelectDetail.getNPledgexx());
+                tie_paid_amount.setText(loSelectDetail.getNAmtPaidxx());
             }
         });
 
@@ -500,7 +515,8 @@ public class Fragment_Project extends Fragment {
                                         loEntry.getSMemberNme(),
                                         "",
                                         loEntry.getDPledgexx(),
-                                        loEntry.getNPledgexx()
+                                        loEntry.getNPledgexx(),
+                                        "0.00"
                                     )
                                 ){
                                     Toast.makeText(requireActivity(), "Pledge of the same member should not have the same date", Toast.LENGTH_SHORT).show();
@@ -525,7 +541,8 @@ public class Fragment_Project extends Fragment {
                         lnSelectDetail,
                         loSelectDetail.getSMemberID(),
                         tie_pledge_date.getText() == null ? "1900-00-00" : tie_pledge_date.getText().toString(),
-                        tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString()
+                        tie_pledge_amount.getText() == null ? "0.00" : tie_pledge_amount.getText().toString(),
+                        tie_paid_amount.getText() == null ? "0.00" : tie_paid_amount.getText().toString()
                 )){
                     Toast.makeText(requireActivity(), "Pledge of the same member should not have the same date", Toast.LENGTH_SHORT).show();
                     return;

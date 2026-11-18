@@ -20,7 +20,8 @@ interface DOfficer {
             "b.nYearxxxx, " +
             "a.sMemberID, a.sYearIDxx, a.sPositnCd," +
             "(c.sFrstName || ' ' || c.sLastName) sMemberNme," +
-            "d.sPositnDs sPositionNme " +
+            "d.sPositnDs sPositionNme," +
+            "a.sModified sModified " +
             "FROM " +
             "Officer_Info a " +
             "JOIN Lodge_Calendar b ON (a.sYearIDxx = b.sYearIDxx) " +
@@ -45,7 +46,8 @@ interface DOfficer {
                 b.nYearxxxx,
                 a.sMemberID, a.sYearIDxx, a.sPositnCd,
                 (c.sFrstName || ' ' || c.sLastName) sMemberNme,
-                d.sPositnDs sPositionNme
+                d.sPositnDs sPositionNme,
+                a.sModified sModified
             FROM
                 Officer_Info a
             JOIN 

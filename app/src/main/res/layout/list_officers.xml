@@ -27,6 +27,18 @@
             android:text="N/A"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_icon"
+            app:layout_constraintWidth_percent="0.5"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/Text_Header"
+            android:id="@+id/mtv_assign_by_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Assigned By:"
+            android:gravity="end"
+            android:alpha="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/mtv_name"
             app:layout_constraintEnd_toEndOf="parent"/>
 
         <com.google.android.material.textview.MaterialTextView
@@ -40,12 +52,14 @@
             app:layout_constraintWidth_percent="0.5"/>
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/mtv_term"
+            android:id="@+id/mtv_assign_by"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="N/A"
             android:textSize="13sp"
             android:gravity="end"
+            android:paddingEnd="5dp"
+            android:alpha="0.65"
             app:layout_constraintTop_toTopOf="@+id/mtv_position"
             app:layout_constraintBottom_toBottomOf="@+id/mtv_position"
             app:layout_constraintStart_toEndOf="@+id/mtv_position"

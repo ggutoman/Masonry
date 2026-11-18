@@ -7,4 +7,5 @@ data class OfficerInfo(
     val sPositnCd : String,
     val sMemberNme : String,
     val sPositionNme : String,
+    val sModified : String
 )
