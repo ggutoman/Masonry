@@ -1,10 +1,14 @@
 package com.gag.accounting.Fragments.Project;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
@@ -26,6 +30,7 @@ import com.gag.accounting.R;
 import com.gag.accounting.ViewModel.VM_Projects;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -56,6 +61,7 @@ public class Fragment_Project extends Fragment {
 
     private String lsTransNox, lsLodgeIDxx, lsStackID, lsYearID;
     private int lnSelectStatus = -1, lnSelectDetail = -1, lnSelectType = -1;
+    private boolean isFiltered = false;
     private ProjectDetail loSelectDetail;
 
     private MaterialCardView mcv_ids;
@@ -64,7 +70,7 @@ public class Fragment_Project extends Fragment {
     private TextInputEditText tie_dtransact, tie_transaction_no, tie_name, tie_due, tie_remarks, tie_pledge_date, tie_pledge_amount, tie_paid_amount;
     private MaterialAutoCompleteTextView auto_proj_type, auto_lodge_member, auto_proj_status;
     private MaterialTextView btn_save_detail, btn_download, btn_view, mtv_totalpledge, mtv_totalcontri, mtv_totaldisb;
-    private ImageButton btn_add_detail;
+    private ImageButton btn_add_detail, btn_filter, btn_date;
     private MaterialButton btn_save;
 
     private View view_modify;
@@ -130,6 +136,8 @@ public class Fragment_Project extends Fragment {
         tie_pledge_date = view.findViewById(R.id.tie_pledge_date);
         tie_pledge_amount = view.findViewById(R.id.tie_pledge_amount);
         tie_paid_amount = view.findViewById(R.id.tie_paid_amount);
+        btn_filter = view.findViewById(R.id.btn_filter);
+        btn_date = view.findViewById(R.id.btn_date);
         btn_save = view.findViewById(R.id.btn_save);
         btn_add_detail = view.findViewById(R.id.btn_add_detail);
         btn_save_detail = view.findViewById(R.id.btn_save_detail);
@@ -412,7 +420,37 @@ public class Fragment_Project extends Fragment {
             }
         });
 
-        tie_pledge_date.setOnClickListener(new View.OnClickListener() {
+        auto_lodge_member.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                if (loProjectDetailAdapter == null) return;
+                loProjectDetailAdapter.GetFilter().filter(isFiltered ? charSequence : "");
+            }
+        });
+
+        btn_filter.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceType")
+            @Override
+            public void onClick(View view) {
+
+                isFiltered = !isFiltered;
+
+                //do ff actions based on status
+                btn_filter.setImageTintList(ColorStateList.valueOf(isFiltered ? MaterialColors.getColor(view, androidx.appcompat.R.attr.colorControlNormal) : Color.GRAY));
+
+                if (loProjectDetailAdapter == null) return;
+                loProjectDetailAdapter.GetFilter().filter(isFiltered ? auto_lodge_member.getText().toString() : "");
+            }
+        });
+
+        btn_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 

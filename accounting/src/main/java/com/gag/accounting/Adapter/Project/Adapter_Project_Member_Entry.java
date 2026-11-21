@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.textview.MaterialTextView;
 
+import org.gag.appdriver.App.Models.Attachments;
 import org.gag.appdriver.App.Models.ProjectDetail;
 import org.gag.appdriver.Libraries.DateUtil.DateRepository;
 import org.gag.appdriver.R;
@@ -24,8 +25,9 @@ public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
     private final Context loContext;
     private final DateRepository poDate;
     public final List<ProjectDetail> loProject;
+    public Filter_Project_Member loFilterProject;
 
-    public List<ProjectDetail> loProjectFiltered;
+    private List<ProjectDetail> loProjectFiltered;
 
     public Adapter_Project_Member_Entry(@NonNull Context context, int resource, @NonNull List<ProjectDetail> objects) {
         super(context, resource, objects);
@@ -35,6 +37,11 @@ public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
         poDate = new DateRepository();
         loProject = objects;
         loProjectFiltered = objects;
+        loFilterProject = new Filter_Project_Member(this);
+    }
+
+    public Filter_Project_Member GetFilter(){
+        return loFilterProject;
     }
 
     @NonNull
@@ -71,35 +78,72 @@ public class Adapter_Project_Member_Entry extends ArrayAdapter<ProjectDetail> {
         return loProjectFiltered.get(position);
     }
 
-    @NonNull
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
+//    @NonNull
+//    @Override
+//    public Filter getFilter() {
+//        return new Filter() {
+//            @Override
+//            protected FilterResults performFiltering(CharSequence constraint) {
+//
+//                List<ProjectDetail> results = new ArrayList<>();
+//                if (constraint == null || constraint.length() == 0) {
+//                    results.addAll(loProject);
+//                } else {
+//                    for (ProjectDetail projectInfo : loProject) {
+//
+//                        if (projectInfo.getSMemberNme().toLowerCase().contains(constraint.toString().toLowerCase())) {
+//                            results.add(projectInfo);
+//                        }
+//                    }
+//                }
+//                FilterResults filterResults = new FilterResults();
+//                filterResults.values = results;
+//
+//                return filterResults;
+//            }
+//
+//            @Override
+//            protected void publishResults(CharSequence constraint, FilterResults results) {
+//                loProjectFiltered = (List<ProjectDetail>) results.values;
+//                notifyDataSetChanged();
+//            }
+//        };
+//    }
 
-                List<ProjectDetail> results = new ArrayList<>();
-                if (constraint == null || constraint.length() == 0) {
-                    results.addAll(loProject);
-                } else {
-                    for (ProjectDetail projectInfo : loProject) {
+    public class Filter_Project_Member extends Filter{
 
-                        if (projectInfo.getSMemberNme().toLowerCase().contains(constraint.toString().toLowerCase())) {
-                            results.add(projectInfo);
-                        }
+        private final Adapter_Project_Member_Entry loAdapter;
+
+        public Filter_Project_Member(Adapter_Project_Member_Entry foAdapter){
+            this.loAdapter = foAdapter;
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+
+            List<ProjectDetail> results = new ArrayList<>();
+            if (charSequence == null || charSequence.length() == 0) {
+                results.addAll(loProject);
+            } else {
+                for (ProjectDetail projectInfo : loProject) {
+
+                    if (projectInfo.getSMemberNme().toLowerCase().contains(charSequence.toString().toLowerCase())) {
+                        results.add(projectInfo);
                     }
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = results;
-
-                return filterResults;
             }
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = results;
 
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                loProjectFiltered = (List<ProjectDetail>) results.values;
-                notifyDataSetChanged();
-            }
-        };
+            return filterResults;
+
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+
+            loProjectFiltered = (List<ProjectDetail>) filterResults.values;
+            loAdapter.notifyDataSetChanged();
+        }
     }
 }

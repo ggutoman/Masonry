@@ -370,6 +370,11 @@
 
                             </LinearLayout>
 
+                            <include
+                                android:id="@+id/view_modify"
+                                layout="@layout/layout_modify"
+                                android:visibility="gone"/>
+
                         </LinearLayout>
 
                     </com.google.android.material.card.MaterialCardView>
